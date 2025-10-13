@@ -1,4 +1,4 @@
-package com.example.dester_flutter
+package com.example.desterlib_flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

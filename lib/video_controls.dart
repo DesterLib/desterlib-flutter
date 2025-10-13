@@ -60,7 +60,7 @@ class _VideoControlsState extends State<VideoControls> {
     if (hours > 0) {
       return '$hours:${twoDigits(minutes)}:${twoDigits(seconds)}';
     }
-    return '${minutes}:${twoDigits(seconds)}';
+    return '$minutes:${twoDigits(seconds)}';
   }
 
   double get _currentSliderValue {

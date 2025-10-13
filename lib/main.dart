@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dester_flutter/web_view_page.dart';
+import 'package:desterlib_flutter/web_view_page.dart';
 import 'package:media_kit/media_kit.dart';
 
 void main() {

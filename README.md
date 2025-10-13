@@ -1,3 +1,3 @@
-# dester_flutter
+# Dester
 
-A new Flutter project.
+A Flutter project for the Dester media library.

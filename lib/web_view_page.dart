@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:dester_flutter/video_player_page.dart';
+import 'package:desterlib_flutter/video_player_page.dart';
 
 class WebViewPage extends StatefulWidget {
   const WebViewPage({super.key});

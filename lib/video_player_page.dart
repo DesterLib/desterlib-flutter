@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:dester_flutter/video_controls.dart';
+import 'package:desterlib_flutter/video_controls.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String videoUrl;
