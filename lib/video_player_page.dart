@@ -26,6 +26,9 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late final Player player;
   late final VideoController controller;
+  final ValueNotifier<bool> _controlsVisibleNotifier = ValueNotifier<bool>(
+    true,
+  );
 
   @override
   void initState() {
@@ -34,8 +37,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     // Create player instance
     player = Player();
 
-    // Create video controller
-    controller = VideoController(player);
+    // Create video controller WITHOUT subtitle rendering
+    controller = VideoController(
+      player,
+      configuration: const VideoControllerConfiguration(
+        enableHardwareAcceleration: true,
+      ),
+    );
 
     // Load and play the video
     player.open(Media(widget.videoUrl));
@@ -43,6 +51,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
+    _controlsVisibleNotifier.dispose();
     player.dispose();
     super.dispose();
   }
@@ -51,23 +60,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Video player with custom controls
-          Center(
-            child: Video(
-              controller: controller,
-              controls: (state) => VideoControls(
-                state: state,
-                player: player,
-                title: widget.title,
-                season: widget.season,
-                episode: widget.episode,
-                episodeTitle: widget.episodeTitle,
-              ),
+      body: Center(
+        child: Video(
+          controller: controller,
+          subtitleViewConfiguration: SubtitleViewConfiguration(
+            padding: const EdgeInsets.only(bottom: 150.0, left: 16, right: 16),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+              backgroundColor: Color.fromARGB(81, 0, 0, 0),
             ),
           ),
-        ],
+          controls: (state) => VideoControls(
+            state: state,
+            player: player,
+            title: widget.title,
+            season: widget.season,
+            episode: widget.episode,
+            episodeTitle: widget.episodeTitle,
+            controlsVisibleNotifier: _controlsVisibleNotifier,
+          ),
+        ),
       ),
     );
   }

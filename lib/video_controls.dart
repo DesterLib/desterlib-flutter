@@ -12,6 +12,7 @@ class VideoControls extends StatefulWidget {
   final int? season;
   final int? episode;
   final String? episodeTitle;
+  final ValueNotifier<bool>? controlsVisibleNotifier;
 
   const VideoControls({
     super.key,
@@ -21,6 +22,7 @@ class VideoControls extends StatefulWidget {
     this.season,
     this.episode,
     this.episodeTitle,
+    this.controlsVisibleNotifier,
   });
 
   @override
@@ -45,6 +47,7 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
     _startHideTimer();
     windowManager.addListener(this);
     _initializeVolume();
+    widget.controlsVisibleNotifier?.value = _controlsVisible;
   }
 
   @override
@@ -104,12 +107,14 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
     _hideTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_isDragging && widget.player.state.playing) {
         setState(() => _controlsVisible = false);
+        widget.controlsVisibleNotifier?.value = false;
       }
     });
   }
 
   void _showControls() {
     setState(() => _controlsVisible = true);
+    widget.controlsVisibleNotifier?.value = true;
     _startHideTimer();
   }
 
@@ -215,6 +220,7 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
           color: Colors.grey[900],
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
+        clipBehavior: Clip.antiAlias,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -442,6 +448,7 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
             _closeMenus();
           } else {
             setState(() => _controlsVisible = !_controlsVisible);
+            widget.controlsVisibleNotifier?.value = _controlsVisible;
             if (_controlsVisible) _startHideTimer();
           }
         },
@@ -473,8 +480,12 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
   Widget _buildMobileControls() {
     return Stack(
       children: [
-        // Gradient backdrop (non-interactive)
-        Positioned.fill(
+        // Top gradient backdrop (non-interactive)
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: MediaQuery.of(context).size.height * 0.3,
           child: IgnorePointer(
             child: AnimatedOpacity(
               opacity: _controlsVisible ? 1.0 : 0.0,
@@ -487,9 +498,35 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
                     colors: [
                       Colors.black.withValues(alpha: 0.6),
                       Colors.black.withValues(alpha: 0.0),
+                    ],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // Bottom gradient backdrop (non-interactive) - only for progress bar area
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _controlsVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              child: Container(
+                height: 120, // Only cover the progress bar area
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.0),
                       Colors.black.withValues(alpha: 0.7),
                     ],
-                    stops: const [0.0, 0.4, 1.0],
+                    stops: const [0.0, 1.0],
                   ),
                 ),
               ),
@@ -853,6 +890,9 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
                           child: InkWell(
                             onTap: () => Navigator.of(context).pop(),
                             borderRadius: BorderRadius.circular(20),
+                            hoverColor: Colors.white.withValues(alpha: 0.15),
+                            highlightColor: Colors.white.withValues(alpha: 0.1),
+                            splashColor: Colors.white.withValues(alpha: 0.15),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
                               child: Icon(
@@ -1038,6 +1078,7 @@ class _VideoControlsState extends State<VideoControls> with WindowListener {
                         width: 1,
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1148,8 +1189,10 @@ class _MobileControlButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(24),
+        customBorder: const CircleBorder(),
         splashColor: Colors.white.withValues(alpha: 0.2),
+        highlightColor: Colors.white.withValues(alpha: 0.1),
+        hoverColor: Colors.white.withValues(alpha: 0.15),
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -1166,13 +1209,8 @@ class _MobileControlButton extends StatelessWidget {
 class _DesktopControlButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
-  final double size;
 
-  const _DesktopControlButton({
-    required this.icon,
-    required this.onPressed,
-    this.size = 22,
-  });
+  const _DesktopControlButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -1183,9 +1221,10 @@ class _DesktopControlButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         splashColor: Colors.white.withValues(alpha: 0.15),
         highlightColor: Colors.white.withValues(alpha: 0.1),
+        hoverColor: Colors.white.withValues(alpha: 0.15),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: Colors.white, size: size),
+          child: Icon(icon, color: Colors.white, size: 22),
         ),
       ),
     );
@@ -1205,38 +1244,45 @@ class _TrackMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.transparent,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    decoration: TextDecoration.none,
+    return ClipRRect(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          hoverColor: Colors.white.withValues(alpha: 0.15),
+          highlightColor: Colors.white.withValues(alpha: 0.1),
+          splashColor: Colors.white.withValues(alpha: 0.2),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      decoration: TextDecoration.none,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              if (isSelected) ...[
-                const SizedBox(width: 8),
-                Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -1257,37 +1303,48 @@ class _DrawerTrackItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.transparent,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.8),
-                    fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+    return ClipRRect(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          hoverColor: Colors.white.withValues(alpha: 0.15),
+          highlightColor: Colors.white.withValues(alpha: 0.1),
+          splashColor: Colors.white.withValues(alpha: 0.2),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.8),
+                      fontSize: 16,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              if (isSelected) ...[
-                const SizedBox(width: 8),
-                const Icon(Icons.check_rounded, color: Colors.white, size: 20),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
