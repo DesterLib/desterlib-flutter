@@ -5,8 +5,19 @@ import 'package:desterlib_flutter/video_controls.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String videoUrl;
+  final String? title;
+  final int? season;
+  final int? episode;
+  final String? episodeTitle;
 
-  const VideoPlayerPage({super.key, required this.videoUrl});
+  const VideoPlayerPage({
+    super.key,
+    required this.videoUrl,
+    this.title,
+    this.season,
+    this.episode,
+    this.episodeTitle,
+  });
 
   @override
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
@@ -46,47 +57,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           Center(
             child: Video(
               controller: controller,
-              controls: (state) => VideoControls(state: state, player: player),
-            ),
-          ),
-
-          // Close button - appears above controls
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.4), Colors.transparent],
-                ),
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            child: const Icon(
-                              Icons.chevron_left,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              controls: (state) => VideoControls(
+                state: state,
+                player: player,
+                title: widget.title,
+                season: widget.season,
+                episode: widget.episode,
+                episodeTitle: widget.episodeTitle,
               ),
             ),
           ),

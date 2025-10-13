@@ -78,33 +78,70 @@ class _WebViewPageState extends State<WebViewPage> {
     }
   }
 
+  Map<String, dynamic> _parseMessage(String message) {
+    // Try to parse as standard JSON first
+    try {
+      return jsonDecode(message) as Map<String, dynamic>;
+    } catch (_) {
+      // If that fails, try to convert the object notation to valid JSON
+      // Handle format: {key: value, ...} -> {"key": "value", ...}
+      String jsonString = message
+          .replaceAllMapped(RegExp(r'(\w+):\s*([^,}]+)'), (match) {
+            final key = match.group(1);
+            final value = match.group(2)?.trim();
+
+            // Check if value is a number
+            if (value != null && double.tryParse(value) != null) {
+              return '"$key": $value';
+            }
+            // Otherwise treat as string
+            return '"$key": "$value"';
+          })
+          .replaceAll('{', '{"')
+          .replaceFirst('{"', '{');
+
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    }
+  }
+
   void _handlePlayVideo(String message) {
     debugPrint('📹 Received playVideo message: $message');
 
     try {
-      String streamUrl;
+      final data = _parseMessage(message);
 
-      // Try to parse as JSON first
-      try {
-        final data = jsonDecode(message) as Map<String, dynamic>;
-        streamUrl = data['url'] as String;
-      } catch (_) {
-        // If JSON parsing fails, try to extract URL using regex
-        // Handle format like: {url: http://...}
-        final match = RegExp(r'url:\s*([^\s}]+)').firstMatch(message);
-        if (match != null) {
-          streamUrl = match.group(1)!;
-        } else {
-          throw Exception('Could not extract URL from message: $message');
-        }
-      }
+      final streamUrl = data['url'] as String;
+      final title = data['title'] as String?;
+      // Handle both int and double for season/episode
+      final season = data['season'] != null
+          ? (data['season'] as num).toInt()
+          : null;
+      final episode = data['episode'] != null
+          ? (data['episode'] as num).toInt()
+          : null;
+      final episodeTitle = data['episodeTitle'] as String?;
 
       debugPrint('Playing video from: $streamUrl');
+      if (title != null) {
+        debugPrint('Title: $title');
+        if (season != null && episode != null) {
+          debugPrint('Season $season, Episode $episode');
+          if (episodeTitle != null) {
+            debugPrint('Episode title: $episodeTitle');
+          }
+        }
+      }
 
       // Navigate to video player page
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => VideoPlayerPage(videoUrl: streamUrl),
+          builder: (context) => VideoPlayerPage(
+            videoUrl: streamUrl,
+            title: title,
+            season: season,
+            episode: episode,
+            episodeTitle: episodeTitle,
+          ),
         ),
       );
     } catch (e) {
