@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:desterlib_flutter/video_player/video_player.dart';
 
 class WebViewPage extends StatefulWidget {
@@ -14,99 +16,152 @@ class WebViewPage extends StatefulWidget {
 }
 
 class _WebViewPageState extends State<WebViewPage> {
-  late final WebViewController _controller;
+  InAppWebViewController? _controller;
 
-  String get _webServerUrl {
-    // For web platform, return a default URL (webview won't work on web anyway)
+  bool _isLoading = true;
+  String? _loadingStatus;
+  bool _hasError = false;
+  String? _errorMessage;
+  bool _isUsingBundled = false;
+
+  /// Get API server URL based on platform
+  String get _apiServerUrl {
     if (kIsWeb) {
       return 'http://localhost:5173';
     }
 
-    // For Android emulator, use special alias
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:5173';
     }
 
-    // For iOS simulator and macOS, localhost works fine
     if (Platform.isIOS || Platform.isMacOS) {
       return 'http://localhost:5173';
     }
 
-    // For Windows and Linux, localhost should work
-    // For physical devices, you'll need to replace this with your machine's IP
     return 'http://localhost:5173';
   }
 
   @override
   void initState() {
     super.initState();
+    _loadWebApp();
+  }
 
-    final url = _webServerUrl;
-    debugPrint('Initializing WebView with URL: $url');
+  /// Load web app: Try API server first, fallback to bundled assets
+  Future<void> _loadWebApp() async {
+    setState(() {
+      _hasError = false;
+      _isUsingBundled = false;
+    });
 
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            debugPrint('✅ Page started loading: $url');
-          },
-          onPageFinished: (String url) {
-            debugPrint('✅ Page finished loading: $url');
-          },
-          onWebResourceError: (WebResourceError error) {
-            debugPrint('❌ Page resource error:');
-            debugPrint('   Description: ${error.description}');
-            debugPrint('   Error code: ${error.errorCode}');
-            debugPrint('   Error type: ${error.errorType}');
-          },
-          onHttpError: (HttpResponseError error) {
-            debugPrint('❌ HTTP error: ${error.response?.statusCode}');
-          },
-        ),
-      )
-      ..addJavaScriptChannel(
-        'playVideo',
-        onMessageReceived: (JavaScriptMessage message) {
-          _handlePlayVideo(message.message);
-        },
-      )
-      ..addJavaScriptChannel(
-        'pickDirectory',
-        onMessageReceived: (JavaScriptMessage message) {
-          _handlePickDirectory();
-        },
-      )
-      ..loadRequest(Uri.parse(url));
+    // Check network connectivity
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final isOnline = connectivityResult != ConnectivityResult.none;
 
-    // setBackgroundColor is not supported on macOS
-    if (!kIsWeb && !Platform.isMacOS) {
-      _controller.setBackgroundColor(const Color(0x00000000));
+    if (isOnline) {
+      final serverReachable = await _tryLoadFromServer();
+      if (serverReachable) {
+        debugPrint('✅ Will load from API server');
+        setState(() => _isUsingBundled = false);
+        return;
+      }
+
+      debugPrint('⚠️ API server not reachable, will use bundled assets...');
+    } else {
+      debugPrint('📴 No network connection, will use bundled assets...');
+    }
+
+    // Fallback to bundled assets
+    setState(() => _isUsingBundled = true);
+  }
+
+  /// Try to check if API server is reachable
+  Future<bool> _tryLoadFromServer() async {
+    try {
+      final url = _apiServerUrl;
+      debugPrint('🌐 Checking API server: $url');
+
+      final uri = Uri.parse(url);
+      final socket = await Socket.connect(
+        uri.host,
+        uri.port,
+        timeout: const Duration(seconds: 3),
+      );
+      socket.destroy();
+
+      setState(() => _isUsingBundled = false);
+      return true;
+    } catch (e) {
+      debugPrint('Failed to connect to API server: $e');
+      return false;
     }
   }
 
+  void _onWebViewCreated(InAppWebViewController controller) {
+    _controller = controller;
+
+    // Add JavaScript handlers for communication
+    controller.addJavaScriptHandler(
+      handlerName: 'playVideo',
+      callback: (args) {
+        if (args.isNotEmpty) {
+          _handlePlayVideo(args[0].toString());
+        }
+      },
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'pickDirectory',
+      callback: (args) {
+        _handlePickDirectory();
+      },
+    );
+  }
+
+  void _onLoadStart(InAppWebViewController controller, WebUri? url) {
+    debugPrint('✅ Page started loading: $url');
+  }
+
+  void _onLoadStop(InAppWebViewController controller, WebUri? url) async {
+    debugPrint('✅ Page finished loading: $url');
+    setState(() {
+      _isLoading = false;
+      _loadingStatus = null;
+    });
+  }
+
+  void _onReceivedError(
+    InAppWebViewController controller,
+    WebResourceRequest request,
+    WebResourceError error,
+  ) {
+    debugPrint('❌ Page load error: ${error.description} (code: ${error.type})');
+  }
+
+  void _onConsoleMessage(
+    InAppWebViewController controller,
+    ConsoleMessage consoleMessage,
+  ) {
+    debugPrint(
+      '🌐 Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}',
+    );
+  }
+
   Map<String, dynamic> _parseMessage(String message) {
-    // Try to parse as standard JSON first
     try {
       return jsonDecode(message) as Map<String, dynamic>;
     } catch (_) {
-      // If that fails, try to convert the object notation to valid JSON
-      // Handle format: {key: value, ...} -> {"key": "value", ...}
       String jsonString = message
           .replaceAllMapped(RegExp(r'(\w+):\s*([^,}]+)'), (match) {
             final key = match.group(1);
             final value = match.group(2)?.trim();
-
-            // Check if value is a number
             if (value != null && double.tryParse(value) != null) {
               return '"$key": $value';
             }
-            // Otherwise treat as string
             return '"$key": "$value"';
           })
           .replaceAll('{', '{"')
           .replaceFirst('{"', '{');
-
       return jsonDecode(jsonString) as Map<String, dynamic>;
     }
   }
@@ -116,10 +171,8 @@ class _WebViewPageState extends State<WebViewPage> {
 
     try {
       final data = _parseMessage(message);
-
       final streamUrl = data['url'] as String;
       final title = data['title'] as String?;
-      // Handle both int and double for season/episode
       final season = data['season'] != null
           ? (data['season'] as num).toInt()
           : null;
@@ -128,18 +181,6 @@ class _WebViewPageState extends State<WebViewPage> {
           : null;
       final episodeTitle = data['episodeTitle'] as String?;
 
-      debugPrint('Playing video from: $streamUrl');
-      if (title != null) {
-        debugPrint('Title: $title');
-        if (season != null && episode != null) {
-          debugPrint('Season $season, Episode $episode');
-          if (episodeTitle != null) {
-            debugPrint('Episode title: $episodeTitle');
-          }
-        }
-      }
-
-      // Navigate to video player page
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => VideoPlayerPage(
@@ -164,18 +205,17 @@ class _WebViewPageState extends State<WebViewPage> {
 
       if (selectedDirectory != null) {
         debugPrint('✅ Directory selected: $selectedDirectory');
-
-        // Send the path back to the web view via JavaScript
         final escapedPath = selectedDirectory
             .replaceAll('\\', '\\\\')
             .replaceAll("'", "\\'");
-        await _controller.runJavaScript('''
+        await _controller?.evaluateJavascript(
+          source:
+              '''
           if (window.flutter_directory_callback) {
             window.flutter_directory_callback('$escapedPath');
           }
-        ''');
-      } else {
-        debugPrint('❌ No directory selected');
+        ''',
+        );
       }
     } catch (e) {
       debugPrint('❌ Error picking directory: $e');
@@ -185,7 +225,143 @@ class _WebViewPageState extends State<WebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: WebViewWidget(controller: _controller)),
+      body: Stack(
+        children: [
+          // WebView
+          if (!_hasError)
+            SafeArea(
+              child: InAppWebView(
+                initialUrlRequest: _isUsingBundled
+                    ? null
+                    : URLRequest(url: WebUri(_apiServerUrl)),
+                initialFile: _isUsingBundled ? 'assets/web/index.html' : null,
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  allowFileAccessFromFileURLs: true,
+                  allowUniversalAccessFromFileURLs: true,
+                  useShouldOverrideUrlLoading: false,
+                  mediaPlaybackRequiresUserGesture: false,
+                  allowsInlineMediaPlayback: true,
+                ),
+                onWebViewCreated: _onWebViewCreated,
+                onLoadStart: _onLoadStart,
+                onLoadStop: _onLoadStop,
+                onReceivedError: _onReceivedError,
+                onConsoleMessage: _onConsoleMessage,
+                onLoadResource: (controller, resource) {
+                  debugPrint('Loading resource: ${resource.url}');
+                },
+              ),
+            ),
+
+          // Loading indicator
+          if (_isLoading)
+            Container(
+              color: const Color(0xFF191919),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                    ),
+                    if (_loadingStatus != null) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        _loadingStatus!,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+          // Error screen
+          if (_hasError)
+            Container(
+              color: const Color(0xFF191919),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        _errorMessage ?? 'An error occurred',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _loadWebApp();
+                          });
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+          // Offline indicator badge
+          if (_isUsingBundled && !_isLoading && !_hasError)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: SafeArea(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.wifi_off, size: 14, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        'Offline Mode',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
