@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:desterlib_flutter/video_player/video_player.dart';
 
 class WebViewPage extends StatefulWidget {
@@ -68,6 +69,12 @@ class _WebViewPageState extends State<WebViewPage> {
         'playVideo',
         onMessageReceived: (JavaScriptMessage message) {
           _handlePlayVideo(message.message);
+        },
+      )
+      ..addJavaScriptChannel(
+        'pickDirectory',
+        onMessageReceived: (JavaScriptMessage message) {
+          _handlePickDirectory();
         },
       )
       ..loadRequest(Uri.parse(url));
@@ -146,6 +153,32 @@ class _WebViewPageState extends State<WebViewPage> {
       );
     } catch (e) {
       debugPrint('❌ Error handling playVideo message: $e');
+    }
+  }
+
+  Future<void> _handlePickDirectory() async {
+    debugPrint('📁 Opening directory picker...');
+
+    try {
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+      if (selectedDirectory != null) {
+        debugPrint('✅ Directory selected: $selectedDirectory');
+
+        // Send the path back to the web view via JavaScript
+        final escapedPath = selectedDirectory
+            .replaceAll('\\', '\\\\')
+            .replaceAll("'", "\\'");
+        await _controller.runJavaScript('''
+          if (window.flutter_directory_callback) {
+            window.flutter_directory_callback('$escapedPath');
+          }
+        ''');
+      } else {
+        debugPrint('❌ No directory selected');
+      }
+    } catch (e) {
+      debugPrint('❌ Error picking directory: $e');
     }
   }
 
