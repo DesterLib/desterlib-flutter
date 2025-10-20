@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:desterlib_flutter/video_player/video_player.dart';
+import 'package:desterlib_flutter/services/network_discovery_service.dart';
 
 class WebViewPage extends StatefulWidget {
   const WebViewPage({super.key});
@@ -14,24 +15,50 @@ class WebViewPage extends StatefulWidget {
 class _WebViewPageState extends State<WebViewPage> {
   InAppWebViewController? _controller;
   bool _bridgeInjected = false;
+  String _serverUrl = '';
+  bool _isDiscovering = true;
 
-  String get _serverUrl {
-    String url;
-    if (Platform.isAndroid) {
-      url = 'http://10.0.2.2:3001';
-    } else if (Platform.isMacOS) {
-      url = 'http://127.0.0.1:3001';
-    } else {
-      url = 'http://127.0.0.1:3001';
+  @override
+  void initState() {
+    super.initState();
+    _discoverAndSetServerUrl();
+  }
+
+  Future<void> _discoverAndSetServerUrl() async {
+    try {
+      final discoveredUrl = await NetworkDiscoveryService.getBestServerUrl();
+
+      if (mounted) {
+        setState(() {
+          _serverUrl = discoveredUrl;
+          _isDiscovering = false;
+        });
+
+        // Reload the webview with the discovered URL
+        if (_controller != null) {
+          await _controller!.loadUrl(
+            urlRequest: URLRequest(url: WebUri(discoveredUrl)),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error discovering server: $e');
+      if (mounted) {
+        setState(() {
+          // Fallback to localhost URL
+          if (Platform.isAndroid) {
+            _serverUrl = 'http://10.0.2.2:3001';
+          } else {
+            _serverUrl = 'http://127.0.0.1:3001';
+          }
+          _isDiscovering = false;
+        });
+      }
     }
-    debugPrint('🌐 Loading URL: $url (Platform: ${Platform.operatingSystem})');
-    return url;
   }
 
   void _onWebViewCreated(InAppWebViewController controller) {
     _controller = controller;
-
-    // Register the playVideo handler
     controller.addJavaScriptHandler(
       handlerName: 'playVideo',
       callback: (args) {
@@ -43,57 +70,38 @@ class _WebViewPageState extends State<WebViewPage> {
   }
 
   void _onLoadStart(InAppWebViewController controller, WebUri? url) {
-    debugPrint('🚀 Load START: $url');
-
-    // Reset bridge state on new page load
     _bridgeInjected = false;
 
-    // Prevent HTTPS redirects
-    if (url != null && url.toString().startsWith('https://localhost:3001')) {
-      debugPrint('🛑 Preventing HTTPS redirect');
-      controller.loadUrl(
-        urlRequest: URLRequest(
-          url: WebUri(
-            url.toString().replaceFirst(
-              'https://localhost:3001',
-              'http://127.0.0.1:3001',
-            ),
-          ),
-        ),
-      );
+    // Prevent HTTPS redirects for local development
+    if (url != null &&
+        url.toString().contains('https://') &&
+        url.toString().contains(':3001')) {
+      final httpUrl = url.toString().replaceFirst('https://', 'http://');
+      controller.loadUrl(urlRequest: URLRequest(url: WebUri(httpUrl)));
     }
   }
 
   void _onLoadStop(InAppWebViewController controller, WebUri? url) async {
-    debugPrint('✅ Load STOP: $url');
-
     try {
-      final pageTitle = await controller.getTitle();
-      debugPrint('📄 Page title: $pageTitle');
-
       // Inject bridge once DOM is ready
       await _injectFlutterBridge();
 
-      // Wait for React initialization and inject again
+      // Wait for React initialization and ensure bridge is ready
       await Future.delayed(const Duration(milliseconds: 500));
       await _ensureBridgeReady();
     } catch (e) {
-      debugPrint('❌ Error after load: $e');
+      debugPrint('Error after load: $e');
       await _injectFlutterBridge();
     }
   }
 
   Future<void> _injectFlutterBridge() async {
-    if (_bridgeInjected) {
-      debugPrint('⏭️ Bridge already injected, skipping');
-      return;
-    }
+    if (_bridgeInjected) return;
 
     try {
       await _controller?.evaluateJavascript(
         source: '''
           (function() {
-            // Define the bridge functions
             window.flutterPlayVideo = function(videoData) {
               try {
                 const message = typeof videoData === 'string' ? videoData : JSON.stringify(videoData);
@@ -104,21 +112,16 @@ class _WebViewPageState extends State<WebViewPage> {
               }
             };
             
-            // Mark as Flutter WebView
             window.isFlutterWebView = true;
-            
-            // Dispatch ready event
             window.dispatchEvent(new CustomEvent('flutterBridgeReady'));
-            
             return 'BRIDGE_READY';
           })();
         ''',
       );
 
       _bridgeInjected = true;
-      debugPrint('✅ Flutter bridge successfully injected');
     } catch (e) {
-      debugPrint('❌ Error injecting Flutter bridge: $e');
+      debugPrint('Error injecting Flutter bridge: $e');
       _bridgeInjected = false;
     }
   }
@@ -128,22 +131,17 @@ class _WebViewPageState extends State<WebViewPage> {
       final result = await _controller?.evaluateJavascript(
         source: '''
           (function() {
-            if (typeof window.flutterPlayVideo === 'function') {
-              return 'READY';
-            } else {
-              return 'NOT_READY';
-            }
+            return typeof window.flutterPlayVideo === 'function' ? 'READY' : 'NOT_READY';
           })();
         ''',
       );
 
       if (result == 'NOT_READY') {
-        debugPrint('⚠️ Bridge verification failed, re-injecting...');
         _bridgeInjected = false;
         await _injectFlutterBridge();
       }
     } catch (e) {
-      debugPrint('❌ Error verifying bridge: $e');
+      debugPrint('Error verifying bridge: $e');
     }
   }
 
@@ -152,9 +150,9 @@ class _WebViewPageState extends State<WebViewPage> {
     WebResourceRequest request,
     WebResourceError error,
   ) {
-    debugPrint('❌ ERROR loading: ${error.description}');
-    debugPrint('❌ Error code: ${error.type}');
-    debugPrint('❌ Request URL: ${request.url}');
+    debugPrint(
+      'WebView error: ${error.description} (${error.type}) at ${request.url}',
+    );
   }
 
   void _handlePlayVideo(String message) {
@@ -163,8 +161,6 @@ class _WebViewPageState extends State<WebViewPage> {
       final streamUrl = data['url'] as String;
       final title = data['title'] as String?;
 
-      debugPrint('🎬 Playing video: $title');
-
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) =>
@@ -172,7 +168,7 @@ class _WebViewPageState extends State<WebViewPage> {
         ),
       );
     } catch (e) {
-      debugPrint('❌ Error handling playVideo: $e');
+      debugPrint('Error handling playVideo: $e');
     }
   }
 
@@ -180,28 +176,39 @@ class _WebViewPageState extends State<WebViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: InAppWebView(
-          initialUrlRequest: URLRequest(url: WebUri(_serverUrl)),
-          initialSettings: InAppWebViewSettings(
-            javaScriptEnabled: true,
-            allowsInlineMediaPlayback: true,
-            mediaPlaybackRequiresUserGesture: false,
-            allowsBackForwardNavigationGestures: false,
-            cacheEnabled: false,
-            clearCache: true,
-            hardwareAcceleration: true,
-            userAgent:
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 DesterFlutterWebView/1.0',
-            mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
-            transparentBackground: false,
-            supportZoom: false,
-            incognito: false,
-          ),
-          onWebViewCreated: _onWebViewCreated,
-          onLoadStart: _onLoadStart,
-          onLoadStop: _onLoadStop,
-          onReceivedError: _onReceivedError,
-        ),
+        child: _isDiscovering || _serverUrl.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Discovering API server on network...'),
+                  ],
+                ),
+              )
+            : InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(_serverUrl)),
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  allowsInlineMediaPlayback: true,
+                  mediaPlaybackRequiresUserGesture: false,
+                  allowsBackForwardNavigationGestures: false,
+                  cacheEnabled: false,
+                  clearCache: true,
+                  hardwareAcceleration: true,
+                  userAgent:
+                      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 DesterFlutterWebView/1.0',
+                  mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
+                  transparentBackground: false,
+                  supportZoom: false,
+                  incognito: false,
+                ),
+                onWebViewCreated: _onWebViewCreated,
+                onLoadStart: _onLoadStart,
+                onLoadStop: _onLoadStop,
+                onReceivedError: _onReceivedError,
+              ),
       ),
     );
   }
