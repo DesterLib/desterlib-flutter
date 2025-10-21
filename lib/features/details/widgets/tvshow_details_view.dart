@@ -136,7 +136,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
                         children: widget.tvShow.genres.map((genre) {
                           return Chip(
                             label: Text(genre),
-                            backgroundColor: Colors.blue.withValues(alpha: 0.2),
+                            backgroundColor: Colors.blue.withOpacity( 0.2),
                             labelStyle: const TextStyle(color: Colors.white),
                             side: BorderSide.none,
                           );
@@ -159,7 +159,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
                       Text(
                         widget.tvShow.description!,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: Colors.white.withOpacity( 0.8),
                           fontSize: 15,
                           height: 1.5,
                         ),
@@ -224,7 +224,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: Colors.white.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -250,7 +250,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.white.withOpacity( 0.6),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -275,10 +275,10 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withOpacity( 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.white.withOpacity( 0.1),
               width: 1,
             ),
           ),
@@ -300,7 +300,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
                     Text(
                       '${season.episodeCount} episode${season.episodeCount != 1 ? 's' : ''}',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity( 0.6),
                         fontSize: 14,
                       ),
                     ),
@@ -327,7 +327,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
           child: Text(
             'No episodes available for this season',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.white.withOpacity( 0.5),
               fontSize: 14,
             ),
           ),

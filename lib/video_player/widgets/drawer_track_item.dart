@@ -20,14 +20,14 @@ class DrawerTrackItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          hoverColor: Colors.white.withValues(alpha: 0.15),
-          highlightColor: Colors.white.withValues(alpha: 0.1),
-          splashColor: Colors.white.withValues(alpha: 0.2),
+          hoverColor: Colors.white.withOpacity( 0.15),
+          highlightColor: Colors.white.withOpacity( 0.1),
+          splashColor: Colors.white.withOpacity( 0.2),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.white.withValues(alpha: 0.1)
+                  ? Colors.white.withOpacity( 0.1)
                   : Colors.transparent,
             ),
             child: Row(
@@ -38,7 +38,7 @@ class DrawerTrackItem extends StatelessWidget {
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
-                          : Colors.white.withValues(alpha: 0.8),
+                          : Colors.white.withOpacity( 0.8),
                       fontSize: 16,
                       fontWeight: isSelected
                           ? FontWeight.w600

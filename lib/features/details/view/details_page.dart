@@ -11,7 +11,7 @@ import '../../../video_player/video_player.dart';
 
 class DetailsPage extends StatelessWidget {
   final String
-  mediaId; // This is the movie/tvshow record ID for fetching details
+      mediaId; // This is the movie/tvshow record ID for fetching details
   final String mediaType; // 'MOVIE' or 'TV_SHOW'
   final DetailsRepository detailsRepository;
 
@@ -195,8 +195,8 @@ class _TvBackButtonState extends State<_TvBackButton> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: _isHighlighted
-                  ? Colors.black.withValues(alpha: 0.7)
-                  : Colors.black.withValues(alpha: 0.5),
+                  ? Colors.black.withOpacity(0.7)
+                  : Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
               border: _isFocused
                   ? Border.all(color: Colors.white, width: 2.5)

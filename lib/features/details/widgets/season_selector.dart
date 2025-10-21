@@ -22,10 +22,10 @@ class SeasonSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withOpacity( 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: Colors.white.withOpacity( 0.1),
           width: 1,
         ),
       ),
