@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Patch script for media_kit_video to support Flutter 3.27+
-# This adds the missing onSurfaceDestroyed() method required by the new TextureRegistry API
+# This fixes the interface changes in TextureRegistry.SurfaceProducer.Callback
 
 set -e
 
@@ -28,7 +28,7 @@ if [ ! -f "$VIDEO_OUTPUT_FILE" ]; then
   fi
 fi
 
-# Check if already patched (correct version)
+# Check if already patched
 if grep -q "public void onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
   echo "✅ Already patched!"
   exit 0
@@ -39,26 +39,36 @@ echo "📝 Applying patch..."
 # Create a backup
 cp "$VIDEO_OUTPUT_FILE" "$VIDEO_OUTPUT_FILE.bak"
 
-# Find the last closing brace and insert the new method before it
+# Apply the patch using sed/awk
+# 1. Remove @Override from onSurfaceCleanup (it's no longer an interface method in Flutter 3.27+)
+# 2. Add onSurfaceDestroyed() method that calls onSurfaceCleanup()
 awk '
-BEGIN { method_added = 0 }
-{
-    # If we find the last closing brace (class end)
-    if (/^}$/ && !method_added) {
-        # Add the new method before the closing brace
-        print "  @Override"
-        print "  public void onSurfaceDestroyed() {"
-        print "    // Required by Flutter 3.27+ TextureRegistry.SurfaceProducer.Callback"
-        print "    synchronized (lock) {"
-        print "      Log.i(TAG, \"onSurfaceDestroyed\");"
-        print "      onSurfaceCleanup();"
-        print "    }"
-        print "  }"
-        print ""
-        method_added = 1
+/^    @Override$/ {
+    # Peek at the next line
+    getline nextline
+    # If next line is onSurfaceCleanup, skip the @Override
+    if (nextline ~ /public void onSurfaceCleanup/) {
+        print "    // Note: onSurfaceCleanup is now a private helper method"
+        print nextline
+    } else {
+        # Otherwise, keep the @Override and the next line
+        print
+        print nextline
     }
-    print
+    next
 }
+# Add onSurfaceDestroyed before the final closing brace
+/^}$/ && !patched {
+    print "    @Override"
+    print "    public void onSurfaceDestroyed() {"
+    print "        // Required by Flutter 3.27+ TextureRegistry.SurfaceProducer.Callback"
+    print "        // In Flutter 3.27+, onSurfaceCleanup() was renamed to onSurfaceDestroyed()"
+    print "        onSurfaceCleanup();"
+    print "    }"
+    print ""
+    patched = 1
+}
+{ print }
 ' "$VIDEO_OUTPUT_FILE.bak" > "$VIDEO_OUTPUT_FILE"
 
 # Verify the patch was applied
