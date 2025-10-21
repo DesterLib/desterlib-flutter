@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/movie_details.dart';
+import '../../../widgets/common/tv_button.dart';
 
 class MovieDetailsView extends StatelessWidget {
   final MovieDetails movie;
@@ -98,25 +99,18 @@ class MovieDetailsView extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Play button
-                    SizedBox(
+                    TvButton(
+                      onPressed: onPlay,
+                      icon: Icons.play_arrow,
                       width: double.infinity,
                       height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: onPlay,
-                        icon: const Icon(Icons.play_arrow, size: 28),
-                        label: const Text(
-                          'Watch Now',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      backgroundColor: Colors.blue,
+                      autofocus: true,
+                      child: const Text(
+                        'Watch Now',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

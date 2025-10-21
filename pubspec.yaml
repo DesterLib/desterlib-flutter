@@ -1,7 +1,7 @@
 name: desterlib_flutter
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.1.0
+version: 0.0.1
 
 environment:
   sdk: ^3.9.2
@@ -21,6 +21,7 @@ dependencies:
   connectivity_plus: ^6.1.1
   http: ^1.2.2
   shared_preferences: ^2.3.2
+  flutter_hooks: ^0.20.5
 
 dev_dependencies:
   flutter_test:

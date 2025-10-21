@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/details_bloc.dart';
 import '../bloc/details_events.dart';
@@ -48,15 +49,8 @@ class DetailsPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    child: _TvBackButton(
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                 ),
@@ -153,6 +147,77 @@ class DetailsPage extends StatelessWidget {
       useSafeArea: false,
       builder: (context) =>
           VideoPlayerPage(videoUrl: streamUrl, title: 'Episode'),
+    );
+  }
+}
+
+/// TV-optimized back button with focus support
+class _TvBackButton extends StatefulWidget {
+  final VoidCallback onPressed;
+
+  const _TvBackButton({required this.onPressed});
+
+  @override
+  State<_TvBackButton> createState() => _TvBackButtonState();
+}
+
+class _TvBackButtonState extends State<_TvBackButton> {
+  bool _isHovered = false;
+  bool _isFocused = false;
+
+  bool get _isHighlighted => _isFocused || _isHovered;
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      onFocusChange: (hasFocus) {
+        setState(() {
+          _isFocused = hasFocus;
+        });
+      },
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent &&
+            (event.logicalKey == LogicalKeyboardKey.enter ||
+                event.logicalKey == LogicalKeyboardKey.space ||
+                event.logicalKey == LogicalKeyboardKey.select)) {
+          widget.onPressed();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onPressed,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: _isHighlighted
+                  ? Colors.black.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: _isFocused
+                  ? Border.all(color: Colors.white, width: 2.5)
+                  : null,
+              boxShadow: _isFocused
+                  ? [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.5),
+                        blurRadius: 12,
+                        spreadRadius: 3,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: widget.onPressed,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
