@@ -1,11 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'features/home/view/home_page.dart';
+import 'package:media_kit/media_kit.dart';
 import 'features/home/repo/home_repository.dart';
+import 'features/settings/repo/settings_repository.dart';
+import 'features/details/repo/details_repository.dart';
+import 'widgets/layouts/app_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize MediaKit for video playback
+  MediaKit.ensureInitialized();
 
   // Configure window for desktop platforms
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -47,6 +53,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeRepository = HomeRepository(baseUrl: _apiServerUrl);
+    final settingsRepository = SettingsRepository(baseUrl: _apiServerUrl);
+    final detailsRepository = DetailsRepository(baseUrl: _apiServerUrl);
 
     return MaterialApp(
       title: 'Dester Library',
@@ -54,7 +62,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HomePage(homeRepository: homeRepository),
+      home: AppShell(
+        homeRepository: homeRepository,
+        settingsRepository: settingsRepository,
+        detailsRepository: detailsRepository,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
