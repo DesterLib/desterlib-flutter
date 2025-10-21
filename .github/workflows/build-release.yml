@@ -141,7 +141,7 @@ jobs:
 
           # Create a temporary directory for DMG contents
           mkdir -p dmg_temp
-          cp -R build/macos/Build/Products/Release/desterlib_flutter.app dmg_temp/
+          cp -R build/macos/Build/Products/Release/Dester.app dmg_temp/
 
           # Create DMG
           create-dmg \
@@ -149,8 +149,8 @@ jobs:
             --window-pos 200 120 \
             --window-size 800 400 \
             --icon-size 100 \
-            --icon "desterlib_flutter.app" 200 190 \
-            --hide-extension "desterlib_flutter.app" \
+            --icon "Dester.app" 200 190 \
+            --hide-extension "Dester.app" \
             --app-drop-link 600 185 \
             "Dester-macOS.dmg" \
             "dmg_temp/" || true
@@ -159,7 +159,7 @@ jobs:
           if [ ! -f "Dester-macOS.dmg" ]; then
             echo "DMG creation failed, creating ZIP instead"
             cd dmg_temp
-            zip -r ../Dester-macOS.zip desterlib_flutter.app
+            zip -r ../Dester-macOS.zip Dester.app
             cd ..
           fi
 
@@ -167,7 +167,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-app
-          path: build/macos/Build/Products/Release/desterlib_flutter.app
+          path: build/macos/Build/Products/Release/Dester.app
           retention-days: 30
 
       - name: Upload macOS DMG/ZIP artifact
