@@ -377,7 +377,8 @@ jobs:
         build-windows,
       ]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Create releases for: version tags OR main/master branch pushes
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     permissions:
       contents: write
@@ -385,6 +386,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for proper versioning
+
+      - name: Generate release version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # For tags, use the tag name
+            VERSION="${GITHUB_REF#refs/tags/}"
+            IS_PRERELEASE=false
+            if [[ "$VERSION" == *"beta"* ]] || [[ "$VERSION" == *"alpha"* ]]; then
+              IS_PRERELEASE=true
+            fi
+          else
+            # For main/master branch, create development release
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            VERSION="dev-${BRANCH_NAME}-${SHORT_SHA}-${TIMESTAMP}"
+            IS_PRERELEASE=true
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          echo "Release version: ${VERSION}"
+          echo "Is prerelease: ${IS_PRERELEASE}"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -397,34 +423,55 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
+          VERSION="${{ steps.version.outputs.version }}"
 
           # Android APKs
-          cp artifacts/android-apk/app-arm64-v8a-release.apk release-assets/Dester-Android-arm64-v8a.apk || true
-          cp artifacts/android-apk/app-armeabi-v7a-release.apk release-assets/Dester-Android-armeabi-v7a.apk || true
-          cp artifacts/android-apk/app-x86_64-release.apk release-assets/Dester-Android-x86_64.apk || true
+          cp artifacts/android-apk/app-arm64-v8a-release.apk release-assets/Dester-${VERSION}-Android-arm64-v8a.apk || true
+          cp artifacts/android-apk/app-armeabi-v7a-release.apk release-assets/Dester-${VERSION}-Android-armeabi-v7a.apk || true
+          cp artifacts/android-apk/app-x86_64-release.apk release-assets/Dester-${VERSION}-Android-x86_64.apk || true
 
           # Android AAB
-          cp artifacts/android-aab/app-release.aab release-assets/Dester-Android.aab || true
+          cp artifacts/android-aab/app-release.aab release-assets/Dester-${VERSION}-Android.aab || true
 
           # Android TV
-          cp artifacts/android-tv-apk/app-androidtv-release.apk release-assets/Dester-AndroidTV-arm64.apk || true
+          cp artifacts/android-tv-apk/app-androidtv-release.apk release-assets/Dester-${VERSION}-AndroidTV-arm64.apk || true
 
           # macOS
-          cp artifacts/macos-installer/Dester-macOS.dmg release-assets/ || true
-          cp artifacts/macos-installer/Dester-macOS.zip release-assets/ || true
+          cp artifacts/macos-installer/Dester-macOS.dmg release-assets/Dester-${VERSION}-macOS.dmg || true
+          cp artifacts/macos-installer/Dester-macOS.zip release-assets/Dester-${VERSION}-macOS.zip || true
 
           # Linux
-          cp artifacts/linux-archive/Dester-Linux-x64.tar.gz release-assets/ || true
+          cp artifacts/linux-archive/Dester-Linux-x64.tar.gz release-assets/Dester-${VERSION}-Linux-x64.tar.gz || true
 
           # Windows
-          cp artifacts/windows-archive/Dester-Windows-x64.zip release-assets/ || true
+          cp artifacts/windows-archive/Dester-Windows-x64.zip release-assets/Dester-${VERSION}-Windows-x64.zip || true
+
+      - name: Delete existing development release (if exists)
+        if: steps.version.outputs.is_prerelease == 'true' && !startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # Delete previous development releases to avoid clutter
+          gh release delete "${{ steps.version.outputs.version }}" --yes || true
+          git push origin :refs/tags/${{ steps.version.outputs.version }} || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
           draft: false
-          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          prerelease: ${{ steps.version.outputs.is_prerelease }}
           generate_release_notes: true
+          body: |
+            ${{ startsWith(github.ref, 'refs/tags/v') && '🎉 Official Release' || '🚧 Development Build' }}
+
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+            - Workflow: ${{ github.run_number }}
+
+            ${{ !startsWith(github.ref, 'refs/tags/v') && '⚠️ This is an automated development build. For stable releases, see tagged versions.' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
