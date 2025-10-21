@@ -5,17 +5,147 @@ import '../bloc/settings_events.dart';
 import '../bloc/settings_states.dart';
 import '../repo/settings_repository.dart';
 import '../widgets/library_dialog.dart';
+import '../../../services/config_service.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   final SettingsRepository settingsRepository;
+  final ConfigService configService;
 
-  const SettingsPage({super.key, required this.settingsRepository});
+  const SettingsPage({
+    super.key,
+    required this.settingsRepository,
+    required this.configService,
+  });
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late TextEditingController _baseUrlController;
+  bool _isConnected = false;
+  bool _isTestingConnection = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseUrlController = TextEditingController(
+      text: widget.configService.baseUrl ?? '',
+    );
+    _testConnection();
+  }
+
+  @override
+  void dispose() {
+    _baseUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _testConnection() async {
+    final url = _baseUrlController.text.trim();
+
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a server URL first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Temporarily save the URL to test it
+    await widget.configService.setBaseUrl(url);
+
+    setState(() => _isTestingConnection = true);
+    final connected = await widget.configService.testConnection();
+    setState(() {
+      _isConnected = connected;
+      _isTestingConnection = false;
+    });
+
+    // Show feedback
+    if (mounted) {
+      if (connected) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Connection successful to $url')),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Failed to connect to $url')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _testConnection,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveBaseUrl() async {
+    final url = _baseUrlController.text.trim();
+
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a server URL'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await widget.configService.setBaseUrl(url);
+    await _testConnection();
+
+    if (mounted) {
+      if (_isConnected) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Server URL saved and connection successful'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Reload settings after successful connection
+        context.read<SettingsBloc>().add(SettingsLoadRequested());
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Server URL saved but connection failed'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          SettingsBloc(repository: settingsRepository)
+          SettingsBloc(repository: widget.settingsRepository)
             ..add(SettingsLoadRequested()),
       child: Builder(
         builder: (context) => SafeArea(
@@ -187,73 +317,83 @@ class SettingsPage extends StatelessWidget {
                             child: ListView(
                               padding: EdgeInsets.zero,
                               children: [
-                                if (isOperating)
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(12),
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.blue.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.blue,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          operationMessage ?? 'Processing...',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                if (isOperating) const SizedBox(height: 16),
-                                // TMDB API Key Section
-                                _buildTmdbSection(context, appSettings),
+                                // Server Configuration Section
+                                _buildServerConfigSection(),
                                 const SizedBox(height: 24),
-                                // Libraries Section
-                                libraries.isEmpty
-                                    ? _buildEmptyState(context)
-                                    : Column(
+
+                                // Only show other settings if connected
+                                if (!_isConnected) ...[
+                                  _buildNotConnectedMessage(),
+                                ] else ...[
+                                  if (isOperating)
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(12),
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.blue.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      child: Row(
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                            ),
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                'Libraries',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
+                                          const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.blue,
                                             ),
                                           ),
-                                          const SizedBox(height: 12),
-                                          ..._buildLibraryCards(
-                                            context,
-                                            libraries,
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            operationMessage ?? 'Processing...',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
                                           ),
                                         ],
                                       ),
+                                    ),
+                                  if (isOperating) const SizedBox(height: 16),
+                                  // TMDB API Key Section
+                                  _buildTmdbSection(context, appSettings),
+                                  const SizedBox(height: 24),
+                                  // Libraries Section
+                                  libraries.isEmpty
+                                      ? _buildEmptyState(context)
+                                      : Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                  ),
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  'Libraries',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            ..._buildLibraryCards(
+                                              context,
+                                              libraries,
+                                            ),
+                                          ],
+                                        ),
+                                ],
                               ],
                             ),
                           );
@@ -267,6 +407,262 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServerConfigSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Server Configuration',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _isConnected
+                    ? Colors.green.withOpacity(0.3)
+                    : Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Configure the Dester server URL',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    if (_isConnected)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.green.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Connected',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (_isTestingConnection)
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.orange.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.warning_amber,
+                              color: Colors.orange,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Not Connected',
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _baseUrlController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Server URL',
+                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                    hintText: 'http://192.168.1.100:3000',
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (_baseUrlController.text.isNotEmpty)
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _baseUrlController.clear();
+                            _isConnected = false;
+                          });
+                          widget.configService.clearBaseUrl();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Server URL cleared'),
+                              backgroundColor: Colors.grey,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.clear, size: 18),
+                        label: const Text('Clear'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red.shade300,
+                        ),
+                      ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: _isTestingConnection ? null : _testConnection,
+                      icon: Icon(
+                        Icons.sync,
+                        size: 18,
+                        color: _isTestingConnection
+                            ? Colors.white.withOpacity(0.3)
+                            : Colors.white70,
+                      ),
+                      label: Text(
+                        'Test Connection',
+                        style: TextStyle(
+                          color: _isTestingConnection
+                              ? Colors.white.withOpacity(0.3)
+                              : Colors.white70,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: _saveBaseUrl,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Save URL'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotConnectedMessage() {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cloud_off,
+              size: 80,
+              color: Colors.orange.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Not Connected to Server',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please configure and test the server URL above to access settings.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

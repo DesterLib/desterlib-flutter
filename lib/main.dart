@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:media_kit/media_kit.dart';
+import 'services/config_service.dart';
 import 'features/home/repo/home_repository.dart';
 import 'features/settings/repo/settings_repository.dart';
 import 'features/details/repo/details_repository.dart';
@@ -12,6 +13,9 @@ void main() async {
 
   // Initialize MediaKit for video playback
   MediaKit.ensureInitialized();
+
+  // Initialize ConfigService
+  final configService = await ConfigService.create();
 
   // Configure window for desktop platforms
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -32,29 +36,23 @@ void main() async {
     });
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(configService: configService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ConfigService configService;
 
-  String get _apiServerUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3001/api/v1'; // Android emulator
-    }
-
-    if (Platform.isIOS || Platform.isMacOS) {
-      return 'http://localhost:3001/api/v1'; // iOS/macOS
-    }
-
-    return 'http://localhost:3001/api/v1';
-  }
+  const MyApp({super.key, required this.configService});
 
   @override
   Widget build(BuildContext context) {
-    final homeRepository = HomeRepository(baseUrl: _apiServerUrl);
-    final settingsRepository = SettingsRepository(baseUrl: _apiServerUrl);
-    final detailsRepository = DetailsRepository(baseUrl: _apiServerUrl);
+    // Use configured baseUrl or fallback to default
+    final apiBaseUrl =
+        configService.apiBaseUrl ?? 'http://localhost:3001/api/v1';
+
+    final homeRepository = HomeRepository(baseUrl: apiBaseUrl);
+    final settingsRepository = SettingsRepository(baseUrl: apiBaseUrl);
+    final detailsRepository = DetailsRepository(baseUrl: apiBaseUrl);
 
     return MaterialApp(
       title: 'Dester Library',
@@ -66,6 +64,7 @@ class MyApp extends StatelessWidget {
         homeRepository: homeRepository,
         settingsRepository: settingsRepository,
         detailsRepository: detailsRepository,
+        configService: configService,
       ),
       debugShowCheckedModeBanner: false,
     );

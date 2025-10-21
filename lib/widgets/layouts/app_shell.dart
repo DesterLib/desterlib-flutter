@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../common/app_navbar.dart';
+import '../../services/config_service.dart';
 import '../../features/home/view/home_page.dart';
 import '../../features/home/repo/home_repository.dart';
 import '../../features/settings/view/settings_page.dart';
@@ -11,12 +12,14 @@ class AppShell extends StatefulWidget {
   final HomeRepository homeRepository;
   final SettingsRepository settingsRepository;
   final DetailsRepository detailsRepository;
+  final ConfigService configService;
 
   const AppShell({
     super.key,
     required this.homeRepository,
     required this.settingsRepository,
     required this.detailsRepository,
+    required this.configService,
   });
 
   @override
@@ -79,9 +82,15 @@ class _AppShellState extends State<AppShell> {
   Widget _buildPage(String route, Object? arguments) {
     switch (route) {
       case '/':
-        return HomePage(homeRepository: widget.homeRepository);
+        return HomePage(
+          homeRepository: widget.homeRepository,
+          configService: widget.configService,
+        );
       case '/settings':
-        return SettingsPage(settingsRepository: widget.settingsRepository);
+        return SettingsPage(
+          settingsRepository: widget.settingsRepository,
+          configService: widget.configService,
+        );
       case '/details':
         if (arguments is Map<String, dynamic>) {
           final mediaId = arguments['mediaId'] as String;
@@ -92,9 +101,15 @@ class _AppShellState extends State<AppShell> {
             detailsRepository: widget.detailsRepository,
           );
         }
-        return HomePage(homeRepository: widget.homeRepository);
+        return HomePage(
+          homeRepository: widget.homeRepository,
+          configService: widget.configService,
+        );
       default:
-        return HomePage(homeRepository: widget.homeRepository);
+        return HomePage(
+          homeRepository: widget.homeRepository,
+          configService: widget.configService,
+        );
     }
   }
 }
