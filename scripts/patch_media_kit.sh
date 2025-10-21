@@ -28,8 +28,8 @@ if [ ! -f "$VIDEO_OUTPUT_FILE" ]; then
   fi
 fi
 
-# Check if already patched
-if grep -q "onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
+# Check if already patched (correct version)
+if grep -q "public void onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
   echo "✅ Already patched!"
   exit 0
 fi
@@ -39,56 +39,35 @@ echo "📝 Applying patch..."
 # Create a backup
 cp "$VIDEO_OUTPUT_FILE" "$VIDEO_OUTPUT_FILE.bak"
 
-# Add the missing method before the closing brace of the class
-# We'll add it after the last @Override method
-sed -i'.tmp' '/@Override/,/^  }$/ {
-  /^  }$/ a\
-\
-  @Override\
-  public void onSurfaceDestroyed() {\
-    // Required by Flutter 3.27+ TextureRegistry.SurfaceProducer.Callback\
-    // Clean up resources when surface is destroyed\
-    if (textureEntry != null) {\
-      textureEntry.release();\
-      textureEntry = null;\
-    }\
-  }
-}' "$VIDEO_OUTPUT_FILE"
+# Find the last closing brace and insert the new method before it
+awk '
+BEGIN { method_added = 0 }
+{
+    # If we find the last closing brace (class end)
+    if (/^}$/ && !method_added) {
+        # Add the new method before the closing brace
+        print "  @Override"
+        print "  public void onSurfaceDestroyed() {"
+        print "    // Required by Flutter 3.27+ TextureRegistry.SurfaceProducer.Callback"
+        print "    synchronized (lock) {"
+        print "      Log.i(TAG, \"onSurfaceDestroyed\");"
+        print "      onSurfaceCleanup();"
+        print "    }"
+        print "  }"
+        print ""
+        method_added = 1
+    }
+    print
+}
+' "$VIDEO_OUTPUT_FILE.bak" > "$VIDEO_OUTPUT_FILE"
 
-# If sed didn't work (some systems), try a different approach
-if ! grep -q "onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
-  echo "📝 Trying alternative patch method..."
-  
-  # Restore from backup
-  cp "$VIDEO_OUTPUT_FILE.bak" "$VIDEO_OUTPUT_FILE"
-  
-  # Find the line number of the last closing brace (end of class)
-  # Insert the new method before it
-  awk '
-  /^}$/ && !done {
-    print "  @Override"
-    print "  public void onSurfaceDestroyed() {"
-    print "    // Required by Flutter 3.27+ TextureRegistry.SurfaceProducer.Callback"
-    print "    // Clean up resources when surface is destroyed"
-    print "    if (textureEntry != null) {"
-    print "      textureEntry.release();"
-    print "      textureEntry = null;"
-    print "    }"
-    print "  }"
-    print ""
-    done = 1
-  }
-  { print }
-  ' "$VIDEO_OUTPUT_FILE.bak" > "$VIDEO_OUTPUT_FILE"
-fi
-
-# Clean up temp files
-rm -f "$VIDEO_OUTPUT_FILE.tmp" "$VIDEO_OUTPUT_FILE.bak"
-
-if grep -q "onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
+# Verify the patch was applied
+if grep -q "public void onSurfaceDestroyed()" "$VIDEO_OUTPUT_FILE"; then
   echo "✅ Patch applied successfully!"
+  rm -f "$VIDEO_OUTPUT_FILE.bak"
 else
-  echo "⚠️  Patch may not have been applied correctly"
-  echo "   Please check the VideoOutput.java file manually"
+  echo "⚠️  Patch failed, restoring backup"
+  cp "$VIDEO_OUTPUT_FILE.bak" "$VIDEO_OUTPUT_FILE"
+  rm -f "$VIDEO_OUTPUT_FILE.bak"
+  exit 1
 fi
-
