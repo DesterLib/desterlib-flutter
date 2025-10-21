@@ -6,6 +6,7 @@ import '../bloc/settings_states.dart';
 import '../repo/settings_repository.dart';
 import '../widgets/library_dialog.dart';
 import '../../../services/config_service.dart';
+import '../../../main.dart';
 
 class SettingsPage extends StatefulWidget {
   final SettingsRepository settingsRepository;
@@ -54,11 +55,9 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-    // Temporarily save the URL to test it
-    await widget.configService.setBaseUrl(url);
-
     setState(() => _isTestingConnection = true);
-    final connected = await widget.configService.testConnection();
+    // Test the URL without saving it
+    final connected = await widget.configService.testUrl(url);
     setState(() {
       _isConnected = connected;
       _isTestingConnection = false;
@@ -117,19 +116,43 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
+    // Get the old URL to check if it changed
+    final oldUrl = widget.configService.baseUrl;
+
     await widget.configService.setBaseUrl(url);
     await _testConnection();
 
     if (mounted) {
       if (_isConnected) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Server URL saved and connection successful'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Reload settings after successful connection
-        context.read<SettingsBloc>().add(SettingsLoadRequested());
+        // Check if URL actually changed
+        final urlChanged = oldUrl != url;
+
+        if (urlChanged) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Server URL saved. Restarting app...'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Wait a moment for the snackbar to show
+          await Future.delayed(const Duration(milliseconds: 800));
+
+          if (mounted) {
+            // Import RestartWidget from main.dart
+            // Restart the entire app to reinitialize repositories
+            RestartWidget.restartApp(context);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Server URL saved successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.read<SettingsBloc>().add(SettingsLoadRequested());
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -212,195 +235,216 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 24),
                   // Content
                   Expanded(
-                    child: BlocConsumer<SettingsBloc, SettingsState>(
-                      listener: (context, state) {
-                        if (state is SettingsOperationSuccess) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(state.message),
-                              backgroundColor: Colors.green,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is SettingsLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.blue,
-                            ),
-                          );
-                        } else if (state is SettingsError) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: Colors.red.shade300,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Error',
-                                  style: TextStyle(
-                                    color: Colors.red.shade300,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                  ),
-                                  child: Text(
-                                    state.message,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                ElevatedButton(
-                                  onPressed: () => context
-                                      .read<SettingsBloc>()
-                                      .add(SettingsLoadRequested()),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else if (state is SettingsLoaded ||
-                            state is SettingsOperationInProgress ||
-                            state is SettingsOperationSuccess) {
-                          List<Library> libraries;
-                          AppSettings appSettings;
-                          String? operationMessage;
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        // Server Configuration Section - Always visible
+                        _buildServerConfigSection(),
+                        const SizedBox(height: 24),
 
-                          if (state is SettingsLoaded) {
-                            libraries = state.libraries;
-                            appSettings = state.appSettings;
-                          } else if (state is SettingsOperationInProgress) {
-                            libraries = state.libraries;
-                            appSettings = state.appSettings;
-                            operationMessage = state.operation;
-                          } else {
-                            final successState =
-                                state as SettingsOperationSuccess;
-                            libraries = successState.libraries;
-                            appSettings = successState.appSettings;
-                          }
-
-                          final isOperating =
-                              state is SettingsOperationInProgress;
-
-                          return RefreshIndicator(
-                            onRefresh: () async {
-                              context.read<SettingsBloc>().add(
-                                SettingsRefreshRequested(),
-                              );
+                        // Only show other settings if connected
+                        if (!_isConnected) ...[
+                          _buildNotConnectedMessage(),
+                        ] else
+                          BlocConsumer<SettingsBloc, SettingsState>(
+                            listener: (context, state) {
+                              if (state is SettingsOperationSuccess) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(state.message),
+                                    backgroundColor: Colors.green,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
                             },
-                            color: Colors.blue,
-                            backgroundColor: Colors.grey.shade800,
-                            child: ListView(
-                              padding: EdgeInsets.zero,
-                              children: [
-                                // Server Configuration Section
-                                _buildServerConfigSection(),
-                                const SizedBox(height: 24),
-
-                                // Only show other settings if connected
-                                if (!_isConnected) ...[
-                                  _buildNotConnectedMessage(),
-                                ] else ...[
-                                  if (isOperating)
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(12),
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 16,
+                            builder: (context, state) {
+                              if (state is SettingsLoading) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(32),
+                                    child: CircularProgressIndicator(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                );
+                              } else if (state is SettingsError) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        size: 64,
+                                        color: Colors.red.shade300,
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.blue.withOpacity(0.3),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Error',
+                                        style: TextStyle(
+                                          color: Colors.red.shade300,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.blue,
-                                            ),
+                                      const SizedBox(height: 8),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 32,
+                                        ),
+                                        child: Text(
+                                          state.message,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 14,
                                           ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            operationMessage ?? 'Processing...',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  if (isOperating) const SizedBox(height: 16),
-                                  // TMDB API Key Section
-                                  _buildTmdbSection(context, appSettings),
-                                  const SizedBox(height: 24),
-                                  // Libraries Section
-                                  libraries.isEmpty
-                                      ? _buildEmptyState(context)
-                                      : Column(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                  ),
-                                              child: Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  'Libraries',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                      const SizedBox(height: 24),
+                                      ElevatedButton(
+                                        onPressed: () => context
+                                            .read<SettingsBloc>()
+                                            .add(SettingsLoadRequested()),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        child: const Text('Retry'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else if (state is SettingsLoaded ||
+                                  state is SettingsOperationInProgress ||
+                                  state is SettingsOperationSuccess) {
+                                List<Library> libraries;
+                                AppSettings appSettings;
+                                String? operationMessage;
+
+                                if (state is SettingsLoaded) {
+                                  libraries = state.libraries;
+                                  appSettings = state.appSettings;
+                                } else if (state
+                                    is SettingsOperationInProgress) {
+                                  libraries = state.libraries;
+                                  appSettings = state.appSettings;
+                                  operationMessage = state.operation;
+                                } else {
+                                  final successState =
+                                      state as SettingsOperationSuccess;
+                                  libraries = successState.libraries;
+                                  appSettings = successState.appSettings;
+                                }
+
+                                final isOperating =
+                                    state is SettingsOperationInProgress;
+
+                                return RefreshIndicator(
+                                  onRefresh: () async {
+                                    context.read<SettingsBloc>().add(
+                                      SettingsRefreshRequested(),
+                                    );
+                                  },
+                                  color: Colors.blue,
+                                  backgroundColor: Colors.grey.shade800,
+                                  child: SingleChildScrollView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    child: Column(
+                                      children: [
+                                        if (isOperating)
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(12),
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.withOpacity(
+                                                0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: Colors.blue.withOpacity(
+                                                  0.3,
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(height: 12),
-                                            ..._buildLibraryCards(
-                                              context,
-                                              libraries,
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        color: Colors.blue,
+                                                      ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  operationMessage ??
+                                                      'Processing...',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                ],
-                              ],
-                            ),
-                          );
-                        }
+                                          ),
+                                        if (isOperating)
+                                          const SizedBox(height: 16),
+                                        // TMDB API Key Section
+                                        _buildTmdbSection(context, appSettings),
+                                        const SizedBox(height: 24),
+                                        // Libraries Section
+                                        libraries.isEmpty
+                                            ? _buildEmptyState(context)
+                                            : Column(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 16,
+                                                        ),
+                                                    child: Align(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      child: Text(
+                                                        'Libraries',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 20,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 12),
+                                                  ..._buildLibraryCards(
+                                                    context,
+                                                    libraries,
+                                                  ),
+                                                ],
+                                              ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
 
-                        return const SizedBox.shrink();
-                      },
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                      ],
                     ),
                   ),
                 ],

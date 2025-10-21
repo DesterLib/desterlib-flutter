@@ -36,19 +36,52 @@ void main() async {
     });
   }
 
-  runApp(MyApp(configService: configService));
+  runApp(RestartWidget(child: MyApp(configService: configService)));
 }
 
-class MyApp extends StatelessWidget {
+class RestartWidget extends StatefulWidget {
+  final Widget child;
+
+  const RestartWidget({super.key, required this.child});
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  State<RestartWidget> createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key _key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      _key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(key: _key, child: widget.child);
+  }
+}
+
+class MyApp extends StatefulWidget {
   final ConfigService configService;
 
   const MyApp({super.key, required this.configService});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
   Widget build(BuildContext context) {
     // Use configured baseUrl or fallback to default
     final apiBaseUrl =
-        configService.apiBaseUrl ?? 'http://localhost:3001/api/v1';
+        widget.configService.apiBaseUrl ?? 'http://localhost:3001/api/v1';
 
     final homeRepository = HomeRepository(baseUrl: apiBaseUrl);
     final settingsRepository = SettingsRepository(baseUrl: apiBaseUrl);
@@ -64,7 +97,7 @@ class MyApp extends StatelessWidget {
         homeRepository: homeRepository,
         settingsRepository: settingsRepository,
         detailsRepository: detailsRepository,
-        configService: configService,
+        configService: widget.configService,
       ),
       debugShowCheckedModeBanner: false,
     );

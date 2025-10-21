@@ -38,15 +38,24 @@ class ConfigService {
     return await _prefs.remove(_baseUrlKey);
   }
 
-  /// Test connection to the server
+  /// Test connection to the server (uses saved baseUrl)
   Future<bool> testConnection() async {
     if (baseUrl == null) return false;
+    return await testUrl(baseUrl!);
+  }
+
+  /// Test connection to a specific URL without saving it
+  Future<bool> testUrl(String url) async {
+    if (url.isEmpty) return false;
 
     try {
-      final uri = Uri.parse('$baseUrl/api/v1/settings');
+      print('Testing connection to: $url/api/v1/settings');
+      final uri = Uri.parse('$url/api/v1/settings');
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
+      print('Response status: ${response.statusCode}');
       return response.statusCode == 200;
     } catch (e) {
+      print('Connection test error: $e');
       return false;
     }
   }
