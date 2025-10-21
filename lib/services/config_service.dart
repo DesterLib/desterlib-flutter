@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -49,13 +50,13 @@ class ConfigService {
     if (url.isEmpty) return false;
 
     try {
-      print('Testing connection to: $url/api/v1/settings');
+      debugPrint('Testing connection to: $url/api/v1/settings');
       final uri = Uri.parse('$url/api/v1/settings');
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
-      print('Response status: ${response.statusCode}');
+      debugPrint('Response status: ${response.statusCode}');
       return response.statusCode == 200;
     } catch (e) {
-      print('Connection test error: $e');
+      debugPrint('Connection test error: $e');
       return false;
     }
   }
