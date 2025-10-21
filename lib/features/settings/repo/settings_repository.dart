@@ -184,8 +184,9 @@ class SettingsRepository {
     final body = <String, dynamic>{};
     if (tmdbApiKey != null) body['tmdbApiKey'] = tmdbApiKey;
     if (port != null) body['port'] = port;
-    if (enableRouteGuards != null)
+    if (enableRouteGuards != null) {
       body['enableRouteGuards'] = enableRouteGuards;
+    }
 
     final res = await client.put(
       uri,

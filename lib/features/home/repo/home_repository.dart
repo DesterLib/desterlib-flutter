@@ -106,8 +106,9 @@ class HomeRepository {
   Future<List<MovieItem>> fetchMovies() async {
     final uri = Uri.parse('$baseUrl/movies');
     final res = await client.get(uri);
-    if (res.statusCode != 200)
+    if (res.statusCode != 200) {
       throw Exception('Failed to load movies: ${res.statusCode}');
+    }
     final List<dynamic> jsonList = jsonDecode(res.body);
     return jsonList
         .map((e) => MovieItem.fromJson(Map<String, dynamic>.from(e)))
@@ -118,8 +119,9 @@ class HomeRepository {
   Future<List<TvItem>> fetchTvShows() async {
     final uri = Uri.parse('$baseUrl/tvshows');
     final res = await client.get(uri);
-    if (res.statusCode != 200)
+    if (res.statusCode != 200) {
       throw Exception('Failed to load tv shows: ${res.statusCode}');
+    }
     final List<dynamic> jsonList = jsonDecode(res.body);
     return jsonList
         .map((e) => TvItem.fromJson(Map<String, dynamic>.from(e)))
