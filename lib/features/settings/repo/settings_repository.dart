@@ -9,16 +9,16 @@ class AppSettings {
   AppSettings({this.tmdbApiKey, this.port, this.enableRouteGuards});
 
   factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
-    tmdbApiKey: j['tmdbApiKey'],
-    port: j['port'],
-    enableRouteGuards: j['enableRouteGuards'],
-  );
+        tmdbApiKey: j['tmdbApiKey'],
+        port: j['port'],
+        enableRouteGuards: j['enableRouteGuards'],
+      );
 
   Map<String, dynamic> toJson() => {
-    if (tmdbApiKey != null) 'tmdbApiKey': tmdbApiKey,
-    if (port != null) 'port': port,
-    if (enableRouteGuards != null) 'enableRouteGuards': enableRouteGuards,
-  };
+        if (tmdbApiKey != null) 'tmdbApiKey': tmdbApiKey,
+        if (port != null) 'port': port,
+        if (enableRouteGuards != null) 'enableRouteGuards': enableRouteGuards,
+      };
 }
 
 class Library {
@@ -41,21 +41,23 @@ class Library {
   });
 
   factory Library.fromJson(Map<String, dynamic> j) => Library(
-    id: j['id'] ?? '',
-    name: j['name'] ?? '',
-    path: j['path'] ?? '',
-    type: j['type'] ?? 'MOVIE',
-    createdAt: j['createdAt'] != null ? DateTime.parse(j['createdAt']) : null,
-    updatedAt: j['updatedAt'] != null ? DateTime.parse(j['updatedAt']) : null,
-    mediaCount: j['mediaCount'],
-  );
+        id: j['id'] ?? '',
+        name: j['name'] ?? '',
+        path: j['path'] ?? '',
+        type: j['type'] ?? 'MOVIE',
+        createdAt:
+            j['createdAt'] != null ? DateTime.parse(j['createdAt']) : null,
+        updatedAt:
+            j['updatedAt'] != null ? DateTime.parse(j['updatedAt']) : null,
+        mediaCount: j['mediaCount'],
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'path': path,
-    'type': type,
-  };
+        'id': id,
+        'name': name,
+        'path': path,
+        'type': type,
+      };
 }
 
 class SettingsRepository {
@@ -63,7 +65,7 @@ class SettingsRepository {
   final http.Client client;
 
   SettingsRepository({required this.baseUrl, http.Client? client})
-    : client = client ?? http.Client();
+      : client = client ?? http.Client();
 
   // Fetch all libraries
   Future<List<Library>> fetchLibraries() async {
@@ -184,8 +186,9 @@ class SettingsRepository {
     final body = <String, dynamic>{};
     if (tmdbApiKey != null) body['tmdbApiKey'] = tmdbApiKey;
     if (port != null) body['port'] = port;
-    if (enableRouteGuards != null)
+    if (enableRouteGuards != null) {
       body['enableRouteGuards'] = enableRouteGuards;
+    }
 
     final res = await client.put(
       uri,

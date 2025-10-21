@@ -11,7 +11,7 @@ import '../../../video_player/video_player.dart';
 
 class DetailsPage extends StatelessWidget {
   final String
-  mediaId; // This is the movie/tvshow record ID for fetching details
+      mediaId; // This is the movie/tvshow record ID for fetching details
   final String mediaType; // 'MOVIE' or 'TV_SHOW'
   final DetailsRepository detailsRepository;
 
@@ -204,7 +204,7 @@ class _TvBackButtonState extends State<_TvBackButton> {
               boxShadow: _isFocused
                   ? [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.5),
+                        color: Colors.blue.withValues(alpha: 0.5),
                         blurRadius: 12,
                         spreadRadius: 3,
                       ),
