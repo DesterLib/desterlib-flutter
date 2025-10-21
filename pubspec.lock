@@ -766,7 +766,7 @@ packages:
     source: hosted
     version: "3.4.0"
   wakelock_plus:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: wakelock_plus
       sha256: bf4ee6f17a2fa373ed3753ad0e602b7603f8c75af006d5b9bdade263928c0484
