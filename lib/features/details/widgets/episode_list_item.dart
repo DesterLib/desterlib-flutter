@@ -55,18 +55,18 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity( 0.3),
+                color: Colors.black.withValues(alpha:  0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _isFocused
                       ? Colors.white
-                      : Colors.white.withOpacity( 0.1),
+                      : Colors.white.withValues(alpha:  0.1),
                   width: _isFocused ? 2.5 : 1,
                 ),
                 boxShadow: _isFocused
                     ? [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
+                          color: Colors.blue.withValues(alpha: 0.5),
                           blurRadius: 12,
                           spreadRadius: 3,
                         ),
@@ -96,7 +96,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                           Center(
                             child: Icon(
                               Icons.tv,
-                              color: Colors.white.withOpacity( 0.3),
+                              color: Colors.white.withValues(alpha:  0.3),
                               size: 32,
                             ),
                           ),
@@ -106,7 +106,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity( 0.9),
+                              color: Colors.blue.withValues(alpha:  0.9),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -130,7 +130,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                             Text(
                               'Episode ${widget.episode.episodeNumber}',
                               style: TextStyle(
-                                color: Colors.white.withOpacity( 0.6),
+                                color: Colors.white.withValues(alpha:  0.6),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -140,7 +140,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                               Text(
                                 '${widget.episode.duration}m',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity( 0.4),
+                                  color: Colors.white.withValues(alpha:  0.4),
                                   fontSize: 12,
                                 ),
                               ),
@@ -163,7 +163,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                           Text(
                             widget.episode.description!,
                             style: TextStyle(
-                              color: Colors.white.withOpacity( 0.7),
+                              color: Colors.white.withValues(alpha:  0.7),
                               fontSize: 13,
                             ),
                             maxLines: 2,

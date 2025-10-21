@@ -37,10 +37,10 @@ class _AppNavBarState extends State<AppNavBar> {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(50),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),

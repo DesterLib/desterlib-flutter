@@ -133,7 +133,7 @@ class MovieDetailsView extends StatelessWidget {
                         children: movie.genres.map((genre) {
                           return Chip(
                             label: Text(genre),
-                            backgroundColor: Colors.blue.withOpacity( 0.2),
+                            backgroundColor: Colors.blue.withValues(alpha:  0.2),
                             labelStyle: const TextStyle(color: Colors.white),
                             side: BorderSide.none,
                           );
@@ -156,7 +156,7 @@ class MovieDetailsView extends StatelessWidget {
                       Text(
                         movie.description!,
                         style: TextStyle(
-                          color: Colors.white.withOpacity( 0.8),
+                          color: Colors.white.withValues(alpha:  0.8),
                           fontSize: 15,
                           height: 1.5,
                         ),
@@ -189,7 +189,7 @@ class MovieDetailsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity( 0.1),
+        color: Colors.white.withValues(alpha:  0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -215,7 +215,7 @@ class MovieDetailsView extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity( 0.6),
+              color: Colors.white.withValues(alpha:  0.6),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),

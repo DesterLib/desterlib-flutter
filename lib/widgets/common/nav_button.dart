@@ -43,7 +43,7 @@ class _NavButtonState extends State<NavButton> {
             color: widget.isSelected
                 ? Colors.white
                 : _isHovered
-                ? Colors.white.withOpacity(0.1)
+                ? Colors.white.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(50),
           ),

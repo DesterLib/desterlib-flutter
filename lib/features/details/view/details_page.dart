@@ -195,8 +195,8 @@ class _TvBackButtonState extends State<_TvBackButton> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: _isHighlighted
-                  ? Colors.black.withOpacity(0.7)
-                  : Colors.black.withOpacity(0.5),
+                  ? Colors.black.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.5),
               shape: BoxShape.circle,
               border: _isFocused
                   ? Border.all(color: Colors.white, width: 2.5)
@@ -204,7 +204,7 @@ class _TvBackButtonState extends State<_TvBackButton> {
               boxShadow: _isFocused
                   ? [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.5),
+                        color: Colors.blue.withValues(alpha: 0.5),
                         blurRadius: 12,
                         spreadRadius: 3,
                       ),

@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                       Icon(
                         Icons.settings_suggest,
                         size: 100,
-                        color: Colors.blue.withOpacity(0.5),
+                        color: Colors.blue.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 24),
                       const Text(
@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                         'To get started, please configure your Dester server URL in the settings.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                       ),

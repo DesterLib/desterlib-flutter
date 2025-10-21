@@ -37,9 +37,9 @@ class VolumeControl extends StatelessWidget {
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
               activeTrackColor: Colors.white,
-              inactiveTrackColor: Colors.white.withOpacity( 0.3),
+              inactiveTrackColor: Colors.white.withValues(alpha:  0.3),
               thumbColor: Colors.white,
-              overlayColor: Colors.white.withOpacity( 0.2),
+              overlayColor: Colors.white.withValues(alpha:  0.2),
             ),
             child: Slider(
               value: playerState.isMuted ? 0 : playerState.volume,
