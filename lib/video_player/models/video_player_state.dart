@@ -14,6 +14,8 @@ class VideoPlayerState extends Equatable {
   final double volume;
   final bool isMuted;
   final bool isFullscreen;
+  final String? errorMessage;
+  final bool hasError;
 
   const VideoPlayerState({
     required this.videoUrl,
@@ -28,6 +30,8 @@ class VideoPlayerState extends Equatable {
     this.volume = 100.0,
     this.isMuted = false,
     this.isFullscreen = false,
+    this.errorMessage,
+    this.hasError = false,
   });
 
   VideoPlayerState copyWith({
@@ -43,6 +47,8 @@ class VideoPlayerState extends Equatable {
     double? volume,
     bool? isMuted,
     bool? isFullscreen,
+    String? errorMessage,
+    bool? hasError,
   }) {
     return VideoPlayerState(
       videoUrl: videoUrl ?? this.videoUrl,
@@ -57,6 +63,8 @@ class VideoPlayerState extends Equatable {
       volume: volume ?? this.volume,
       isMuted: isMuted ?? this.isMuted,
       isFullscreen: isFullscreen ?? this.isFullscreen,
+      errorMessage: errorMessage ?? this.errorMessage,
+      hasError: hasError ?? this.hasError,
     );
   }
 
@@ -90,5 +98,7 @@ class VideoPlayerState extends Equatable {
     volume,
     isMuted,
     isFullscreen,
+    errorMessage,
+    hasError,
   ];
 }

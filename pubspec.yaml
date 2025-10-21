@@ -20,7 +20,7 @@ dependencies:
   file_picker: ^10.3.3
   connectivity_plus: ^6.1.1
   http: ^1.2.2
-  network_info_plus: ^6.0.2
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

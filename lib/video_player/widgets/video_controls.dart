@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/controls_cubit.dart';
 import '../models/controls_state.dart';
+import '../constants/video_player_constants.dart';
 import 'desktop_top_bar.dart';
 import 'desktop_controls.dart';
 import 'mobile_controls.dart';
@@ -13,7 +14,7 @@ class VideoControls extends StatelessWidget {
 
   bool _isDesktop(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth >= 768;
+    return screenWidth >= VideoPlayerConstants.mobileBreakpoint;
   }
 
   @override
@@ -44,7 +45,7 @@ class VideoControls extends StatelessWidget {
                   top: 0,
                   child: AnimatedOpacity(
                     opacity: controlsState.isVisible ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 250),
+                    duration: VideoPlayerConstants.controlsAnimationDuration,
                     child: const DesktopTopBar(),
                   ),
                 ),
@@ -57,7 +58,7 @@ class VideoControls extends StatelessWidget {
                   bottom: 0,
                   child: AnimatedOpacity(
                     opacity: controlsState.isVisible ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 250),
+                    duration: VideoPlayerConstants.controlsAnimationDuration,
                     child: const DesktopControls(),
                   ),
                 )

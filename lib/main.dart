@@ -1,67 +1,61 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
-import 'web_view_page.dart';
-
-// Custom page transition builder for pure fade effect
-class FadePageTransitionsBuilder extends PageTransitionsBuilder {
-  const FadePageTransitionsBuilder();
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return FadeTransition(opacity: animation, child: child);
-  }
-}
+import 'features/home/view/home_page.dart';
+import 'features/home/repo/home_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize media_kit
-  MediaKit.ensureInitialized();
-  // Initialize window_manager for desktop platforms
-  await windowManager.ensureInitialized();
 
-  // Configure window options
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(1280, 800),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.normal,
-  );
+  // Configure window for desktop platforms
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
 
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1280, 720),
+      minimumSize: Size(800, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+    );
 
-  runApp(const MainApp());
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  String get _apiServerUrl {
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3001/api/v1'; // Android emulator
+    }
+
+    if (Platform.isIOS || Platform.isMacOS) {
+      return 'http://localhost:3001/api/v1'; // iOS/macOS
+    }
+
+    return 'http://localhost:3001/api/v1';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final homeRepository = HomeRepository(baseUrl: _apiServerUrl);
+
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      title: 'Dester Library',
       theme: ThemeData(
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: FadePageTransitionsBuilder(),
-            TargetPlatform.iOS: FadePageTransitionsBuilder(),
-            TargetPlatform.linux: FadePageTransitionsBuilder(),
-            TargetPlatform.macOS: FadePageTransitionsBuilder(),
-            TargetPlatform.windows: FadePageTransitionsBuilder(),
-          },
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: const WebViewPage(),
+      home: HomePage(homeRepository: homeRepository),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
