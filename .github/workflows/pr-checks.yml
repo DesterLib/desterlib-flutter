@@ -5,9 +5,8 @@ on:
     branches: [main, master, dev, dev-new]
 
 env:
-  # Using Flutter 3.24.3 due to compatibility issues with media_kit_video 1.3.1
-  # Flutter 3.27+ introduces breaking changes to TextureRegistry.SurfaceProducer.Callback
-  FLUTTER_VERSION: "3.24.3"
+  # Using Flutter 3.27.1 with a patch for media_kit_video compatibility
+  FLUTTER_VERSION: "3.27.1"
 
 jobs:
   analyze:
@@ -88,6 +87,9 @@ jobs:
 
       - name: Get Flutter dependencies
         run: flutter pub get
+
+      - name: Patch media_kit_video for Flutter 3.27
+        run: bash scripts/patch_media_kit.sh
 
       - name: Build APK (debug)
         run: flutter build apk --debug

@@ -6,40 +6,55 @@ A cross-platform media library application built with Flutter.
 
 ### Prerequisites
 
-- **Flutter SDK**: 3.24.3 (Required - see compatibility note below)
+- **Flutter SDK**: 3.27.1 (Required)
 - **Android Studio** (for Android builds)
 - **Xcode** (for iOS/macOS builds, macOS only)
 - **Visual Studio** (for Windows builds)
 
-### ⚠️ Important: Flutter Version Compatibility
+### ⚠️ Important: media_kit_video Compatibility Patch
 
-This project currently requires **Flutter 3.24.3** due to compatibility issues with the `media_kit_video` plugin.
+This project uses **Flutter 3.27.1** and includes an automatic patch for `media_kit_video` compatibility.
 
-**Why not the latest Flutter version?**
-- Flutter 3.27+ introduced breaking changes to `TextureRegistry.SurfaceProducer.Callback` API
-- The current version of `media_kit_video` (1.3.1) does not yet support these changes
-- Using Flutter 3.27+ will result in compilation errors
+**What's the issue?**
 
-**To install the correct Flutter version:**
+- Flutter 3.27+ introduced changes to the `TextureRegistry.SurfaceProducer.Callback` API
+- The current version of `media_kit_video` (1.3.1) doesn't include the required `onSurfaceDestroyed()` method
+- Our build automatically applies a patch to fix this (see `scripts/patch_media_kit.sh`)
+
+**To install Flutter 3.27.1:**
 
 ```bash
 # Using fvm (Flutter Version Management) - Recommended
-fvm install 3.24.3
-fvm use 3.24.3
+fvm install 3.27.1
+fvm use 3.27.1
 
-# Or using flutter downgrade
-flutter downgrade 3.24.3
+# Or using flutter
+flutter upgrade
+# or
+flutter downgrade 3.27.1
 ```
 
 ### Installation
 
+#### Quick Setup (Recommended)
+
+```bash
+# One command to install dependencies and apply patches
+bash scripts/setup.sh
+```
+
+#### Manual Setup
+
 1. Clone the repository
-2. Install dependencies:
+2. Install dependencies and apply patches:
+
 ```bash
 flutter pub get
+bash scripts/patch_media_kit.sh  # Apply media_kit_video patch
 ```
 
 3. Run the app:
+
 ```bash
 # Debug mode
 flutter run
@@ -51,6 +66,7 @@ flutter build apk --release
 ## 🏗️ Building for Different Platforms
 
 ### Android
+
 ```bash
 # APK (split per ABI)
 flutter build apk --release --split-per-abi
@@ -63,6 +79,7 @@ flutter build apk --release --target-platform android-arm64
 ```
 
 ### iOS/macOS
+
 ```bash
 # iOS
 flutter build ios --release
@@ -73,12 +90,14 @@ flutter build macos --release
 ```
 
 ### Linux
+
 ```bash
 flutter config --enable-linux-desktop
 flutter build linux --release
 ```
 
 ### Windows
+
 ```bash
 flutter config --enable-windows-desktop
 flutter build windows --release
@@ -106,6 +125,7 @@ This will automatically build all platforms and create a GitHub release with dow
 ## 📦 Dependencies
 
 Key dependencies:
+
 - `media_kit` - Video playback
 - `media_kit_video` - Video rendering
 - `flutter_bloc` - State management
@@ -117,6 +137,7 @@ For a full list, see [pubspec.yaml](pubspec.yaml).
 ## 📝 Development Notes
 
 ### Android SDK Requirements
+
 - Compile SDK: 36 (required by media_kit plugins)
 - Min SDK: Set by Flutter
 - Target SDK: Set by Flutter
@@ -124,9 +145,20 @@ For a full list, see [pubspec.yaml](pubspec.yaml).
 
 ### Known Issues
 
-1. **Flutter 3.27+ Compatibility**: Not compatible with current media_kit_video version
-   - **Workaround**: Use Flutter 3.24.3
-   - **Status**: Waiting for media_kit_video update
+1. **media_kit_video Flutter 3.27 Compatibility**
+
+   - **Issue**: media_kit_video 1.3.1 lacks `onSurfaceDestroyed()` method for Flutter 3.27+
+   - **Solution**: Automatic patch applied via `scripts/patch_media_kit.sh`
+   - **Status**: Patch required until media_kit_video releases an update
+
+   If you encounter build issues, run:
+
+   ```bash
+   flutter pub get
+   bash scripts/patch_media_kit.sh
+   flutter clean
+   flutter build apk
+   ```
 
 ## 🤝 Contributing
 
