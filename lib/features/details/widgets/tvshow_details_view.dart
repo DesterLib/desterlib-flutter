@@ -208,7 +208,7 @@ class _TvShowDetailsViewState extends State<TvShowDetailsView> {
                             const SizedBox(height: 8),
                           ],
                         );
-                      }),
+                      }).toList(),
                     ],
                   ],
                 ),

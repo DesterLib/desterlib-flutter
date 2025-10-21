@@ -77,7 +77,7 @@ class _MediaCardState extends State<MediaCard> {
                       border: Border.all(
                         color: _isHighlighted
                             ? Colors.white
-                            : Colors.white.withValues(alpha: 0.2),
+                            : Colors.white.withOpacity(0.2),
                         width: 2,
                       ),
                     ),

@@ -66,7 +66,7 @@ class _EpisodeListItemState extends State<EpisodeListItem> {
                 boxShadow: _isFocused
                     ? [
                         BoxShadow(
-                          color: Colors.blue.withValues(alpha: 0.5),
+                          color: Colors.blue.withOpacity(0.5),
                           blurRadius: 12,
                           spreadRadius: 3,
                         ),

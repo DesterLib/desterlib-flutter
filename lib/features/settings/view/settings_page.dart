@@ -167,8 +167,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SettingsBloc(repository: widget.settingsRepository)
-        ..add(SettingsLoadRequested()),
+      create: (_) =>
+          SettingsBloc(repository: widget.settingsRepository)
+            ..add(SettingsLoadRequested()),
       child: Builder(
         builder: (context) => SafeArea(
           child: Center(
@@ -180,11 +181,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   // Header
                   BlocBuilder<SettingsBloc, SettingsState>(
                     builder: (context, state) {
-                      final hasApiKey = (state is SettingsLoaded ||
+                      final hasApiKey =
+                          (state is SettingsLoaded ||
                               state is SettingsOperationInProgress ||
                               state is SettingsOperationSuccess)
                           ? _getAppSettings(state)?.tmdbApiKey?.isNotEmpty ??
-                              false
+                                false
                           : false;
 
                       return Padding(
@@ -211,8 +213,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 icon: const Icon(Icons.add, size: 20),
                                 label: const Text('Add Library'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      hasApiKey ? Colors.blue : Colors.grey,
+                                  backgroundColor: hasApiKey
+                                      ? Colors.blue
+                                      : Colors.grey,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
@@ -344,8 +347,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 return RefreshIndicator(
                                   onRefresh: () async {
                                     context.read<SettingsBloc>().add(
-                                          SettingsRefreshRequested(),
-                                        );
+                                      SettingsRefreshRequested(),
+                                    );
                                   },
                                   color: Colors.blue,
                                   backgroundColor: Colors.grey.shade800,
@@ -362,14 +365,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                               horizontal: 16,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.blue.withValues(
-                                                alpha: 0.2,
+                                              color: Colors.blue.withOpacity(
+                                                0.2,
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                               border: Border.all(
-                                                color: Colors.blue.withValues(
-                                                  alpha: 0.3,
+                                                color: Colors.blue.withOpacity(
+                                                  0.3,
                                                 ),
                                               ),
                                             ),
@@ -380,9 +383,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                                   height: 20,
                                                   child:
                                                       CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: Colors.blue,
-                                                  ),
+                                                        strokeWidth: 2,
+                                                        color: Colors.blue,
+                                                      ),
                                                 ),
                                                 const SizedBox(width: 12),
                                                 Text(
@@ -407,10 +410,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                             : Column(
                                                 children: [
                                                   Padding(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 16,
-                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 16,
+                                                        ),
                                                     child: Align(
                                                       alignment:
                                                           Alignment.centerLeft,
@@ -471,12 +474,12 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withOpacity(0.3),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _isConnected
-                    ? Colors.green.withValues(alpha: 0.3)
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? Colors.green.withOpacity(0.3)
+                    : Colors.white.withOpacity(0.1),
                 width: 1,
               ),
             ),
@@ -489,7 +492,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Text(
                         'Configure the Dester server URL',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Colors.white.withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -501,10 +504,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.2),
+                          color: Colors.green.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.green.withValues(alpha: 0.3),
+                            color: Colors.green.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -543,10 +546,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
+                          color: Colors.orange.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3),
+                            color: Colors.orange.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -577,23 +580,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     labelText: 'Server URL',
-                    labelStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                     hintText: 'http://192.168.1.100:3000',
-                    hintStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    fillColor: Colors.white.withOpacity(0.05),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -637,14 +638,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         Icons.sync,
                         size: 18,
                         color: _isTestingConnection
-                            ? Colors.white.withValues(alpha: 0.3)
+                            ? Colors.white.withOpacity(0.3)
                             : Colors.white70,
                       ),
                       label: Text(
                         'Test Connection',
                         style: TextStyle(
                           color: _isTestingConnection
-                              ? Colors.white.withValues(alpha: 0.3)
+                              ? Colors.white.withOpacity(0.3)
                               : Colors.white70,
                         ),
                       ),
@@ -685,13 +686,13 @@ class _SettingsPageState extends State<SettingsPage> {
             Icon(
               Icons.cloud_off,
               size: 80,
-              color: Colors.orange.withValues(alpha: 0.5),
+              color: Colors.orange.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
               'Not Connected to Server',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withOpacity(0.7),
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
@@ -701,7 +702,7 @@ class _SettingsPageState extends State<SettingsPage> {
               'Please configure and test the server URL above to access settings.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: Colors.white.withOpacity(0.5),
                 fontSize: 14,
               ),
             ),
@@ -729,7 +730,7 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: Colors.grey.shade900,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          side: BorderSide(color: Colors.white.withOpacity(0.1)),
         ),
         title: Row(
           children: [
@@ -772,13 +773,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 Icon(
                   Icons.folder_outlined,
                   size: 80,
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: Colors.white.withOpacity(0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No Libraries Yet',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Colors.white.withOpacity(0.7),
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
                   ),
@@ -790,7 +791,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       : 'Configure your TMDB API key above, then add a library',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withOpacity(0.5),
                     fontSize: 14,
                   ),
                 ),
@@ -834,8 +835,8 @@ class _SettingsPageState extends State<SettingsPage> {
           onDelete: () => _showDeleteConfirmation(context, library),
           onScan: () {
             context.read<SettingsBloc>().add(
-                  LibraryScanRequested(libraryId: library.id),
-                );
+              LibraryScanRequested(libraryId: library.id),
+            );
           },
         ),
       );
@@ -864,10 +865,10 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withOpacity(0.3),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withOpacity(0.1),
                 width: 1,
               ),
             ),
@@ -877,7 +878,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text(
                   'Configure your The Movie Database API key for fetching metadata',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Colors.white.withOpacity(0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -887,23 +888,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     labelText: 'API Key',
-                    labelStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
                     hintText: 'Enter your TMDB API key',
-                    hintStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    fillColor: Colors.white.withOpacity(0.05),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -921,10 +920,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       context.read<SettingsBloc>().add(
-                            AppSettingsUpdateRequested(
-                              tmdbApiKey: tmdbController.text,
-                            ),
-                          );
+                        AppSettingsUpdateRequested(
+                          tmdbApiKey: tmdbController.text,
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -961,22 +960,22 @@ class _SettingsPageState extends State<SettingsPage> {
       if (library == null) {
         // Create new library
         context.read<SettingsBloc>().add(
-              LibraryCreateRequested(
-                name: result['name'],
-                path: result['path'],
-                type: result['type'],
-              ),
-            );
+          LibraryCreateRequested(
+            name: result['name'],
+            path: result['path'],
+            type: result['type'],
+          ),
+        );
       } else {
         // Update existing library
         context.read<SettingsBloc>().add(
-              LibraryUpdateRequested(
-                id: result['id'],
-                name: result['name'],
-                path: result['path'],
-                type: result['type'],
-              ),
-            );
+          LibraryUpdateRequested(
+            id: result['id'],
+            name: result['name'],
+            path: result['path'],
+            type: result['type'],
+          ),
+        );
       }
     }
   }
@@ -991,7 +990,7 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: Colors.grey.shade900,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          side: BorderSide(color: Colors.white.withOpacity(0.1)),
         ),
         title: const Text(
           'Delete Library',
@@ -1043,10 +1042,9 @@ class _LibraryCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1056,7 +1054,7 @@ class _LibraryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.2),
+                  color: Colors.blue.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -1084,7 +1082,7 @@ class _LibraryCard extends StatelessWidget {
                     Text(
                       library.type == 'MOVIE' ? 'Movies' : 'TV Shows',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                         fontSize: 14,
                       ),
                     ),
@@ -1122,7 +1120,7 @@ class _LibraryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -1130,14 +1128,14 @@ class _LibraryCard extends StatelessWidget {
                 Icon(
                   Icons.folder_outlined,
                   size: 16,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: Colors.white.withOpacity(0.5),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     library.path,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.white.withOpacity(0.7),
                       fontSize: 13,
                       fontFamily: 'monospace',
                     ),
@@ -1153,13 +1151,13 @@ class _LibraryCard extends StatelessWidget {
                 Icon(
                   Icons.video_library_outlined,
                   size: 16,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: Colors.white.withOpacity(0.5),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${library.mediaCount} items',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: Colors.white.withOpacity(0.6),
                     fontSize: 13,
                   ),
                 ),

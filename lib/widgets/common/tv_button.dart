@@ -103,7 +103,7 @@ class _TvButtonState extends State<TvButton> {
                     ? [
                         BoxShadow(
                           color: (widget.backgroundColor ?? Colors.blue)
-                              .withValues(alpha: 0.6),
+                              .withOpacity(0.6),
                           blurRadius: 12,
                           spreadRadius: 3,
                         ),

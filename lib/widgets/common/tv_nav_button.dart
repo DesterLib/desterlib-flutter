@@ -82,8 +82,8 @@ class _TvNavButtonState extends State<TvNavButton> {
               color: widget.isSelected
                   ? Colors.white
                   : _isFocused || _isHovered
-                      ? Colors.white.withValues(alpha: 0.2)
-                      : Colors.transparent,
+                  ? Colors.white.withOpacity(0.2)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(50),
               border: _isFocused
                   ? Border.all(color: Colors.blue.shade400, width: 2.5)
@@ -91,7 +91,7 @@ class _TvNavButtonState extends State<TvNavButton> {
               boxShadow: _isFocused
                   ? [
                       BoxShadow(
-                        color: Colors.blue.withValues(alpha: 0.5),
+                        color: Colors.blue.withOpacity(0.5),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),

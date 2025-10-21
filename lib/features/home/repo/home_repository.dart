@@ -23,16 +23,17 @@ class Media {
   });
 
   factory Media.fromJson(Map<String, dynamic> j) => Media(
-        id: j['id'] ?? '',
-        title: j['title'] ?? '',
-        type: j['type'] ?? '',
-        description: j['description'] ?? '',
-        posterUrl: j['posterUrl'] ?? '',
-        backdropUrl: j['backdropUrl'] ?? '',
-        releaseDate:
-            j['releaseDate'] != null ? DateTime.parse(j['releaseDate']) : null,
-        rating: j['rating'] != null ? (j['rating'] as num).toDouble() : null,
-      );
+    id: j['id'] ?? '',
+    title: j['title'] ?? '',
+    type: j['type'] ?? '',
+    description: j['description'] ?? '',
+    posterUrl: j['posterUrl'] ?? '',
+    backdropUrl: j['backdropUrl'] ?? '',
+    releaseDate: j['releaseDate'] != null
+        ? DateTime.parse(j['releaseDate'])
+        : null,
+    rating: j['rating'] != null ? (j['rating'] as num).toDouble() : null,
+  );
 }
 
 class MovieItem {
@@ -57,17 +58,17 @@ class MovieItem {
   });
 
   factory MovieItem.fromJson(Map<String, dynamic> j) => MovieItem(
-        id: j['id'] ?? '',
-        duration: j['duration'],
-        trailerUrl: j['trailerUrl'],
-        filePath: j['filePath'],
-        fileSize: j['fileSize'],
-        fileModifiedAt: j['fileModifiedAt'] != null
-            ? DateTime.parse(j['fileModifiedAt'])
-            : null,
-        mediaId: j['mediaId'],
-        media: Media.fromJson(Map<String, dynamic>.from(j['media'] ?? {})),
-      );
+    id: j['id'] ?? '',
+    duration: j['duration'],
+    trailerUrl: j['trailerUrl'],
+    filePath: j['filePath'],
+    fileSize: j['fileSize'],
+    fileModifiedAt: j['fileModifiedAt'] != null
+        ? DateTime.parse(j['fileModifiedAt'])
+        : null,
+    mediaId: j['mediaId'],
+    media: Media.fromJson(Map<String, dynamic>.from(j['media'] ?? {})),
+  );
 }
 
 class TvItem {
@@ -86,12 +87,12 @@ class TvItem {
   });
 
   factory TvItem.fromJson(Map<String, dynamic> j) => TvItem(
-        id: j['id'] ?? '',
-        creator: j['creator'],
-        network: j['network'],
-        mediaId: j['mediaId'],
-        media: Media.fromJson(Map<String, dynamic>.from(j['media'] ?? {})),
-      );
+    id: j['id'] ?? '',
+    creator: j['creator'],
+    network: j['network'],
+    mediaId: j['mediaId'],
+    media: Media.fromJson(Map<String, dynamic>.from(j['media'] ?? {})),
+  );
 }
 
 class HomeRepository {
@@ -99,15 +100,14 @@ class HomeRepository {
   final http.Client client;
 
   HomeRepository({required this.baseUrl, http.Client? client})
-      : client = client ?? http.Client();
+    : client = client ?? http.Client();
 
   // Fetch movies list from /movies
   Future<List<MovieItem>> fetchMovies() async {
     final uri = Uri.parse('$baseUrl/movies');
     final res = await client.get(uri);
-    if (res.statusCode != 200) {
+    if (res.statusCode != 200)
       throw Exception('Failed to load movies: ${res.statusCode}');
-    }
     final List<dynamic> jsonList = jsonDecode(res.body);
     return jsonList
         .map((e) => MovieItem.fromJson(Map<String, dynamic>.from(e)))
@@ -118,9 +118,8 @@ class HomeRepository {
   Future<List<TvItem>> fetchTvShows() async {
     final uri = Uri.parse('$baseUrl/tvshows');
     final res = await client.get(uri);
-    if (res.statusCode != 200) {
+    if (res.statusCode != 200)
       throw Exception('Failed to load tv shows: ${res.statusCode}');
-    }
     final List<dynamic> jsonList = jsonDecode(res.body);
     return jsonList
         .map((e) => TvItem.fromJson(Map<String, dynamic>.from(e)))
