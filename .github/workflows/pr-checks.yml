@@ -78,6 +78,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
+          cache-key: flutter-${{ hashFiles('scripts/patch_media_kit.sh') }}
 
       - name: Install Android SDK & NDK
         run: |
@@ -86,6 +87,12 @@ jobs:
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
       - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Clean cached media_kit_video (ensure fresh patch)
+        run: rm -rf $HOME/.pub-cache/hosted/*/media_kit_video-* || true
+
+      - name: Re-get media_kit_video
         run: flutter pub get
 
       - name: Patch media_kit_video for Flutter 3.27
