@@ -766,13 +766,13 @@ packages:
     source: hosted
     version: "3.4.0"
   wakelock_plus:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: wakelock_plus
-      sha256: "9296d40c9adbedaba95d1e704f4e0b434be446e2792948d0e4aa977048104228"
+      sha256: bf4ee6f17a2fa373ed3753ad0e602b7603f8c75af006d5b9bdade263928c0484
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.2.8"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
