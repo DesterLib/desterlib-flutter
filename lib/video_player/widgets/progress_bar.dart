@@ -47,9 +47,9 @@ class DesktopProgressBar extends StatelessWidget {
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
               activeTrackColor: Colors.white,
-              inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+              inactiveTrackColor: Colors.white.withValues(alpha:  0.3),
               thumbColor: Colors.white,
-              overlayColor: Colors.white.withValues(alpha: 0.2),
+              overlayColor: Colors.white.withValues(alpha:  0.2),
             ),
             child: Slider(
               value: currentValue.clamp(
@@ -75,7 +75,7 @@ class DesktopProgressBar extends StatelessWidget {
         Text(
           DurationFormatter.format(duration),
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: Colors.white.withValues(alpha:  0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -116,9 +116,9 @@ class MobileProgressBar extends StatelessWidget {
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
             activeTrackColor: Colors.white,
-            inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+            inactiveTrackColor: Colors.white.withValues(alpha:  0.3),
             thumbColor: Colors.white,
-            overlayColor: Colors.white.withValues(alpha: 0.2),
+            overlayColor: Colors.white.withValues(alpha:  0.2),
           ),
           child: Slider(
             value: currentValue.clamp(0.0, duration.inMilliseconds.toDouble()),
@@ -147,7 +147,7 @@ class MobileProgressBar extends StatelessWidget {
                   Duration(milliseconds: currentValue.toInt()),
                 ),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white.withValues(alpha:  0.9),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],
@@ -156,7 +156,7 @@ class MobileProgressBar extends StatelessWidget {
               Text(
                 DurationFormatter.format(duration),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withValues(alpha:  0.7),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],

@@ -18,9 +18,9 @@ class DesktopControlButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(20),
-        splashColor: Colors.white.withValues(alpha: 0.15),
-        highlightColor: Colors.white.withValues(alpha: 0.1),
-        hoverColor: Colors.white.withValues(alpha: 0.15),
+        splashColor: Colors.white.withValues(alpha:  0.15),
+        highlightColor: Colors.white.withValues(alpha:  0.1),
+        hoverColor: Colors.white.withValues(alpha:  0.15),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Icon(icon, color: Colors.white, size: 22),

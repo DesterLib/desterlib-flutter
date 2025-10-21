@@ -8,3 +8,6 @@ export 'models/controls_state.dart';
 // Export cubits (if needed externally)
 export 'cubits/video_player_cubit.dart';
 export 'cubits/controls_cubit.dart';
+
+// Export constants
+export 'constants/video_player_constants.dart';

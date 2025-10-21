@@ -20,14 +20,14 @@ class MobileControlButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         customBorder: const CircleBorder(),
-        splashColor: Colors.white.withValues(alpha: 0.2),
-        highlightColor: Colors.white.withValues(alpha: 0.1),
-        hoverColor: Colors.white.withValues(alpha: 0.15),
+        splashColor: Colors.white.withValues(alpha:  0.2),
+        highlightColor: Colors.white.withValues(alpha:  0.1),
+        hoverColor: Colors.white.withValues(alpha:  0.15),
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.black.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha:  0.4),
           ),
           child: Icon(icon, color: Colors.white, size: size),
         ),

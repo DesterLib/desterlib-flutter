@@ -59,10 +59,10 @@ static void my_application_activate(GApplication* application) {
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
-  GdkRGBA background_color;
+  // GdkRGBA background_color;
   // Background defaults to black, override it here if necessary, e.g. #00000000 for transparent.
-  gdk_rgba_parse(&background_color, "#000000");
-  fl_view_set_background_color(view, &background_color);
+  // gdk_rgba_parse(&background_color, "#000000");
+  // fl_view_set_background_color(view, &background_color);  // Removed in Flutter 3.24+
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 

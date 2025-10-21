@@ -1,0 +1,430 @@
+name: Build Release
+
+on:
+  push:
+    branches: [main, master, dev, dev-new]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main, master, dev, dev-new]
+  workflow_dispatch:
+
+env:
+  # Using Flutter 3.27.1 with a patch for media_kit_video compatibility
+  # See scripts/patch_media_kit.sh for the patch details
+  FLUTTER_VERSION: "3.27.1"
+
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+          cache-key: flutter-${{ hashFiles('scripts/patch_media_kit.sh') }}
+
+      - name: Install Android SDK & NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36"
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.0.12077973"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Clean cached media_kit_video (ensure fresh patch)
+        run: rm -rf $HOME/.pub-cache/hosted/*/media_kit_video-* || true
+
+      - name: Re-get media_kit_video
+        run: flutter pub get
+
+      - name: Patch media_kit_video for Flutter 3.27
+        run: bash scripts/patch_media_kit.sh
+
+      - name: Analyze Flutter code
+        run: flutter analyze
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+
+      - name: Build Android TV APK
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  build-android-tv:
+    name: Build Android TV
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+          cache-key: flutter-${{ hashFiles('scripts/patch_media_kit.sh') }}
+
+      - name: Install Android SDK & NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36"
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.0.12077973"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Clean cached media_kit_video (ensure fresh patch)
+        run: rm -rf $HOME/.pub-cache/hosted/*/media_kit_video-* || true
+
+      - name: Re-get media_kit_video
+        run: flutter pub get
+
+      - name: Patch media_kit_video for Flutter 3.27
+        run: bash scripts/patch_media_kit.sh
+
+      - name: Build Android TV APK
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Rename for Android TV
+        run: |
+          mkdir -p build/android-tv
+          cp build/app/outputs/flutter-apk/app-release.apk build/android-tv/app-androidtv-release.apk
+
+      - name: Upload Android TV APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-tv-apk
+          path: build/android-tv/app-androidtv-release.apk
+          retention-days: 30
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Build macOS app
+        run: flutter build macos --release
+
+      - name: Create DMG
+        run: |
+          # Install create-dmg if not present
+          brew install create-dmg || true
+
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg_temp
+          cp -R build/macos/Build/Products/Release/Dester.app dmg_temp/
+
+          # Create DMG
+          create-dmg \
+            --volname "Dester" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "Dester.app" 200 190 \
+            --hide-extension "Dester.app" \
+            --app-drop-link 600 185 \
+            "Dester-macOS.dmg" \
+            "dmg_temp/" || true
+
+          # Fallback: Create a simple zip if DMG creation fails
+          if [ ! -f "Dester-macOS.dmg" ]; then
+            echo "DMG creation failed, creating ZIP instead"
+            cd dmg_temp
+            zip -r ../Dester-macOS.zip Dester.app
+            cd ..
+          fi
+
+      - name: Upload macOS app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: build/macos/Build/Products/Release/Dester.app
+          retention-days: 30
+
+      - name: Upload macOS DMG/ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: |
+            Dester-macOS.dmg
+            Dester-macOS.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+  build-tvos:
+    name: Build tvOS (Apple TV)
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Check if tvOS is supported
+        id: check_tvos
+        run: |
+          if flutter devices | grep -q "tvOS"; then
+            echo "supported=true" >> $GITHUB_OUTPUT
+          else
+            echo "supported=false" >> $GITHUB_OUTPUT
+            echo "⚠️ tvOS support not available in current Flutter version"
+          fi
+
+      - name: Build tvOS app
+        if: steps.check_tvos.outputs.supported == 'true'
+        run: |
+          # Enable tvOS if available
+          flutter config --enable-tvos-desktop 2>/dev/null || echo "tvOS not yet available"
+          # Note: tvOS support is experimental and may not be available in stable channel
+          flutter build tvos --release --no-codesign || echo "tvOS build not available yet"
+
+      - name: Create info file
+        run: |
+          echo "tvOS build support is experimental in Flutter" > tvos-info.txt
+          echo "Full tvOS support coming in future Flutter releases" >> tvos-info.txt
+
+      - name: Upload tvOS info
+        uses: actions/upload-artifact@v4
+        with:
+          name: tvos-info
+          path: tvos-info.txt
+          retention-days: 30
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            liblzma-dev \
+            libstdc++-12-dev \
+            libmpv-dev \
+            mpv
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Build Linux app
+        run: flutter build linux --release
+
+      - name: Create tar.gz archive
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czf ../../../../../Dester-Linux-x64.tar.gz .
+          cd ../../../../../
+
+      - name: Upload Linux app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-app
+          path: build/linux/x64/release/bundle/
+          retention-days: 30
+
+      - name: Upload Linux archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-archive
+          path: Dester-Linux-x64.tar.gz
+          retention-days: 30
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows app
+        run: flutter build windows --release
+
+      - name: Create ZIP archive
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-Windows-x64.zip
+
+      - name: Upload Windows app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-app
+          path: build/windows/x64/runner/Release/
+          retention-days: 30
+
+      - name: Upload Windows archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-archive
+          path: Dester-Windows-x64.zip
+          retention-days: 30
+
+  create-release:
+    name: Create Release
+    needs:
+      [
+        build-android,
+        build-android-tv,
+        build-macos,
+        build-tvos,
+        build-linux,
+        build-windows,
+      ]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+
+          # Android APKs
+          cp artifacts/android-apk/app-arm64-v8a-release.apk release-assets/Dester-Android-arm64-v8a.apk || true
+          cp artifacts/android-apk/app-armeabi-v7a-release.apk release-assets/Dester-Android-armeabi-v7a.apk || true
+          cp artifacts/android-apk/app-x86_64-release.apk release-assets/Dester-Android-x86_64.apk || true
+
+          # Android AAB
+          cp artifacts/android-aab/app-release.aab release-assets/Dester-Android.aab || true
+
+          # Android TV
+          cp artifacts/android-tv-apk/app-androidtv-release.apk release-assets/Dester-AndroidTV-arm64.apk || true
+
+          # macOS
+          cp artifacts/macos-installer/Dester-macOS.dmg release-assets/ || true
+          cp artifacts/macos-installer/Dester-macOS.zip release-assets/ || true
+
+          # Linux
+          cp artifacts/linux-archive/Dester-Linux-x64.tar.gz release-assets/ || true
+
+          # Windows
+          cp artifacts/windows-archive/Dester-Windows-x64.zip release-assets/ || true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-assets/*
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,57 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+env:
+  # Using Flutter 3.27.1 with a patch for media_kit_video compatibility
+  FLUTTER_VERSION: "3.27.1"
+
+jobs:
+  check-changes:
+    name: Check for Changes
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes in last 24 hours
+        id: check
+        run: |
+          # Check if there are commits in the last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --oneline | wc -l)
+          if [ $COMMITS -gt 0 ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Found $COMMITS commits in the last 24 hours"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No commits in the last 24 hours"
+          fi
+
+  build-nightly:
+    name: Build Nightly
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'true'
+    uses: ./.github/workflows/build-release.yml
+    secrets: inherit
+
+  notify:
+    name: Notify on Failure
+    needs: [check-changes, build-nightly]
+    runs-on: ubuntu-latest
+    if: failure() && needs.check-changes.outputs.has_changes == 'true'
+
+    steps:
+      - name: Send notification
+        run: |
+          echo "Nightly build failed!"
+          echo "Check the workflow logs for details"
+          # Add notification logic here (e.g., Slack, Discord, email)

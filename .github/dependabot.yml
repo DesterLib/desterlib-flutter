@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    reviewers:
+      - "YOUR_GITHUB_USERNAME" # Replace with your GitHub username
+    assignees:
+      - "YOUR_GITHUB_USERNAME" # Replace with your GitHub username
+
+  # Enable version updates for pub dependencies
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "flutter"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    reviewers:
+      - "YOUR_GITHUB_USERNAME" # Replace with your GitHub username
+    assignees:
+      - "YOUR_GITHUB_USERNAME" # Replace with your GitHub username
+    # Ignore specific packages if needed
+    ignore:
+      # Example: ignore major version updates for specific packages
+      # - dependency-name: "flutter"
+      #   update-types: ["version-update:semver-major"]

@@ -25,10 +25,10 @@ class DesktopTopBar extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: Colors.black.withValues(alpha:  0.5),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha:  0.1),
                     width: 1,
                   ),
                 ),
@@ -43,9 +43,9 @@ class DesktopTopBar extends StatelessWidget {
                       child: InkWell(
                         onTap: () => Navigator.of(context).pop(),
                         borderRadius: BorderRadius.circular(20),
-                        hoverColor: Colors.white.withValues(alpha: 0.15),
-                        highlightColor: Colors.white.withValues(alpha: 0.1),
-                        splashColor: Colors.white.withValues(alpha: 0.15),
+                        hoverColor: Colors.white.withValues(alpha:  0.15),
+                        highlightColor: Colors.white.withValues(alpha:  0.1),
+                        splashColor: Colors.white.withValues(alpha:  0.15),
                         child: const Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(

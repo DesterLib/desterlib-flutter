@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/controls_state.dart';
+import '../constants/video_player_constants.dart';
 
 /// Cubit for managing video controls visibility and interactions
 class ControlsCubit extends Cubit<ControlsState> {
@@ -12,7 +13,7 @@ class ControlsCubit extends Cubit<ControlsState> {
 
   void _startHideTimer() {
     _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 3), () {
+    _hideTimer = Timer(VideoPlayerConstants.controlsHideDelay, () {
       if (!state.isDragging) {
         emit(state.copyWith(isVisible: false));
       }

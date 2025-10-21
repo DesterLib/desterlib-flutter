@@ -37,8 +37,8 @@ class MobileControls extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.6),
-                      Colors.black.withValues(alpha: 0.0),
+                      Colors.black.withValues(alpha:  0.6),
+                      Colors.black.withValues(alpha:  0.0),
                     ],
                     stops: const [0.0, 1.0],
                   ),
@@ -64,8 +64,8 @@ class MobileControls extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.0),
-                      Colors.black.withValues(alpha: 0.7),
+                      Colors.black.withValues(alpha:  0.0),
+                      Colors.black.withValues(alpha:  0.7),
                     ],
                     stops: const [0.0, 1.0],
                   ),

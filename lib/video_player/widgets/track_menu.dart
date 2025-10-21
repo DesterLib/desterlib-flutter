@@ -53,10 +53,10 @@ class TrackMenu extends StatelessWidget {
                       maxHeight: MediaQuery.of(context).size.height * 0.5,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
+                      color: Colors.black.withValues(alpha:  0.5),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withValues(alpha:  0.1),
                         width: 1,
                       ),
                     ),
@@ -71,7 +71,7 @@ class TrackMenu extends StatelessWidget {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: Colors.white.withValues(alpha:  0.1),
                                 width: 1,
                               ),
                             ),
@@ -193,7 +193,7 @@ void showMobileTrackDrawer(BuildContext context, TrackMenuType menuType) {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: Colors.white.withValues(alpha:  0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
