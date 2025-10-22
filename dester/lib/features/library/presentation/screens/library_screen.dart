@@ -6,9 +6,8 @@ class LibraryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Library')),
-      body: const Center(child: Text('Library Screen')),
+    return const Scaffold(
+      body: Center(child: Text('Library Screen - Add your content here')),
     );
   }
 }

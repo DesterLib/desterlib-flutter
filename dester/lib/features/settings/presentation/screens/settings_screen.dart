@@ -6,9 +6,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('Settings Screen')),
+    return const Scaffold(
+      body: Center(child: Text('Settings Screen - Add your content here')),
     );
   }
 }

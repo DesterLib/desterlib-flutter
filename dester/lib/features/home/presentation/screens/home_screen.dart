@@ -8,33 +8,29 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Navigation Test')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: 12,
-            itemBuilder: (context, index) {
-              return FocusableCard(
-                autofocus: index == 0,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Item ${index + 1}'),
-                      duration: const Duration(milliseconds: 500),
-                    ),
-                  );
-                },
-                child: Center(child: Text('${index + 1}')),
-              );
-            },
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
+          itemCount: 12,
+          itemBuilder: (context, index) {
+            return FocusableCard(
+              autofocus: index == 0,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Item ${index + 1}'),
+                    duration: const Duration(milliseconds: 500),
+                  ),
+                );
+              },
+              child: Center(child: Text('${index + 1}')),
+            );
+          },
         ),
       ),
     );
