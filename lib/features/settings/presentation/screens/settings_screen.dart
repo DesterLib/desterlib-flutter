@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
-import 'package:dester/shared/providers/drawer_provider.dart';
+import 'package:dester/core/providers/connection_provider.dart';
 import '../widgets/settings_layout.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
@@ -14,52 +15,68 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTmdbConfigured = ref.watch(isTmdbConfiguredProvider);
-    
+    final connectionStatus = ref.watch(connectionStatusProvider);
+
     return AnimatedAppBarPage(
       title: 'Settings',
       maxWidthConstraint: 1220,
       child: DSettingsLayout(
         groups: [
+          // API Connection Settings
+          DSettingsGroup(
+            title: 'API Connection',
+            items: [
+              DSettingsItem(
+                title: 'API Server',
+                subtitle: connectionStatus == ConnectionStatus.connected
+                    ? 'Connected ✓'
+                    : connectionStatus == ConnectionStatus.disconnected
+                    ? 'Disconnected - Tap to connect'
+                    : 'Checking connection...',
+                icon: connectionStatus == ConnectionStatus.connected
+                    ? PlatformIcons.checkCircle
+                    : PlatformIcons.errorCircle,
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
+                onTap: () {
+                  context.push('/api-connection');
+                },
+              ),
+            ],
+          ),
           // Library Management Settings
           DSettingsGroup(
             title: 'Library Management',
             items: [
               DSettingsItem(
                 title: 'TMDB API Key',
-                subtitle: isTmdbConfigured ? 'Configured ✓' : 'Required for adding library items',
+                subtitle: isTmdbConfigured
+                    ? 'Configured ✓'
+                    : 'Required for adding library items',
                 icon: PlatformIcons.key,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
                 onTap: () {
-                  ref.read(drawerProvider.notifier).openDrawer(DrawerContentType.tmdbApiKey);
+                  context.push('/drawer/tmdb-api-key');
                 },
               ),
               DSettingsItem(
-                title: 'Add Library Item',
-                subtitle: isTmdbConfigured ? 'Add new movies or TV shows' : 'Requires TMDB API Key',
-                icon: PlatformIcons.add,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
-                onTap: isTmdbConfigured ? () {
-                  ref.read(drawerProvider.notifier).openDrawer(DrawerContentType.addLibraryItem);
-                } : () {
-                  ref.read(drawerProvider.notifier).openDrawer(DrawerContentType.tmdbRequired);
-                },
-              ),
-              DSettingsItem(
-                title: 'Update Library',
-                subtitle: 'Refresh library metadata',
-                icon: PlatformIcons.refresh,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                title: 'Manage Libraries',
+                subtitle: 'Edit or delete libraries',
+                icon: PlatformIcons.settings,
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
                 onTap: () {
-                  ref.read(drawerProvider.notifier).openDrawer(DrawerContentType.updateLibrary);
-                },
-              ),
-              DSettingsItem(
-                title: 'Delete Library Item',
-                subtitle: 'Remove items from library',
-                icon: PlatformIcons.delete,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
-                onTap: () {
-                  ref.read(drawerProvider.notifier).openDrawer(DrawerContentType.deleteLibraryItem);
+                  context.push('/settings/manage-libraries');
                 },
               ),
             ],

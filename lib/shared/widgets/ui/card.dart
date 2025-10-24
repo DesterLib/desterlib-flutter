@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../utils/platform_icons.dart';
 
-class DCard extends StatefulWidget {
+class DCard extends StatelessWidget {
   final String title;
   final String year;
   final String? imageUrl;
@@ -26,25 +26,17 @@ class DCard extends StatefulWidget {
   });
 
   @override
-  State<DCard> createState() => _DCardState();
-}
-
-class _DCardState extends State<DCard> {
-  bool _isHovered = false;
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 768;
-    final titleSize = widget.isCompact || isSmallScreen ? 14.0 : 16.0;
-    final yearSize = widget.isCompact || isSmallScreen ? 12.0 : 14.0;
-    final spacing = widget.isCompact || isSmallScreen ? 6.0 : 8.0;
+    final titleSize = isCompact || isSmallScreen ? 14.0 : 16.0;
+    final yearSize = isCompact || isSmallScreen ? 12.0 : 14.0;
+    final spacing = isCompact || isSmallScreen ? 6.0 : 8.0;
 
     Widget buildImage() {
-      if (widget.width != null && widget.height != null) {
+      if (width != null && height != null) {
         return SizedBox(
-          width: widget.width,
-          height: widget.height,
+          width: width,
+          height: height,
           child: _buildCardContent(),
         );
       }
@@ -57,7 +49,7 @@ class _DCardState extends State<DCard> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            widget.title,
+            title,
             style: TextStyle(
               color: Colors.white,
               fontSize: titleSize,
@@ -69,7 +61,7 @@ class _DCardState extends State<DCard> {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            widget.year,
+            year,
             style: TextStyle(
               color: Colors.grey.shade400,
               fontSize: yearSize,
@@ -84,7 +76,7 @@ class _DCardState extends State<DCard> {
       return flexible ? Flexible(child: textContent) : textContent;
     }
 
-    final content = widget.isInGrid
+    final content = isInGrid
         ? LayoutBuilder(
             builder: (context, constraints) => SizedBox(
               height: constraints.maxHeight,
@@ -104,45 +96,20 @@ class _DCardState extends State<DCard> {
             children: [
               buildImage(),
               SizedBox(height: spacing + 4),
-              if (widget.width != null)
-                SizedBox(width: widget.width, child: buildText())
+              if (width != null)
+                SizedBox(width: width, child: buildText())
               else
                 buildText(),
             ],
           );
 
     return IntrinsicHeight(
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        child: GestureDetector(
-          onTapDown: (_) {
-            HapticFeedback.lightImpact();
-            setState(() => _isPressed = true);
-          },
-          onTapUp: (_) {
-            setState(() => _isPressed = false);
-            widget.onTap?.call();
-          },
-          onTapCancel: () => setState(() => _isPressed = false),
-          child: AnimatedScale(
-            scale: _isPressed
-                ? 0.98
-                : _isHovered
-                ? 1.02
-                : 1.0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            alignment: Alignment.topCenter,
-            child: content,
-          ),
-        ),
-      ),
+      child: GestureDetector(onTap: onTap, child: content),
     );
   }
 
   Widget _buildCardContent() {
-    final hasImage = widget.imageUrl != null;
+    final hasImage = imageUrl != null;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -152,7 +119,7 @@ class _DCardState extends State<DCard> {
           // Background image or color
           if (hasImage)
             Image.network(
-              widget.imageUrl!,
+              imageUrl!,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>
                   Container(color: const Color(0xFF1a1a1a)),
@@ -162,24 +129,17 @@ class _DCardState extends State<DCard> {
 
           // Glassmorphism overlay
           BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: _isHovered ? 5 : 10,
-              sigmaY: _isHovered ? 5 : 10,
-            ),
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               decoration: ShapeDecoration(
-                color: _isHovered
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: RoundedSuperellipseBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
-                    color: _isHovered
-                        ? Colors.white.withValues(alpha: 0.5)
-                        : Colors.white.withValues(alpha: 0.2),
-                    width: _isHovered ? 2 : 1,
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
                   ),
                 ),
               ),

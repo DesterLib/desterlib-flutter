@@ -42,15 +42,15 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.star_fill : Icons.star_rounded;
   static IconData get time =>
       isApplePlatform ? CupertinoIcons.time : Icons.access_time_rounded;
-  static IconData get calendar =>
-      isApplePlatform ? CupertinoIcons.calendar_today : Icons.calendar_today_rounded;
+  static IconData get calendar => isApplePlatform
+      ? CupertinoIcons.calendar_today
+      : Icons.calendar_today_rounded;
   static IconData get brokenImage =>
       isApplePlatform ? CupertinoIcons.photo_fill : Icons.broken_image_rounded;
 
   // Navigation icons
-  static IconData get arrowBack => isApplePlatform
-      ? CupertinoIcons.back
-      : Icons.arrow_back_ios_new_rounded;
+  static IconData get arrowBack =>
+      isApplePlatform ? CupertinoIcons.back : Icons.arrow_back_ios_new_rounded;
   static IconData get arrowForward => isApplePlatform
       ? CupertinoIcons.arrow_right
       : Icons.arrow_forward_rounded;
@@ -64,8 +64,9 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.globe : Icons.language_outlined;
   static IconData get notifications =>
       isApplePlatform ? CupertinoIcons.bell : Icons.notifications_outlined;
-  static IconData get videoSettings =>
-      isApplePlatform ? CupertinoIcons.video_camera : Icons.video_settings_outlined;
+  static IconData get videoSettings => isApplePlatform
+      ? CupertinoIcons.video_camera
+      : Icons.video_settings_outlined;
   static IconData get folder =>
       isApplePlatform ? CupertinoIcons.folder : Icons.folder_outlined;
   static IconData get playCircle =>
@@ -92,6 +93,17 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.refresh : Icons.refresh_outlined;
   static IconData get delete =>
       isApplePlatform ? CupertinoIcons.delete : Icons.delete_outline;
+
+  // Status icons
+  static IconData get checkCircle => isApplePlatform
+      ? CupertinoIcons.checkmark_circle_fill
+      : Icons.check_circle;
+  static IconData get errorCircle =>
+      isApplePlatform ? CupertinoIcons.xmark_circle_fill : Icons.error;
+  static IconData get loading =>
+      isApplePlatform ? CupertinoIcons.arrow_clockwise : Icons.refresh;
+  static IconData get info =>
+      isApplePlatform ? CupertinoIcons.info_circle : Icons.info_outline;
 
   // Other icons
   static IconData get moreHoriz =>

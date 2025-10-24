@@ -54,6 +54,8 @@ static void my_application_activate(GApplication* application) {
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+  // Set minimum window size to avoid mobile UI
+  gtk_widget_set_size_request(GTK_WIDGET(window), 1000, 600);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);

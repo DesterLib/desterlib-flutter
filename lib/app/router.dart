@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../features/home/home_features.dart';
 import '../features/library/library_features.dart';
@@ -6,12 +7,22 @@ import '../features/settings/settings_features.dart';
 import '../features/media/media_features.dart';
 import '../shared/widgets/ui/bottom_nav_bar.dart';
 import '../shared/widgets/ui/sidebar/sidebar.dart';
-import '../shared/widgets/drawer_content.dart';
+import '../shared/widgets/connection_guard.dart';
+import '../shared/widgets/drawer_widgets.dart';
 import '../shared/utils/platform_icons.dart';
+import '../core/providers/connection_provider.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
+    // API Connection route - always accessible
+    GoRoute(
+      path: '/api-connection',
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        return _buildPageWithTransition(state, const ApiConnectionScreen());
+      },
+    ),
+    // Main app shell with navigation
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithNavBar(child: child);
@@ -20,26 +31,86 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/',
           pageBuilder: (BuildContext context, GoRouterState state) {
-            return _buildPageWithTransition(state, const HomeScreen());
+            return _buildPageWithTransition(
+              state,
+              const ConnectionGuard(child: HomeScreen()),
+            );
           },
         ),
         GoRoute(
           path: '/library',
           pageBuilder: (BuildContext context, GoRouterState state) {
-            return _buildPageWithTransition(state, const LibraryScreen());
+            return _buildPageWithTransition(
+              state,
+              const ConnectionGuard(child: LibraryScreen()),
+            );
           },
         ),
         GoRoute(
           path: '/settings',
           pageBuilder: (BuildContext context, GoRouterState state) {
-            return _buildPageWithTransition(state, const SettingsScreen());
+            return _buildPageWithTransition(
+              state,
+              const ConnectionGuard(child: SettingsScreen()),
+            );
           },
+          routes: [
+            GoRoute(
+              path: 'manage-libraries',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return _buildPageWithTransition(
+                  state,
+                  const ConnectionGuard(child: ManageLibrariesScreen()),
+                );
+              },
+              routes: [
+                GoRoute(
+                  path: 'edit/:id',
+                  pageBuilder: (BuildContext context, GoRouterState state) {
+                    final id = state.pathParameters['id']!;
+                    return _buildPageWithTransition(
+                      state,
+                      ConnectionGuard(child: EditLibraryScreen(libraryId: id)),
+                    );
+                  },
+                ),
+                GoRoute(
+                  path: 'delete/:id',
+                  pageBuilder: (BuildContext context, GoRouterState state) {
+                    final id = state.pathParameters['id']!;
+                    return _buildPageWithTransition(
+                      state,
+                      ConnectionGuard(
+                        child: DeleteLibraryScreen(libraryId: id),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
         GoRoute(
           path: '/media/:id',
           pageBuilder: (BuildContext context, GoRouterState state) {
             final id = state.pathParameters['id']!;
-            return _buildPageWithTransition(state, MediaDetailScreen(id: id));
+            return _buildPageWithTransition(
+              state,
+              ConnectionGuard(child: MediaDetailScreen(id: id)),
+            );
+          },
+        ),
+        // Drawer routes - using modal bottom sheet for better UX
+        GoRoute(
+          path: '/drawer/tmdb-api-key',
+          pageBuilder: (BuildContext context, GoRouterState state) {
+            return _buildModalPage(const TmdbApiKeyDrawer());
+          },
+        ),
+        GoRoute(
+          path: '/drawer/tmdb-required',
+          pageBuilder: (BuildContext context, GoRouterState state) {
+            return _buildModalPage(const TmdbRequiredDrawer());
           },
         ),
       ],
@@ -76,23 +147,86 @@ CustomTransitionPage _buildPageWithTransition(
   );
 }
 
-class ScaffoldWithNavBar extends StatelessWidget {
+CustomTransitionPage _buildModalPage(Widget child) {
+  return CustomTransitionPage(
+    key: const ValueKey('modal'),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+}
+
+class ScaffoldWithNavBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavBar({super.key, required this.child});
 
   final Widget child;
 
   @override
+  ConsumerState<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+
+  static int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (location.startsWith('/library')) {
+      return 1;
+    }
+    if (location.startsWith('/settings')) {
+      return 2;
+    }
+    return 0;
+  }
+
+  static void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        context.go('/');
+      case 1:
+        context.go('/library');
+      case 2:
+        context.go('/settings');
+    }
+  }
+}
+
+class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize to 0, will be updated in didChangeDependencies
+    _selectedIndex = 0;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Calculate selected index based on current route
+    final newIndex = ScaffoldWithNavBar._calculateSelectedIndex(context);
+    final currentPath = GoRouterState.of(context).uri.path;
+
+    // Don't update if we're on a drawer route
+    if (!currentPath.startsWith('/drawer/')) {
+      _selectedIndex = newIndex;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final connectionStatus = ref.watch(connectionStatusProvider);
+    final isConnected = connectionStatus == ConnectionStatus.connected;
+
     // Show sidebar on desktop and TV screens (> 900px width)
     final screenWidth = MediaQuery.of(context).size.width;
     final showSidebar = screenWidth > 900;
 
     return Scaffold(
       extendBody: true,
-      bottomNavigationBar: !showSidebar
+      bottomNavigationBar: !showSidebar && isConnected
           ? DBottomNavBar(
-              currentIndex: _calculateSelectedIndex(context),
-              onTap: (index) => _onItemTapped(index, context),
+              currentIndex: _selectedIndex,
+              onTap: (index) =>
+                  ScaffoldWithNavBar._onItemTapped(index, context),
               items: [
                 DBottomNavBarItem(
                   icon: PlatformIcons.home,
@@ -112,62 +246,34 @@ class ScaffoldWithNavBar extends StatelessWidget {
               ],
             )
           : null,
-      // Add the drawer content widget to listen for state changes
-      body: showSidebar 
-          ? _DesktopLayout(child: child) 
-          : Stack(
-              children: [
-                child,
-                const DrawerContent(),
-              ],
-            ),
+      body: showSidebar && isConnected
+          ? _DesktopLayout(selectedIndex: _selectedIndex, child: widget.child)
+          : widget.child,
     );
-  }
-
-  static int _calculateSelectedIndex(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/library')) {
-      return 1;
-    }
-    if (location.startsWith('/settings')) {
-      return 2;
-    }
-    return 0;
-  }
-
-  void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        context.go('/');
-      case 1:
-        context.go('/library');
-      case 2:
-        context.go('/settings');
-    }
   }
 }
 
 class _DesktopLayout extends StatelessWidget {
   final Widget child;
+  final int selectedIndex;
 
-  const _DesktopLayout({required this.child});
+  const _DesktopLayout({required this.child, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        // Content area with left padding for sidebar
-        Positioned.fill(
-          left: 340, // Space for sidebar with margins
-          child: child,
-        ),
-        // Floating sidebar on the left
+        // Content area with left margin for sidebar
+        Padding(padding: const EdgeInsets.only(left: 340), child: child),
+        // Sidebar positioned on the left
         Positioned(
           left: 0,
           top: 0,
           bottom: 0,
+          width: 340,
           child: DSidebar(
-            currentIndex: ScaffoldWithNavBar._calculateSelectedIndex(context),
+            currentIndex: selectedIndex,
             items: [
               DSidebarNavigationItem(
                 label: 'Home',

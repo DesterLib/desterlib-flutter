@@ -1,14 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Drawer content types
-enum DrawerContentType {
-  none,
-  tmdbApiKey,
-  addLibraryItem,
-  updateLibrary,
-  deleteLibraryItem,
-  tmdbRequired,
-}
+enum DrawerContentType { none, tmdbApiKey, tmdbRequired }
 
 /// Drawer state
 class DrawerState {
@@ -47,10 +40,7 @@ class DrawerNotifier extends Notifier<DrawerState> {
 
   /// Open drawer with specific content
   void openDrawer(DrawerContentType contentType, {Map<String, dynamic>? data}) {
-    state = state.copyWith(
-      contentType: contentType,
-      data: data ?? {},
-    );
+    state = state.copyWith(contentType: contentType, data: data ?? {});
   }
 
   /// Close drawer
