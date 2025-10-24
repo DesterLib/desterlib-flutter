@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (iPhone)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008120-000870141403C01E",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Flutter (macOS)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "macos",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Flutter (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Storybook (iPhone)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008120-000870141403C01E",
+      "program": "lib/storybook.dart"
+    },
+    {
+      "name": "Storybook (macOS)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "macos",
+      "program": "lib/storybook.dart"
+    },
+    {
+      "name": "Storybook (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "program": "lib/storybook.dart"
+    }
+  ]
+}
