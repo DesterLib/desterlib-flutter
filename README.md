@@ -1,369 +1,238 @@
-# 📱 Dester - Mobile & Desktop App
+# 📱 Dester Client
 
-This is the **mobile and desktop app** for DesterLib! It lets you browse and watch your personal movie and TV show collection on your phone, tablet, or desktop computer. Supports Android, iOS, macOS, Linux, Windows, and TV support coming soon!
+Cross-platform client application for **DesterLib** - Browse and stream your personal media collection on any device.
 
----
-
-## 🎯 What Does This App Do?
-
-- 🍿 **Browse Movies & Shows** - Explore your entire collection
-- ▶️ **Watch Videos** - Stream smoothly with cool playback controls
-- 📺 **Track Progress** - Remember where you stopped watching
-- ⚙️ **Personalize** - Adjust settings to your liking
-- 📱 **Multi-Device** - Works on Android, iOS, macOS, Linux, Windows, and soon on TV!
+[![GitHub](https://img.shields.io/badge/GitHub-desterlib--flutter-blue?logo=github)](https://github.com/DesterLib/desterlib-flutter)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-desterlib-blue)](https://desterlib.github.io/desterlib/clients/overview)
 
 ---
 
-## 📦 What You Need
+## 📱 Supported Platforms
 
-Before starting, make sure you have:
+### Available Now
+- **Android** - Phones and tablets
+- **iOS** - iPhone and iPad
+- **macOS** - Desktop application
+- **Linux** - Desktop application
+- **Windows** - Desktop application
 
-1. **Flutter** installed ([Install Flutter](https://flutter.dev/docs/get-started/install))
-   - The tool that builds the app
-   
-2. **DesterLib API Running**
-   - The backend that provides your media
-   - See the main README for setup instructions
-   
-3. **A computer** with 4GB+ RAM (for development)
+### Coming Soon
+- **Android TV** - TV interface with remote control
+- **Apple TV** - Native TV experience
 
 ---
 
 ## 🚀 Quick Start
 
-### Step 1: Get the Code Ready
+### Prerequisites
+
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) 3.9.2+
+- [DesterLib API Server](https://github.com/DesterLib/desterlib) running
+
+### Installation
 
 ```bash
-# Download all dependencies
-flutter pub get
+# Clone the repository
+git clone https://github.com/DesterLib/desterlib-flutter.git
+cd desterlib-flutter
 
-# (First time only) Generate code
+# Run automated setup
+bash scripts/setup.sh
+
+# Or manual setup:
+flutter pub get
+npm install
+npm run prepare
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### Step 2: Run the App
-
-#### For Development (testing on your computer)
+### Run the App
 
 ```bash
-# Start in debug mode (watch for changes)
+# Run on your device
 flutter run
 
-# This will ask you which device to run on
-# Choose your connected phone, emulator, or desktop (macOS/Linux/Windows)
+# Or specify platform
+flutter run -d macos    # macOS
+flutter run -d android  # Android
+flutter run -d ios      # iOS
 ```
 
-#### For Your Phone
+### First Launch
 
-```bash
-# Build for Android
-flutter build apk
-# Transfer the file to your phone and install
-
-# Build for iOS
-flutter build ios
-# Open in Xcode and deploy to your device
-```
-
-#### For Desktop (macOS)
-
-```bash
-# Run on macOS desktop
-flutter run -d macos
-
-# Build for macOS desktop
-flutter build macos
-```
-
-#### For Desktop (Linux)
-
-```bash
-# Run on Linux desktop
-flutter run -d linux
-
-# Build for Linux desktop
-flutter build linux
-```
-
-#### For Desktop (Windows)
-
-```bash
-# Run on Windows desktop
-flutter run -d windows
-
-# Build for Windows desktop
-flutter build windows
-```
-
-### Step 3: Connect to Your Server
-
-When the app opens:
-
-1. **Settings** → **Server Configuration**
-2. Enter your DesterLib API address:
-   - If testing locally: `http://localhost:3001`
-   - If on your network: `http://192.168.1.XXX:3001` (replace XXX)
-   - If remote: `https://yourdomain.com`
-3. The app will connect automatically!
+1. Open the app
+2. Go to **Settings** → **Server Configuration**
+3. Enter your DesterLib API URL:
+   - Local: `http://localhost:3001`
+   - Network: `http://192.168.1.XXX:3001`
+   - Remote: `https://yourdomain.com`
 
 ---
 
-## 📂 Project Structure (Simple Version)
+## 📚 Documentation
+
+**📖 Full Documentation:** [desterlib.github.io/desterlib](https://desterlib.github.io/desterlib)
+
+### Quick Links
+
+- [Client Overview](https://desterlib.github.io/desterlib/clients/overview) - Features and platforms
+- [Platform Setup](https://desterlib.github.io/desterlib/clients/flutter) - Detailed setup guide
+- [Contributing](https://desterlib.github.io/desterlib/development/contributing) - How to contribute
+- [API Server Setup](https://desterlib.github.io/desterlib/api/overview) - Backend setup
+
+---
+
+## 🎨 Features
+
+- 🍿 **Browse Media** - Explore your movies and TV shows
+- ▶️ **Video Streaming** - Smooth playback with controls
+- 📺 **Watch Progress** - Automatic tracking across devices
+- 🔍 **Search & Filter** - Find content quickly
+- ⚙️ **Settings** - Customize your experience
+- 🌓 **Dark Mode** - Eye-friendly viewing
+- 📱 **Responsive UI** - Works on any screen size
+
+---
+
+## 🛠️ Development
+
+### Project Structure
 
 ```
 lib/
-├── main.dart              ← App starts here
-│
-├── app/
-│   ├── router.dart        ← Navigation between screens
-│   └── theme/            ← Colors and styles
-│
-├── features/              ← Main features
-│   ├── movies/           ← Browse and play movies
-│   ├── tv_shows/         ← Browse and play TV shows
-│   ├── player/           ← Video player
-│   └── settings/         ← App settings
-│
-├── shared/
-│   ├── widgets/          ← Reusable UI pieces (buttons, cards, etc.)
-│   ├── animations/       ← Cool visual effects
-│   └── responsive/       ← Works on phone, tablet, and desktop (macOS, Linux, Windows)
-│
-├── core/
-│   ├── config/           ← Settings and constants
-│   ├── errors/           ← Error handling
-│   └── utils/            ← Helper functions
-│
-└── api/                   ← Talks to DesterLib backend
-    ├── openapi.dart      ← API client (auto-generated)
-    ├── models/           ← Data structures
-    └── services/         ← How to use the API
+├── main.dart              # App entry point
+├── app/                   # App configuration
+├── features/              # Feature modules (home, library, media, settings)
+├── shared/                # Shared resources (widgets, utils, providers)
+└── api/                   # Generated API client
 ```
 
----
+See [CODE_STRUCTURE.md](CODE_STRUCTURE.md) for details.
 
-## 💻 Development Commands
-
-### Running & Testing
+### Commands
 
 ```bash
-# Start developing (picks up code changes automatically)
+# Run app
 flutter run
 
-# Run on specific device
-flutter run -d macos               # macOS desktop
-flutter run -d linux               # Linux desktop
-flutter run -d windows             # Windows desktop
-flutter run -d "iPhone 15"         # iOS simulator
-flutter run -d "Pixel 6"           # Android emulator
-
-# Run all tests
+# Run tests
 flutter test
 
-# Analyze code for issues
+# Analyze code
 flutter analyze
 
-# Format code nicely
+# Format code
 dart format lib/
+
+# Build for release
+flutter build apk        # Android
+flutter build ios        # iOS
+flutter build macos      # macOS
+flutter build linux      # Linux
+flutter build windows    # Windows
 ```
 
-### Building for Release
+---
 
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](https://desterlib.github.io/desterlib/development/contributing).
+
+**Quick Start:**
 ```bash
-# Build for production
-flutter build apk        # Android app
-flutter build ios        # iOS app
-flutter build macos      # macOS desktop app
-flutter build linux      # Linux desktop app
-flutter build windows    # Windows desktop app
+# Fork, clone, and setup
+bash scripts/setup.sh
 
-# Note: TV support is in development
+# Create feature branch
+git checkout -b feat/your-feature
+
+# Make changes with conventional commits
+npm run commit
+
+# Push and create PR
+git push origin feat/your-feature
 ```
 
-### Cleaning & Fixing Issues
+**Resources:**
+- [Contributing Guide](CONTRIBUTING.md) - Quick start
+- [Commit Guidelines](https://desterlib.github.io/desterlib/development/commit-guidelines)
+- [Versioning Guide](https://desterlib.github.io/desterlib/development/versioning)
 
+---
+
+## 📦 Building for Release
+
+### Android
 ```bash
-# Clean everything (use when things break badly)
-flutter clean
-
-# Get dependencies again
-flutter pub get
-
-# Upgrade dependencies (careful - may break things!)
-flutter pub upgrade
-
-# Generate code (if changes don't show)
-dart run build_runner build --delete-conflicting-outputs
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
 ```
 
----
-
-## 🔌 How the App Connects to the Backend
-
-The app uses the **OpenAPI API Client** (`lib/api/openapi.dart`) that was automatically generated from the backend.
-
-### Key API Features
-
-- 🎬 Get movies and shows
-- ▶️ Get streaming URLs
-- 📊 Save your watch progress
-- ⚙️ Manage settings
-- 🔐 Handle authentication
-
-### Configure API Connection
-
-Edit `lib/core/config/api_config.dart` or use Settings in the app:
-
-```dart
-// Basic configuration
-const apiBaseUrl = 'http://localhost:3001';  // Change this to your server
+### iOS
+```bash
+flutter build ios --release
+# Open in Xcode for deployment
 ```
 
----
-
-## 🎨 Customization
-
-### Change Colors & Styles
-
-Edit `lib/app/theme/app_theme.dart`:
-
-```dart
-// Change primary color
-primaryColor: Colors.blue,  // Change to your favorite color
-
-// Change text styles, sizes, etc.
+### Desktop
+```bash
+flutter build macos --release   # macOS
+flutter build linux --release   # Linux
+flutter build windows --release # Windows
 ```
-
-### Add New Screens
-
-1. Create a new feature folder: `lib/features/your_feature/`
-2. Add screens: `lib/features/your_feature/screens/`
-3. Add it to router: `lib/app/router.dart`
-
-### Use State Management (Riverpod)
-
-This app uses **Riverpod** for state management (like Redux or MobX):
-
-```dart
-// Create a provider
-final myProvider = StateProvider<String>((ref) => 'initial value');
-
-// Use it in a widget
-final String value = ref.watch(myProvider);
-
-// Change it
-ref.read(myProvider.notifier).state = 'new value';
-```
-
----
-
-## 🎬 Video Player
-
-The app includes a powerful video player using **media_kit**:
-
-- ⏯️ Play, pause, seek
-- 🔊 Volume & audio track selection
-- 📺 Fullscreen support
-- 🎚️ Playback speed control
-- 💾 Remember where you stopped
 
 ---
 
 ## 🐛 Troubleshooting
 
-### "App can't connect to server"
-- Check server address in Settings
-- Make sure DesterLib API is running (`docker-compose up`)
-- Try using your computer's IP instead of localhost
+### Can't Connect to Server
+- Check server URL in Settings
+- Ensure DesterLib API is running
+- Try using IP address instead of localhost
 - Check firewall settings
 
-### "Videos won't play"
+### Videos Won't Play
 - Check internet connection
-- Make sure server is accessible
-- Try a different video format
-- Check video permissions
+- Verify server is accessible
+- Try a different video
+- Check video codec support
 
-### "App is slow or crashes"
-- Run: `flutter clean && flutter pub get`
-- Restart emulator/device
-- Check device storage space
-- Update Flutter: `flutter upgrade`
-
-### "Code changes don't show up"
-- Hot reload usually works: `r` in terminal
-- If not: Hot restart: `R`
-- Full restart: `flutter run` again
+### Build Issues
+```bash
+# Clean and rebuild
+flutter clean
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
+```
 
 ---
 
-## 📚 Useful Resources
+## 💬 Support
 
-- **Flutter Docs**: https://flutter.dev/docs
-- **Riverpod Guide**: https://riverpod.dev
-- **Media Kit**: https://media-kit.js.org
-- **Go Router**: https://gorouter.dev
-
----
-
-## 🎯 Project Goals
-
-✅ Beautiful UI - Easy to use and nice to look at  
-✅ Fast - Responsive and smooth  
-✅ Works Everywhere - Phone, tablet, desktop  
-✅ Accessible - Works for everyone  
-✅ Maintainable - Clean, organized code  
+- 📖 [Documentation](https://desterlib.github.io/desterlib)
+- 🐛 [Report Issues](https://github.com/DesterLib/desterlib-flutter/issues)
+- 💬 [Discussions](https://github.com/DesterLib/desterlib-flutter/discussions)
 
 ---
 
-## 🚀 Building for Production
+## 📄 License
 
-### Android
+GNU Affero General Public License v3.0 (AGPL-3.0)
 
-```bash
-# Build signed APK for Play Store
-flutter build apk --release
+This ensures the software remains free and open source forever. See [LICENSE](LICENSE) for details.
 
-# Build App Bundle for Play Store
-flutter build appbundle
-```
+---
 
-### iOS
+## 🙏 Acknowledgments
 
-```bash
-# Build for iOS
-flutter build ios --release
+Built with:
+- [Flutter](https://flutter.dev/) - Cross-platform framework
+- [media_kit](https://github.com/media-kit/media-kit) - Video playback
+- [Riverpod](https://riverpod.dev/) - State management
+- [go_router](https://pub.dev/packages/go_router) - Navigation
 
-# Upload to App Store
-# (Use Xcode or App Store Connect)
-```
+---
 
-### macOS
-
-```bash
-# Build optimized macOS version
-flutter build macos --release
-```
-
-### Linux
-
-```bash
-# Build optimized Linux version
-flutter build linux --release
-
-# Run the app
-./build/linux/x64/release/bundle/dester
-```
-
-### Windows
-
-```bash
-# Build optimized Windows version
-flutter build windows --release
-
-# Run the app
-.\build\windows\x64\runner\Release\dester.exe
-```
-
-### TV (Coming Soon)
-
-TV app support is planned for future releases!
+**Made with ❤️ by the DesterLib community**
