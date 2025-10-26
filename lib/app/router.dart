@@ -15,14 +15,12 @@ import '../core/providers/connection_provider.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
-    // API Connection route - always accessible
     GoRoute(
       path: '/api-connection',
       pageBuilder: (BuildContext context, GoRouterState state) {
         return _buildPageWithTransition(state, const ApiConnectionScreen());
       },
     ),
-    // Main app shell with navigation
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithNavBar(child: child);
@@ -100,7 +98,6 @@ final GoRouter router = GoRouter(
             );
           },
         ),
-        // Drawer routes - using modal bottom sheet for better UX
         GoRoute(
           path: '/drawer/tmdb-api-key',
           pageBuilder: (BuildContext context, GoRouterState state) {

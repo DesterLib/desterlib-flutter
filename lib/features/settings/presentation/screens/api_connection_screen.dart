@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
+import '../../../../app/providers.dart';
 import '../../../../core/providers/connection_provider.dart';
 import '../../../../core/config/api_config.dart';
 
@@ -42,6 +43,8 @@ class _ApiConnectionScreenState extends ConsumerState<ApiConnectionScreen> {
   }
 
   Future<void> _testConnection() async {
+    if (!mounted) return;
+
     setState(() {
       _isConnecting = true;
       _errorMessage = null;
@@ -51,6 +54,9 @@ class _ApiConnectionScreenState extends ConsumerState<ApiConnectionScreen> {
       // Save the new URL first
       await ApiConfig.saveBaseUrl(_urlController.text.trim());
 
+      // Update the base URL provider to trigger OpenAPI client recreation
+      ref.read(baseUrlProvider.notifier).updateUrl(_urlController.text.trim());
+
       // Test the connection
       final connectionNotifier = ref.read(connectionStatusProvider.notifier);
       await connectionNotifier.checkConnection();
@@ -58,24 +64,32 @@ class _ApiConnectionScreenState extends ConsumerState<ApiConnectionScreen> {
       // Wait a bit for the status to update
       await Future.delayed(const Duration(milliseconds: 200));
 
+      if (!mounted) return;
+
       final status = ref.read(connectionStatusProvider);
       if (status == ConnectionStatus.connected) {
         if (mounted) {
           context.go('/settings');
         }
       } else {
-        setState(() {
-          _errorMessage = 'Failed to connect to API server';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Failed to connect to API server';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Connection error: ${e.toString()}';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Connection error: ${e.toString()}';
+        });
+      }
     } finally {
-      setState(() {
-        _isConnecting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isConnecting = false;
+        });
+      }
     }
   }
 
@@ -178,7 +192,7 @@ class _ApiConnectionScreenState extends ConsumerState<ApiConnectionScreen> {
                   controller: _urlController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'http://localhost:3000',
+                    hintText: 'http://localhost:3001',
                     hintStyle: TextStyle(color: Colors.grey[500]),
                     filled: true,
                     fillColor: Colors.grey[900],
@@ -325,7 +339,7 @@ class _ApiConnectionScreenState extends ConsumerState<ApiConnectionScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Make sure your Dester API server is running and accessible. The default URL is usually http://localhost:3001 for local development.',
+                        'Make sure your Dester API server is running and accessible. The default URL is http://localhost:3001 for local development.',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[400],

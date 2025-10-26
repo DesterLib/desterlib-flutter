@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/api_client.dart';
-import '../config/api_config.dart';
+import 'package:dester/app/providers.dart';
 
 class ConnectionStatusNotifier extends Notifier<ConnectionStatus> {
   @override
@@ -11,8 +10,9 @@ class ConnectionStatusNotifier extends Notifier<ConnectionStatus> {
 
   Future<void> _checkConnection() async {
     try {
-      final apiClient = ref.read(apiClientProvider);
-      await apiClient.get(ApiConfig.healthUrl);
+      final client = ref.read(openapiClientProvider);
+      final healthApi = client.getHealthApi();
+      await healthApi.healthGet();
       state = ConnectionStatus.connected;
     } catch (e) {
       state = ConnectionStatus.disconnected;

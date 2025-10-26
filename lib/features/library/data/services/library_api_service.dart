@@ -1,49 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dester/core/services/api_client.dart';
-import 'package:dester/core/config/api_config.dart';
+import 'package:openapi/openapi.dart';
+import 'package:dester/app/providers.dart';
 import 'package:dester/features/library/data/models/library_model.dart';
 
 class LibraryApiService {
-  final ApiClient _apiClient;
+  final LibraryApi _libraryApi;
 
-  LibraryApiService(this._apiClient);
-
-  static const String _basePath = '/api/v1/library';
+  LibraryApiService(this._libraryApi);
 
   /// Get all libraries with optional filtering
   Future<List<LibraryModel>> getLibraries({LibraryFilters? filters}) async {
-    final queryParams = filters?.toQueryParams() ?? {};
-    final url = _buildUrl(_basePath, queryParams);
-
     try {
-      final response = await _apiClient.get(url);
+      final response = await _libraryApi.apiV1LibraryGet(
+        isLibrary: filters?.isLibrary,
+        libraryType: filters?.libraryType?.name,
+      );
 
-      // The API client returns Map<String, dynamic>
-      if (response.containsKey('data')) {
-        final data = response['data'];
+      final libraries = response.data;
+      if (libraries == null) return [];
 
-        if (data is List) {
-          final List<dynamic> jsonList = data;
-
-          return jsonList.map<LibraryModel>((json) {
-            // Ensure json is cast to Map<String, dynamic> before calling fromJson
-            if (json is Map<String, dynamic>) {
-              return LibraryModel.fromJson(json);
-            } else {
-              throw TypeError();
-            }
-          }).toList();
-        } else if (data == null) {
-          // Return empty list if data is null
-          return [];
-        } else {
-          throw Exception(
-            'Expected list in data field, got: ${data.runtimeType}',
-          );
-        }
-      } else {
-        throw Exception('No data field in response. Response: $response');
-      }
+      return libraries.map((lib) {
+        return LibraryModel.fromJson({
+          'id': lib.id,
+          'name': lib.name,
+          'slug': lib.slug,
+          'description': lib.description,
+          'posterUrl': lib.posterUrl,
+          'backdropUrl': lib.backdropUrl,
+          'isLibrary': lib.isLibrary,
+          'libraryPath': lib.libraryPath,
+          'libraryType': lib.libraryType?.name,
+          'createdAt': lib.createdAt.toIso8601String(),
+          'updatedAt': lib.updatedAt.toIso8601String(),
+          'parentId': lib.parentId,
+          'mediaCount': lib.mediaCount,
+        });
+      }).toList();
     } catch (e) {
       throw Exception('Failed to fetch libraries: $e');
     }
@@ -51,14 +43,38 @@ class LibraryApiService {
 
   /// Update library details
   Future<LibraryModel> updateLibrary(LibraryUpdateRequest request) async {
-    final url = _buildUrl(_basePath);
+    try {
+      final putRequest = ApiV1LibraryPutRequestBuilder()
+        ..id = request.id
+        ..name = request.name
+        ..description = request.description;
 
-    final response = await _apiClient.put(url, request.toJson());
+      final response = await _libraryApi.apiV1LibraryPut(
+        apiV1LibraryPutRequest: putRequest.build(),
+      );
 
-    if (response.containsKey('library')) {
-      return LibraryModel.fromJson(response['library']);
-    } else {
-      throw Exception('Expected library object in response');
+      final library = response.data?.library_;
+      if (library == null) {
+        throw Exception('No library in response');
+      }
+
+      return LibraryModel.fromJson({
+        'id': library.id,
+        'name': library.name,
+        'slug': library.slug,
+        'description': library.description,
+        'posterUrl': library.posterUrl,
+        'backdropUrl': library.backdropUrl,
+        'isLibrary': library.isLibrary,
+        'libraryPath': library.libraryPath,
+        'libraryType': library.libraryType?.name,
+        'createdAt': library.createdAt.toIso8601String(),
+        'updatedAt': library.updatedAt.toIso8601String(),
+        'parentId': library.parentId,
+        'mediaCount': library.mediaCount,
+      });
+    } catch (e) {
+      throw Exception('Failed to update library: $e');
     }
   }
 
@@ -66,31 +82,26 @@ class LibraryApiService {
   Future<Map<String, dynamic>> deleteLibrary(
     LibraryDeleteRequest request,
   ) async {
-    final url = _buildUrl(_basePath);
+    try {
+      final deleteRequest = ApiV1LibraryDeleteRequestBuilder()..id = request.id;
 
-    return await _apiClient.put(url, request.toJson());
-  }
+      final response = await _libraryApi.apiV1LibraryDelete(
+        apiV1LibraryDeleteRequest: deleteRequest.build(),
+      );
 
-  String _buildUrl(String path, [Map<String, dynamic>? queryParams]) {
-    final baseUrl = ApiConfig.baseUrl;
-    final uri = Uri.parse('$baseUrl$path');
-
-    if (queryParams != null && queryParams.isNotEmpty) {
-      return uri
-          .replace(
-            queryParameters: queryParams.map(
-              (key, value) => MapEntry(key, value.toString()),
-            ),
-          )
-          .toString();
+      return {
+        'success': response.data?.success ?? false,
+        'message': response.data?.message ?? '',
+        'mediaDeleted': response.data?.mediaDeleted ?? 0,
+      };
+    } catch (e) {
+      throw Exception('Failed to delete library: $e');
     }
-
-    return uri.toString();
   }
 }
 
 // Provider for library API service
 final libraryApiServiceProvider = Provider<LibraryApiService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return LibraryApiService(apiClient);
+  final client = ref.watch(openapiClientProvider);
+  return LibraryApiService(client.getLibraryApi());
 });

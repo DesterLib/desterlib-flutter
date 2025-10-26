@@ -1,0 +1,53 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+export 'package:openapi/src/api.dart';
+export 'package:openapi/src/auth/api_key_auth.dart';
+export 'package:openapi/src/auth/basic_auth.dart';
+export 'package:openapi/src/auth/bearer_auth.dart';
+export 'package:openapi/src/auth/oauth.dart';
+export 'package:openapi/src/serializers.dart';
+export 'package:openapi/src/model/date.dart';
+
+export 'package:openapi/src/api/health_api.dart';
+export 'package:openapi/src/api/library_api.dart';
+export 'package:openapi/src/api/movies_api.dart';
+export 'package:openapi/src/api/scan_api.dart';
+export 'package:openapi/src/api/stream_api.dart';
+export 'package:openapi/src/api/tv_shows_api.dart';
+
+export 'package:openapi/src/model/api_v1_library_delete200_response.dart';
+export 'package:openapi/src/model/api_v1_library_delete400_response.dart';
+export 'package:openapi/src/model/api_v1_library_delete500_response.dart';
+export 'package:openapi/src/model/api_v1_library_delete_request.dart';
+export 'package:openapi/src/model/api_v1_library_put200_response.dart';
+export 'package:openapi/src/model/api_v1_library_put400_response.dart';
+export 'package:openapi/src/model/api_v1_library_put404_response.dart';
+export 'package:openapi/src/model/api_v1_library_put_request.dart';
+export 'package:openapi/src/model/api_v1_movies_get200_response_inner.dart';
+export 'package:openapi/src/model/api_v1_movies_get200_response_inner_media.dart';
+export 'package:openapi/src/model/api_v1_movies_get500_response.dart';
+export 'package:openapi/src/model/api_v1_movies_id_get200_response.dart';
+export 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
+export 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
+export 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post200_response_cache_stats.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
+export 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+export 'package:openapi/src/model/api_v1_stream_id_get400_response.dart';
+export 'package:openapi/src/model/api_v1_stream_id_get404_response.dart';
+export 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
+export 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
+export 'package:openapi/src/model/api_v1_tvshows_get200_response_inner.dart';
+export 'package:openapi/src/model/api_v1_tvshows_get200_response_inner_media.dart';
+export 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
+export 'package:openapi/src/model/api_v1_tvshows_id_get400_response.dart';
+export 'package:openapi/src/model/api_v1_tvshows_id_get404_response.dart';
+export 'package:openapi/src/model/api_v1_tvshows_id_get500_response.dart';
+export 'package:openapi/src/model/health_response.dart';
+export 'package:openapi/src/model/model_library.dart';
+

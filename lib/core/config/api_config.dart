@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConfig {
-  static const String defaultBaseUrl = 'http://localhost:3000';
+  static const String defaultBaseUrl = 'http://localhost:3001';
   static const String apiVersion = 'v1';
   static const Duration timeout = Duration(seconds: 30);
   static const String _baseUrlKey = 'api_base_url';
