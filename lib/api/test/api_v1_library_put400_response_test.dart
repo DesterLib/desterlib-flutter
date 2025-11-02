@@ -7,8 +7,18 @@ void main() {
   // TODO add properties to the builder and call build()
 
   group(ApiV1LibraryPut400Response, () {
+    // bool success
+    test('to test the property `success`', () async {
+      // TODO
+    });
+
     // String error
     test('to test the property `error`', () async {
+      // TODO
+    });
+
+    // String message
+    test('to test the property `message`', () async {
       // TODO
     });
 

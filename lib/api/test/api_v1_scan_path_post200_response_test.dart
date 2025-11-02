@@ -12,37 +12,13 @@ void main() {
       // TODO
     });
 
+    // ApiV1ScanPathPost200ResponseData data
+    test('to test the property `data`', () async {
+      // TODO
+    });
+
     // String message
     test('to test the property `message`', () async {
-      // TODO
-    });
-
-    // The ID of the library that was scanned
-    // String libraryId
-    test('to test the property `libraryId`', () async {
-      // TODO
-    });
-
-    // The name of the library
-    // String libraryName
-    test('to test the property `libraryName`', () async {
-      // TODO
-    });
-
-    // Total number of media files discovered during scan
-    // num totalFiles
-    test('to test the property `totalFiles`', () async {
-      // TODO
-    });
-
-    // Total number of media files successfully saved to the database
-    // num totalSaved
-    test('to test the property `totalSaved`', () async {
-      // TODO
-    });
-
-    // ApiV1ScanPathPost200ResponseCacheStats cacheStats
-    test('to test the property `cacheStats`', () async {
       // TODO
     });
 

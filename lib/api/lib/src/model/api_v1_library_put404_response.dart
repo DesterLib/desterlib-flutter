@@ -11,10 +11,14 @@ part 'api_v1_library_put404_response.g.dart';
 /// ApiV1LibraryPut404Response
 ///
 /// Properties:
+/// * [success] 
 /// * [error] 
 /// * [message] 
 @BuiltValue()
 abstract class ApiV1LibraryPut404Response implements Built<ApiV1LibraryPut404Response, ApiV1LibraryPut404ResponseBuilder> {
+  @BuiltValueField(wireName: r'success')
+  bool? get success;
+
   @BuiltValueField(wireName: r'error')
   String? get error;
 
@@ -44,6 +48,13 @@ class _$ApiV1LibraryPut404ResponseSerializer implements PrimitiveSerializer<ApiV
     ApiV1LibraryPut404Response object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    if (object.success != null) {
+      yield r'success';
+      yield serializers.serialize(
+        object.success,
+        specifiedType: const FullType(bool),
+      );
+    }
     if (object.error != null) {
       yield r'error';
       yield serializers.serialize(
@@ -81,6 +92,13 @@ class _$ApiV1LibraryPut404ResponseSerializer implements PrimitiveSerializer<ApiV
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'success':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.success = valueDes;
+          break;
         case r'error':
           final valueDes = serializers.deserialize(
             value,

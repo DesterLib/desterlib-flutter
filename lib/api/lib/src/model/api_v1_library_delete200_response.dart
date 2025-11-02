@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:openapi/src/model/api_v1_library_delete200_response_data.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -12,24 +13,15 @@ part 'api_v1_library_delete200_response.g.dart';
 ///
 /// Properties:
 /// * [success] 
-/// * [libraryId] 
-/// * [libraryName] 
-/// * [mediaDeleted] - Number of media entries that were deleted (only those belonging exclusively to this library)
+/// * [data] 
 /// * [message] 
 @BuiltValue()
 abstract class ApiV1LibraryDelete200Response implements Built<ApiV1LibraryDelete200Response, ApiV1LibraryDelete200ResponseBuilder> {
   @BuiltValueField(wireName: r'success')
   bool? get success;
 
-  @BuiltValueField(wireName: r'libraryId')
-  String? get libraryId;
-
-  @BuiltValueField(wireName: r'libraryName')
-  String? get libraryName;
-
-  /// Number of media entries that were deleted (only those belonging exclusively to this library)
-  @BuiltValueField(wireName: r'mediaDeleted')
-  num? get mediaDeleted;
+  @BuiltValueField(wireName: r'data')
+  ApiV1LibraryDelete200ResponseData? get data;
 
   @BuiltValueField(wireName: r'message')
   String? get message;
@@ -64,25 +56,11 @@ class _$ApiV1LibraryDelete200ResponseSerializer implements PrimitiveSerializer<A
         specifiedType: const FullType(bool),
       );
     }
-    if (object.libraryId != null) {
-      yield r'libraryId';
+    if (object.data != null) {
+      yield r'data';
       yield serializers.serialize(
-        object.libraryId,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.libraryName != null) {
-      yield r'libraryName';
-      yield serializers.serialize(
-        object.libraryName,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.mediaDeleted != null) {
-      yield r'mediaDeleted';
-      yield serializers.serialize(
-        object.mediaDeleted,
-        specifiedType: const FullType(num),
+        object.data,
+        specifiedType: const FullType(ApiV1LibraryDelete200ResponseData),
       );
     }
     if (object.message != null) {
@@ -122,26 +100,12 @@ class _$ApiV1LibraryDelete200ResponseSerializer implements PrimitiveSerializer<A
           ) as bool;
           result.success = valueDes;
           break;
-        case r'libraryId':
+        case r'data':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.libraryId = valueDes;
-          break;
-        case r'libraryName':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.libraryName = valueDes;
-          break;
-        case r'mediaDeleted':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.mediaDeleted = valueDes;
+            specifiedType: const FullType(ApiV1LibraryDelete200ResponseData),
+          ) as ApiV1LibraryDelete200ResponseData;
+          result.data.replace(valueDes);
           break;
         case r'message':
           final valueDes = serializers.deserialize(

@@ -11,10 +11,14 @@ part 'api_v1_movies_get500_response.g.dart';
 /// ApiV1MoviesGet500Response
 ///
 /// Properties:
+/// * [success] 
 /// * [error] 
 /// * [message] 
 @BuiltValue()
 abstract class ApiV1MoviesGet500Response implements Built<ApiV1MoviesGet500Response, ApiV1MoviesGet500ResponseBuilder> {
+  @BuiltValueField(wireName: r'success')
+  bool? get success;
+
   @BuiltValueField(wireName: r'error')
   String? get error;
 
@@ -44,6 +48,13 @@ class _$ApiV1MoviesGet500ResponseSerializer implements PrimitiveSerializer<ApiV1
     ApiV1MoviesGet500Response object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    if (object.success != null) {
+      yield r'success';
+      yield serializers.serialize(
+        object.success,
+        specifiedType: const FullType(bool),
+      );
+    }
     if (object.error != null) {
       yield r'error';
       yield serializers.serialize(
@@ -81,6 +92,13 @@ class _$ApiV1MoviesGet500ResponseSerializer implements PrimitiveSerializer<ApiV1
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'success':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.success = valueDes;
+          break;
         case r'error':
           final valueDes = serializers.deserialize(
             value,

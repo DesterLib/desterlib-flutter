@@ -8,6 +8,8 @@ import '../widgets/settings_layout.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
 import '../../data/tmdb_settings_provider.dart';
+import '../modals/api_connection_modal.dart';
+import '../modals/tmdb_api_key_modal.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -41,8 +43,8 @@ class SettingsScreen extends ConsumerWidget {
                   size: 20,
                   color: Colors.white70,
                 ),
-                onTap: () {
-                  context.push('/api-connection');
+                onTap: () async {
+                  await ApiConnectionModal.show(context);
                 },
               ),
             ],
@@ -62,8 +64,8 @@ class SettingsScreen extends ConsumerWidget {
                   size: 20,
                   color: Colors.white70,
                 ),
-                onTap: () {
-                  context.push('/drawer/tmdb-api-key');
+                onTap: () async {
+                  await TmdbApiKeyModal.show(context);
                 },
               ),
               DSettingsItem(
@@ -81,6 +83,13 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+          // TODO: Add Display & Preferences settings when implemented
+          // DSettingsGroup(
+          //   title: 'Display & Preferences',
+          //   items: [
+          //     // Add real settings items here
+          //   ],
+          // ),
         ],
       ),
     );

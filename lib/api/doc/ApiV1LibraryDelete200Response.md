@@ -9,9 +9,7 @@ import 'package:openapi/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **success** | **bool** |  | [optional] 
-**libraryId** | **String** |  | [optional] 
-**libraryName** | **String** |  | [optional] 
-**mediaDeleted** | **num** | Number of media entries that were deleted (only those belonging exclusively to this library) | [optional] 
+**data** | [**ApiV1LibraryDelete200ResponseData**](ApiV1LibraryDelete200ResponseData.md) |  | [optional] 
 **message** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

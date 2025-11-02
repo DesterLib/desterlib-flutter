@@ -24,9 +24,11 @@ class AnimatedAppBarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final childWidget = maxWidthConstraint != null
-        ? ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidthConstraint!),
-            child: child,
+        ? Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidthConstraint!),
+              child: child,
+            ),
           )
         : child;
 

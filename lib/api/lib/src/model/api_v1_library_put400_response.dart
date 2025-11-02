@@ -11,11 +11,19 @@ part 'api_v1_library_put400_response.g.dart';
 /// ApiV1LibraryPut400Response
 ///
 /// Properties:
+/// * [success] 
 /// * [error] 
+/// * [message] 
 @BuiltValue()
 abstract class ApiV1LibraryPut400Response implements Built<ApiV1LibraryPut400Response, ApiV1LibraryPut400ResponseBuilder> {
+  @BuiltValueField(wireName: r'success')
+  bool? get success;
+
   @BuiltValueField(wireName: r'error')
   String? get error;
+
+  @BuiltValueField(wireName: r'message')
+  String? get message;
 
   ApiV1LibraryPut400Response._();
 
@@ -40,10 +48,24 @@ class _$ApiV1LibraryPut400ResponseSerializer implements PrimitiveSerializer<ApiV
     ApiV1LibraryPut400Response object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    if (object.success != null) {
+      yield r'success';
+      yield serializers.serialize(
+        object.success,
+        specifiedType: const FullType(bool),
+      );
+    }
     if (object.error != null) {
       yield r'error';
       yield serializers.serialize(
         object.error,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.message != null) {
+      yield r'message';
+      yield serializers.serialize(
+        object.message,
         specifiedType: const FullType(String),
       );
     }
@@ -70,12 +92,26 @@ class _$ApiV1LibraryPut400ResponseSerializer implements PrimitiveSerializer<ApiV
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'success':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.success = valueDes;
+          break;
         case r'error':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(String),
           ) as String;
           result.error = valueDes;
+          break;
+        case r'message':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.message = valueDes;
           break;
         default:
           unhandled.add(key);

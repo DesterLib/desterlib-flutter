@@ -12,8 +12,8 @@ void main() {
       // TODO
     });
 
-    // ModelLibrary library_
-    test('to test the property `library_`', () async {
+    // ApiV1LibraryPut200ResponseData data
+    test('to test the property `data`', () async {
       // TODO
     });
 

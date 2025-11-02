@@ -11,17 +11,8 @@ void main() {
     //
     // Retrieves all TV shows with their associated media metadata
     //
-    //Future<BuiltList<ApiV1TvshowsGet200ResponseInner>> apiV1TvshowsGet() async
+    //Future<ApiV1MoviesGet200Response> apiV1TvshowsGet() async
     test('test apiV1TvshowsGet', () async {
-      // TODO
-    });
-
-    // Get a TV show by ID
-    //
-    // Retrieves a single TV show with its associated media metadata
-    //
-    //Future<ApiV1TvshowsGet200ResponseInner> apiV1TvshowsIdGet(String id) async
-    test('test apiV1TvshowsIdGet', () async {
       // TODO
     });
 

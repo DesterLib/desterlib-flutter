@@ -11,17 +11,8 @@ void main() {
     //
     // Retrieves all movies with their associated media metadata
     //
-    //Future<BuiltList<ApiV1MoviesGet200ResponseInner>> apiV1MoviesGet() async
+    //Future<ApiV1MoviesGet200Response> apiV1MoviesGet() async
     test('test apiV1MoviesGet', () async {
-      // TODO
-    });
-
-    // Get a movie by ID
-    //
-    // Retrieves a single movie with its associated media metadata
-    //
-    //Future<ApiV1MoviesIdGet200Response> apiV1MoviesIdGet(String id) async
-    test('test apiV1MoviesIdGet', () async {
       // TODO
     });
 

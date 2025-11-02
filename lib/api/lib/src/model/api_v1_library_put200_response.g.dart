@@ -10,7 +10,7 @@ class _$ApiV1LibraryPut200Response extends ApiV1LibraryPut200Response {
   @override
   final bool? success;
   @override
-  final ModelLibrary? library_;
+  final ApiV1LibraryPut200ResponseData? data;
   @override
   final String? message;
 
@@ -18,7 +18,7 @@ class _$ApiV1LibraryPut200Response extends ApiV1LibraryPut200Response {
     void Function(ApiV1LibraryPut200ResponseBuilder)? updates,
   ]) => (ApiV1LibraryPut200ResponseBuilder()..update(updates))._build();
 
-  _$ApiV1LibraryPut200Response._({this.success, this.library_, this.message})
+  _$ApiV1LibraryPut200Response._({this.success, this.data, this.message})
     : super._();
   @override
   ApiV1LibraryPut200Response rebuild(
@@ -34,7 +34,7 @@ class _$ApiV1LibraryPut200Response extends ApiV1LibraryPut200Response {
     if (identical(other, this)) return true;
     return other is ApiV1LibraryPut200Response &&
         success == other.success &&
-        library_ == other.library_ &&
+        data == other.data &&
         message == other.message;
   }
 
@@ -42,7 +42,7 @@ class _$ApiV1LibraryPut200Response extends ApiV1LibraryPut200Response {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, success.hashCode);
-    _$hash = $jc(_$hash, library_.hashCode);
+    _$hash = $jc(_$hash, data.hashCode);
     _$hash = $jc(_$hash, message.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -52,7 +52,7 @@ class _$ApiV1LibraryPut200Response extends ApiV1LibraryPut200Response {
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1LibraryPut200Response')
           ..add('success', success)
-          ..add('library_', library_)
+          ..add('data', data)
           ..add('message', message))
         .toString();
   }
@@ -67,10 +67,10 @@ class ApiV1LibraryPut200ResponseBuilder
   bool? get success => _$this._success;
   set success(bool? success) => _$this._success = success;
 
-  ModelLibraryBuilder? _library_;
-  ModelLibraryBuilder get library_ =>
-      _$this._library_ ??= ModelLibraryBuilder();
-  set library_(ModelLibraryBuilder? library_) => _$this._library_ = library_;
+  ApiV1LibraryPut200ResponseDataBuilder? _data;
+  ApiV1LibraryPut200ResponseDataBuilder get data =>
+      _$this._data ??= ApiV1LibraryPut200ResponseDataBuilder();
+  set data(ApiV1LibraryPut200ResponseDataBuilder? data) => _$this._data = data;
 
   String? _message;
   String? get message => _$this._message;
@@ -84,7 +84,7 @@ class ApiV1LibraryPut200ResponseBuilder
     final $v = _$v;
     if ($v != null) {
       _success = $v.success;
-      _library_ = $v.library_?.toBuilder();
+      _data = $v.data?.toBuilder();
       _message = $v.message;
       _$v = null;
     }
@@ -111,14 +111,14 @@ class ApiV1LibraryPut200ResponseBuilder
           _$v ??
           _$ApiV1LibraryPut200Response._(
             success: success,
-            library_: _library_?.build(),
+            data: _data?.build(),
             message: message,
           );
     } catch (_) {
       late String _$failedField;
       try {
-        _$failedField = 'library_';
-        _library_?.build();
+        _$failedField = 'data';
+        _data?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'ApiV1LibraryPut200Response',

@@ -8,17 +8,16 @@ import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
-import 'package:built_collection/built_collection.dart';
 import 'package:openapi/src/api_util.dart';
 import 'package:openapi/src/model/api_v1_library_delete200_response.dart';
 import 'package:openapi/src/model/api_v1_library_delete400_response.dart';
 import 'package:openapi/src/model/api_v1_library_delete500_response.dart';
 import 'package:openapi/src/model/api_v1_library_delete_request.dart';
+import 'package:openapi/src/model/api_v1_library_get200_response.dart';
 import 'package:openapi/src/model/api_v1_library_put200_response.dart';
 import 'package:openapi/src/model/api_v1_library_put400_response.dart';
 import 'package:openapi/src/model/api_v1_library_put404_response.dart';
 import 'package:openapi/src/model/api_v1_library_put_request.dart';
-import 'package:openapi/src/model/model_library.dart';
 
 class LibraryApi {
 
@@ -136,9 +135,9 @@ class LibraryApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [BuiltList<ModelLibrary>] as data
+  /// Returns a [Future] containing a [Response] with a [ApiV1LibraryGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<BuiltList<ModelLibrary>>> apiV1LibraryGet({ 
+  Future<Response<ApiV1LibraryGet200Response>> apiV1LibraryGet({ 
     bool? isLibrary,
     String? libraryType,
     CancelToken? cancelToken,
@@ -175,14 +174,14 @@ class LibraryApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    BuiltList<ModelLibrary>? _responseData;
+    ApiV1LibraryGet200Response? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(BuiltList, [FullType(ModelLibrary)]),
-      ) as BuiltList<ModelLibrary>;
+        specifiedType: const FullType(ApiV1LibraryGet200Response),
+      ) as ApiV1LibraryGet200Response;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -194,7 +193,7 @@ class LibraryApi {
       );
     }
 
-    return Response<BuiltList<ModelLibrary>>(
+    return Response<ApiV1LibraryGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

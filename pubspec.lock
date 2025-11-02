@@ -98,7 +98,7 @@ packages:
     source: hosted
     version: "9.3.1"
   built_collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: built_collection
       sha256: "376e3dd27b51ea877c28d525560790aee2e6fbb5f20e2f85d5081027d94e2100"
@@ -106,7 +106,7 @@ packages:
     source: hosted
     version: "5.1.1"
   built_value:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: built_value
       sha256: "1b3b173f3379c8f941446267868548b6fc67e9134d81f4842eb98bb729451359"
@@ -1173,5 +1173,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.9.2 <4.0.0"
+  dart: "3.9.2"
   flutter: ">=3.35.0"

@@ -9,12 +9,8 @@ import 'package:openapi/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **success** | **bool** |  | [optional] 
+**data** | [**ApiV1ScanPathPost200ResponseData**](ApiV1ScanPathPost200ResponseData.md) |  | [optional] 
 **message** | **String** |  | [optional] 
-**libraryId** | **String** | The ID of the library that was scanned | [optional] 
-**libraryName** | **String** | The name of the library | [optional] 
-**totalFiles** | **num** | Total number of media files discovered during scan | [optional] 
-**totalSaved** | **num** | Total number of media files successfully saved to the database | [optional] 
-**cacheStats** | [**ApiV1ScanPathPost200ResponseCacheStats**](ApiV1ScanPathPost200ResponseCacheStats.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

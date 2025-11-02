@@ -11,10 +11,14 @@ part 'api_v1_scan_path_post400_response.g.dart';
 /// ApiV1ScanPathPost400Response
 ///
 /// Properties:
+/// * [success] 
 /// * [error] 
 /// * [message] 
 @BuiltValue()
 abstract class ApiV1ScanPathPost400Response implements Built<ApiV1ScanPathPost400Response, ApiV1ScanPathPost400ResponseBuilder> {
+  @BuiltValueField(wireName: r'success')
+  bool? get success;
+
   @BuiltValueField(wireName: r'error')
   String? get error;
 
@@ -44,6 +48,13 @@ class _$ApiV1ScanPathPost400ResponseSerializer implements PrimitiveSerializer<Ap
     ApiV1ScanPathPost400Response object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    if (object.success != null) {
+      yield r'success';
+      yield serializers.serialize(
+        object.success,
+        specifiedType: const FullType(bool),
+      );
+    }
     if (object.error != null) {
       yield r'error';
       yield serializers.serialize(
@@ -81,6 +92,13 @@ class _$ApiV1ScanPathPost400ResponseSerializer implements PrimitiveSerializer<Ap
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'success':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.success = valueDes;
+          break;
         case r'error':
           final valueDes = serializers.deserialize(
             value,

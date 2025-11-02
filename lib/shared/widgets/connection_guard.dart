@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/connection_provider.dart';
-import '../../features/settings/presentation/screens/api_connection_screen.dart';
+import '../../features/settings/presentation/modals/api_connection_modal.dart';
+import '../../shared/utils/platform_icons.dart';
+import 'ui/button.dart';
 
 class ConnectionGuard extends ConsumerWidget {
   final Widget child;
@@ -34,9 +36,48 @@ class ConnectionGuard extends ConsumerWidget {
       );
     }
 
-    // If disconnected, show connection screen
+    // If disconnected, show connection prompt
     if (connectionStatus == ConnectionStatus.disconnected) {
-      return const ApiConnectionScreen();
+      return Scaffold(
+        backgroundColor: const Color(0xFF0a0a0a),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  PlatformIcons.errorCircle,
+                  size: 64,
+                  color: Colors.red[400],
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'API Not Connected',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Please configure your API connection to continue',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                ),
+                const SizedBox(height: 32),
+                DButton(
+                  label: 'Configure Connection',
+                  variant: DButtonVariant.primary,
+                  size: DButtonSize.sm,
+                  onTap: () => ApiConnectionModal.show(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     // If connected, show the child widget

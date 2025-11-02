@@ -70,32 +70,29 @@ Class | Method | HTTP request | Description
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryGet**](doc/LibraryApi.md#apiv1libraryget) | **GET** /api/v1/library | Get all libraries with optional filtering
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryPut**](doc/LibraryApi.md#apiv1libraryput) | **PUT** /api/v1/library | Update library details
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesGet**](doc/MoviesApi.md#apiv1moviesget) | **GET** /api/v1/movies | Get all movies
-[*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesIdGet**](doc/MoviesApi.md#apiv1moviesidget) | **GET** /api/v1/movies/{id} | Get a movie by ID
 [*ScanApi*](doc/ScanApi.md) | [**apiV1ScanPathPost**](doc/ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch TMDB metadata
 [*StreamApi*](doc/StreamApi.md) | [**apiV1StreamIdGet**](doc/StreamApi.md#apiv1streamidget) | **GET** /api/v1/stream/{id} | Stream any media file by ID with byte-range support
 [*TVShowsApi*](doc/TVShowsApi.md) | [**apiV1TvshowsGet**](doc/TVShowsApi.md#apiv1tvshowsget) | **GET** /api/v1/tvshows | Get all TV shows
-[*TVShowsApi*](doc/TVShowsApi.md) | [**apiV1TvshowsIdGet**](doc/TVShowsApi.md#apiv1tvshowsidget) | **GET** /api/v1/tvshows/{id} | Get a TV show by ID
 
 
 ## Documentation For Models
 
  - [ApiV1LibraryDelete200Response](doc/ApiV1LibraryDelete200Response.md)
+ - [ApiV1LibraryDelete200ResponseData](doc/ApiV1LibraryDelete200ResponseData.md)
  - [ApiV1LibraryDelete400Response](doc/ApiV1LibraryDelete400Response.md)
  - [ApiV1LibraryDelete500Response](doc/ApiV1LibraryDelete500Response.md)
  - [ApiV1LibraryDeleteRequest](doc/ApiV1LibraryDeleteRequest.md)
+ - [ApiV1LibraryGet200Response](doc/ApiV1LibraryGet200Response.md)
  - [ApiV1LibraryPut200Response](doc/ApiV1LibraryPut200Response.md)
+ - [ApiV1LibraryPut200ResponseData](doc/ApiV1LibraryPut200ResponseData.md)
  - [ApiV1LibraryPut400Response](doc/ApiV1LibraryPut400Response.md)
  - [ApiV1LibraryPut404Response](doc/ApiV1LibraryPut404Response.md)
  - [ApiV1LibraryPutRequest](doc/ApiV1LibraryPutRequest.md)
- - [ApiV1MoviesGet200ResponseInner](doc/ApiV1MoviesGet200ResponseInner.md)
- - [ApiV1MoviesGet200ResponseInnerMedia](doc/ApiV1MoviesGet200ResponseInnerMedia.md)
+ - [ApiV1MoviesGet200Response](doc/ApiV1MoviesGet200Response.md)
  - [ApiV1MoviesGet500Response](doc/ApiV1MoviesGet500Response.md)
- - [ApiV1MoviesIdGet200Response](doc/ApiV1MoviesIdGet200Response.md)
- - [ApiV1MoviesIdGet400Response](doc/ApiV1MoviesIdGet400Response.md)
- - [ApiV1MoviesIdGet404Response](doc/ApiV1MoviesIdGet404Response.md)
- - [ApiV1MoviesIdGet500Response](doc/ApiV1MoviesIdGet500Response.md)
  - [ApiV1ScanPathPost200Response](doc/ApiV1ScanPathPost200Response.md)
- - [ApiV1ScanPathPost200ResponseCacheStats](doc/ApiV1ScanPathPost200ResponseCacheStats.md)
+ - [ApiV1ScanPathPost200ResponseData](doc/ApiV1ScanPathPost200ResponseData.md)
+ - [ApiV1ScanPathPost200ResponseDataCacheStats](doc/ApiV1ScanPathPost200ResponseDataCacheStats.md)
  - [ApiV1ScanPathPost400Response](doc/ApiV1ScanPathPost400Response.md)
  - [ApiV1ScanPathPost500Response](doc/ApiV1ScanPathPost500Response.md)
  - [ApiV1ScanPathPostRequest](doc/ApiV1ScanPathPostRequest.md)
@@ -104,12 +101,7 @@ Class | Method | HTTP request | Description
  - [ApiV1StreamIdGet404Response](doc/ApiV1StreamIdGet404Response.md)
  - [ApiV1StreamIdGet416Response](doc/ApiV1StreamIdGet416Response.md)
  - [ApiV1StreamIdGet500Response](doc/ApiV1StreamIdGet500Response.md)
- - [ApiV1TvshowsGet200ResponseInner](doc/ApiV1TvshowsGet200ResponseInner.md)
- - [ApiV1TvshowsGet200ResponseInnerMedia](doc/ApiV1TvshowsGet200ResponseInnerMedia.md)
  - [ApiV1TvshowsGet500Response](doc/ApiV1TvshowsGet500Response.md)
- - [ApiV1TvshowsIdGet400Response](doc/ApiV1TvshowsIdGet400Response.md)
- - [ApiV1TvshowsIdGet404Response](doc/ApiV1TvshowsIdGet404Response.md)
- - [ApiV1TvshowsIdGet500Response](doc/ApiV1TvshowsIdGet500Response.md)
  - [HealthResponse](doc/HealthResponse.md)
  - [ModelLibrary](doc/ModelLibrary.md)
 

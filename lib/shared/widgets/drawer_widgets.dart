@@ -87,13 +87,25 @@ class _TmdbApiKeyDrawerState extends ConsumerState<TmdbApiKeyDrawer> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'TMDB API Key',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
+                            // Header with title and close button
+                            Row(
+                              children: [
+                                const Text(
+                                  'TMDB API Key',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Spacer(),
+                                DButton(
+                                  icon: Icons.close,
+                                  variant: DButtonVariant.ghost,
+                                  size: DButtonSize.sm,
+                                  onTap: () => context.pop(),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 16),
                             const Text(
@@ -138,18 +150,11 @@ class _TmdbApiKeyDrawerState extends ConsumerState<TmdbApiKeyDrawer> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                DButton(
-                                  label: 'Cancel',
-                                  variant: DButtonVariant.ghost,
-                                  size: DButtonSize.md,
-                                  onTap: () => context.pop(),
-                                ),
-                                const SizedBox(width: 12),
                                 if (currentApiKey != null)
                                   DButton(
                                     label: 'Clear',
                                     variant: DButtonVariant.danger,
-                                    size: DButtonSize.md,
+                                    size: DButtonSize.sm,
                                     onTap: () async {
                                       try {
                                         await tmdbNotifier.clearApiKey();
@@ -177,7 +182,7 @@ class _TmdbApiKeyDrawerState extends ConsumerState<TmdbApiKeyDrawer> {
                                       ? 'Update'
                                       : 'Save',
                                   variant: DButtonVariant.primary,
-                                  size: DButtonSize.md,
+                                  size: DButtonSize.sm,
                                   onTap: () async {
                                     if (_apiKeyController.text.isNotEmpty) {
                                       try {
@@ -273,13 +278,25 @@ class TmdbRequiredDrawer extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'TMDB API Key Required',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
+                            // Header with title and close button
+                            Row(
+                              children: [
+                                const Text(
+                                  'TMDB API Key Required',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Spacer(),
+                                DButton(
+                                  icon: Icons.close,
+                                  variant: DButtonVariant.ghost,
+                                  size: DButtonSize.sm,
+                                  onTap: () => context.pop(),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 16),
                             const Text(
@@ -294,16 +311,9 @@ class TmdbRequiredDrawer extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 DButton(
-                                  label: 'Cancel',
-                                  variant: DButtonVariant.ghost,
-                                  size: DButtonSize.md,
-                                  onTap: () => context.pop(),
-                                ),
-                                const SizedBox(width: 12),
-                                DButton(
                                   label: 'Configure',
                                   variant: DButtonVariant.primary,
-                                  size: DButtonSize.md,
+                                  size: DButtonSize.sm,
                                   onTap: () {
                                     context.pop(); // Close current drawer
                                     context.push('/drawer/tmdb-api-key');

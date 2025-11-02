@@ -12,19 +12,8 @@ void main() {
       // TODO
     });
 
-    // String libraryId
-    test('to test the property `libraryId`', () async {
-      // TODO
-    });
-
-    // String libraryName
-    test('to test the property `libraryName`', () async {
-      // TODO
-    });
-
-    // Number of media entries that were deleted (only those belonging exclusively to this library)
-    // num mediaDeleted
-    test('to test the property `mediaDeleted`', () async {
+    // ApiV1LibraryDelete200ResponseData data
+    test('to test the property `data`', () async {
       // TODO
     });
 

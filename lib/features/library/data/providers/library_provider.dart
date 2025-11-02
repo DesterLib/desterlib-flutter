@@ -1,53 +1,57 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dester/features/library/data/models/library_model.dart';
+import 'package:openapi/openapi.dart';
 import 'package:dester/features/library/data/services/library_api_service.dart';
 
 /// Provider for libraries list
-final librariesProvider = FutureProvider<List<LibraryModel>>((ref) async {
+final librariesProvider = FutureProvider<BuiltList<ModelLibrary>>((ref) async {
   final service = ref.watch(libraryApiServiceProvider);
   return await service.getLibraries();
 });
 
-/// Provider for libraries with filtering
+/// Provider for libraries with optional filtering
 final librariesFilteredProvider =
-    FutureProvider.family<List<LibraryModel>, LibraryFilters?>((
-      ref,
-      filters,
-    ) async {
+    FutureProvider.family<
+      BuiltList<ModelLibrary>,
+      ({bool? isLibrary, ModelLibraryLibraryTypeEnum? libraryType})
+    >((ref, filters) async {
       final service = ref.watch(libraryApiServiceProvider);
-      return await service.getLibraries(filters: filters);
+      return await service.getLibraries(
+        isLibrary: filters.isLibrary,
+        libraryType: filters.libraryType,
+      );
     });
 
 /// Provider for actual libraries only (isLibrary = true)
-final actualLibrariesProvider = FutureProvider<List<LibraryModel>>((ref) async {
+final actualLibrariesProvider = FutureProvider<BuiltList<ModelLibrary>>((
+  ref,
+) async {
   final service = ref.watch(libraryApiServiceProvider);
-  return await service.getLibraries(
-    filters: const LibraryFilters(isLibrary: true),
-  );
+  return await service.getLibraries(isLibrary: true);
 });
 
 /// Provider for collections only (isLibrary = false)
-final collectionsProvider = FutureProvider<List<LibraryModel>>((ref) async {
+final collectionsProvider = FutureProvider<BuiltList<ModelLibrary>>((
+  ref,
+) async {
   final service = ref.watch(libraryApiServiceProvider);
-  return await service.getLibraries(
-    filters: const LibraryFilters(isLibrary: false),
-  );
+  return await service.getLibraries(isLibrary: false);
 });
 
 /// Provider for libraries by type
 final librariesByTypeProvider =
-    FutureProvider.family<List<LibraryModel>, LibraryType>((ref, type) async {
-      final service = ref.watch(libraryApiServiceProvider);
-      return await service.getLibraries(
-        filters: LibraryFilters(libraryType: type),
-      );
-    });
+    FutureProvider.family<BuiltList<ModelLibrary>, ModelLibraryLibraryTypeEnum>(
+      (ref, type) async {
+        final service = ref.watch(libraryApiServiceProvider);
+        return await service.getLibraries(libraryType: type);
+      },
+    );
 
 /// State for library management operations
 class LibraryManagementState {
   final bool isLoading;
   final String? error;
-  final LibraryModel? selectedLibrary;
+  final ModelLibrary? selectedLibrary;
 
   const LibraryManagementState({
     this.isLoading = false,
@@ -58,7 +62,7 @@ class LibraryManagementState {
   LibraryManagementState copyWith({
     bool? isLoading,
     String? error,
-    LibraryModel? selectedLibrary,
+    ModelLibrary? selectedLibrary,
   }) {
     return LibraryManagementState(
       isLoading: isLoading ?? this.isLoading,
@@ -82,7 +86,7 @@ class LibraryManagementNotifier extends Notifier<LibraryManagementState> {
   }
 
   /// Update library details
-  Future<void> updateLibrary(LibraryUpdateRequest request) async {
+  Future<void> updateLibrary(ApiV1LibraryPutRequest request) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -106,7 +110,8 @@ class LibraryManagementNotifier extends Notifier<LibraryManagementState> {
 
     try {
       final service = ref.read(libraryApiServiceProvider);
-      await service.deleteLibrary(LibraryDeleteRequest(id: libraryId));
+      final deleteRequest = ApiV1LibraryDeleteRequestBuilder()..id = libraryId;
+      await service.deleteLibrary(deleteRequest.build());
 
       // Refresh libraries list
       ref.invalidate(librariesProvider);
@@ -120,7 +125,7 @@ class LibraryManagementNotifier extends Notifier<LibraryManagementState> {
   }
 
   /// Set selected library for editing
-  void selectLibrary(LibraryModel library) {
+  void selectLibrary(ModelLibrary library) {
     state = state.copyWith(selectedLibrary: library);
   }
 

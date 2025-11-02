@@ -1,7 +1,7 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/app/providers.dart';
-import 'package:dester/features/library/data/models/library_model.dart';
 
 class LibraryApiService {
   final LibraryApi _libraryApi;
@@ -9,91 +9,58 @@ class LibraryApiService {
   LibraryApiService(this._libraryApi);
 
   /// Get all libraries with optional filtering
-  Future<List<LibraryModel>> getLibraries({LibraryFilters? filters}) async {
+  Future<BuiltList<ModelLibrary>> getLibraries({
+    bool? isLibrary,
+    ModelLibraryLibraryTypeEnum? libraryType,
+  }) async {
     try {
       final response = await _libraryApi.apiV1LibraryGet(
-        isLibrary: filters?.isLibrary,
-        libraryType: filters?.libraryType?.name,
+        isLibrary: isLibrary,
+        libraryType: libraryType?.name,
       );
 
-      final libraries = response.data;
-      if (libraries == null) return [];
+      // The API returns ApiV1LibraryGet200Response with success and data fields
+      final libraries = response.data?.data;
+      if (libraries == null) return BuiltList<ModelLibrary>();
 
-      return libraries.map((lib) {
-        return LibraryModel.fromJson({
-          'id': lib.id,
-          'name': lib.name,
-          'slug': lib.slug,
-          'description': lib.description,
-          'posterUrl': lib.posterUrl,
-          'backdropUrl': lib.backdropUrl,
-          'isLibrary': lib.isLibrary,
-          'libraryPath': lib.libraryPath,
-          'libraryType': lib.libraryType?.name,
-          'createdAt': lib.createdAt.toIso8601String(),
-          'updatedAt': lib.updatedAt.toIso8601String(),
-          'parentId': lib.parentId,
-          'mediaCount': lib.mediaCount,
-        });
-      }).toList();
+      return libraries;
     } catch (e) {
       throw Exception('Failed to fetch libraries: $e');
     }
   }
 
   /// Update library details
-  Future<LibraryModel> updateLibrary(LibraryUpdateRequest request) async {
+  Future<ModelLibrary> updateLibrary(ApiV1LibraryPutRequest request) async {
     try {
-      final putRequest = ApiV1LibraryPutRequestBuilder()
-        ..id = request.id
-        ..name = request.name
-        ..description = request.description;
-
       final response = await _libraryApi.apiV1LibraryPut(
-        apiV1LibraryPutRequest: putRequest.build(),
+        apiV1LibraryPutRequest: request,
       );
 
-      final library = response.data?.library_;
+      final library = response.data?.data?.library_;
       if (library == null) {
         throw Exception('No library in response');
       }
 
-      return LibraryModel.fromJson({
-        'id': library.id,
-        'name': library.name,
-        'slug': library.slug,
-        'description': library.description,
-        'posterUrl': library.posterUrl,
-        'backdropUrl': library.backdropUrl,
-        'isLibrary': library.isLibrary,
-        'libraryPath': library.libraryPath,
-        'libraryType': library.libraryType?.name,
-        'createdAt': library.createdAt.toIso8601String(),
-        'updatedAt': library.updatedAt.toIso8601String(),
-        'parentId': library.parentId,
-        'mediaCount': library.mediaCount,
-      });
+      return library;
     } catch (e) {
       throw Exception('Failed to update library: $e');
     }
   }
 
   /// Delete library and its associated media
-  Future<Map<String, dynamic>> deleteLibrary(
-    LibraryDeleteRequest request,
+  Future<ApiV1LibraryDelete200Response> deleteLibrary(
+    ApiV1LibraryDeleteRequest request,
   ) async {
     try {
-      final deleteRequest = ApiV1LibraryDeleteRequestBuilder()..id = request.id;
-
       final response = await _libraryApi.apiV1LibraryDelete(
-        apiV1LibraryDeleteRequest: deleteRequest.build(),
+        apiV1LibraryDeleteRequest: request,
       );
 
-      return {
-        'success': response.data?.success ?? false,
-        'message': response.data?.message ?? '',
-        'mediaDeleted': response.data?.mediaDeleted ?? 0,
-      };
+      if (response.data == null) {
+        throw Exception('No response data');
+      }
+
+      return response.data!;
     } catch (e) {
       throw Exception('Failed to delete library: $e');
     }

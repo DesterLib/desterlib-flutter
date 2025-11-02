@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:dester/app/theme/theme.dart';
 
 class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -23,6 +25,13 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if we should show a back button
+    final canPop = Navigator.of(context).canPop();
+    final shouldShowBackButton = leading == null && canPop;
+    final titleStyle = shouldShowBackButton
+        ? AppTypography.h2
+        : AppTypography.h1;
+
     return SizedBox(
       height: height,
       child: Container(
@@ -53,32 +62,31 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Leading widget
-                  if (leading != null) ...[leading!, const SizedBox(width: 12)],
+                  // Leading widget or back button
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: 12),
+                  ] else if (shouldShowBackButton) ...[
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textPrimary,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.of(context).pop();
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   // Title
                   if (!centerTitle)
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    )
+                    Expanded(child: Text(title, style: titleStyle))
                   else ...[
                     const Spacer(),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+                    Text(title, style: AppTypography.h2),
                     const Spacer(),
                   ],
                   // Actions

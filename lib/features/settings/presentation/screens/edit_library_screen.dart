@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
-import 'package:dester/features/library/data/models/library_model.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 
 class EditLibraryScreen extends ConsumerStatefulWidget {
@@ -21,7 +21,7 @@ class _EditLibraryScreenState extends ConsumerState<EditLibraryScreen> {
   final TextEditingController _libraryDescriptionController =
       TextEditingController();
   final TextEditingController _libraryPathController = TextEditingController();
-  LibraryType? selectedType;
+  ModelLibraryLibraryTypeEnum? selectedType;
 
   @override
   void dispose() {
@@ -113,21 +113,22 @@ class _EditLibraryScreenState extends ConsumerState<EditLibraryScreen> {
                     border: Border.all(color: Colors.grey[600]!),
                   ),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<LibraryType?>(
+                    child: DropdownButton<ModelLibraryLibraryTypeEnum?>(
                       value: selectedType,
                       isExpanded: true,
                       dropdownColor: Colors.grey[800],
                       style: const TextStyle(color: Colors.white),
                       items: [
-                        const DropdownMenuItem<LibraryType?>(
+                        const DropdownMenuItem<ModelLibraryLibraryTypeEnum?>(
                           value: null,
                           child: Text('Select type'),
                         ),
-                        ...LibraryType.values.map(
-                          (type) => DropdownMenuItem<LibraryType?>(
-                            value: type,
-                            child: Text(type.displayName),
-                          ),
+                        ...ModelLibraryLibraryTypeEnum.values.map(
+                          (type) =>
+                              DropdownMenuItem<ModelLibraryLibraryTypeEnum?>(
+                                value: type,
+                                child: Text(_getLibraryTypeDisplayName(type)),
+                              ),
                         ),
                       ],
                       onChanged: (value) {
@@ -214,41 +215,47 @@ class _EditLibraryScreenState extends ConsumerState<EditLibraryScreen> {
                     DButton(
                       label: 'Cancel',
                       variant: DButtonVariant.ghost,
-                      size: DButtonSize.md,
+                      size: DButtonSize.sm,
                       onTap: () => context.pop(),
                     ),
                     const SizedBox(width: 12),
                     DButton(
                       label: managementState.isLoading ? 'Saving...' : 'Save',
                       variant: DButtonVariant.primary,
-                      size: DButtonSize.md,
+                      size: DButtonSize.sm,
                       onTap: managementState.isLoading
                           ? null
                           : () async {
                               if (_libraryNameController.text.isNotEmpty) {
                                 try {
+                                  // Convert ModelLibraryLibraryTypeEnum to ApiV1LibraryPutRequestLibraryTypeEnum
+                                  ApiV1LibraryPutRequestLibraryTypeEnum?
+                                  apiLibraryType;
+                                  if (selectedType != null) {
+                                    apiLibraryType = _convertToApiLibraryType(
+                                      selectedType!,
+                                    );
+                                  }
+
+                                  final putRequest =
+                                      ApiV1LibraryPutRequestBuilder()
+                                        ..id = library.id
+                                        ..name = _libraryNameController.text
+                                        ..description =
+                                            _libraryDescriptionController
+                                                .text
+                                                .isEmpty
+                                            ? null
+                                            : _libraryDescriptionController.text
+                                        ..libraryPath =
+                                            _libraryPathController.text.isEmpty
+                                            ? null
+                                            : _libraryPathController.text
+                                        ..libraryType = apiLibraryType;
+
                                   await ref
                                       .read(libraryManagementProvider.notifier)
-                                      .updateLibrary(
-                                        LibraryUpdateRequest(
-                                          id: library.id,
-                                          name: _libraryNameController.text,
-                                          description:
-                                              _libraryDescriptionController
-                                                  .text
-                                                  .isEmpty
-                                              ? null
-                                              : _libraryDescriptionController
-                                                    .text,
-                                          libraryPath:
-                                              _libraryPathController
-                                                  .text
-                                                  .isEmpty
-                                              ? null
-                                              : _libraryPathController.text,
-                                          libraryType: selectedType,
-                                        ),
-                                      );
+                                      .updateLibrary(putRequest.build());
                                   if (mounted) context.pop();
                                 } catch (e) {
                                   // Error is handled by the provider
@@ -293,5 +300,31 @@ class _EditLibraryScreenState extends ConsumerState<EditLibraryScreen> {
         ),
       ),
     );
+  }
+
+  String _getLibraryTypeDisplayName(ModelLibraryLibraryTypeEnum type) {
+    if (type == ModelLibraryLibraryTypeEnum.MOVIE) return 'Movies';
+    if (type == ModelLibraryLibraryTypeEnum.TV_SHOW) return 'TV Shows';
+    if (type == ModelLibraryLibraryTypeEnum.MUSIC) return 'Music';
+    if (type == ModelLibraryLibraryTypeEnum.COMIC) return 'Comics';
+    return 'Unknown';
+  }
+
+  ApiV1LibraryPutRequestLibraryTypeEnum _convertToApiLibraryType(
+    ModelLibraryLibraryTypeEnum type,
+  ) {
+    if (type == ModelLibraryLibraryTypeEnum.MOVIE) {
+      return ApiV1LibraryPutRequestLibraryTypeEnum.MOVIE;
+    }
+    if (type == ModelLibraryLibraryTypeEnum.TV_SHOW) {
+      return ApiV1LibraryPutRequestLibraryTypeEnum.TV_SHOW;
+    }
+    if (type == ModelLibraryLibraryTypeEnum.MUSIC) {
+      return ApiV1LibraryPutRequestLibraryTypeEnum.MUSIC;
+    }
+    if (type == ModelLibraryLibraryTypeEnum.COMIC) {
+      return ApiV1LibraryPutRequestLibraryTypeEnum.COMIC;
+    }
+    throw ArgumentError('Unknown library type: $type');
   }
 }

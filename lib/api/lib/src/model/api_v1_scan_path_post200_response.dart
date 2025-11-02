@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/api_v1_scan_path_post200_response_cache_stats.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post200_response_data.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -13,38 +13,18 @@ part 'api_v1_scan_path_post200_response.g.dart';
 ///
 /// Properties:
 /// * [success] 
+/// * [data] 
 /// * [message] 
-/// * [libraryId] - The ID of the library that was scanned
-/// * [libraryName] - The name of the library
-/// * [totalFiles] - Total number of media files discovered during scan
-/// * [totalSaved] - Total number of media files successfully saved to the database
-/// * [cacheStats] 
 @BuiltValue()
 abstract class ApiV1ScanPathPost200Response implements Built<ApiV1ScanPathPost200Response, ApiV1ScanPathPost200ResponseBuilder> {
   @BuiltValueField(wireName: r'success')
   bool? get success;
 
+  @BuiltValueField(wireName: r'data')
+  ApiV1ScanPathPost200ResponseData? get data;
+
   @BuiltValueField(wireName: r'message')
   String? get message;
-
-  /// The ID of the library that was scanned
-  @BuiltValueField(wireName: r'libraryId')
-  String? get libraryId;
-
-  /// The name of the library
-  @BuiltValueField(wireName: r'libraryName')
-  String? get libraryName;
-
-  /// Total number of media files discovered during scan
-  @BuiltValueField(wireName: r'totalFiles')
-  num? get totalFiles;
-
-  /// Total number of media files successfully saved to the database
-  @BuiltValueField(wireName: r'totalSaved')
-  num? get totalSaved;
-
-  @BuiltValueField(wireName: r'cacheStats')
-  ApiV1ScanPathPost200ResponseCacheStats? get cacheStats;
 
   ApiV1ScanPathPost200Response._();
 
@@ -76,46 +56,18 @@ class _$ApiV1ScanPathPost200ResponseSerializer implements PrimitiveSerializer<Ap
         specifiedType: const FullType(bool),
       );
     }
+    if (object.data != null) {
+      yield r'data';
+      yield serializers.serialize(
+        object.data,
+        specifiedType: const FullType(ApiV1ScanPathPost200ResponseData),
+      );
+    }
     if (object.message != null) {
       yield r'message';
       yield serializers.serialize(
         object.message,
         specifiedType: const FullType(String),
-      );
-    }
-    if (object.libraryId != null) {
-      yield r'libraryId';
-      yield serializers.serialize(
-        object.libraryId,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.libraryName != null) {
-      yield r'libraryName';
-      yield serializers.serialize(
-        object.libraryName,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.totalFiles != null) {
-      yield r'totalFiles';
-      yield serializers.serialize(
-        object.totalFiles,
-        specifiedType: const FullType(num),
-      );
-    }
-    if (object.totalSaved != null) {
-      yield r'totalSaved';
-      yield serializers.serialize(
-        object.totalSaved,
-        specifiedType: const FullType(num),
-      );
-    }
-    if (object.cacheStats != null) {
-      yield r'cacheStats';
-      yield serializers.serialize(
-        object.cacheStats,
-        specifiedType: const FullType(ApiV1ScanPathPost200ResponseCacheStats),
       );
     }
   }
@@ -148,47 +100,19 @@ class _$ApiV1ScanPathPost200ResponseSerializer implements PrimitiveSerializer<Ap
           ) as bool;
           result.success = valueDes;
           break;
+        case r'data':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ApiV1ScanPathPost200ResponseData),
+          ) as ApiV1ScanPathPost200ResponseData;
+          result.data.replace(valueDes);
+          break;
         case r'message':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(String),
           ) as String;
           result.message = valueDes;
-          break;
-        case r'libraryId':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.libraryId = valueDes;
-          break;
-        case r'libraryName':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.libraryName = valueDes;
-          break;
-        case r'totalFiles':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.totalFiles = valueDes;
-          break;
-        case r'totalSaved':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.totalSaved = valueDes;
-          break;
-        case r'cacheStats':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(ApiV1ScanPathPost200ResponseCacheStats),
-          ) as ApiV1ScanPathPost200ResponseCacheStats;
-          result.cacheStats.replace(valueDes);
           break;
         default:
           unhandled.add(key);

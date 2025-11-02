@@ -10,31 +10,16 @@ class _$ApiV1ScanPathPost200Response extends ApiV1ScanPathPost200Response {
   @override
   final bool? success;
   @override
+  final ApiV1ScanPathPost200ResponseData? data;
+  @override
   final String? message;
-  @override
-  final String? libraryId;
-  @override
-  final String? libraryName;
-  @override
-  final num? totalFiles;
-  @override
-  final num? totalSaved;
-  @override
-  final ApiV1ScanPathPost200ResponseCacheStats? cacheStats;
 
   factory _$ApiV1ScanPathPost200Response([
     void Function(ApiV1ScanPathPost200ResponseBuilder)? updates,
   ]) => (ApiV1ScanPathPost200ResponseBuilder()..update(updates))._build();
 
-  _$ApiV1ScanPathPost200Response._({
-    this.success,
-    this.message,
-    this.libraryId,
-    this.libraryName,
-    this.totalFiles,
-    this.totalSaved,
-    this.cacheStats,
-  }) : super._();
+  _$ApiV1ScanPathPost200Response._({this.success, this.data, this.message})
+    : super._();
   @override
   ApiV1ScanPathPost200Response rebuild(
     void Function(ApiV1ScanPathPost200ResponseBuilder) updates,
@@ -49,24 +34,16 @@ class _$ApiV1ScanPathPost200Response extends ApiV1ScanPathPost200Response {
     if (identical(other, this)) return true;
     return other is ApiV1ScanPathPost200Response &&
         success == other.success &&
-        message == other.message &&
-        libraryId == other.libraryId &&
-        libraryName == other.libraryName &&
-        totalFiles == other.totalFiles &&
-        totalSaved == other.totalSaved &&
-        cacheStats == other.cacheStats;
+        data == other.data &&
+        message == other.message;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, success.hashCode);
+    _$hash = $jc(_$hash, data.hashCode);
     _$hash = $jc(_$hash, message.hashCode);
-    _$hash = $jc(_$hash, libraryId.hashCode);
-    _$hash = $jc(_$hash, libraryName.hashCode);
-    _$hash = $jc(_$hash, totalFiles.hashCode);
-    _$hash = $jc(_$hash, totalSaved.hashCode);
-    _$hash = $jc(_$hash, cacheStats.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -75,12 +52,8 @@ class _$ApiV1ScanPathPost200Response extends ApiV1ScanPathPost200Response {
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1ScanPathPost200Response')
           ..add('success', success)
-          ..add('message', message)
-          ..add('libraryId', libraryId)
-          ..add('libraryName', libraryName)
-          ..add('totalFiles', totalFiles)
-          ..add('totalSaved', totalSaved)
-          ..add('cacheStats', cacheStats))
+          ..add('data', data)
+          ..add('message', message))
         .toString();
   }
 }
@@ -97,31 +70,15 @@ class ApiV1ScanPathPost200ResponseBuilder
   bool? get success => _$this._success;
   set success(bool? success) => _$this._success = success;
 
+  ApiV1ScanPathPost200ResponseDataBuilder? _data;
+  ApiV1ScanPathPost200ResponseDataBuilder get data =>
+      _$this._data ??= ApiV1ScanPathPost200ResponseDataBuilder();
+  set data(ApiV1ScanPathPost200ResponseDataBuilder? data) =>
+      _$this._data = data;
+
   String? _message;
   String? get message => _$this._message;
   set message(String? message) => _$this._message = message;
-
-  String? _libraryId;
-  String? get libraryId => _$this._libraryId;
-  set libraryId(String? libraryId) => _$this._libraryId = libraryId;
-
-  String? _libraryName;
-  String? get libraryName => _$this._libraryName;
-  set libraryName(String? libraryName) => _$this._libraryName = libraryName;
-
-  num? _totalFiles;
-  num? get totalFiles => _$this._totalFiles;
-  set totalFiles(num? totalFiles) => _$this._totalFiles = totalFiles;
-
-  num? _totalSaved;
-  num? get totalSaved => _$this._totalSaved;
-  set totalSaved(num? totalSaved) => _$this._totalSaved = totalSaved;
-
-  ApiV1ScanPathPost200ResponseCacheStatsBuilder? _cacheStats;
-  ApiV1ScanPathPost200ResponseCacheStatsBuilder get cacheStats =>
-      _$this._cacheStats ??= ApiV1ScanPathPost200ResponseCacheStatsBuilder();
-  set cacheStats(ApiV1ScanPathPost200ResponseCacheStatsBuilder? cacheStats) =>
-      _$this._cacheStats = cacheStats;
 
   ApiV1ScanPathPost200ResponseBuilder() {
     ApiV1ScanPathPost200Response._defaults(this);
@@ -131,12 +88,8 @@ class ApiV1ScanPathPost200ResponseBuilder
     final $v = _$v;
     if ($v != null) {
       _success = $v.success;
+      _data = $v.data?.toBuilder();
       _message = $v.message;
-      _libraryId = $v.libraryId;
-      _libraryName = $v.libraryName;
-      _totalFiles = $v.totalFiles;
-      _totalSaved = $v.totalSaved;
-      _cacheStats = $v.cacheStats?.toBuilder();
       _$v = null;
     }
     return this;
@@ -162,18 +115,14 @@ class ApiV1ScanPathPost200ResponseBuilder
           _$v ??
           _$ApiV1ScanPathPost200Response._(
             success: success,
+            data: _data?.build(),
             message: message,
-            libraryId: libraryId,
-            libraryName: libraryName,
-            totalFiles: totalFiles,
-            totalSaved: totalSaved,
-            cacheStats: _cacheStats?.build(),
           );
     } catch (_) {
       late String _$failedField;
       try {
-        _$failedField = 'cacheStats';
-        _cacheStats?.build();
+        _$failedField = 'data';
+        _data?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'ApiV1ScanPathPost200Response',

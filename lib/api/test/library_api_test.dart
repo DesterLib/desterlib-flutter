@@ -20,7 +20,7 @@ void main() {
     //
     // Retrieves a list of libraries with optional filtering by: - isLibrary: Filter by actual libraries vs collections - libraryType: Filter by media type (MOVIE, TV_SHOW, MUSIC, COMIC) 
     //
-    //Future<BuiltList<ModelLibrary>> apiV1LibraryGet({ bool isLibrary, String libraryType }) async
+    //Future<ApiV1LibraryGet200Response> apiV1LibraryGet({ bool isLibrary, String libraryType }) async
     test('test apiV1LibraryGet', () async {
       // TODO
     });

@@ -10,11 +10,7 @@ class _$ApiV1LibraryDelete200Response extends ApiV1LibraryDelete200Response {
   @override
   final bool? success;
   @override
-  final String? libraryId;
-  @override
-  final String? libraryName;
-  @override
-  final num? mediaDeleted;
+  final ApiV1LibraryDelete200ResponseData? data;
   @override
   final String? message;
 
@@ -22,13 +18,8 @@ class _$ApiV1LibraryDelete200Response extends ApiV1LibraryDelete200Response {
     void Function(ApiV1LibraryDelete200ResponseBuilder)? updates,
   ]) => (ApiV1LibraryDelete200ResponseBuilder()..update(updates))._build();
 
-  _$ApiV1LibraryDelete200Response._({
-    this.success,
-    this.libraryId,
-    this.libraryName,
-    this.mediaDeleted,
-    this.message,
-  }) : super._();
+  _$ApiV1LibraryDelete200Response._({this.success, this.data, this.message})
+    : super._();
   @override
   ApiV1LibraryDelete200Response rebuild(
     void Function(ApiV1LibraryDelete200ResponseBuilder) updates,
@@ -43,9 +34,7 @@ class _$ApiV1LibraryDelete200Response extends ApiV1LibraryDelete200Response {
     if (identical(other, this)) return true;
     return other is ApiV1LibraryDelete200Response &&
         success == other.success &&
-        libraryId == other.libraryId &&
-        libraryName == other.libraryName &&
-        mediaDeleted == other.mediaDeleted &&
+        data == other.data &&
         message == other.message;
   }
 
@@ -53,9 +42,7 @@ class _$ApiV1LibraryDelete200Response extends ApiV1LibraryDelete200Response {
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, success.hashCode);
-    _$hash = $jc(_$hash, libraryId.hashCode);
-    _$hash = $jc(_$hash, libraryName.hashCode);
-    _$hash = $jc(_$hash, mediaDeleted.hashCode);
+    _$hash = $jc(_$hash, data.hashCode);
     _$hash = $jc(_$hash, message.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -65,9 +52,7 @@ class _$ApiV1LibraryDelete200Response extends ApiV1LibraryDelete200Response {
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1LibraryDelete200Response')
           ..add('success', success)
-          ..add('libraryId', libraryId)
-          ..add('libraryName', libraryName)
-          ..add('mediaDeleted', mediaDeleted)
+          ..add('data', data)
           ..add('message', message))
         .toString();
   }
@@ -85,17 +70,11 @@ class ApiV1LibraryDelete200ResponseBuilder
   bool? get success => _$this._success;
   set success(bool? success) => _$this._success = success;
 
-  String? _libraryId;
-  String? get libraryId => _$this._libraryId;
-  set libraryId(String? libraryId) => _$this._libraryId = libraryId;
-
-  String? _libraryName;
-  String? get libraryName => _$this._libraryName;
-  set libraryName(String? libraryName) => _$this._libraryName = libraryName;
-
-  num? _mediaDeleted;
-  num? get mediaDeleted => _$this._mediaDeleted;
-  set mediaDeleted(num? mediaDeleted) => _$this._mediaDeleted = mediaDeleted;
+  ApiV1LibraryDelete200ResponseDataBuilder? _data;
+  ApiV1LibraryDelete200ResponseDataBuilder get data =>
+      _$this._data ??= ApiV1LibraryDelete200ResponseDataBuilder();
+  set data(ApiV1LibraryDelete200ResponseDataBuilder? data) =>
+      _$this._data = data;
 
   String? _message;
   String? get message => _$this._message;
@@ -109,9 +88,7 @@ class ApiV1LibraryDelete200ResponseBuilder
     final $v = _$v;
     if ($v != null) {
       _success = $v.success;
-      _libraryId = $v.libraryId;
-      _libraryName = $v.libraryName;
-      _mediaDeleted = $v.mediaDeleted;
+      _data = $v.data?.toBuilder();
       _message = $v.message;
       _$v = null;
     }
@@ -132,15 +109,29 @@ class ApiV1LibraryDelete200ResponseBuilder
   ApiV1LibraryDelete200Response build() => _build();
 
   _$ApiV1LibraryDelete200Response _build() {
-    final _$result =
-        _$v ??
-        _$ApiV1LibraryDelete200Response._(
-          success: success,
-          libraryId: libraryId,
-          libraryName: libraryName,
-          mediaDeleted: mediaDeleted,
-          message: message,
+    _$ApiV1LibraryDelete200Response _$result;
+    try {
+      _$result =
+          _$v ??
+          _$ApiV1LibraryDelete200Response._(
+            success: success,
+            data: _data?.build(),
+            message: message,
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'data';
+        _data?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'ApiV1LibraryDelete200Response',
+          _$failedField,
+          e.toString(),
         );
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

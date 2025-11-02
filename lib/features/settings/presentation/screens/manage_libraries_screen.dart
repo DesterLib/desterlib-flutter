@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
-import 'package:dester/features/library/data/models/library_model.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 
 class ManageLibrariesScreen extends ConsumerWidget {
@@ -19,59 +19,40 @@ class ManageLibrariesScreen extends ConsumerWidget {
       child: librariesAsync.when(
         data: (libraries) {
           if (libraries.isEmpty) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'View and manage your media libraries. You can edit library details or remove libraries.',
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.video_library_outlined,
-                          size: 64,
-                          color: Colors.white24,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No libraries found',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Libraries will appear here once you scan your media folders',
-                          style: TextStyle(fontSize: 14, color: Colors.white54),
-                        ),
-                      ],
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.video_library_outlined,
+                      size: 64,
+                      color: Colors.white24,
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No libraries found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Libraries will appear here once you scan your media folders',
+                      style: TextStyle(fontSize: 14, color: Colors.white54),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'View and manage your media libraries. You can edit library details or remove libraries.',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
-                ),
-              ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -114,7 +95,11 @@ class ManageLibrariesScreen extends ConsumerWidget {
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            library.libraryType?.displayName ?? 'Unknown Type',
+                            library.libraryType != null
+                                ? _getLibraryTypeDisplayName(
+                                    library.libraryType!,
+                                  )
+                                : 'Unknown Type',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.white70,
@@ -181,74 +166,63 @@ class ManageLibrariesScreen extends ConsumerWidget {
             child: const Center(child: CircularProgressIndicator()),
           ),
         ),
-        error: (error, stack) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'View and manage your media libraries. You can edit library details or remove libraries.',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
-              ),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Error loading libraries',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      error.toString(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        ref.invalidate(actualLibrariesProvider);
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
+        error: (error, stack) => SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Error loading libraries',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.invalidate(actualLibrariesProvider);
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  IconData _getLibraryIcon(LibraryType? type) {
+  IconData _getLibraryIcon(ModelLibraryLibraryTypeEnum? type) {
     switch (type) {
-      case LibraryType.movie:
+      case ModelLibraryLibraryTypeEnum.MOVIE:
         return PlatformIcons.movie;
-      case LibraryType.tvShow:
+      case ModelLibraryLibraryTypeEnum.TV_SHOW:
         return PlatformIcons.videoLibrary;
-      case LibraryType.music:
+      case ModelLibraryLibraryTypeEnum.MUSIC:
         return PlatformIcons.playCircle;
-      case LibraryType.comic:
+      case ModelLibraryLibraryTypeEnum.COMIC:
         return PlatformIcons.libraryBooks;
       default:
         return PlatformIcons.videoLibrary;
     }
+  }
+
+  String _getLibraryTypeDisplayName(ModelLibraryLibraryTypeEnum type) {
+    if (type == ModelLibraryLibraryTypeEnum.MOVIE) return 'Movies';
+    if (type == ModelLibraryLibraryTypeEnum.TV_SHOW) return 'TV Shows';
+    if (type == ModelLibraryLibraryTypeEnum.MUSIC) return 'Music';
+    if (type == ModelLibraryLibraryTypeEnum.COMIC) return 'Comics';
+    return 'Unknown';
   }
 }

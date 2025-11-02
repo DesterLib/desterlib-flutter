@@ -8,6 +8,8 @@ part of 'api_v1_scan_path_post400_response.dart';
 
 class _$ApiV1ScanPathPost400Response extends ApiV1ScanPathPost400Response {
   @override
+  final bool? success;
+  @override
   final String? error;
   @override
   final String? message;
@@ -16,7 +18,8 @@ class _$ApiV1ScanPathPost400Response extends ApiV1ScanPathPost400Response {
     void Function(ApiV1ScanPathPost400ResponseBuilder)? updates,
   ]) => (ApiV1ScanPathPost400ResponseBuilder()..update(updates))._build();
 
-  _$ApiV1ScanPathPost400Response._({this.error, this.message}) : super._();
+  _$ApiV1ScanPathPost400Response._({this.success, this.error, this.message})
+    : super._();
   @override
   ApiV1ScanPathPost400Response rebuild(
     void Function(ApiV1ScanPathPost400ResponseBuilder) updates,
@@ -30,6 +33,7 @@ class _$ApiV1ScanPathPost400Response extends ApiV1ScanPathPost400Response {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is ApiV1ScanPathPost400Response &&
+        success == other.success &&
         error == other.error &&
         message == other.message;
   }
@@ -37,6 +41,7 @@ class _$ApiV1ScanPathPost400Response extends ApiV1ScanPathPost400Response {
   @override
   int get hashCode {
     var _$hash = 0;
+    _$hash = $jc(_$hash, success.hashCode);
     _$hash = $jc(_$hash, error.hashCode);
     _$hash = $jc(_$hash, message.hashCode);
     _$hash = $jf(_$hash);
@@ -46,6 +51,7 @@ class _$ApiV1ScanPathPost400Response extends ApiV1ScanPathPost400Response {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1ScanPathPost400Response')
+          ..add('success', success)
           ..add('error', error)
           ..add('message', message))
         .toString();
@@ -59,6 +65,10 @@ class ApiV1ScanPathPost400ResponseBuilder
           ApiV1ScanPathPost400ResponseBuilder
         > {
   _$ApiV1ScanPathPost400Response? _$v;
+
+  bool? _success;
+  bool? get success => _$this._success;
+  set success(bool? success) => _$this._success = success;
 
   String? _error;
   String? get error => _$this._error;
@@ -75,6 +85,7 @@ class ApiV1ScanPathPost400ResponseBuilder
   ApiV1ScanPathPost400ResponseBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
+      _success = $v.success;
       _error = $v.error;
       _message = $v.message;
       _$v = null;
@@ -97,7 +108,12 @@ class ApiV1ScanPathPost400ResponseBuilder
 
   _$ApiV1ScanPathPost400Response _build() {
     final _$result =
-        _$v ?? _$ApiV1ScanPathPost400Response._(error: error, message: message);
+        _$v ??
+        _$ApiV1ScanPathPost400Response._(
+          success: success,
+          error: error,
+          message: message,
+        );
     replace(_$result);
     return _$result;
   }

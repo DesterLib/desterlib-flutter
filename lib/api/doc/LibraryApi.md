@@ -58,7 +58,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiV1LibraryGet**
-> BuiltList<ModelLibrary> apiV1LibraryGet(isLibrary, libraryType)
+> ApiV1LibraryGet200Response apiV1LibraryGet(isLibrary, libraryType)
 
 Get all libraries with optional filtering
 
@@ -89,7 +89,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**BuiltList&lt;ModelLibrary&gt;**](ModelLibrary.md)
+[**ApiV1LibraryGet200Response**](ApiV1LibraryGet200Response.md)
 
 ### Authorization
 

@@ -75,7 +75,7 @@ class DeleteLibraryScreen extends ConsumerWidget {
                     DButton(
                       label: 'Cancel',
                       variant: DButtonVariant.ghost,
-                      size: DButtonSize.md,
+                      size: DButtonSize.sm,
                       onTap: () => context.pop(),
                     ),
                     const SizedBox(width: 12),
@@ -84,7 +84,7 @@ class DeleteLibraryScreen extends ConsumerWidget {
                           ? 'Deleting...'
                           : 'Delete',
                       variant: DButtonVariant.danger,
-                      size: DButtonSize.md,
+                      size: DButtonSize.sm,
                       onTap: managementState.isLoading
                           ? null
                           : () async {
@@ -92,7 +92,7 @@ class DeleteLibraryScreen extends ConsumerWidget {
                                 await ref
                                     .read(libraryManagementProvider.notifier)
                                     .deleteLibrary(library.id);
-                                context.pop();
+                                if (context.mounted) context.pop();
                               } catch (e) {
                                 // Error is handled by the provider
                               }

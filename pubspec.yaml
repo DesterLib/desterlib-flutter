@@ -19,6 +19,8 @@ dependencies:
   google_fonts: ^6.2.1
   shared_preferences: ^2.2.2
   http: ^1.1.0
+  built_collection: ^5.1.1
+  built_value: ^8.9.2
   openapi:
     path: ./lib/api
 

@@ -15,12 +15,6 @@ import '../core/providers/connection_provider.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
-    GoRoute(
-      path: '/api-connection',
-      pageBuilder: (BuildContext context, GoRouterState state) {
-        return _buildPageWithTransition(state, const ApiConnectionScreen());
-      },
-    ),
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithNavBar(child: child);

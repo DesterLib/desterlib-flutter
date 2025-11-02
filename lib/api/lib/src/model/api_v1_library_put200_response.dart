@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/model_library.dart';
+import 'package:openapi/src/model/api_v1_library_put200_response_data.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -13,15 +13,15 @@ part 'api_v1_library_put200_response.g.dart';
 ///
 /// Properties:
 /// * [success] 
-/// * [library_] 
+/// * [data] 
 /// * [message] 
 @BuiltValue()
 abstract class ApiV1LibraryPut200Response implements Built<ApiV1LibraryPut200Response, ApiV1LibraryPut200ResponseBuilder> {
   @BuiltValueField(wireName: r'success')
   bool? get success;
 
-  @BuiltValueField(wireName: r'library')
-  ModelLibrary? get library_;
+  @BuiltValueField(wireName: r'data')
+  ApiV1LibraryPut200ResponseData? get data;
 
   @BuiltValueField(wireName: r'message')
   String? get message;
@@ -56,11 +56,11 @@ class _$ApiV1LibraryPut200ResponseSerializer implements PrimitiveSerializer<ApiV
         specifiedType: const FullType(bool),
       );
     }
-    if (object.library_ != null) {
-      yield r'library';
+    if (object.data != null) {
+      yield r'data';
       yield serializers.serialize(
-        object.library_,
-        specifiedType: const FullType(ModelLibrary),
+        object.data,
+        specifiedType: const FullType(ApiV1LibraryPut200ResponseData),
       );
     }
     if (object.message != null) {
@@ -100,12 +100,12 @@ class _$ApiV1LibraryPut200ResponseSerializer implements PrimitiveSerializer<ApiV
           ) as bool;
           result.success = valueDes;
           break;
-        case r'library':
+        case r'data':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(ModelLibrary),
-          ) as ModelLibrary;
-          result.library_.replace(valueDes);
+            specifiedType: const FullType(ApiV1LibraryPut200ResponseData),
+          ) as ApiV1LibraryPut200ResponseData;
+          result.data.replace(valueDes);
           break;
         case r'message':
           final valueDes = serializers.deserialize(
