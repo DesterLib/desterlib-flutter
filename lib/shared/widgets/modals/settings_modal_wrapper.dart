@@ -17,6 +17,7 @@ Future<T?> showSettingsModal<T>({
   bool isDismissible = true,
   bool showCloseButton = true,
   double? maxWidth,
+  bool useFullscreenOnMobile = false,
 }) {
   final useBottomSheet = _shouldUseBottomSheet(context);
 
@@ -27,6 +28,7 @@ Future<T?> showSettingsModal<T>({
       builder: builder,
       isDismissible: isDismissible,
       showCloseButton: showCloseButton,
+      useFullscreen: useFullscreenOnMobile,
     );
   } else {
     return _showSettingsDialog<T>(
@@ -46,12 +48,16 @@ Future<T?> _showSettingsBottomSheet<T>({
   required Widget Function(BuildContext) builder,
   required bool isDismissible,
   required bool showCloseButton,
+  required bool useFullscreen,
 }) {
+  // Capture safe area from the original context before modal is shown
+  final safeAreaTop = MediaQuery.of(context).padding.top;
+
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: isDismissible,
-    enableDrag: isDismissible,
+    enableDrag: isDismissible && !useFullscreen,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black54,
     useRootNavigator: true,
@@ -59,6 +65,8 @@ Future<T?> _showSettingsBottomSheet<T>({
       title: title,
       showCloseButton: showCloseButton,
       isBottomSheet: true,
+      useFullscreen: useFullscreen,
+      safeAreaTop: safeAreaTop,
       child: builder(context),
     ),
   );
@@ -118,26 +126,50 @@ class _SettingsModalContainer extends StatelessWidget {
   final String title;
   final bool showCloseButton;
   final bool isBottomSheet;
+  final bool useFullscreen;
+  final double? safeAreaTop;
   final Widget child;
 
   const _SettingsModalContainer({
     required this.title,
     required this.showCloseButton,
     required this.isBottomSheet,
+    this.useFullscreen = false,
+    this.safeAreaTop,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+    // Use passed-in safeAreaTop if available, otherwise fall back to MediaQuery
+    final effectiveSafeAreaTop =
+        safeAreaTop ?? MediaQuery.of(context).padding.top;
+
     final bottomPadding = isBottomSheet
-        ? AppSpacing.xl + MediaQuery.of(context).viewPadding.bottom
-        : AppSpacing.xl + MediaQuery.of(context).viewInsets.bottom;
+        ? AppSpacing.xl
+        : AppSpacing.xl + viewInsets;
+
+    // Calculate max height based on fullscreen mode
+    final maxHeight = useFullscreen && isBottomSheet
+        ? screenHeight // Full screen height, content will be pushed inside
+        : screenHeight * 0.9;
 
     final content = Container(
+      // In fullscreen mode, use exact height for full screen
+      // Otherwise use maxHeight constraint
+      height: useFullscreen && isBottomSheet ? maxHeight : null,
+      constraints: useFullscreen && isBottomSheet
+          ? null
+          : BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
         color: AppColors.backgroundElevated,
         borderRadius: isBottomSheet
-            ? AppRadius.radiusTopXL
+            ? (useFullscreen
+                  ? BorderRadius
+                        .zero // No border radius in fullscreen for true edge-to-edge
+                  : AppRadius.radiusTopXL)
             : AppRadius.radiusXL,
         border: isBottomSheet
             ? null
@@ -150,13 +182,15 @@ class _SettingsModalContainer extends StatelessWidget {
             title: title,
             showCloseButton: showCloseButton,
             isBottomSheet: isBottomSheet,
+            useFullscreen: useFullscreen,
+            safeAreaTop: effectiveSafeAreaTop,
           ),
           Flexible(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
                 left: AppSpacing.xl,
                 right: AppSpacing.xl,
-                top: AppSpacing.xl,
+                top: useFullscreen && isBottomSheet ? 0 : AppSpacing.xl,
                 bottom: bottomPadding,
               ),
               child: child,
@@ -168,9 +202,7 @@ class _SettingsModalContainer extends StatelessWidget {
 
     if (isBottomSheet) {
       return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+        padding: EdgeInsets.only(bottom: viewInsets),
         child: content,
       );
     }
@@ -183,23 +215,37 @@ class _ModalHeader extends StatelessWidget {
   final String title;
   final bool showCloseButton;
   final bool isBottomSheet;
+  final bool useFullscreen;
+  final double? safeAreaTop;
 
   const _ModalHeader({
     required this.title,
     required this.showCloseButton,
     required this.isBottomSheet,
+    this.useFullscreen = false,
+    this.safeAreaTop,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.paddingXL,
+    final content = Container(
+      padding: EdgeInsets.only(
+        left: AppSpacing.xl,
+        right: AppSpacing.xl,
+        bottom: AppSpacing.xl,
+      ),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
       child: Column(
         children: [
-          if (isBottomSheet) ...[
+          // Top spacing based on mode
+          if (isBottomSheet && useFullscreen) ...[
+            // Fullscreen: just safe area padding, no extra spacing
+            SizedBox(height: safeAreaTop ?? 0),
+          ] else if (isBottomSheet && !useFullscreen) ...[
+            // Regular bottom sheet: standard padding + drag handle
+            SizedBox(height: AppSpacing.xl),
             Container(
               width: 40,
               height: 4,
@@ -209,6 +255,9 @@ class _ModalHeader extends StatelessWidget {
                 borderRadius: AppRadius.radiusXS,
               ),
             ),
+          ] else ...[
+            // Dialog: standard padding
+            SizedBox(height: AppSpacing.xl),
           ],
           Row(
             children: [
@@ -222,6 +271,17 @@ class _ModalHeader extends StatelessWidget {
         ],
       ),
     );
+
+    // Wrap with SafeArea for bottom sheets to handle status bar/notch
+    // But skip SafeArea in fullscreen mode since we handle it manually above
+    if (isBottomSheet && !useFullscreen) {
+      return SafeArea(
+        bottom: false, // Don't apply safe area to bottom (handled elsewhere)
+        child: content,
+      );
+    }
+
+    return content;
   }
 }
 

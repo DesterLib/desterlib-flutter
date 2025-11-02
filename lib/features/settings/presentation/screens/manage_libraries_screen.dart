@@ -1,10 +1,15 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
+import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
+import 'package:dester/app/theme/theme.dart';
+import '../modals/add_library_modal.dart';
+import '../modals/edit_library_modal.dart';
+import '../modals/delete_library_modal.dart';
 
 class ManageLibrariesScreen extends ConsumerWidget {
   const ManageLibrariesScreen({super.key});
@@ -12,153 +17,34 @@ class ManageLibrariesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final librariesAsync = ref.watch(actualLibrariesProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
 
     return AnimatedAppBarPage(
       title: 'Manage Libraries',
       maxWidthConstraint: 1220,
+      actions: [
+        DButton(
+          label: isMobile ? '' : 'Add Library',
+          icon: PlatformIcons.add,
+          variant: DButtonVariant.primary,
+          size: DButtonSize.sm,
+          onTap: () async {
+            final result = await AddLibraryModal.show(context);
+            if (result == true) {
+              // Library was added successfully
+              ref.invalidate(actualLibrariesProvider);
+            }
+          },
+        ),
+      ],
       child: librariesAsync.when(
         data: (libraries) {
           if (libraries.isEmpty) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.video_library_outlined,
-                      size: 64,
-                      color: Colors.white24,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No libraries found',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Libraries will appear here once you scan your media folders',
-                      style: TextStyle(fontSize: 14, color: Colors.white54),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return _EmptyState();
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: libraries.length,
-                itemBuilder: (context, index) {
-                  final library = libraries[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[800],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[600]!),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(20),
-                      leading: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[700],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          _getLibraryIcon(library.libraryType),
-                          color: Colors.white70,
-                          size: 24,
-                        ),
-                      ),
-                      title: Text(
-                        library.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(
-                            library.libraryType != null
-                                ? _getLibraryTypeDisplayName(
-                                    library.libraryType!,
-                                  )
-                                : 'Unknown Type',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.white70,
-                            ),
-                          ),
-                          if (library.description != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              library.description!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white54,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          if (library.libraryPath != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              library.libraryPath!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white38,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white70),
-                            onPressed: () {
-                              context.push(
-                                '/settings/manage-libraries/edit/${library.id}',
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              context.push(
-                                '/settings/manage-libraries/delete/${library.id}',
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-            ],
-          );
+          return _LibrariesGrid(libraries: libraries, isMobile: isMobile);
         },
         loading: () => Center(
           child: SizedBox(
@@ -166,39 +52,246 @@ class ManageLibrariesScreen extends ConsumerWidget {
             child: const Center(child: CircularProgressIndicator()),
           ),
         ),
-        error: (error, stack) => SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        error: (error, stack) => _ErrorState(
+          error: error.toString(),
+          onRetry: () => ref.invalidate(actualLibrariesProvider),
+        ),
+      ),
+    );
+  }
+}
+
+// Empty state widget
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.6,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              PlatformIcons.videoLibrary,
+              size: 64,
+              color: AppColors.textTertiary,
+            ),
+            AppSpacing.gapVerticalLG,
+            Text(
+              'No libraries found',
+              style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
+            ),
+            AppSpacing.gapVerticalSM,
+            Text(
+              'Click the "Add Library" button to scan your media folders',
+              style: AppTypography.bodyBase.copyWith(
+                color: AppColors.textTertiary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Error state widget
+class _ErrorState extends StatelessWidget {
+  final String error;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.6,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            AppSpacing.gapVerticalLG,
+            Text('Error loading libraries', style: AppTypography.h3),
+            AppSpacing.gapVerticalSM,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                error,
+                style: AppTypography.bodyBase.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            AppSpacing.gapVerticalLG,
+            DButton(
+              label: 'Retry',
+              variant: DButtonVariant.secondary,
+              size: DButtonSize.md,
+              onTap: onRetry,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Libraries grid/list widget
+class _LibrariesGrid extends StatelessWidget {
+  final BuiltList<ModelLibrary> libraries;
+  final bool isMobile;
+
+  const _LibrariesGrid({required this.libraries, required this.isMobile});
+
+  @override
+  Widget build(BuildContext context) {
+    if (isMobile) {
+      // Mobile: List view
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        itemCount: libraries.length,
+        separatorBuilder: (context, index) => AppSpacing.gapVerticalMD,
+        itemBuilder: (context, index) {
+          return _LibraryCard(library: libraries[index]);
+        },
+      );
+    }
+
+    // Desktop/Tablet: Grid view
+    final crossAxisCount = MediaQuery.of(context).size.width > 1024 ? 3 : 2;
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: AppSpacing.lg,
+        mainAxisSpacing: AppSpacing.lg,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: libraries.length,
+      itemBuilder: (context, index) {
+        return _LibraryCard(library: libraries[index]);
+      },
+    );
+  }
+}
+
+// Library card widget
+class _LibraryCard extends StatelessWidget {
+  final ModelLibrary library;
+
+  const _LibraryCard({required this.library});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.radiusLG,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with icon and actions
+          Padding(
+            padding: AppSpacing.paddingLG,
+            child: Row(
               children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                const Text(
-                  'Error loading libraries',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundElevated,
+                    borderRadius: AppRadius.radiusMD,
+                  ),
+                  child: Icon(
+                    _getLibraryIcon(library.libraryType),
+                    color: AppColors.primary,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: const TextStyle(fontSize: 14, color: Colors.white70),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(actualLibrariesProvider);
-                  },
-                  child: const Text('Retry'),
-                ),
+                const Spacer(),
+                _LibraryActions(library: library),
               ],
             ),
           ),
-        ),
+
+          // Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    library.name,
+                    style: AppTypography.h4,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  AppSpacing.gapVerticalXS,
+                  Text(
+                    _getLibraryTypeDisplayName(library.libraryType),
+                    style: AppTypography.bodySmall,
+                  ),
+                  if (library.description != null) ...[
+                    AppSpacing.gapVerticalXS,
+                    Expanded(
+                      child: Text(
+                        library.description!,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // Footer with path
+          if (library.libraryPath != null)
+            Container(
+              padding: AppSpacing.paddingMD,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundElevated,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(AppRadius.lg),
+                  bottomRight: Radius.circular(AppRadius.lg),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    PlatformIcons.folder,
+                    size: 14,
+                    color: AppColors.textTertiary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      library.libraryPath!,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -218,11 +311,58 @@ class ManageLibrariesScreen extends ConsumerWidget {
     }
   }
 
-  String _getLibraryTypeDisplayName(ModelLibraryLibraryTypeEnum type) {
+  String _getLibraryTypeDisplayName(ModelLibraryLibraryTypeEnum? type) {
     if (type == ModelLibraryLibraryTypeEnum.MOVIE) return 'Movies';
     if (type == ModelLibraryLibraryTypeEnum.TV_SHOW) return 'TV Shows';
     if (type == ModelLibraryLibraryTypeEnum.MUSIC) return 'Music';
     if (type == ModelLibraryLibraryTypeEnum.COMIC) return 'Comics';
     return 'Unknown';
+  }
+}
+
+// Library actions widget
+class _LibraryActions extends ConsumerWidget {
+  final ModelLibrary library;
+
+  const _LibraryActions({required this.library});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DButton(
+          icon: Icons.edit,
+          variant: DButtonVariant.ghost,
+          size: DButtonSize.sm,
+          onTap: () async {
+            final result = await EditLibraryModal.show(
+              context,
+              libraryId: library.id,
+            );
+            if (result == true) {
+              // Library was updated successfully
+              ref.invalidate(actualLibrariesProvider);
+            }
+          },
+        ),
+        const SizedBox(width: 8),
+        DButton(
+          icon: PlatformIcons.delete,
+          variant: DButtonVariant.ghost,
+          size: DButtonSize.sm,
+          onTap: () async {
+            final result = await DeleteLibraryModal.show(
+              context,
+              libraryId: library.id,
+            );
+            if (result == true) {
+              // Library was deleted successfully
+              ref.invalidate(actualLibrariesProvider);
+            }
+          },
+        ),
+      ],
+    );
   }
 }

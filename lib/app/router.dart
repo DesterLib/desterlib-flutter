@@ -55,30 +55,6 @@ final GoRouter router = GoRouter(
                   const ConnectionGuard(child: ManageLibrariesScreen()),
                 );
               },
-              routes: [
-                GoRoute(
-                  path: 'edit/:id',
-                  pageBuilder: (BuildContext context, GoRouterState state) {
-                    final id = state.pathParameters['id']!;
-                    return _buildPageWithTransition(
-                      state,
-                      ConnectionGuard(child: EditLibraryScreen(libraryId: id)),
-                    );
-                  },
-                ),
-                GoRoute(
-                  path: 'delete/:id',
-                  pageBuilder: (BuildContext context, GoRouterState state) {
-                    final id = state.pathParameters['id']!;
-                    return _buildPageWithTransition(
-                      state,
-                      ConnectionGuard(
-                        child: DeleteLibraryScreen(libraryId: id),
-                      ),
-                    );
-                  },
-                ),
-              ],
             ),
           ],
         ),
