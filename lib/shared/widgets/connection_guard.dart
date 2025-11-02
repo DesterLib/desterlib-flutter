@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/connection_provider.dart';
 import '../../features/settings/presentation/modals/api_connection_modal.dart';
@@ -14,19 +15,32 @@ class ConnectionGuard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final connectionStatus = ref.watch(connectionStatusProvider);
 
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeIn,
+      switchOutCurve: Curves.easeOut,
+      child: _buildContent(context, connectionStatus),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, ConnectionStatus status) {
     // If checking connection, show loading
-    if (connectionStatus == ConnectionStatus.checking) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF0a0a0a),
+    if (status == ConnectionStatus.checking) {
+      return Scaffold(
+        key: const ValueKey('checking'),
+        backgroundColor: const Color(0xFF0a0a0a),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00FFB3)),
+              RepaintBoundary(
+                child: const CupertinoActivityIndicator(
+                  color: Colors.white,
+                  radius: 16,
+                ),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 'Checking API connection...',
                 style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
@@ -37,8 +51,9 @@ class ConnectionGuard extends ConsumerWidget {
     }
 
     // If disconnected, show connection prompt
-    if (connectionStatus == ConnectionStatus.disconnected) {
+    if (status == ConnectionStatus.disconnected) {
       return Scaffold(
+        key: const ValueKey('disconnected'),
         backgroundColor: const Color(0xFF0a0a0a),
         body: Center(
           child: Padding(
@@ -81,8 +96,8 @@ class ConnectionGuard extends ConsumerWidget {
     }
 
     // If connected, show the child widget
-    if (connectionStatus == ConnectionStatus.connected) {
-      return child;
+    if (status == ConnectionStatus.connected) {
+      return Container(key: const ValueKey('connected'), child: child);
     }
 
     return const SizedBox.shrink();
