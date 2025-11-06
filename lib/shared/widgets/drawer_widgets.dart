@@ -24,11 +24,15 @@ class _TmdbApiKeyDrawerState extends ConsumerState<TmdbApiKeyDrawer> {
   @override
   Widget build(BuildContext context) {
     final tmdbNotifier = ref.read(tmdbSettingsProvider.notifier);
-    final currentApiKey = ref.read(tmdbSettingsProvider);
+    final currentApiKeyAsync = ref.watch(tmdbSettingsProvider);
+
+    // Extract the current API key value
+    String? currentApiKey;
+    currentApiKeyAsync.whenData((data) => currentApiKey = data);
 
     // Update controller text when drawer opens
     if (currentApiKey != null && _apiKeyController.text != currentApiKey) {
-      _apiKeyController.text = currentApiKey;
+      _apiKeyController.text = currentApiKey!;
     } else if (currentApiKey == null && _apiKeyController.text.isNotEmpty) {
       _apiKeyController.clear();
     }

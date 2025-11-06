@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
+import 'package:dester/shared/widgets/ui/cached_image.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'media_data.dart';
 
@@ -18,37 +19,64 @@ class MediaHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = mediaData.imageUrl != null;
-    
-    Widget heroContent = SizedBox(
-      width: double.infinity,
-      child: ConstrainedBox(
-        constraints: isMobile ? const BoxConstraints() : const BoxConstraints(maxHeight: 600),
-        child: AspectRatio(
-          aspectRatio: isMobile ? 10 / 16 : 16 / 9,
-          child: ClipRRect(
-            borderRadius: isMobile 
-                ? BorderRadius.zero 
-                : const BorderRadius.only(bottomLeft: Radius.circular(24)),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildBackground(hasImage),
-                _buildGradientOverlay(),
-                Positioned(
-                  left: isMobile ? 24 : 40,
-                  right: isMobile ? 24 : 40,
-                  bottom: isMobile ? 12 : 40,
-                  child: _buildContent(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    // Use poster on mobile (portrait), backdrop on desktop (landscape)
+    final imageUrl = isMobile
+        ? (mediaData.posterUrl ?? mediaData.backdropUrl)
+        : (mediaData.backdropUrl ?? mediaData.posterUrl);
+    final hasImage = imageUrl != null;
 
-    return heroContent;
+    return SizedBox(
+      width: double.infinity,
+      child: isMobile
+          ? AspectRatio(
+              aspectRatio: 2 / 3, // Standard poster aspect ratio
+              child: ClipRRect(
+                borderRadius: BorderRadius.zero,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildBackground(hasImage, imageUrl),
+                    _buildVignetteOverlay(),
+                    _buildGradientOverlay(),
+                    // Content positioned at the bottom with proper padding
+                    Positioned(
+                      left: 24,
+                      right: 24,
+                      bottom: 12,
+                      child: _buildContent(),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 600),
+              child: AspectRatio(
+                aspectRatio:
+                    16 / 9, // Landscape aspect ratio for backdrop images
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _buildBackground(hasImage, imageUrl),
+                      _buildVignetteOverlay(),
+                      _buildGradientOverlay(),
+                      // Content positioned at the bottom with proper padding
+                      Positioned(
+                        left: 40,
+                        right: 40,
+                        bottom: 40,
+                        child: _buildContent(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+    );
   }
 
   Widget _buildContent() {
@@ -56,6 +84,7 @@ class MediaHeroSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title
         Text(
           mediaData.title,
           style: TextStyle(
@@ -64,41 +93,70 @@ class MediaHeroSection extends StatelessWidget {
             fontWeight: FontWeight.w800,
             letterSpacing: -0.8,
             height: 1.0,
+            shadows: [
+              Shadow(
+                offset: const Offset(0, 2),
+                blurRadius: 8,
+                color: Colors.black.withValues(alpha: 0.7),
+              ),
+              Shadow(
+                offset: const Offset(0, 4),
+                blurRadius: 16,
+                color: Colors.black.withValues(alpha: 0.5),
+              ),
+            ],
           ),
         ),
         SizedBox(height: isMobile ? 12 : 16),
 
-        Text(
-          '${mediaData.year} • ${mediaData.duration} • ${mediaData.rating}',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.9),
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.2,
-          ),
+        // Metadata row with icons
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            DBadge(
+              icon: PlatformIcons.star,
+              label: mediaData.rating,
+              fontSize: isMobile ? 11 : 12,
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 10,
+                vertical: isMobile ? 5 : 6,
+              ),
+            ),
+            DBadge(
+              icon: PlatformIcons.calendar,
+              label: mediaData.year,
+              fontSize: isMobile ? 11 : 12,
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 10,
+                vertical: isMobile ? 5 : 6,
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: isMobile ? 8 : 12),
+        SizedBox(height: isMobile ? 12 : 16),
 
+        // Genres
         Wrap(
           spacing: isMobile ? 6 : 8,
           runSpacing: 4,
           children: mediaData.genres
               .take(3)
               .map(
-                (genre) => isMobile
-                    ? DBadge(
-                        label: genre,
-                        fontSize: 12,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                      )
-                    : DBadge(label: genre),
+                (genre) => DBadge(
+                  label: genre,
+                  fontSize: isMobile ? 11 : 12,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 8 : 10,
+                    vertical: isMobile ? 4 : 5,
+                  ),
+                ),
               )
               .toList(),
         ),
-        SizedBox(height: isMobile ? 16 : 32),
+
+        SizedBox(height: isMobile ? 16 : 24),
 
         isMobile ? _buildMobileButtons() : _buildDesktopButtons(),
       ],
@@ -109,25 +167,21 @@ class MediaHeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GestureDetector(
+        DButton(
+          label: 'Play',
+          icon: PlatformIcons.playArrow,
+          variant: DButtonVariant.primary,
           onTap: onPlayTapped,
-          child: DButton(
-            label: 'Play',
-            icon: PlatformIcons.playArrow,
-            variant: DButtonVariant.primary,
-          ),
         ),
         const SizedBox(height: 12),
 
-        GestureDetector(
+        DButton(
+          label: 'Add to List',
+          icon: PlatformIcons.add,
+          variant: DButtonVariant.secondary,
           onTap: () {
             // TODO: Implement add to list functionality
           },
-          child: DButton(
-            label: 'Add to List',
-            icon: PlatformIcons.add,
-            variant: DButtonVariant.secondary,
-          ),
         ),
       ],
     );
@@ -136,56 +190,47 @@ class MediaHeroSection extends StatelessWidget {
   Widget _buildDesktopButtons() {
     return Row(
       children: [
-        GestureDetector(
+        DButton(
+          label: 'Play',
+          icon: PlatformIcons.playArrow,
+          variant: DButtonVariant.primary,
           onTap: onPlayTapped,
-          child: DButton(
-            label: 'Play',
-            icon: PlatformIcons.playArrow,
-            variant: DButtonVariant.primary,
-          ),
         ),
         const SizedBox(width: 16),
 
-        GestureDetector(
+        DButton(
+          icon: PlatformIcons.add,
+          variant: DButtonVariant.secondary,
           onTap: () {
             // TODO: Implement add to list functionality
           },
-          child: DButton(
-            icon: PlatformIcons.add,
-            variant: DButtonVariant.secondary,
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildBackground(bool hasImage) {
-    if (hasImage) {
-      return Image.network(
-        mediaData.imageUrl!,
-        fit: BoxFit.cover,
-        cacheWidth: isMobile ? 400 : 800,
-        cacheHeight: isMobile ? 640 : 450,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
+  Widget _buildBackground(bool hasImage, String? imageUrl) {
+    if (hasImage && imageUrl != null) {
+      return SizedBox.expand(
+        child: DCachedImage(
+          imageUrl: imageUrl,
+          fit: BoxFit.cover,
+          // Use higher cache sizes to ensure quality on high-DPI displays
+          // Poster (mobile): ~1200px width for 3x retina displays
+          // Backdrop (desktop): ~1920px width for HD displays
+          cacheWidth: isMobile ? 1200 : 1920,
+          cacheHeight: isMobile ? 1800 : 1080,
+          showLoadingIndicator: true,
+          placeholder: Container(
             color: const Color(0xFF1a1a1a),
             child: Center(
               child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                    : null,
                 color: Colors.white.withValues(alpha: 0.5),
+                strokeWidth: 2,
               ),
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('Image load error: $error');
-          debugPrint('Image URL: ${mediaData.imageUrl}');
-          debugPrint('Stack trace: $stackTrace');
-          return Container(
+          ),
+          errorWidget: Container(
             color: const Color(0xFF1a1a1a),
             child: Center(
               child: Column(
@@ -207,8 +252,8 @@ class MediaHeroSection extends StatelessWidget {
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       );
     }
 
@@ -229,13 +274,31 @@ class MediaHeroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: const [0.0, 0.3, 0.7, 1.0],
+          stops: const [0.0, 0.4, 0.65, 0.85, 1.0],
+          colors: [
+            Colors.black.withValues(alpha: 0.1),
+            Colors.black.withValues(alpha: 0.3),
+            Colors.black.withValues(alpha: 0.6),
+            Colors.black.withValues(alpha: 0.85),
+            Colors.black.withValues(alpha: 0.95),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVignetteOverlay() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.0,
           colors: [
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.2),
+            Colors.black.withValues(alpha: 0.3),
             Colors.black.withValues(alpha: 0.6),
-            Colors.black.withValues(alpha: 0.9),
           ],
+          stops: const [0.3, 0.7, 1.0],
         ),
       ),
     );
@@ -253,10 +316,7 @@ class MediaMetadata extends StatelessWidget {
       children: [
         _MetadataItem(icon: PlatformIcons.star, text: mediaData.rating),
         const SizedBox(width: 16),
-        _MetadataItem(
-          icon: PlatformIcons.time,
-          text: mediaData.duration,
-        ),
+        _MetadataItem(icon: PlatformIcons.time, text: mediaData.duration),
         const SizedBox(width: 16),
         _MetadataItem(icon: PlatformIcons.calendar, text: mediaData.year),
       ],

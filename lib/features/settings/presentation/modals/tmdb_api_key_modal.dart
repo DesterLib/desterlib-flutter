@@ -32,14 +32,23 @@ class _TmdbApiKeyModalContentState
   @override
   void initState() {
     super.initState();
-    _loadCurrentApiKey();
+    // Load current API key once data is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCurrentApiKey();
+    });
   }
 
   void _loadCurrentApiKey() {
-    final currentApiKey = ref.read(tmdbSettingsProvider);
-    if (currentApiKey != null) {
-      _apiKeyController.text = currentApiKey;
-    }
+    final currentApiKeyAsync = ref.read(tmdbSettingsProvider);
+    currentApiKeyAsync.whenData((currentApiKey) {
+      if (currentApiKey != null && currentApiKey.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _apiKeyController.text = currentApiKey;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -107,8 +116,26 @@ class _TmdbApiKeyModalContentState
 
   @override
   Widget build(BuildContext context) {
-    final currentApiKey = ref.watch(tmdbSettingsProvider);
-    final hasExistingKey = currentApiKey != null && currentApiKey.isNotEmpty;
+    final currentApiKeyAsync = ref.watch(tmdbSettingsProvider);
+
+    // Extract the current API key value
+    String? currentApiKey;
+    currentApiKeyAsync.whenData((data) {
+      currentApiKey = data;
+    });
+
+    final hasExistingKey = currentApiKey != null && currentApiKey!.isNotEmpty;
+
+    // Update text field when API key is loaded
+    if (currentApiKey != null &&
+        currentApiKey!.isNotEmpty &&
+        _apiKeyController.text.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _apiKeyController.text = currentApiKey!;
+        }
+      });
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -67,7 +67,9 @@ class _DScrollableListState extends State<DScrollableList> {
               ),
             if (widget.title != null) const SizedBox(height: 16),
             SizedBox(
-              height: cardHeight + 60, // Card height + text area (60)
+              height:
+                  cardHeight +
+                  90, // Card height + text area (90 for 2-line titles + padding)
               child: ListView.separated(
                 controller: _scrollController,
                 scrollDirection: Axis.horizontal,

@@ -21,7 +21,15 @@ Serializers _$serializers =
           ..add(ApiV1LibraryPutRequest.serializer)
           ..add(ApiV1LibraryPutRequestLibraryTypeEnum.serializer)
           ..add(ApiV1MoviesGet200Response.serializer)
+          ..add(ApiV1MoviesGet200ResponseDataInner.serializer)
+          ..add(ApiV1MoviesGet200ResponseDataInnerMedia.serializer)
+          ..add(ApiV1MoviesGet200ResponseDataInnerMediaTypeEnum.serializer)
           ..add(ApiV1MoviesGet500Response.serializer)
+          ..add(ApiV1MoviesIdGet200Response.serializer)
+          ..add(ApiV1MoviesIdGet200ResponseData.serializer)
+          ..add(ApiV1MoviesIdGet400Response.serializer)
+          ..add(ApiV1MoviesIdGet404Response.serializer)
+          ..add(ApiV1MoviesIdGet500Response.serializer)
           ..add(ApiV1ScanPathPost200Response.serializer)
           ..add(ApiV1ScanPathPost200ResponseData.serializer)
           ..add(ApiV1ScanPathPost200ResponseDataCacheStats.serializer)
@@ -30,21 +38,68 @@ Serializers _$serializers =
           ..add(ApiV1ScanPathPostRequest.serializer)
           ..add(ApiV1ScanPathPostRequestOptions.serializer)
           ..add(ApiV1ScanPathPostRequestOptionsMediaTypeEnum.serializer)
+          ..add(ApiV1SettingsFirstRunCompletePost200Response.serializer)
+          ..add(ApiV1SettingsFirstRunCompletePost500Response.serializer)
+          ..add(ApiV1SettingsGet200Response.serializer)
+          ..add(ApiV1SettingsGet500Response.serializer)
+          ..add(ApiV1SettingsPut200Response.serializer)
+          ..add(ApiV1SettingsPut500Response.serializer)
           ..add(ApiV1StreamIdGet400Response.serializer)
           ..add(ApiV1StreamIdGet404Response.serializer)
           ..add(ApiV1StreamIdGet416Response.serializer)
           ..add(ApiV1StreamIdGet500Response.serializer)
+          ..add(ApiV1TvshowsGet200Response.serializer)
+          ..add(ApiV1TvshowsGet200ResponseDataInner.serializer)
+          ..add(ApiV1TvshowsGet200ResponseDataInnerMedia.serializer)
+          ..add(ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum.serializer)
           ..add(ApiV1TvshowsGet500Response.serializer)
+          ..add(ApiV1TvshowsIdGet200Response.serializer)
+          ..add(ApiV1TvshowsIdGet200ResponseData.serializer)
+          ..add(ApiV1TvshowsIdGet200ResponseDataSeasonsInner.serializer)
+          ..add(
+            ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner
+                .serializer,
+          )
+          ..add(ApiV1TvshowsIdGet400Response.serializer)
+          ..add(ApiV1TvshowsIdGet404Response.serializer)
+          ..add(ApiV1TvshowsIdGet500Response.serializer)
           ..add(HealthResponse.serializer)
           ..add(ModelLibrary.serializer)
           ..add(ModelLibraryLibraryTypeEnum.serializer)
+          ..add(PublicSettings.serializer)
+          ..add(UpdateSettingsRequest.serializer)
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ApiV1MoviesGet200ResponseDataInner),
+            ]),
+            () => ListBuilder<ApiV1MoviesGet200ResponseDataInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ApiV1TvshowsGet200ResponseDataInner),
+            ]),
+            () => ListBuilder<ApiV1TvshowsGet200ResponseDataInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ApiV1TvshowsIdGet200ResponseDataSeasonsInner),
+            ]),
+            () => ListBuilder<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(
+                ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner,
+              ),
+            ]),
+            () =>
+                ListBuilder<
+                  ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner
+                >(),
+          )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(ModelLibrary)]),
             () => ListBuilder<ModelLibrary>(),
-          )
-          ..addBuilderFactory(
-            const FullType(BuiltList, const [const FullType(String)]),
-            () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),

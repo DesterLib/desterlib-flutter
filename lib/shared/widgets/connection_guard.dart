@@ -82,12 +82,7 @@ class ConnectionGuard extends ConsumerWidget {
                   style: TextStyle(fontSize: 16, color: Colors.grey[400]),
                 ),
                 const SizedBox(height: 32),
-                DButton(
-                  label: 'Configure Connection',
-                  variant: DButtonVariant.primary,
-                  size: DButtonSize.sm,
-                  onTap: () => ApiConnectionModal.show(context),
-                ),
+                _DisconnectedActions(context: context),
               ],
             ),
           ),
@@ -101,5 +96,37 @@ class ConnectionGuard extends ConsumerWidget {
     }
 
     return const SizedBox.shrink();
+  }
+}
+
+class _DisconnectedActions extends ConsumerWidget {
+  final BuildContext context;
+
+  const _DisconnectedActions({required this.context});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        DButton(
+          label: 'Retry',
+          variant: DButtonVariant.secondary,
+          size: DButtonSize.sm,
+          icon: PlatformIcons.refresh,
+          onTap: () {
+            ref.read(connectionStatusProvider.notifier).checkConnection();
+          },
+        ),
+        const SizedBox(width: 12),
+        DButton(
+          label: 'Configure Connection',
+          variant: DButtonVariant.primary,
+          size: DButtonSize.sm,
+          icon: PlatformIcons.settings,
+          onTap: () => ApiConnectionModal.show(context),
+        ),
+      ],
+    );
   }
 }

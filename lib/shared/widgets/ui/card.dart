@@ -1,6 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../utils/platform_icons.dart';
+import 'cached_image.dart';
 
 class DCard extends StatelessWidget {
   final String title;
@@ -59,6 +59,7 @@ class DCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          SizedBox(height: spacing - 2), // Small gap between title and year
           Text(
             year,
             style: TextStyle(
@@ -95,16 +96,17 @@ class DCard extends StatelessWidget {
             children: [
               buildImage(),
               SizedBox(height: spacing + 4),
+              // Constrain text area to prevent overflow
               if (width != null)
                 SizedBox(width: width, child: buildText())
               else
                 buildText(),
+              // Extra bottom padding to prevent overflow
+              const SizedBox(height: 4),
             ],
           );
 
-    return IntrinsicHeight(
-      child: GestureDetector(onTap: onTap, child: content),
-    );
+    return GestureDetector(onTap: onTap, child: content);
   }
 
   Widget _buildCardContent() {
@@ -115,37 +117,38 @@ class DCard extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image or color
-          if (hasImage)
-            Image.network(
-              imageUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(color: const Color(0xFF1a1a1a)),
-            )
-          else
-            Container(color: const Color(0xFF1a1a1a)),
+          // Background color (always present)
+          Container(color: const Color(0xFF1a1a1a)),
 
-          // Glassmorphism overlay
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              decoration: ShapeDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
+          // Image filling the card
+          if (hasImage)
+            DCachedImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover, // Fill the card while maintaining aspect ratio
+              // Landscape aspect ratio cache for backdrop images (16:9)
+              // High resolution for 2x-3x retina displays
+              cacheWidth: 1600,
+              cacheHeight: 900,
+              showLoadingIndicator: false,
+              errorWidget: Container(color: const Color(0xFF1a1a1a)),
+            ),
+
+          // Subtle overlay for better contrast (only if there's an image)
+          if (hasImage)
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.3),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          // Icon (after blur, so it's not blurred)
+          // Icon (when no image available)
           if (!hasImage)
             Center(
               child: Icon(

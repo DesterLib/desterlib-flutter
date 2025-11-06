@@ -11,6 +11,7 @@ class DSettingsItem extends StatefulWidget {
   final bool isActive;
   final BorderRadius? borderRadius;
   final EdgeInsetsGeometry? padding;
+  final Widget? progressBar; // Optional progress bar widget
 
   const DSettingsItem({
     super.key,
@@ -23,6 +24,7 @@ class DSettingsItem extends StatefulWidget {
     this.isActive = false,
     this.borderRadius,
     this.padding,
+    this.progressBar,
   });
 
   @override
@@ -48,76 +50,85 @@ class _DSettingsItemState extends State<DSettingsItem> {
               HapticFeedback.lightImpact();
             }
           : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        padding:
-            widget.padding ??
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: ShapeDecoration(
-          color: backgroundColor,
-          shape: RoundedSuperellipseBorder(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
-          ),
-        ),
-        child: Row(
-          children: [
-            // Icon
-            if (widget.icon != null) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: ShapeDecoration(
-                  color: widget.isActive
-                      ? Colors.black.withValues(alpha: 0.1)
-                      : Colors.white.withValues(alpha: 0.1),
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-                child: Icon(widget.icon, size: 20, color: textColor),
-              ),
-              const SizedBox(width: 12),
-            ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Optional progress bar at the top
+          if (widget.progressBar != null) widget.progressBar!,
 
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      letterSpacing: -0.5,
-                      color: textColor,
-                    ),
-                  ),
-                  if (widget.subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      widget.subtitle!,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 13,
-                        letterSpacing: -0.1,
-                        color: subtitleColor,
-                      ),
-                    ),
-                  ],
-                ],
+          // Main item content
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            width: double.infinity,
+            padding:
+                widget.padding ??
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: ShapeDecoration(
+              color: backgroundColor,
+              shape: RoundedSuperellipseBorder(
+                borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
               ),
             ),
+            child: Row(
+              children: [
+                // Icon
+                if (widget.icon != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: ShapeDecoration(
+                      color: widget.isActive
+                          ? Colors.black.withValues(alpha: 0.1)
+                          : Colors.white.withValues(alpha: 0.1),
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: Icon(widget.icon, size: 20, color: textColor),
+                  ),
+                  const SizedBox(width: 12),
+                ],
 
-            // Trailing widget
-            if (widget.trailing != null) ...[
-              const SizedBox(width: 12),
-              widget.trailing!,
-            ],
-          ],
-        ),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          letterSpacing: -0.5,
+                          color: textColor,
+                        ),
+                      ),
+                      if (widget.subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.subtitle!,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13,
+                            letterSpacing: -0.1,
+                            color: subtitleColor,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Trailing widget
+                if (widget.trailing != null) ...[
+                  const SizedBox(width: 12),
+                  widget.trailing!,
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:dester/app/theme/theme.dart';
 import '../../../../app/providers.dart';
 import '../../../../core/providers/connection_provider.dart';
 import '../../../../core/config/api_config.dart';
+import '../../data/tmdb_settings_provider.dart';
 
 class ApiConnectionModal {
   static Future<bool?> show(BuildContext context) {
@@ -78,6 +79,9 @@ class _ApiConnectionModalContentState
 
       final status = ref.read(connectionStatusProvider);
       if (status == ConnectionStatus.connected) {
+        // Refresh TMDB settings from the newly connected API
+        await ref.read(tmdbSettingsProvider.notifier).refreshFromApi();
+
         if (mounted) {
           Navigator.of(context).pop(true);
         }
@@ -126,10 +130,14 @@ class _ApiConnectionModalContentState
         SettingsModalActions(
           actions: [
             DButton(
-              label: _isConnecting ? 'Connecting...' : 'Connect',
+              label: _isConnecting
+                  ? 'Connecting...'
+                  : _errorMessage != null
+                  ? 'Retry'
+                  : 'Connect',
               variant: DButtonVariant.primary,
               size: DButtonSize.sm,
-              icon: Icons.link,
+              icon: _errorMessage != null ? Icons.refresh : Icons.link,
               onTap: _isConnecting ? null : _testConnection,
             ),
           ],

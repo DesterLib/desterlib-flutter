@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 enum DButtonVariant { primary, secondary, ghost, danger }
@@ -136,17 +137,36 @@ class _DButtonState extends State<DButton> {
 
     return GestureDetector(
       onTap: widget.onTap,
-      child: Container(
-        width: widget.fullWidth ? double.infinity : null,
-        padding: style.padding,
-        decoration: ShapeDecoration(
-          color: style.backgroundColor,
-          shape: RoundedSuperellipseBorder(
-            borderRadius: style.borderRadius,
-            side: style.borderSide,
-          ),
-        ),
-        child: _buildButtonContent(style),
+      child: ClipRRect(
+        borderRadius: style.borderRadius,
+        child: widget.variant == DButtonVariant.secondary
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: widget.fullWidth ? double.infinity : null,
+                  padding: style.padding,
+                  decoration: ShapeDecoration(
+                    color: style.backgroundColor,
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: style.borderRadius,
+                      side: style.borderSide,
+                    ),
+                  ),
+                  child: _buildButtonContent(style),
+                ),
+              )
+            : Container(
+                width: widget.fullWidth ? double.infinity : null,
+                padding: style.padding,
+                decoration: ShapeDecoration(
+                  color: style.backgroundColor,
+                  shape: RoundedSuperellipseBorder(
+                    borderRadius: style.borderRadius,
+                    side: style.borderSide,
+                  ),
+                ),
+                child: _buildButtonContent(style),
+              ),
       ),
     );
   }

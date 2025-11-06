@@ -3,8 +3,8 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:built_value/json_object.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -15,17 +15,13 @@ part 'api_v1_movies_get200_response.g.dart';
 /// Properties:
 /// * [success] 
 /// * [data] 
-/// * [properties] 
 @BuiltValue()
 abstract class ApiV1MoviesGet200Response implements Built<ApiV1MoviesGet200Response, ApiV1MoviesGet200ResponseBuilder> {
   @BuiltValueField(wireName: r'success')
   bool? get success;
 
   @BuiltValueField(wireName: r'data')
-  BuiltList<String>? get data;
-
-  @BuiltValueField(wireName: r'properties')
-  JsonObject? get properties;
+  BuiltList<ApiV1MoviesGet200ResponseDataInner>? get data;
 
   ApiV1MoviesGet200Response._();
 
@@ -61,14 +57,7 @@ class _$ApiV1MoviesGet200ResponseSerializer implements PrimitiveSerializer<ApiV1
       yield r'data';
       yield serializers.serialize(
         object.data,
-        specifiedType: const FullType(BuiltList, [FullType(String)]),
-      );
-    }
-    if (object.properties != null) {
-      yield r'properties';
-      yield serializers.serialize(
-        object.properties,
-        specifiedType: const FullType.nullable(JsonObject),
+        specifiedType: const FullType(BuiltList, [FullType(ApiV1MoviesGet200ResponseDataInner)]),
       );
     }
   }
@@ -104,17 +93,9 @@ class _$ApiV1MoviesGet200ResponseSerializer implements PrimitiveSerializer<ApiV1
         case r'data':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
+            specifiedType: const FullType(BuiltList, [FullType(ApiV1MoviesGet200ResponseDataInner)]),
+          ) as BuiltList<ApiV1MoviesGet200ResponseDataInner>;
           result.data.replace(valueDes);
-          break;
-        case r'properties':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType.nullable(JsonObject),
-          ) as JsonObject?;
-          if (valueDes == null) continue;
-          result.properties = valueDes;
           break;
         default:
           unhandled.add(key);

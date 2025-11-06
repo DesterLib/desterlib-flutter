@@ -190,7 +190,7 @@ class _SettingsModalContainer extends StatelessWidget {
               padding: EdgeInsets.only(
                 left: AppSpacing.xl,
                 right: AppSpacing.xl,
-                top: useFullscreen && isBottomSheet ? 0 : AppSpacing.xl,
+                top: AppSpacing.xl,
                 bottom: bottomPadding,
               ),
               child: child,
@@ -241,8 +241,8 @@ class _ModalHeader extends StatelessWidget {
         children: [
           // Top spacing based on mode
           if (isBottomSheet && useFullscreen) ...[
-            // Fullscreen: just safe area padding, no extra spacing
-            SizedBox(height: safeAreaTop ?? 0),
+            // Fullscreen: use safe area padding with proper fallback
+            SizedBox(height: safeAreaTop ?? MediaQuery.of(context).padding.top),
           ] else if (isBottomSheet && !useFullscreen) ...[
             // Regular bottom sheet: standard padding + drag handle
             SizedBox(height: AppSpacing.xl),

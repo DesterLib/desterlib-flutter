@@ -10,16 +10,13 @@ class _$ApiV1MoviesGet200Response extends ApiV1MoviesGet200Response {
   @override
   final bool? success;
   @override
-  final BuiltList<String>? data;
-  @override
-  final JsonObject? properties;
+  final BuiltList<ApiV1MoviesGet200ResponseDataInner>? data;
 
   factory _$ApiV1MoviesGet200Response([
     void Function(ApiV1MoviesGet200ResponseBuilder)? updates,
   ]) => (ApiV1MoviesGet200ResponseBuilder()..update(updates))._build();
 
-  _$ApiV1MoviesGet200Response._({this.success, this.data, this.properties})
-    : super._();
+  _$ApiV1MoviesGet200Response._({this.success, this.data}) : super._();
   @override
   ApiV1MoviesGet200Response rebuild(
     void Function(ApiV1MoviesGet200ResponseBuilder) updates,
@@ -34,8 +31,7 @@ class _$ApiV1MoviesGet200Response extends ApiV1MoviesGet200Response {
     if (identical(other, this)) return true;
     return other is ApiV1MoviesGet200Response &&
         success == other.success &&
-        data == other.data &&
-        properties == other.properties;
+        data == other.data;
   }
 
   @override
@@ -43,7 +39,6 @@ class _$ApiV1MoviesGet200Response extends ApiV1MoviesGet200Response {
     var _$hash = 0;
     _$hash = $jc(_$hash, success.hashCode);
     _$hash = $jc(_$hash, data.hashCode);
-    _$hash = $jc(_$hash, properties.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -52,8 +47,7 @@ class _$ApiV1MoviesGet200Response extends ApiV1MoviesGet200Response {
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1MoviesGet200Response')
           ..add('success', success)
-          ..add('data', data)
-          ..add('properties', properties))
+          ..add('data', data))
         .toString();
   }
 }
@@ -67,13 +61,11 @@ class ApiV1MoviesGet200ResponseBuilder
   bool? get success => _$this._success;
   set success(bool? success) => _$this._success = success;
 
-  ListBuilder<String>? _data;
-  ListBuilder<String> get data => _$this._data ??= ListBuilder<String>();
-  set data(ListBuilder<String>? data) => _$this._data = data;
-
-  JsonObject? _properties;
-  JsonObject? get properties => _$this._properties;
-  set properties(JsonObject? properties) => _$this._properties = properties;
+  ListBuilder<ApiV1MoviesGet200ResponseDataInner>? _data;
+  ListBuilder<ApiV1MoviesGet200ResponseDataInner> get data =>
+      _$this._data ??= ListBuilder<ApiV1MoviesGet200ResponseDataInner>();
+  set data(ListBuilder<ApiV1MoviesGet200ResponseDataInner>? data) =>
+      _$this._data = data;
 
   ApiV1MoviesGet200ResponseBuilder() {
     ApiV1MoviesGet200Response._defaults(this);
@@ -84,7 +76,6 @@ class ApiV1MoviesGet200ResponseBuilder
     if ($v != null) {
       _success = $v.success;
       _data = $v.data?.toBuilder();
-      _properties = $v.properties;
       _$v = null;
     }
     return this;
@@ -108,11 +99,7 @@ class ApiV1MoviesGet200ResponseBuilder
     try {
       _$result =
           _$v ??
-          _$ApiV1MoviesGet200Response._(
-            success: success,
-            data: _data?.build(),
-            properties: properties,
-          );
+          _$ApiV1MoviesGet200Response._(success: success, data: _data?.build());
     } catch (_) {
       late String _$failedField;
       try {

@@ -70,9 +70,14 @@ Class | Method | HTTP request | Description
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryGet**](doc/LibraryApi.md#apiv1libraryget) | **GET** /api/v1/library | Get all libraries with optional filtering
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryPut**](doc/LibraryApi.md#apiv1libraryput) | **PUT** /api/v1/library | Update library details
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesGet**](doc/MoviesApi.md#apiv1moviesget) | **GET** /api/v1/movies | Get all movies
+[*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesIdGet**](doc/MoviesApi.md#apiv1moviesidget) | **GET** /api/v1/movies/{id} | Get a movie by ID
 [*ScanApi*](doc/ScanApi.md) | [**apiV1ScanPathPost**](doc/ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch TMDB metadata
+[*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsFirstRunCompletePost**](doc/SettingsApi.md#apiv1settingsfirstruncompletepost) | **POST** /api/v1/settings/first-run-complete | Complete first run setup
+[*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsGet**](doc/SettingsApi.md#apiv1settingsget) | **GET** /api/v1/settings | Get application settings
+[*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsPut**](doc/SettingsApi.md#apiv1settingsput) | **PUT** /api/v1/settings | Update application settings
 [*StreamApi*](doc/StreamApi.md) | [**apiV1StreamIdGet**](doc/StreamApi.md#apiv1streamidget) | **GET** /api/v1/stream/{id} | Stream any media file by ID with byte-range support
 [*TVShowsApi*](doc/TVShowsApi.md) | [**apiV1TvshowsGet**](doc/TVShowsApi.md#apiv1tvshowsget) | **GET** /api/v1/tvshows | Get all TV shows
+[*TVShowsApi*](doc/TVShowsApi.md) | [**apiV1TvshowsIdGet**](doc/TVShowsApi.md#apiv1tvshowsidget) | **GET** /api/v1/tvshows/{id} | Get a TV show by ID
 
 
 ## Documentation For Models
@@ -89,7 +94,14 @@ Class | Method | HTTP request | Description
  - [ApiV1LibraryPut404Response](doc/ApiV1LibraryPut404Response.md)
  - [ApiV1LibraryPutRequest](doc/ApiV1LibraryPutRequest.md)
  - [ApiV1MoviesGet200Response](doc/ApiV1MoviesGet200Response.md)
+ - [ApiV1MoviesGet200ResponseDataInner](doc/ApiV1MoviesGet200ResponseDataInner.md)
+ - [ApiV1MoviesGet200ResponseDataInnerMedia](doc/ApiV1MoviesGet200ResponseDataInnerMedia.md)
  - [ApiV1MoviesGet500Response](doc/ApiV1MoviesGet500Response.md)
+ - [ApiV1MoviesIdGet200Response](doc/ApiV1MoviesIdGet200Response.md)
+ - [ApiV1MoviesIdGet200ResponseData](doc/ApiV1MoviesIdGet200ResponseData.md)
+ - [ApiV1MoviesIdGet400Response](doc/ApiV1MoviesIdGet400Response.md)
+ - [ApiV1MoviesIdGet404Response](doc/ApiV1MoviesIdGet404Response.md)
+ - [ApiV1MoviesIdGet500Response](doc/ApiV1MoviesIdGet500Response.md)
  - [ApiV1ScanPathPost200Response](doc/ApiV1ScanPathPost200Response.md)
  - [ApiV1ScanPathPost200ResponseData](doc/ApiV1ScanPathPost200ResponseData.md)
  - [ApiV1ScanPathPost200ResponseDataCacheStats](doc/ApiV1ScanPathPost200ResponseDataCacheStats.md)
@@ -97,13 +109,31 @@ Class | Method | HTTP request | Description
  - [ApiV1ScanPathPost500Response](doc/ApiV1ScanPathPost500Response.md)
  - [ApiV1ScanPathPostRequest](doc/ApiV1ScanPathPostRequest.md)
  - [ApiV1ScanPathPostRequestOptions](doc/ApiV1ScanPathPostRequestOptions.md)
+ - [ApiV1SettingsFirstRunCompletePost200Response](doc/ApiV1SettingsFirstRunCompletePost200Response.md)
+ - [ApiV1SettingsFirstRunCompletePost500Response](doc/ApiV1SettingsFirstRunCompletePost500Response.md)
+ - [ApiV1SettingsGet200Response](doc/ApiV1SettingsGet200Response.md)
+ - [ApiV1SettingsGet500Response](doc/ApiV1SettingsGet500Response.md)
+ - [ApiV1SettingsPut200Response](doc/ApiV1SettingsPut200Response.md)
+ - [ApiV1SettingsPut500Response](doc/ApiV1SettingsPut500Response.md)
  - [ApiV1StreamIdGet400Response](doc/ApiV1StreamIdGet400Response.md)
  - [ApiV1StreamIdGet404Response](doc/ApiV1StreamIdGet404Response.md)
  - [ApiV1StreamIdGet416Response](doc/ApiV1StreamIdGet416Response.md)
  - [ApiV1StreamIdGet500Response](doc/ApiV1StreamIdGet500Response.md)
+ - [ApiV1TvshowsGet200Response](doc/ApiV1TvshowsGet200Response.md)
+ - [ApiV1TvshowsGet200ResponseDataInner](doc/ApiV1TvshowsGet200ResponseDataInner.md)
+ - [ApiV1TvshowsGet200ResponseDataInnerMedia](doc/ApiV1TvshowsGet200ResponseDataInnerMedia.md)
  - [ApiV1TvshowsGet500Response](doc/ApiV1TvshowsGet500Response.md)
+ - [ApiV1TvshowsIdGet200Response](doc/ApiV1TvshowsIdGet200Response.md)
+ - [ApiV1TvshowsIdGet200ResponseData](doc/ApiV1TvshowsIdGet200ResponseData.md)
+ - [ApiV1TvshowsIdGet200ResponseDataSeasonsInner](doc/ApiV1TvshowsIdGet200ResponseDataSeasonsInner.md)
+ - [ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner](doc/ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner.md)
+ - [ApiV1TvshowsIdGet400Response](doc/ApiV1TvshowsIdGet400Response.md)
+ - [ApiV1TvshowsIdGet404Response](doc/ApiV1TvshowsIdGet404Response.md)
+ - [ApiV1TvshowsIdGet500Response](doc/ApiV1TvshowsIdGet500Response.md)
  - [HealthResponse](doc/HealthResponse.md)
  - [ModelLibrary](doc/ModelLibrary.md)
+ - [PublicSettings](doc/PublicSettings.md)
+ - [UpdateSettingsRequest](doc/UpdateSettingsRequest.md)
 
 
 ## Documentation For Authorization

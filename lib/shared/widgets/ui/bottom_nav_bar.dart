@@ -72,68 +72,71 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
           left: 16.0,
           right: 16.0,
         ),
-        child: RepaintBoundary(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
-              child: Container(
-                decoration: ShapeDecoration(
-                  color: Colors.grey.shade800.withValues(alpha: 0.1),
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    side: BorderSide(
-                      color: Colors.grey.shade800.withValues(alpha: 0.2),
-                      width: 0.33,
-                    ),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Stack(
-                    key: _stackKey,
-                    clipBehavior: Clip.none,
-                    children: [
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 350),
-                        curve: Curves.easeInOutCubic,
-                        left: _pillLeft,
-                        top: 0,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 350),
-                          curve: Curves.easeInOutCubic,
-                          width: _pillWidth,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RepaintBoundary(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+                  child: Container(
+                    decoration: ShapeDecoration(
+                      color: Colors.grey.shade800.withValues(alpha: 0.1),
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        side: BorderSide(
+                          color: Colors.grey.shade800.withValues(alpha: 0.2),
+                          width: 0.33,
                         ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Stack(
+                        key: _stackKey,
+                        clipBehavior: Clip.none,
                         children: [
-                          ...List.generate(
-                            widget.items.length,
-                            (index) => _NavBarItem(
-                              key: _itemKeys[index],
-                              item: widget.items[index],
-                              isSelected: widget.currentIndex == index,
-                              onTap: () => widget.onTap(index),
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeInOutCubic,
+                            left: _pillLeft,
+                            top: 0,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeInOutCubic,
+                              width: _pillWidth,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
                             ),
                           ),
-                          if (widget.onSearchTap != null) ...[
-                            const SizedBox(width: 12),
-                            _SearchButton(onTap: widget.onSearchTap!),
-                          ],
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(
+                              widget.items.length,
+                              (index) => _NavBarItem(
+                                key: _itemKeys[index],
+                                item: widget.items[index],
+                                isSelected: widget.currentIndex == index,
+                                onTap: () => widget.onTap(index),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+            if (widget.onSearchTap != null) ...[
+              const SizedBox(width: 12),
+              _SearchButton(onTap: widget.onSearchTap!),
+            ],
+          ],
         ),
       ),
     );
@@ -218,18 +221,24 @@ class _SearchButton extends StatelessWidget {
         onTap();
       },
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.75),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 0.33,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+          child: Container(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade800.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.grey.shade800.withValues(alpha: 0.2),
+                width: 0.33,
+              ),
+            ),
+            child: Icon(PlatformIcons.search, color: Colors.white, size: 24),
           ),
         ),
-        child: Icon(PlatformIcons.search, color: Colors.white, size: 24),
       ),
     );
   }

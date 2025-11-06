@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 import '../shared/widgets/splash_screen.dart';
+import '../core/providers/websocket_provider.dart';
 
 /// Root application widget that sets up theming and routing.
 /// This wraps the ProviderScope and configures the Material app.
-class App extends StatefulWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  State<App> createState() => _AppState();
+  ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends ConsumerState<App> {
   bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize WebSocket service early
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(websocketServiceProvider);
+      ref.read(scanProgressProvider);
+    });
+  }
 
   void _onSplashComplete() {
     setState(() {

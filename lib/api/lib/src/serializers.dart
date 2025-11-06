@@ -26,7 +26,14 @@ import 'package:openapi/src/model/api_v1_library_put400_response.dart';
 import 'package:openapi/src/model/api_v1_library_put404_response.dart';
 import 'package:openapi/src/model/api_v1_library_put_request.dart';
 import 'package:openapi/src/model/api_v1_movies_get200_response.dart';
+import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner.dart';
+import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media.dart';
 import 'package:openapi/src/model/api_v1_movies_get500_response.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get200_response.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response_data.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response_data_cache_stats.dart';
@@ -34,13 +41,31 @@ import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+import 'package:openapi/src/model/api_v1_settings_first_run_complete_post200_response.dart';
+import 'package:openapi/src/model/api_v1_settings_first_run_complete_post500_response.dart';
+import 'package:openapi/src/model/api_v1_settings_get200_response.dart';
+import 'package:openapi/src/model/api_v1_settings_get500_response.dart';
+import 'package:openapi/src/model/api_v1_settings_put200_response.dart';
+import 'package:openapi/src/model/api_v1_settings_put500_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get400_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner_episodes_inner.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get400_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get404_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get500_response.dart';
 import 'package:openapi/src/model/health_response.dart';
 import 'package:openapi/src/model/model_library.dart';
+import 'package:openapi/src/model/public_settings.dart';
+import 'package:openapi/src/model/update_settings_request.dart';
 
 part 'serializers.g.dart';
 
@@ -57,7 +82,14 @@ part 'serializers.g.dart';
   ApiV1LibraryPut404Response,
   ApiV1LibraryPutRequest,
   ApiV1MoviesGet200Response,
+  ApiV1MoviesGet200ResponseDataInner,
+  ApiV1MoviesGet200ResponseDataInnerMedia,
   ApiV1MoviesGet500Response,
+  ApiV1MoviesIdGet200Response,
+  ApiV1MoviesIdGet200ResponseData,
+  ApiV1MoviesIdGet400Response,
+  ApiV1MoviesIdGet404Response,
+  ApiV1MoviesIdGet500Response,
   ApiV1ScanPathPost200Response,
   ApiV1ScanPathPost200ResponseData,
   ApiV1ScanPathPost200ResponseDataCacheStats,
@@ -65,13 +97,31 @@ part 'serializers.g.dart';
   ApiV1ScanPathPost500Response,
   ApiV1ScanPathPostRequest,
   ApiV1ScanPathPostRequestOptions,
+  ApiV1SettingsFirstRunCompletePost200Response,
+  ApiV1SettingsFirstRunCompletePost500Response,
+  ApiV1SettingsGet200Response,
+  ApiV1SettingsGet500Response,
+  ApiV1SettingsPut200Response,
+  ApiV1SettingsPut500Response,
   ApiV1StreamIdGet400Response,
   ApiV1StreamIdGet404Response,
   ApiV1StreamIdGet416Response,
   ApiV1StreamIdGet500Response,
+  ApiV1TvshowsGet200Response,
+  ApiV1TvshowsGet200ResponseDataInner,
+  ApiV1TvshowsGet200ResponseDataInnerMedia,
   ApiV1TvshowsGet500Response,
+  ApiV1TvshowsIdGet200Response,
+  ApiV1TvshowsIdGet200ResponseData,
+  ApiV1TvshowsIdGet200ResponseDataSeasonsInner,
+  ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner,
+  ApiV1TvshowsIdGet400Response,
+  ApiV1TvshowsIdGet404Response,
+  ApiV1TvshowsIdGet500Response,
   HealthResponse,
   ModelLibrary,
+  PublicSettings,
+  UpdateSettingsRequest,
 ])
 Serializers serializers = (_$serializers.toBuilder()
       ..add(const OneOfSerializer())

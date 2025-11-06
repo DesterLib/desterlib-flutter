@@ -7,6 +7,12 @@ import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 import 'package:dester/app/theme/theme.dart';
+import 'package:dester/core/providers/websocket_provider.dart';
+import 'package:dester/core/services/websocket_service.dart';
+import 'package:dester/shared/widgets/ui/scan_progress_bar.dart';
+import '../widgets/settings_layout.dart';
+import '../widgets/settings_group.dart';
+import '../widgets/settings_item.dart';
 import '../modals/add_library_modal.dart';
 import '../modals/edit_library_modal.dart';
 import '../modals/delete_library_modal.dart';
@@ -17,19 +23,18 @@ class ManageLibrariesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final librariesAsync = ref.watch(actualLibrariesProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
 
     return AnimatedAppBarPage(
       title: 'Manage Libraries',
       maxWidthConstraint: 1220,
       actions: [
-        DButton(
-          label: isMobile ? '' : 'Add Library',
-          icon: PlatformIcons.add,
-          variant: DButtonVariant.primary,
-          size: DButtonSize.sm,
-          onTap: () async {
+        IconButton(
+          icon: Icon(PlatformIcons.add),
+          color: AppColors.textPrimary,
+          iconSize: 24,
+          padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          onPressed: () async {
             final result = await AddLibraryModal.show(context);
             if (result == true) {
               // Library was added successfully
@@ -44,7 +49,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
             return _EmptyState();
           }
 
-          return _LibrariesGrid(libraries: libraries, isMobile: isMobile);
+          return _LibrariesList(libraries: libraries);
         },
         loading: () => Center(
           child: SizedBox(
@@ -139,161 +144,107 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
-// Libraries grid/list widget
-class _LibrariesGrid extends StatelessWidget {
+// Libraries list widget using DSettingsLayout
+class _LibrariesList extends ConsumerWidget {
   final BuiltList<ModelLibrary> libraries;
-  final bool isMobile;
 
-  const _LibrariesGrid({required this.libraries, required this.isMobile});
+  const _LibrariesList({required this.libraries});
 
   @override
-  Widget build(BuildContext context) {
-    if (isMobile) {
-      // Mobile: List view
-      return ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        itemCount: libraries.length,
-        separatorBuilder: (context, index) => AppSpacing.gapVerticalMD,
-        itemBuilder: (context, index) {
-          return _LibraryCard(library: libraries[index]);
-        },
-      );
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DSettingsLayout(
+      groups: [
+        DSettingsGroup(
+          title: 'Libraries',
+          items: libraries
+              .map((library) => _buildLibraryItem(library, ref, context))
+              .toList(),
+        ),
+      ],
+    );
+  }
 
-    // Desktop/Tablet: Grid view
-    final crossAxisCount = MediaQuery.of(context).size.width > 1024 ? 3 : 2;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: AppSpacing.lg,
-        mainAxisSpacing: AppSpacing.lg,
-        childAspectRatio: 1.5,
+  DSettingsItem _buildLibraryItem(
+    ModelLibrary library,
+    WidgetRef ref,
+    BuildContext context,
+  ) {
+    final scanProgress = ref.watch(scanProgressProvider);
+    final progress = scanProgress.getProgress(library.id);
+    final isScanning = progress?.isScanning ?? false;
+
+    return DSettingsItem(
+      title: library.name,
+      subtitle: _buildSubtitle(library, progress),
+      icon: _getLibraryIcon(library.libraryType),
+      progressBar: isScanning
+          ? ScanProgressBar(progress: progress, height: 2)
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isScanning) ...[
+            CompactScanProgress(progress: progress!),
+            const SizedBox(width: 12),
+          ],
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: () async {
+              final result = await EditLibraryModal.show(
+                context,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.invalidate(actualLibrariesProvider);
+              }
+            },
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: Icon(PlatformIcons.delete, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: () async {
+              final result = await DeleteLibraryModal.show(
+                context,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.invalidate(actualLibrariesProvider);
+              }
+            },
+          ),
+        ],
       ),
-      itemCount: libraries.length,
-      itemBuilder: (context, index) {
-        return _LibraryCard(library: libraries[index]);
+      onTap: () {
+        // Future: Navigate to library details
       },
     );
   }
-}
 
-// Library card widget
-class _LibraryCard extends StatelessWidget {
-  final ModelLibrary library;
+  String _buildSubtitle(ModelLibrary library, ScanProgressMessage? progress) {
+    final parts = <String>[];
 
-  const _LibraryCard({required this.library});
+    // Add type
+    parts.add(_getLibraryTypeDisplayName(library.libraryType));
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.radiusLG,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with icon and actions
-          Padding(
-            padding: AppSpacing.paddingLG,
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundElevated,
-                    borderRadius: AppRadius.radiusMD,
-                  ),
-                  child: Icon(
-                    _getLibraryIcon(library.libraryType),
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const Spacer(),
-                _LibraryActions(library: library),
-              ],
-            ),
-          ),
+    // Add path if available
+    if (library.libraryPath != null) {
+      parts.add(library.libraryPath!);
+    }
 
-          // Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    library.name,
-                    style: AppTypography.h4,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  AppSpacing.gapVerticalXS,
-                  Text(
-                    _getLibraryTypeDisplayName(library.libraryType),
-                    style: AppTypography.bodySmall,
-                  ),
-                  if (library.description != null) ...[
-                    AppSpacing.gapVerticalXS,
-                    Expanded(
-                      child: Text(
-                        library.description!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
+    // Add scan progress message if scanning
+    if (progress != null &&
+        progress.isScanning &&
+        progress.message.isNotEmpty) {
+      parts.add(progress.message);
+    }
 
-          // Footer with path
-          if (library.libraryPath != null)
-            Container(
-              padding: AppSpacing.paddingMD,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundElevated,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(AppRadius.lg),
-                  bottomRight: Radius.circular(AppRadius.lg),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    PlatformIcons.folder,
-                    size: 14,
-                    color: AppColors.textTertiary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      library.libraryPath!,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
+    return parts.join(' • ');
   }
 
   IconData _getLibraryIcon(ModelLibraryLibraryTypeEnum? type) {
@@ -317,52 +268,5 @@ class _LibraryCard extends StatelessWidget {
     if (type == ModelLibraryLibraryTypeEnum.MUSIC) return 'Music';
     if (type == ModelLibraryLibraryTypeEnum.COMIC) return 'Comics';
     return 'Unknown';
-  }
-}
-
-// Library actions widget
-class _LibraryActions extends ConsumerWidget {
-  final ModelLibrary library;
-
-  const _LibraryActions({required this.library});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        DButton(
-          icon: Icons.edit,
-          variant: DButtonVariant.ghost,
-          size: DButtonSize.sm,
-          onTap: () async {
-            final result = await EditLibraryModal.show(
-              context,
-              libraryId: library.id,
-            );
-            if (result == true) {
-              // Library was updated successfully
-              ref.invalidate(actualLibrariesProvider);
-            }
-          },
-        ),
-        const SizedBox(width: 8),
-        DButton(
-          icon: PlatformIcons.delete,
-          variant: DButtonVariant.ghost,
-          size: DButtonSize.sm,
-          onTap: () async {
-            final result = await DeleteLibraryModal.show(
-              context,
-              libraryId: library.id,
-            );
-            if (result == true) {
-              // Library was deleted successfully
-              ref.invalidate(actualLibrariesProvider);
-            }
-          },
-        ),
-      ],
-    );
   }
 }

@@ -9,6 +9,9 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool centerTitle;
   final double height;
   final double? maxWidthConstraint;
+  final bool showBackground;
+  final double titleOpacity;
+  final double titleOffset;
 
   const DAppBar({
     super.key,
@@ -18,6 +21,9 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.centerTitle = false,
     this.height = 120.0,
     this.maxWidthConstraint,
+    this.showBackground = true,
+    this.titleOpacity = 1.0,
+    this.titleOffset = 0.0,
   });
 
   @override
@@ -35,18 +41,20 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     return SizedBox(
       height: height,
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withValues(alpha: 0.8),
-              Colors.black.withValues(alpha: 0.4),
-              Colors.transparent,
-            ],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: showBackground
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.4),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.3, 1.0],
+                ),
+              )
+            : null,
         child: Padding(
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top,
@@ -83,10 +91,24 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ],
                   // Title
                   if (!centerTitle)
-                    Expanded(child: Text(title, style: titleStyle))
+                    Expanded(
+                      child: Transform.translate(
+                        offset: Offset(0, titleOffset),
+                        child: Opacity(
+                          opacity: titleOpacity,
+                          child: Text(title, style: titleStyle),
+                        ),
+                      ),
+                    )
                   else ...[
                     const Spacer(),
-                    Text(title, style: AppTypography.h2),
+                    Transform.translate(
+                      offset: Offset(0, titleOffset),
+                      child: Opacity(
+                        opacity: titleOpacity,
+                        child: Text(title, style: AppTypography.h2),
+                      ),
+                    ),
                     const Spacer(),
                   ],
                   // Actions

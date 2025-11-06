@@ -3,14 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/widgets/ui/segmented_control.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 
 class EditLibraryModal {
   static Future<bool?> show(BuildContext context, {required String libraryId}) {
+    // Use root navigator context to avoid issues with nested navigators
+    // This ensures the modal properly overlays the entire screen
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
     return showSettingsModal<bool>(
-      context: context,
+      context: rootContext,
       title: 'Edit Library',
       builder: (context) => _EditLibraryModalContent(libraryId: libraryId),
       useFullscreenOnMobile: true,
@@ -145,27 +149,42 @@ class _EditLibraryModalContentState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Error banner
-        if (_errorMessage != null)
+        if (_errorMessage != null) ...[
           SettingsModalBanner(
             message: _errorMessage!,
             type: SettingsModalBannerType.error,
           ),
+          AppSpacing.gapVerticalLG,
+        ],
 
         // Library name
         SettingsModalTextField(
           controller: _nameController,
-          label: 'Library Name',
-          hintText: 'Enter library name',
+          label: 'Name',
+          hintText: 'e.g., My Movies',
           enabled: !_isSaving,
         ),
         AppSpacing.gapVerticalLG,
 
         // Library type
         SettingsModalSection(
-          label: 'Library Type',
-          child: _LibraryTypeDropdown(
-            selectedType: _selectedType,
+          label: 'Type',
+          description: 'Currently supports Movies and TV Shows',
+          child: DSegmentedControl<ModelLibraryLibraryTypeEnum>(
+            value: _selectedType,
             enabled: !_isSaving,
+            options: [
+              SegmentedOption(
+                value: ModelLibraryLibraryTypeEnum.MOVIE,
+                label: 'Movies',
+                icon: PlatformIcons.movie,
+              ),
+              SegmentedOption(
+                value: ModelLibraryLibraryTypeEnum.TV_SHOW,
+                label: 'TV Shows',
+                icon: PlatformIcons.videoLibrary,
+              ),
+            ],
             onChanged: (value) {
               setState(() {
                 _selectedType = value;
@@ -175,21 +194,21 @@ class _EditLibraryModalContentState
         ),
         AppSpacing.gapVerticalLG,
 
-        // Description
+        // Library path
         SettingsModalTextField(
-          controller: _descriptionController,
-          label: 'Description (Optional)',
-          hintText: 'Enter description',
-          maxLines: 3,
+          controller: _pathController,
+          label: 'Path (Optional)',
+          hintText: '/path/to/your/media/folder',
           enabled: !_isSaving,
         ),
         AppSpacing.gapVerticalLG,
 
-        // Library path
+        // Description
         SettingsModalTextField(
-          controller: _pathController,
-          label: 'Library Path (Optional)',
-          hintText: 'Enter file system path',
+          controller: _descriptionController,
+          label: 'Description (Optional)',
+          hintText: 'Enter a description for this library',
+          maxLines: 2,
           enabled: !_isSaving,
         ),
         AppSpacing.gapVerticalLG,
@@ -229,98 +248,6 @@ class _EditLibraryModalContentState
         return ApiV1LibraryPutRequestLibraryTypeEnum.COMIC;
       default:
         return ApiV1LibraryPutRequestLibraryTypeEnum.MOVIE;
-    }
-  }
-}
-
-// Library type dropdown widget
-class _LibraryTypeDropdown extends StatelessWidget {
-  final ModelLibraryLibraryTypeEnum? selectedType;
-  final bool enabled;
-  final ValueChanged<ModelLibraryLibraryTypeEnum?> onChanged;
-
-  const _LibraryTypeDropdown({
-    required this.selectedType,
-    required this.enabled,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.paddingMD,
-      decoration: BoxDecoration(
-        color: enabled ? AppColors.surface : AppColors.backgroundElevated,
-        borderRadius: AppRadius.radiusMD,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<ModelLibraryLibraryTypeEnum?>(
-          value: selectedType,
-          isExpanded: true,
-          dropdownColor: AppColors.surface,
-          style: AppTypography.bodyBase,
-          icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-          items: [
-            DropdownMenuItem<ModelLibraryLibraryTypeEnum?>(
-              value: null,
-              child: Text(
-                'Select type',
-                style: AppTypography.bodyBase.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-            ...ModelLibraryLibraryTypeEnum.values.map(
-              (type) => DropdownMenuItem<ModelLibraryLibraryTypeEnum?>(
-                value: type,
-                child: Row(
-                  children: [
-                    Icon(
-                      _getLibraryIcon(type),
-                      size: 20,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(_getLibraryTypeDisplayName(type)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-          onChanged: enabled ? onChanged : null,
-        ),
-      ),
-    );
-  }
-
-  IconData _getLibraryIcon(ModelLibraryLibraryTypeEnum type) {
-    switch (type) {
-      case ModelLibraryLibraryTypeEnum.MOVIE:
-        return PlatformIcons.movie;
-      case ModelLibraryLibraryTypeEnum.TV_SHOW:
-        return PlatformIcons.videoLibrary;
-      case ModelLibraryLibraryTypeEnum.MUSIC:
-        return PlatformIcons.playCircle;
-      case ModelLibraryLibraryTypeEnum.COMIC:
-        return PlatformIcons.libraryBooks;
-      default:
-        return PlatformIcons.videoLibrary;
-    }
-  }
-
-  String _getLibraryTypeDisplayName(ModelLibraryLibraryTypeEnum type) {
-    switch (type) {
-      case ModelLibraryLibraryTypeEnum.MOVIE:
-        return 'Movies';
-      case ModelLibraryLibraryTypeEnum.TV_SHOW:
-        return 'TV Shows';
-      case ModelLibraryLibraryTypeEnum.MUSIC:
-        return 'Music';
-      case ModelLibraryLibraryTypeEnum.COMIC:
-        return 'Comics';
-      default:
-        return 'Unknown';
     }
   }
 }

@@ -62,9 +62,12 @@ final GoRouter router = GoRouter(
           path: '/media/:id',
           pageBuilder: (BuildContext context, GoRouterState state) {
             final id = state.pathParameters['id']!;
+            final type = state.uri.queryParameters['type'];
             return _buildPageWithTransition(
               state,
-              ConnectionGuard(child: MediaDetailScreen(id: id)),
+              ConnectionGuard(
+                child: MediaDetailScreen(id: id, mediaType: type),
+              ),
             );
           },
         ),
@@ -211,6 +214,9 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
                   label: 'Settings',
                 ),
               ],
+              onSearchTap: () {
+                // TODO: Implement search functionality
+              },
             )
           : null,
       body: showSidebar && isConnected

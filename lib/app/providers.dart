@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:openapi/openapi.dart';
 import '../core/config/api_config.dart';
 
@@ -37,5 +38,16 @@ final baseUrlProvider = NotifierProvider<BaseUrlNotifier, String>(() {
 final openapiClientProvider = Provider<Openapi>((ref) {
   // Watch the base URL so the client gets recreated when it changes
   final baseUrl = ref.watch(baseUrlProvider);
-  return Openapi(basePathOverride: baseUrl);
+
+  // Create Dio with longer timeouts for operations like scanning
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: ApiConfig.timeout, // 30 seconds
+      sendTimeout: ApiConfig.timeout,
+    ),
+  );
+
+  return Openapi(basePathOverride: baseUrl, dio: dio);
 });

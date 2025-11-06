@@ -13,6 +13,7 @@ import 'package:openapi/src/api/health_api.dart';
 import 'package:openapi/src/api/library_api.dart';
 import 'package:openapi/src/api/movies_api.dart';
 import 'package:openapi/src/api/scan_api.dart';
+import 'package:openapi/src/api/settings_api.dart';
 import 'package:openapi/src/api/stream_api.dart';
 import 'package:openapi/src/api/tv_shows_api.dart';
 
@@ -92,6 +93,12 @@ class Openapi {
   /// by doing that all interceptors will not be executed
   ScanApi getScanApi() {
     return ScanApi(dio, serializers);
+  }
+
+  /// Get SettingsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  SettingsApi getSettingsApi() {
+    return SettingsApi(dio, serializers);
   }
 
   /// Get StreamApi instance, base route and serializer can be overridden by a given but be careful,

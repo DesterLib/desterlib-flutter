@@ -17,7 +17,18 @@ class MediaGenresSection extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: genres.map((genre) => DBadge(label: genre)).toList(),
+          children: genres
+              .map(
+                (genre) => DBadge(
+                  label: genre,
+                  fontSize: 12,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );

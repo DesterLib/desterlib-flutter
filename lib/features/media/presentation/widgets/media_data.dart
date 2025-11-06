@@ -9,7 +9,8 @@ class MediaData {
   final String description;
   final String director;
   final List<String> cast;
-  final String? imageUrl;
+  final String? posterUrl;
+  final String? backdropUrl;
 
   const MediaData({
     required this.id,
@@ -21,7 +22,8 @@ class MediaData {
     required this.description,
     required this.director,
     required this.cast,
-    this.imageUrl,
+    this.posterUrl,
+    this.backdropUrl,
   });
 
   factory MediaData.fromJson(Map<String, dynamic> json) {
@@ -35,7 +37,8 @@ class MediaData {
       description: json['description'] as String,
       director: json['director'] as String,
       cast: List<String>.from(json['cast'] as List),
-      imageUrl: json['imageUrl'] as String?,
+      posterUrl: json['posterUrl'] as String?,
+      backdropUrl: json['backdropUrl'] as String?,
     );
   }
 }
