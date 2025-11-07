@@ -1,7 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:ui';
 
-enum DButtonVariant { primary, secondary, ghost, danger }
+enum DButtonVariant { primary, secondary, ghost, danger, neutral }
 
 enum DButtonSize { sm, md, lg }
 
@@ -49,6 +50,9 @@ class DButton extends StatefulWidget {
 }
 
 class _DButtonState extends State<DButton> {
+  bool _isHovered = false;
+  bool _isPressed = false;
+
   ({double iconSize, double fontSize, EdgeInsets padding}) get _sizeProperties {
     switch (widget.size) {
       case DButtonSize.sm:
@@ -81,28 +85,31 @@ class _DButtonState extends State<DButton> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  _ButtonStyle get _style {
     final sizeProps = _sizeProperties;
 
-    late _ButtonStyle style;
     switch (widget.variant) {
       case DButtonVariant.primary:
-        style = _ButtonStyle(
-          backgroundColor: Colors.white,
-          textColor: Colors.black,
+        return _ButtonStyle(
+          backgroundColor: _isHovered ? Colors.grey[300]! : Colors.white,
+          textColor: _isHovered ? Colors.grey.shade800 : Colors.black,
           borderSide: BorderSide.none,
           borderRadius: widget.borderRadius,
           padding: sizeProps.padding,
           alignment: MainAxisAlignment.center,
           iconLabelSpacing: 4,
         );
+
       case DButtonVariant.secondary:
-        style = _ButtonStyle(
-          backgroundColor: Colors.white.withValues(alpha: 0.1),
-          textColor: Colors.grey.shade200,
+        return _ButtonStyle(
+          backgroundColor: _isHovered
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.white.withValues(alpha: 0.1),
+          textColor: _isHovered ? Colors.white : Colors.grey.shade200,
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: _isHovered
+                ? Colors.white.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
           borderRadius: widget.borderRadius,
@@ -110,23 +117,49 @@ class _DButtonState extends State<DButton> {
           alignment: MainAxisAlignment.center,
           iconLabelSpacing: 4,
         );
+
       case DButtonVariant.ghost:
-        style = _ButtonStyle(
-          backgroundColor: Colors.transparent,
-          textColor: Colors.grey.shade400,
+        return _ButtonStyle(
+          backgroundColor: _isHovered
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.transparent,
+          textColor: _isHovered ? Colors.white : Colors.grey.shade400,
           borderSide: BorderSide.none,
           borderRadius: widget.borderRadius,
           padding: sizeProps.padding,
           alignment: MainAxisAlignment.center,
           iconLabelSpacing: 4,
         );
+
       case DButtonVariant.danger:
-        style = _ButtonStyle(
-          backgroundColor: Colors.red.withValues(alpha: 0.6),
+        return _ButtonStyle(
+          backgroundColor: _isHovered
+              ? Colors.red.withValues(alpha: 0.8)
+              : Colors.red.withValues(alpha: 0.6),
           textColor: Colors.white,
           borderSide: BorderSide(
-            color: Colors.red.withValues(alpha: 0.7),
+            color: _isHovered
+                ? Colors.red.withValues(alpha: 0.9)
+                : Colors.red.withValues(alpha: 0.7),
             width: 1,
+          ),
+          borderRadius: widget.borderRadius,
+          padding: sizeProps.padding,
+          alignment: MainAxisAlignment.center,
+          iconLabelSpacing: 4,
+        );
+
+      case DButtonVariant.neutral:
+        return _ButtonStyle(
+          backgroundColor: _isHovered
+              ? Colors.grey.shade800.withValues(alpha: 0.15)
+              : Colors.grey.shade800.withValues(alpha: 0.1),
+          textColor: _isHovered ? Colors.white : Colors.grey.shade200,
+          borderSide: BorderSide(
+            color: _isHovered
+                ? Colors.grey.shade800.withValues(alpha: 0.3)
+                : Colors.grey.shade800.withValues(alpha: 0.2),
+            width: 0.33,
           ),
           borderRadius: widget.borderRadius,
           padding: sizeProps.padding,
@@ -134,15 +167,60 @@ class _DButtonState extends State<DButton> {
           iconLabelSpacing: 4,
         );
     }
+  }
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: ClipRRect(
-        borderRadius: style.borderRadius,
-        child: widget.variant == DButtonVariant.secondary
-            ? BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
+  @override
+  Widget build(BuildContext context) {
+    final style = _style;
+
+    Widget buttonContent = MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Listener(
+        onPointerDown: (_) {
+          HapticFeedback.lightImpact();
+          setState(() => _isPressed = true);
+        },
+        onPointerUp: (_) => setState(() => _isPressed = false),
+        onPointerCancel: (_) => setState(() => _isPressed = false),
+        child: AnimatedScale(
+          scale: _isPressed
+              ? 0.98
+              : _isHovered
+              ? 1.02
+              : 1.0,
+          duration: const Duration(milliseconds: 100),
+          child:
+              (widget.variant == DButtonVariant.secondary ||
+                  widget.variant == DButtonVariant.neutral)
+              ? ClipRRect(
+                  borderRadius: style.borderRadius,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: widget.variant == DButtonVariant.neutral
+                          ? 40.0
+                          : 10.0,
+                      sigmaY: widget.variant == DButtonVariant.neutral
+                          ? 40.0
+                          : 10.0,
+                    ),
+                    child: Container(
+                      width: widget.fullWidth ? double.infinity : null,
+                      padding: style.padding,
+                      decoration: ShapeDecoration(
+                        color: style.backgroundColor,
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: style.borderRadius,
+                          side: style.borderSide,
+                        ),
+                      ),
+                      child: _buildButtonContent(style),
+                    ),
+                  ),
+                )
+              : AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
                   width: widget.fullWidth ? double.infinity : null,
                   padding: style.padding,
                   decoration: ShapeDecoration(
@@ -154,21 +232,16 @@ class _DButtonState extends State<DButton> {
                   ),
                   child: _buildButtonContent(style),
                 ),
-              )
-            : Container(
-                width: widget.fullWidth ? double.infinity : null,
-                padding: style.padding,
-                decoration: ShapeDecoration(
-                  color: style.backgroundColor,
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: style.borderRadius,
-                    side: style.borderSide,
-                  ),
-                ),
-                child: _buildButtonContent(style),
-              ),
+        ),
       ),
     );
+
+    // Wrap with GestureDetector if onTap is provided
+    if (widget.onTap != null) {
+      return GestureDetector(onTap: widget.onTap, child: buttonContent);
+    }
+
+    return buttonContent;
   }
 
   Widget _buildButtonContent(_ButtonStyle style) {

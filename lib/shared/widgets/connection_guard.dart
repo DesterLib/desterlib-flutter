@@ -19,11 +19,15 @@ class ConnectionGuard extends ConsumerWidget {
       duration: const Duration(milliseconds: 300),
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
-      child: _buildContent(context, connectionStatus),
+      child: _buildContent(context, ref, connectionStatus),
     );
   }
 
-  Widget _buildContent(BuildContext context, ConnectionStatus status) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    ConnectionStatus status,
+  ) {
     // If checking connection, show loading
     if (status == ConnectionStatus.checking) {
       return Scaffold(
@@ -124,7 +128,7 @@ class _DisconnectedActions extends ConsumerWidget {
           variant: DButtonVariant.primary,
           size: DButtonSize.sm,
           icon: PlatformIcons.settings,
-          onTap: () => ApiConnectionModal.show(context),
+          onTap: () => ApiConnectionModal.show(context, ref),
         ),
       ],
     );

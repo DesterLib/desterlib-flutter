@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
-import 'package:dester/shared/widgets/ui/cached_image.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'media_data.dart';
 
@@ -30,14 +29,30 @@ class MediaHeroSection extends StatelessWidget {
       child: isMobile
           ? AspectRatio(
               aspectRatio: 2 / 3, // Standard poster aspect ratio
-              child: ClipRRect(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Force integer pixel dimensions to prevent subpixel rendering issues
+                  final width = constraints.maxWidth.floorToDouble();
+                  final height = constraints.maxHeight.floorToDouble();
+
+                  return Container(
+                    width: width,
+                    height: height,
+                    clipBehavior: Clip.hardEdge,
+                    decoration: const ShapeDecoration(
+                      shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
+                      ),
+                    ),
                 child: Stack(
-                  fit: StackFit.expand,
                   children: [
-                    _buildBackground(hasImage, imageUrl),
-                    _buildVignetteOverlay(),
-                    _buildGradientOverlay(),
+                        // Combined background and gradient in single layer
+                        Positioned.fill(
+                          child: _buildBackgroundWithGradient(
+                            hasImage,
+                            imageUrl,
+                          ),
+                        ),
                     // Content positioned at the bottom with proper padding
                     Positioned(
                       left: 24,
@@ -47,6 +62,8 @@ class MediaHeroSection extends StatelessWidget {
                     ),
                   ],
                 ),
+                  );
+                },
               ),
             )
           : ConstrainedBox(
@@ -54,16 +71,32 @@ class MediaHeroSection extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio:
                     16 / 9, // Landscape aspect ratio for backdrop images
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Force integer pixel dimensions to prevent subpixel rendering issues
+                    final width = constraints.maxWidth.floorToDouble();
+                    final height = constraints.maxHeight.floorToDouble();
+
+                    return Container(
+                      width: width,
+                      height: height,
+                      clipBehavior: Clip.hardEdge,
+                      decoration: const ShapeDecoration(
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(24),
+                          ),
+                        ),
                   ),
                   child: Stack(
-                    fit: StackFit.expand,
                     children: [
-                      _buildBackground(hasImage, imageUrl),
-                      _buildVignetteOverlay(),
-                      _buildGradientOverlay(),
+                          // Combined background and gradient in single layer
+                          Positioned.fill(
+                            child: _buildBackgroundWithGradient(
+                              hasImage,
+                              imageUrl,
+                            ),
+                          ),
                       // Content positioned at the bottom with proper padding
                       Positioned(
                         left: 40,
@@ -73,6 +106,8 @@ class MediaHeroSection extends StatelessWidget {
                       ),
                     ],
                   ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -87,6 +122,8 @@ class MediaHeroSection extends StatelessWidget {
         // Title
         Text(
           mediaData.title,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white,
             fontSize: isMobile ? 28 : 48,
@@ -95,14 +132,9 @@ class MediaHeroSection extends StatelessWidget {
             height: 1.0,
             shadows: [
               Shadow(
-                offset: const Offset(0, 2),
-                blurRadius: 8,
-                color: Colors.black.withValues(alpha: 0.7),
-              ),
-              Shadow(
-                offset: const Offset(0, 4),
-                blurRadius: 16,
-                color: Colors.black.withValues(alpha: 0.5),
+                offset: const Offset(0, 1),
+                blurRadius: 4,
+                color: Colors.black.withValues(alpha: 0.4),
               ),
             ],
           ),
@@ -209,96 +241,51 @@ class MediaHeroSection extends StatelessWidget {
     );
   }
 
-  Widget _buildBackground(bool hasImage, String? imageUrl) {
+  /// Builds background with gradient mask applied directly to the image
+  /// This eliminates separate layers and prevents pixel shift issues
+  Widget _buildBackgroundWithGradient(bool hasImage, String? imageUrl) {
     if (hasImage && imageUrl != null) {
+      // Use ShaderMask to apply gradient directly to the image
       return SizedBox.expand(
-        child: DCachedImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          // Use higher cache sizes to ensure quality on high-DPI displays
-          // Poster (mobile): ~1200px width for 3x retina displays
-          // Backdrop (desktop): ~1920px width for HD displays
-          cacheWidth: isMobile ? 1200 : 1920,
-          cacheHeight: isMobile ? 1800 : 1080,
-          showLoadingIndicator: true,
-          placeholder: Container(
-            color: const Color(0xFF1a1a1a),
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Colors.white.withValues(alpha: 0.5),
-                strokeWidth: 2,
-              ),
-            ),
-          ),
-          errorWidget: Container(
-            color: const Color(0xFF1a1a1a),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    PlatformIcons.brokenImage,
-                    color: Colors.white54,
-                    size: 48,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Failed to load image',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
-                    ),
-                  ),
+        child: ColoredBox(
+          color: Colors.black, // Background color that shows through the mask
+          child: ShaderMask(
+            shaderCallback: (rect) {
+              return LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.4, 0.65, 0.85, 1.0],
+                colors: [
+                  Colors.white.withValues(alpha: 0.9),
+                  Colors.white.withValues(alpha: 0.7),
+                  Colors.white.withValues(alpha: 0.4),
+                  Colors.white.withValues(alpha: 0.15),
+                  Colors.white.withValues(alpha: 0.05),
                 ],
-              ),
+              ).createShader(rect);
+            },
+            blendMode: BlendMode
+                .dstIn, // Makes the image transparent where mask is transparent
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
             ),
           ),
         ),
       );
     }
 
-    return Container(
+    // No image - show gradient background only
+    return SizedBox.expand(
+      child: Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF2a2a2a), Color(0xFF1a1a1a)],
         ),
-      ),
-    );
-  }
-
-  Widget _buildGradientOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.4, 0.65, 0.85, 1.0],
-          colors: [
-            Colors.black.withValues(alpha: 0.1),
-            Colors.black.withValues(alpha: 0.3),
-            Colors.black.withValues(alpha: 0.6),
-            Colors.black.withValues(alpha: 0.85),
-            Colors.black.withValues(alpha: 0.95),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVignetteOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.center,
-          radius: 1.0,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.3),
-            Colors.black.withValues(alpha: 0.6),
-          ],
-          stops: const [0.3, 0.7, 1.0],
         ),
       ),
     );

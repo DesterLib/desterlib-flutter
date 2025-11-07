@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:openapi/openapi.dart';
+import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
@@ -49,55 +50,63 @@ class MediaDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
-    final mediaAsync = ref.watch(mediaDetailProvider((id, mediaType)));
-    final tvShowDetailsAsync = ref.watch(tvShowDetailsProvider(id));
+    final mediaDetailAsync = ref.watch(mediaDetailProvider((id, mediaType)));
+
+    // Extract title from async result for app bar
+    final appBarTitle = mediaDetailAsync.maybeWhen(
+      data: (result) => result?.mediaData.title ?? '',
+      orElse: () => '',
+    );
+
+    // Calculate hero section height to determine when title should appear
+    // Mobile: 2/3 aspect ratio (poster), Desktop: min of 16/9 aspect ratio or 600px (backdrop)
+    final heroHeight = isMobile
+        ? screenWidth *
+              (3 / 2) // 2:3 aspect ratio for mobile poster
+        : (screenWidth * (9 / 16)).clamp(
+            0.0,
+            600.0,
+          ); // 16:9 aspect ratio capped at 600px
+
+    // Responsive app bar height: smaller on desktop, larger on mobile
+    final appBarHeight = isMobile ? 120.0 : 80.0;
 
     return AnimatedAppBarPage(
-      title: '', // Hide app bar title on both mobile and desktop
+      title: appBarTitle,
       extendBodyBehindAppBar: true,
-      leading: DButton(
+      showTitleOnScroll: true, // Show title when scrolling
+      appBarHeight: appBarHeight,
+      scrollThresholdForTitle:
+          heroHeight -
+          appBarHeight, // Start fade when hero is almost off screen (minus app bar height)
+      titleStyle: const TextStyle(
+        fontSize: AppTypography.fontSizeLG, // 16px
+        fontWeight: AppTypography.semiBold,
+        color: AppColors.textPrimary,
+        letterSpacing: AppTypography.letterSpacingTight,
+      ),
+      leadingBuilder: (isScrolled) => DButton(
         icon: PlatformIcons.arrowBack,
-        variant: DButtonVariant.secondary,
+        variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
         size: DButtonSize.sm,
         onTap: () => context.pop(),
       ),
-      child: mediaAsync.when(
-        data: (mediaData) {
-          if (mediaData == null) {
+      child: mediaDetailAsync.when(
+        data: (result) {
+          if (result == null) {
             return _buildNotFound(context);
           }
 
-          // Check if this is a TV show and get seasons data
-          return tvShowDetailsAsync.when(
-            data: (tvShowDetails) {
-              // Debug: Print seasons data
-              if (tvShowDetails?.seasons != null) {
-                debugPrint(
-                  'TV Show has ${tvShowDetails!.seasons!.length} seasons',
-                );
-              } else {
-                debugPrint('No seasons data available');
-              }
+          final mediaData = result.mediaData;
+          final tvShowSeasons = result.tvShowDetails?.seasons;
 
-              return _MediaDetailContent(
-                mediaData: mediaData,
-                isMobile: isMobile,
-                tvShowSeasons: tvShowDetails?.seasons,
-                onPlayTapped: () => _handlePlayTapped(context, mediaData.id),
-                onEpisodePlay: (episodeId, episodeTitle) =>
-                    _handleEpisodePlay(context, episodeId, episodeTitle),
-              );
-            },
-            loading: () => _MediaDetailContent(
-              mediaData: mediaData,
-              isMobile: isMobile,
-              onPlayTapped: () => _handlePlayTapped(context, mediaData.id),
-            ),
-            error: (error, stack) => _MediaDetailContent(
-              mediaData: mediaData,
-              isMobile: isMobile,
-              onPlayTapped: () => _handlePlayTapped(context, mediaData.id),
-            ),
+          return _MediaDetailContent(
+            mediaData: mediaData,
+            isMobile: isMobile,
+            tvShowSeasons: tvShowSeasons,
+            onPlayTapped: () => _handlePlayTapped(context, mediaData.id),
+            onEpisodePlay: (episodeId, episodeTitle) =>
+                _handleEpisodePlay(context, episodeId, episodeTitle),
           );
         },
         loading: () => const _LoadingIndicator(),

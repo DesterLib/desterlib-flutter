@@ -51,23 +51,13 @@ final librariesByTypeProvider =
 class LibraryManagementState {
   final bool isLoading;
   final String? error;
-  final ModelLibrary? selectedLibrary;
 
-  const LibraryManagementState({
-    this.isLoading = false,
-    this.error,
-    this.selectedLibrary,
-  });
+  const LibraryManagementState({this.isLoading = false, this.error});
 
-  LibraryManagementState copyWith({
-    bool? isLoading,
-    String? error,
-    ModelLibrary? selectedLibrary,
-  }) {
+  LibraryManagementState copyWith({bool? isLoading, String? error}) {
     return LibraryManagementState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      selectedLibrary: selectedLibrary ?? this.selectedLibrary,
     );
   }
 }
@@ -122,21 +112,6 @@ class LibraryManagementNotifier extends Notifier<LibraryManagementState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
-  }
-
-  /// Set selected library for editing
-  void selectLibrary(ModelLibrary library) {
-    state = state.copyWith(selectedLibrary: library);
-  }
-
-  /// Clear selected library
-  void clearSelectedLibrary() {
-    state = state.copyWith(selectedLibrary: null);
-  }
-
-  /// Clear error
-  void clearError() {
-    state = state.copyWith(error: null);
   }
 }
 

@@ -72,6 +72,7 @@ Class | Method | HTTP request | Description
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesGet**](doc/MoviesApi.md#apiv1moviesget) | **GET** /api/v1/movies | Get all movies
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesIdGet**](doc/MoviesApi.md#apiv1moviesidget) | **GET** /api/v1/movies/{id} | Get a movie by ID
 [*ScanApi*](doc/ScanApi.md) | [**apiV1ScanPathPost**](doc/ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch TMDB metadata
+[*SearchApi*](doc/SearchApi.md) | [**apiV1SearchGet**](doc/SearchApi.md#apiv1searchget) | **GET** /api/v1/search | Search media by title
 [*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsFirstRunCompletePost**](doc/SettingsApi.md#apiv1settingsfirstruncompletepost) | **POST** /api/v1/settings/first-run-complete | Complete first run setup
 [*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsGet**](doc/SettingsApi.md#apiv1settingsget) | **GET** /api/v1/settings | Get application settings
 [*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsPut**](doc/SettingsApi.md#apiv1settingsput) | **PUT** /api/v1/settings | Update application settings
@@ -109,6 +110,13 @@ Class | Method | HTTP request | Description
  - [ApiV1ScanPathPost500Response](doc/ApiV1ScanPathPost500Response.md)
  - [ApiV1ScanPathPostRequest](doc/ApiV1ScanPathPostRequest.md)
  - [ApiV1ScanPathPostRequestOptions](doc/ApiV1ScanPathPostRequestOptions.md)
+ - [ApiV1SearchGet200Response](doc/ApiV1SearchGet200Response.md)
+ - [ApiV1SearchGet200ResponseData](doc/ApiV1SearchGet200ResponseData.md)
+ - [ApiV1SearchGet200ResponseDataMoviesInner](doc/ApiV1SearchGet200ResponseDataMoviesInner.md)
+ - [ApiV1SearchGet200ResponseDataTvShowsInner](doc/ApiV1SearchGet200ResponseDataTvShowsInner.md)
+ - [ApiV1SearchGet200ResponseDataTvShowsInnerMedia](doc/ApiV1SearchGet200ResponseDataTvShowsInnerMedia.md)
+ - [ApiV1SearchGet400Response](doc/ApiV1SearchGet400Response.md)
+ - [ApiV1SearchGet500Response](doc/ApiV1SearchGet500Response.md)
  - [ApiV1SettingsFirstRunCompletePost200Response](doc/ApiV1SettingsFirstRunCompletePost200Response.md)
  - [ApiV1SettingsFirstRunCompletePost500Response](doc/ApiV1SettingsFirstRunCompletePost500Response.md)
  - [ApiV1SettingsGet200Response](doc/ApiV1SettingsGet200Response.md)
@@ -121,7 +129,6 @@ Class | Method | HTTP request | Description
  - [ApiV1StreamIdGet500Response](doc/ApiV1StreamIdGet500Response.md)
  - [ApiV1TvshowsGet200Response](doc/ApiV1TvshowsGet200Response.md)
  - [ApiV1TvshowsGet200ResponseDataInner](doc/ApiV1TvshowsGet200ResponseDataInner.md)
- - [ApiV1TvshowsGet200ResponseDataInnerMedia](doc/ApiV1TvshowsGet200ResponseDataInnerMedia.md)
  - [ApiV1TvshowsGet500Response](doc/ApiV1TvshowsGet500Response.md)
  - [ApiV1TvshowsIdGet200Response](doc/ApiV1TvshowsIdGet200Response.md)
  - [ApiV1TvshowsIdGet200ResponseData](doc/ApiV1TvshowsIdGet200ResponseData.md)

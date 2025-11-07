@@ -38,6 +38,16 @@ Serializers _$serializers =
           ..add(ApiV1ScanPathPostRequest.serializer)
           ..add(ApiV1ScanPathPostRequestOptions.serializer)
           ..add(ApiV1ScanPathPostRequestOptionsMediaTypeEnum.serializer)
+          ..add(ApiV1SearchGet200Response.serializer)
+          ..add(ApiV1SearchGet200ResponseData.serializer)
+          ..add(ApiV1SearchGet200ResponseDataMoviesInner.serializer)
+          ..add(ApiV1SearchGet200ResponseDataTvShowsInner.serializer)
+          ..add(ApiV1SearchGet200ResponseDataTvShowsInnerMedia.serializer)
+          ..add(
+            ApiV1SearchGet200ResponseDataTvShowsInnerMediaTypeEnum.serializer,
+          )
+          ..add(ApiV1SearchGet400Response.serializer)
+          ..add(ApiV1SearchGet500Response.serializer)
           ..add(ApiV1SettingsFirstRunCompletePost200Response.serializer)
           ..add(ApiV1SettingsFirstRunCompletePost500Response.serializer)
           ..add(ApiV1SettingsGet200Response.serializer)
@@ -50,8 +60,6 @@ Serializers _$serializers =
           ..add(ApiV1StreamIdGet500Response.serializer)
           ..add(ApiV1TvshowsGet200Response.serializer)
           ..add(ApiV1TvshowsGet200ResponseDataInner.serializer)
-          ..add(ApiV1TvshowsGet200ResponseDataInnerMedia.serializer)
-          ..add(ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum.serializer)
           ..add(ApiV1TvshowsGet500Response.serializer)
           ..add(ApiV1TvshowsIdGet200Response.serializer)
           ..add(ApiV1TvshowsIdGet200ResponseData.serializer)
@@ -73,6 +81,18 @@ Serializers _$serializers =
               const FullType(ApiV1MoviesGet200ResponseDataInner),
             ]),
             () => ListBuilder<ApiV1MoviesGet200ResponseDataInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ApiV1SearchGet200ResponseDataMoviesInner),
+            ]),
+            () => ListBuilder<ApiV1SearchGet200ResponseDataMoviesInner>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [
+              const FullType(ApiV1SearchGet200ResponseDataTvShowsInner),
+            ]),
+            () => ListBuilder<ApiV1SearchGet200ResponseDataTvShowsInner>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [

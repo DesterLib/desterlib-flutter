@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/configurable_modal.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/app/theme/theme.dart';
 import '../../../../app/providers.dart';
@@ -9,138 +9,80 @@ import '../../../../core/config/api_config.dart';
 import '../../data/tmdb_settings_provider.dart';
 
 class ApiConnectionModal {
-  static Future<bool?> show(BuildContext context) {
-    return showSettingsModal<bool>(
-      context: context,
-      title: 'API Connection',
-      builder: (context) => const _ApiConnectionModalContent(),
+  static Future<bool?> show(BuildContext context, WidgetRef ref) async {
+    await ApiConfig.loadBaseUrl();
+
+    if (!context.mounted) return null;
+
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+    return showConfigurableModal<bool>(
+      context: rootContext,
+      config: _createConfig(ref),
+      initialValues: {'url': ApiConfig.baseUrl},
     );
   }
-}
 
-class _ApiConnectionModalContent extends ConsumerStatefulWidget {
-  const _ApiConnectionModalContent();
-
-  @override
-  ConsumerState<_ApiConnectionModalContent> createState() =>
-      _ApiConnectionModalContentState();
-}
-
-class _ApiConnectionModalContentState
-    extends ConsumerState<_ApiConnectionModalContent> {
-  final TextEditingController _urlController = TextEditingController();
-  bool _isConnecting = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUrl();
-  }
-
-  Future<void> _loadCurrentUrl() async {
-    await ApiConfig.loadBaseUrl();
-    if (mounted) {
-      setState(() {
-        _urlController.text = ApiConfig.baseUrl;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _testConnection() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isConnecting = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // Save the new URL
-      await ApiConfig.saveBaseUrl(_urlController.text.trim());
-
-      // Update the base URL provider
-      ref.read(baseUrlProvider.notifier).updateUrl(_urlController.text.trim());
-
-      // Test the connection
-      final connectionNotifier = ref.read(connectionStatusProvider.notifier);
-      await connectionNotifier.checkConnection();
-
-      // Wait for status update
-      await Future.delayed(const Duration(milliseconds: 200));
-
-      if (!mounted) return;
-
-      final status = ref.read(connectionStatusProvider);
-      if (status == ConnectionStatus.connected) {
-        // Refresh TMDB settings from the newly connected API
-        await ref.read(tmdbSettingsProvider.notifier).refreshFromApi();
-
-        if (mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            _errorMessage = 'Failed to connect to API server';
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Connection error: ${e.toString()}';
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isConnecting = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_errorMessage != null)
-          SettingsModalBanner(
-            message: _errorMessage!,
-            type: SettingsModalBannerType.error,
-          ),
-        SettingsModalTextField(
-          controller: _urlController,
+  static ModalConfig _createConfig(WidgetRef ref) {
+    return ModalConfig(
+      title: 'API Connection',
+      banners: const [],
+      fields: [
+        ModalFieldConfig(
+          key: 'url',
           label: 'Server URL',
           hintText: 'http://localhost:3001',
           keyboardType: TextInputType.url,
-          enabled: !_isConnecting,
         ),
-        _ConnectionStatusIndicator(),
-        AppSpacing.gapVerticalXS,
-        SettingsModalActions(
-          actions: [
-            DButton(
-              label: _isConnecting
-                  ? 'Connecting...'
-                  : _errorMessage != null
-                  ? 'Retry'
-                  : 'Connect',
-              variant: DButtonVariant.primary,
-              size: DButtonSize.sm,
-              icon: _errorMessage != null ? Icons.refresh : Icons.link,
-              onTap: _isConnecting ? null : _testConnection,
-            ),
-          ],
+      ],
+      customSections: [
+        ModalSectionConfig(
+          position: 1,
+          builder: (context, state, updateState) {
+            return _ConnectionStatusIndicator();
+          },
+        ),
+      ],
+      actions: [
+        ModalActionConfig(
+          label: 'Connect',
+          icon: Icons.link,
+          variant: DButtonVariant.primary,
+          size: DButtonSize.sm,
+          labelBuilder: (values, state) {
+            final hasError = state['hasError'] == true;
+            return hasError ? 'Retry' : 'Connect';
+          },
+          iconBuilder: (values, state) {
+            final hasError = state['hasError'] == true;
+            return hasError ? Icons.refresh : Icons.link;
+          },
+          onTap: (values, state, context) async {
+            final url = values['url']?.trim() ?? '';
+
+            await ApiConfig.saveBaseUrl(url);
+            ref.read(baseUrlProvider.notifier).updateUrl(url);
+
+            final connectionNotifier = ref.read(
+              connectionStatusProvider.notifier,
+            );
+            await connectionNotifier.checkConnection();
+
+            await Future.delayed(const Duration(milliseconds: 200));
+
+            if (!context.mounted) return;
+
+            final status = ref.read(connectionStatusProvider);
+            if (status == ConnectionStatus.connected) {
+              await ref.read(tmdbSettingsProvider.notifier).refresh();
+
+              if (context.mounted) {
+                Navigator.of(context).pop(true);
+              }
+            } else {
+              state['hasError'] = true;
+              throw Exception('Failed to connect to API server');
+            }
+          },
         ),
       ],
     );

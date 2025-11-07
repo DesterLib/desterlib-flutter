@@ -19,7 +19,7 @@ class DSegmentedControl<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(AppSpacing.xxs),
       decoration: BoxDecoration(
         color: AppColors.backgroundElevated,
         borderRadius: BorderRadius.circular(12),
@@ -49,7 +49,9 @@ class DSegmentedControl<T> extends StatelessWidget {
 
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: index < options.length - 1 ? 4 : 0),
+            padding: EdgeInsets.only(
+              right: index < options.length - 1 ? AppSpacing.xxs : 0,
+            ),
             child: _SegmentButton(
               label: option.label,
               icon: option.icon,
@@ -76,7 +78,9 @@ class DSegmentedControl<T> extends StatelessWidget {
 
       rows.add(
         Padding(
-          padding: EdgeInsets.only(bottom: i + 2 < options.length ? 4 : 0),
+          padding: EdgeInsets.only(
+            bottom: i + 2 < options.length ? AppSpacing.xxs : 0,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -93,7 +97,7 @@ class DSegmentedControl<T> extends StatelessWidget {
                 ),
               ),
               if (secondOption != null) ...[
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xxs),
                 Expanded(
                   child: _SegmentButton(
                     label: secondOption.label,
@@ -156,7 +160,7 @@ class _SegmentButton extends StatelessWidget {
                 size: 18,
                 color: isSelected ? Colors.black : AppColors.textSecondary,
               ),
-              const SizedBox(width: 8),
+              AppSpacing.gapHorizontalXS,
             ],
             Flexible(
               child: Text(

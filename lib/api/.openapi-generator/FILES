@@ -28,6 +28,13 @@ doc/ApiV1ScanPathPost400Response.md
 doc/ApiV1ScanPathPost500Response.md
 doc/ApiV1ScanPathPostRequest.md
 doc/ApiV1ScanPathPostRequestOptions.md
+doc/ApiV1SearchGet200Response.md
+doc/ApiV1SearchGet200ResponseData.md
+doc/ApiV1SearchGet200ResponseDataMoviesInner.md
+doc/ApiV1SearchGet200ResponseDataTvShowsInner.md
+doc/ApiV1SearchGet200ResponseDataTvShowsInnerMedia.md
+doc/ApiV1SearchGet400Response.md
+doc/ApiV1SearchGet500Response.md
 doc/ApiV1SettingsFirstRunCompletePost200Response.md
 doc/ApiV1SettingsFirstRunCompletePost500Response.md
 doc/ApiV1SettingsGet200Response.md
@@ -40,7 +47,6 @@ doc/ApiV1StreamIdGet416Response.md
 doc/ApiV1StreamIdGet500Response.md
 doc/ApiV1TvshowsGet200Response.md
 doc/ApiV1TvshowsGet200ResponseDataInner.md
-doc/ApiV1TvshowsGet200ResponseDataInnerMedia.md
 doc/ApiV1TvshowsGet500Response.md
 doc/ApiV1TvshowsIdGet200Response.md
 doc/ApiV1TvshowsIdGet200ResponseData.md
@@ -56,6 +62,7 @@ doc/ModelLibrary.md
 doc/MoviesApi.md
 doc/PublicSettings.md
 doc/ScanApi.md
+doc/SearchApi.md
 doc/SettingsApi.md
 doc/StreamApi.md
 doc/TVShowsApi.md
@@ -66,6 +73,7 @@ lib/src/api/health_api.dart
 lib/src/api/library_api.dart
 lib/src/api/movies_api.dart
 lib/src/api/scan_api.dart
+lib/src/api/search_api.dart
 lib/src/api/settings_api.dart
 lib/src/api/stream_api.dart
 lib/src/api/tv_shows_api.dart
@@ -103,6 +111,13 @@ lib/src/model/api_v1_scan_path_post400_response.dart
 lib/src/model/api_v1_scan_path_post500_response.dart
 lib/src/model/api_v1_scan_path_post_request.dart
 lib/src/model/api_v1_scan_path_post_request_options.dart
+lib/src/model/api_v1_search_get200_response.dart
+lib/src/model/api_v1_search_get200_response_data.dart
+lib/src/model/api_v1_search_get200_response_data_movies_inner.dart
+lib/src/model/api_v1_search_get200_response_data_tv_shows_inner.dart
+lib/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart
+lib/src/model/api_v1_search_get400_response.dart
+lib/src/model/api_v1_search_get500_response.dart
 lib/src/model/api_v1_settings_first_run_complete_post200_response.dart
 lib/src/model/api_v1_settings_first_run_complete_post500_response.dart
 lib/src/model/api_v1_settings_get200_response.dart
@@ -115,7 +130,6 @@ lib/src/model/api_v1_stream_id_get416_response.dart
 lib/src/model/api_v1_stream_id_get500_response.dart
 lib/src/model/api_v1_tvshows_get200_response.dart
 lib/src/model/api_v1_tvshows_get200_response_data_inner.dart
-lib/src/model/api_v1_tvshows_get200_response_data_inner_media.dart
 lib/src/model/api_v1_tvshows_get500_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response_data.dart
@@ -131,6 +145,3 @@ lib/src/model/public_settings.dart
 lib/src/model/update_settings_request.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/api_v1_tvshows_id_get200_response_data_seasons_inner_episodes_inner_test.dart
-test/api_v1_tvshows_id_get200_response_data_seasons_inner_test.dart
-test/api_v1_tvshows_id_get200_response_data_test.dart

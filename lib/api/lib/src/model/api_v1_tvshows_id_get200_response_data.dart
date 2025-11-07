@@ -5,7 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -37,7 +37,7 @@ abstract class ApiV1TvshowsIdGet200ResponseData implements Built<ApiV1TvshowsIdG
   String? get mediaId;
 
   @BuiltValueField(wireName: r'media')
-  ApiV1TvshowsGet200ResponseDataInnerMedia? get media;
+  ApiV1SearchGet200ResponseDataTvShowsInnerMedia? get media;
 
   @BuiltValueField(wireName: r'seasons')
   BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>? get seasons;
@@ -97,7 +97,7 @@ class _$ApiV1TvshowsIdGet200ResponseDataSerializer implements PrimitiveSerialize
       yield r'media';
       yield serializers.serialize(
         object.media,
-        specifiedType: const FullType(ApiV1TvshowsGet200ResponseDataInnerMedia),
+        specifiedType: const FullType(ApiV1SearchGet200ResponseDataTvShowsInnerMedia),
       );
     }
     if (object.seasons != null) {
@@ -163,8 +163,8 @@ class _$ApiV1TvshowsIdGet200ResponseDataSerializer implements PrimitiveSerialize
         case r'media':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(ApiV1TvshowsGet200ResponseDataInnerMedia),
-          ) as ApiV1TvshowsGet200ResponseDataInnerMedia;
+            specifiedType: const FullType(ApiV1SearchGet200ResponseDataTvShowsInnerMedia),
+          ) as ApiV1SearchGet200ResponseDataTvShowsInnerMedia;
           result.media.replace(valueDes);
           break;
         case r'seasons':

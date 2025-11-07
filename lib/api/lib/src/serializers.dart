@@ -41,6 +41,13 @@ import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_movies_inner.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart';
+import 'package:openapi/src/model/api_v1_search_get400_response.dart';
+import 'package:openapi/src/model/api_v1_search_get500_response.dart';
 import 'package:openapi/src/model/api_v1_settings_first_run_complete_post200_response.dart';
 import 'package:openapi/src/model/api_v1_settings_first_run_complete_post500_response.dart';
 import 'package:openapi/src/model/api_v1_settings_get200_response.dart';
@@ -53,7 +60,6 @@ import 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner.dart';
-import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data.dart';
@@ -97,6 +103,13 @@ part 'serializers.g.dart';
   ApiV1ScanPathPost500Response,
   ApiV1ScanPathPostRequest,
   ApiV1ScanPathPostRequestOptions,
+  ApiV1SearchGet200Response,
+  ApiV1SearchGet200ResponseData,
+  ApiV1SearchGet200ResponseDataMoviesInner,
+  ApiV1SearchGet200ResponseDataTvShowsInner,
+  ApiV1SearchGet200ResponseDataTvShowsInnerMedia,
+  ApiV1SearchGet400Response,
+  ApiV1SearchGet500Response,
   ApiV1SettingsFirstRunCompletePost200Response,
   ApiV1SettingsFirstRunCompletePost500Response,
   ApiV1SettingsGet200Response,
@@ -109,7 +122,6 @@ part 'serializers.g.dart';
   ApiV1StreamIdGet500Response,
   ApiV1TvshowsGet200Response,
   ApiV1TvshowsGet200ResponseDataInner,
-  ApiV1TvshowsGet200ResponseDataInnerMedia,
   ApiV1TvshowsGet500Response,
   ApiV1TvshowsIdGet200Response,
   ApiV1TvshowsIdGet200ResponseData,

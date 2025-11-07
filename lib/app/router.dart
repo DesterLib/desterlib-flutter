@@ -8,7 +8,6 @@ import '../features/media/media_features.dart';
 import '../shared/widgets/ui/bottom_nav_bar.dart';
 import '../shared/widgets/ui/sidebar/sidebar.dart';
 import '../shared/widgets/connection_guard.dart';
-import '../shared/widgets/drawer_widgets.dart';
 import '../shared/utils/platform_icons.dart';
 import '../core/providers/connection_provider.dart';
 
@@ -71,18 +70,9 @@ final GoRouter router = GoRouter(
             );
           },
         ),
-        GoRoute(
-          path: '/drawer/tmdb-api-key',
-          pageBuilder: (BuildContext context, GoRouterState state) {
-            return _buildModalPage(const TmdbApiKeyDrawer());
-          },
-        ),
-        GoRoute(
-          path: '/drawer/tmdb-required',
-          pageBuilder: (BuildContext context, GoRouterState state) {
-            return _buildModalPage(const TmdbRequiredDrawer());
-          },
-        ),
+        // Note: TMDB modals are now called directly via TmdbApiKeyModal.show()
+        // and TmdbRequiredModal.show() from other screens.
+        // No need for dedicated routes since they're overlay modals, not pages.
       ],
     ),
   ],
@@ -113,16 +103,6 @@ CustomTransitionPage _buildPageWithTransition(
           ),
         ),
       );
-    },
-  );
-}
-
-CustomTransitionPage _buildModalPage(Widget child) {
-  return CustomTransitionPage(
-    key: const ValueKey('modal'),
-    child: child,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(opacity: animation, child: child);
     },
   );
 }
@@ -175,8 +155,8 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     final newIndex = ScaffoldWithNavBar._calculateSelectedIndex(context);
     final currentPath = GoRouterState.of(context).uri.path;
 
-    // Don't update if we're on a drawer route
-    if (!currentPath.startsWith('/drawer/')) {
+    // Don't update if we're on a modal route
+    if (!currentPath.startsWith('/modal/')) {
       _selectedIndex = newIndex;
     }
   }
@@ -215,7 +195,7 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
                 ),
               ],
               onSearchTap: () {
-                // TODO: Implement search functionality
+                context.go('/library?focus=search');
               },
             )
           : null,
@@ -247,6 +227,7 @@ class _DesktopLayout extends StatelessWidget {
           width: 340,
           child: DSidebar(
             currentIndex: selectedIndex,
+            showSearch: true,
             items: [
               DSidebarNavigationItem(
                 label: 'Home',

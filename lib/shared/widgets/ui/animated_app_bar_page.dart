@@ -6,10 +6,18 @@ class AnimatedAppBarPage extends StatefulWidget {
   final Widget child;
   final List<Widget>? actions;
   final Widget? leading;
+  final Widget Function(bool isScrolled)?
+  leadingBuilder; // Dynamic leading based on scroll state
   final bool centerTitle;
   final double appBarHeight;
   final double? maxWidthConstraint;
   final bool extendBodyBehindAppBar;
+  final bool addBottomNavPadding;
+  final bool
+  showTitleOnScroll; // Reverse animation: fade IN on scroll instead of OUT
+  final double?
+  scrollThresholdForTitle; // Custom scroll distance before title appears
+  final TextStyle? titleStyle;
 
   const AnimatedAppBarPage({
     super.key,
@@ -17,11 +25,19 @@ class AnimatedAppBarPage extends StatefulWidget {
     required this.child,
     this.actions,
     this.leading,
+    this.leadingBuilder,
     this.centerTitle = false,
     this.appBarHeight = 120.0,
     this.maxWidthConstraint,
     this.extendBodyBehindAppBar = false,
-  });
+    this.addBottomNavPadding = true,
+    this.showTitleOnScroll = false,
+    this.scrollThresholdForTitle,
+    this.titleStyle,
+  }) : assert(
+         leading == null || leadingBuilder == null,
+         'Cannot provide both leading and leadingBuilder',
+       );
 
   @override
   State<AnimatedAppBarPage> createState() => _AnimatedAppBarPageState();
@@ -62,12 +78,43 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
         : widget.child;
 
     // Calculate opacity and offset based on scroll position
-    // Fade out over 40px of scrolling
     const fadeDistance = 40.0;
-    final opacity = (1.0 - (_scrollOffset / fadeDistance)).clamp(0.0, 1.0);
-    final offset =
-        _scrollOffset.clamp(0.0, fadeDistance) *
-        0.5; // Shift up by half the scroll amount
+    final scrollThreshold = widget.scrollThresholdForTitle ?? 0.0;
+
+    final opacity = widget.showTitleOnScroll
+        ? ((_scrollOffset - scrollThreshold) / fadeDistance).clamp(
+            0.0,
+            1.0,
+          ) // Fade IN after threshold
+        : (1.0 - (_scrollOffset / fadeDistance)).clamp(
+            0.0,
+            1.0,
+          ); // Fade OUT on scroll
+
+    // For showTitleOnScroll, keep title at original position (no offset)
+    // For normal mode, shift title up as it fades out
+    final offset = widget.showTitleOnScroll
+        ? 0.0 // No offset - stay at original position
+        : _scrollOffset.clamp(0.0, fadeDistance) *
+              0.5; // Shift up by half the scroll amount
+
+    // Calculate bottom padding for bottom navigation bar
+    // Bottom nav is ~68px total (60px pill + 8px padding)
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isMobile = screenWidth <= 900;
+    final bottomPadding = widget.addBottomNavPadding && isMobile
+        ? 120.0 // Space for bottom nav bar (80px) + extra padding (40px)
+        : 40.0; // Extra padding for desktop
+
+    // Show background when scrolled
+    // For showTitleOnScroll mode, show on desktop too; otherwise only on mobile
+    final backgroundThreshold = scrollThreshold;
+    final showBackground = widget.showTitleOnScroll
+        ? _scrollOffset > backgroundThreshold
+        : (isMobile && _scrollOffset > fadeDistance);
+    final backgroundOpacity =
+        ((_scrollOffset - backgroundThreshold) / fadeDistance).clamp(0.0, 1.0);
 
     return Scaffold(
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
@@ -76,19 +123,44 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
         child: DAppBar(
           title: widget.title,
           actions: widget.actions,
-          leading: widget.leading,
+          leading: widget.leadingBuilder != null
+              ? widget.leadingBuilder!(showBackground)
+              : widget.leading,
           centerTitle: widget.centerTitle,
           height: widget.appBarHeight,
           maxWidthConstraint: widget.maxWidthConstraint,
-          showBackground: false,
+          showBackground: showBackground,
+          backgroundOpacity: backgroundOpacity,
           titleOpacity: opacity,
           titleOffset: -offset,
+          titleStyle: widget.titleStyle,
         ),
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(),
-        child: childWidget,
+      body: Listener(
+        onPointerDown: (_) {
+          // Dismiss keyboard on any pointer down event (tap, click, etc.)
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: screenHeight - widget.appBarHeight + bottomPadding,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: bottomPadding),
+                  child: childWidget,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

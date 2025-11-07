@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/platform_icons.dart';
 import 'cached_image.dart';
 
-class DCard extends StatelessWidget {
+class DCard extends StatefulWidget {
   final String title;
   final String year;
   final String? imageUrl;
@@ -25,21 +25,46 @@ class DCard extends StatelessWidget {
   });
 
   @override
+  State<DCard> createState() => _DCardState();
+}
+
+class _DCardState extends State<DCard> {
+  bool _isHovered = false;
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 768;
-    final titleSize = isCompact || isSmallScreen ? 14.0 : 16.0;
-    final yearSize = isCompact || isSmallScreen ? 12.0 : 14.0;
-    final spacing = isCompact || isSmallScreen ? 6.0 : 8.0;
+    final titleSize = widget.isCompact || isSmallScreen ? 14.0 : 16.0;
+    final yearSize = widget.isCompact || isSmallScreen ? 12.0 : 14.0;
+    final spacing = widget.isCompact || isSmallScreen ? 6.0 : 8.0;
 
     Widget buildImage() {
-      if (width != null && height != null) {
-        return SizedBox(
-          width: width,
-          height: height,
-          child: _buildCardContent(),
-        );
-      }
-      return AspectRatio(aspectRatio: 16 / 10, child: _buildCardContent());
+      final imageContent = widget.width != null && widget.height != null
+          ? SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child: _buildCardContent(),
+            )
+          : AspectRatio(aspectRatio: 16 / 10, child: _buildCardContent());
+
+      // Add scale animation to image using TweenAnimationBuilder to avoid layout shift
+      return TweenAnimationBuilder<double>(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: _isPressed
+              ? 0.98
+              : _isHovered
+              ? 1.02
+              : 1.0,
+        ),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        builder: (context, scale, child) {
+          return Transform.scale(scale: scale, child: child);
+        },
+        child: imageContent,
+      );
     }
 
     Widget buildText({bool flexible = false}) {
@@ -48,7 +73,7 @@ class DCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            title,
+            widget.title,
             style: TextStyle(
               color: Colors.white,
               fontSize: titleSize,
@@ -61,7 +86,7 @@ class DCard extends StatelessWidget {
           ),
           SizedBox(height: spacing - 2), // Small gap between title and year
           Text(
-            year,
+            widget.year,
             style: TextStyle(
               color: Colors.grey.shade400,
               fontSize: yearSize,
@@ -73,22 +98,30 @@ class DCard extends StatelessWidget {
           ),
         ],
       );
-      return flexible ? Flexible(child: textContent) : textContent;
+
+      // Add slight downward shift animation to text using Transform to avoid layout shift
+      final animatedText = TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: _isHovered ? 4.0 : 0.0),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        builder: (context, offset, child) {
+          return Transform.translate(offset: Offset(0, offset), child: child);
+        },
+        child: textContent,
+      );
+
+      return flexible ? Flexible(child: animatedText) : animatedText;
     }
 
-    final content = isInGrid
-        ? LayoutBuilder(
-            builder: (context, constraints) => SizedBox(
-              height: constraints.maxHeight,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildImage(),
-                  SizedBox(height: spacing),
-                  buildText(flexible: true),
-                ],
-              ),
-            ),
+    final content = widget.isInGrid
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildImage(),
+              SizedBox(height: spacing),
+              buildText(flexible: true),
+            ],
           )
         : Column(
             mainAxisSize: MainAxisSize.min,
@@ -97,8 +130,8 @@ class DCard extends StatelessWidget {
               buildImage(),
               SizedBox(height: spacing + 4),
               // Constrain text area to prevent overflow
-              if (width != null)
-                SizedBox(width: width, child: buildText())
+              if (widget.width != null)
+                SizedBox(width: widget.width, child: buildText())
               else
                 buildText(),
               // Extra bottom padding to prevent overflow
@@ -106,11 +139,21 @@ class DCard extends StatelessWidget {
             ],
           );
 
-    return GestureDetector(onTap: onTap, child: content);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        onTap: widget.onTap,
+        child: content,
+      ),
+    );
   }
 
   Widget _buildCardContent() {
-    final hasImage = imageUrl != null;
+    final hasImage = widget.imageUrl != null;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -123,7 +166,7 @@ class DCard extends StatelessWidget {
           // Image filling the card
           if (hasImage)
             DCachedImage(
-              imageUrl: imageUrl!,
+              imageUrl: widget.imageUrl!,
               fit: BoxFit.cover, // Fill the card while maintaining aspect ratio
               // Landscape aspect ratio cache for backdrop images (16:9)
               // High resolution for 2x-3x retina displays

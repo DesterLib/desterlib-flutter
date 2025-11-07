@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dester/app/theme/theme.dart';
@@ -10,8 +11,10 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final double? maxWidthConstraint;
   final bool showBackground;
+  final double backgroundOpacity;
   final double titleOpacity;
   final double titleOffset;
+  final TextStyle? titleStyle;
 
   const DAppBar({
     super.key,
@@ -22,8 +25,10 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.height = 120.0,
     this.maxWidthConstraint,
     this.showBackground = true,
+    this.backgroundOpacity = 1.0,
     this.titleOpacity = 1.0,
     this.titleOffset = 0.0,
+    this.titleStyle,
   });
 
   @override
@@ -34,90 +39,106 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Determine if we should show a back button
     final canPop = Navigator.of(context).canPop();
     final shouldShowBackButton = leading == null && canPop;
-    final titleStyle = shouldShowBackButton
-        ? AppTypography.h2
-        : AppTypography.h1;
+    final effectiveTitleStyle =
+        titleStyle ??
+        (shouldShowBackButton ? AppTypography.h2 : AppTypography.h1);
 
     return SizedBox(
       height: height,
-      child: Container(
-        decoration: showBackground
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.8),
-                    Colors.black.withValues(alpha: 0.4),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.3, 1.0],
-                ),
-              )
-            : null,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            left: 20,
-            right: 20,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: maxWidthConstraint != null
-                  ? BoxConstraints(maxWidth: maxWidthConstraint!)
-                  : const BoxConstraints(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Leading widget or back button
-                  if (leading != null) ...[
-                    leading!,
-                    const SizedBox(width: 12),
-                  ] else if (shouldShowBackButton) ...[
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppColors.textPrimary,
+      child: Stack(
+        children: [
+          // Background with blur (bottom nav style)
+          if (showBackground)
+            Positioned.fill(
+              child: Opacity(
+                opacity: backgroundOpacity,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800.withValues(alpha: 0.1),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey.shade800.withValues(alpha: 0.2),
+                            width: 0.33,
+                          ),
+                        ),
                       ),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        Navigator.of(context).pop();
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                     ),
-                    const SizedBox(width: 12),
-                  ],
-                  // Title
-                  if (!centerTitle)
-                    Expanded(
-                      child: Transform.translate(
+                  ),
+                ),
+              ),
+            ),
+
+          // Content
+          Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top,
+              left: 20,
+              right: 20,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: maxWidthConstraint != null
+                    ? BoxConstraints(maxWidth: maxWidthConstraint!)
+                    : const BoxConstraints(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Leading widget or back button
+                    if (leading != null) ...[
+                      leading!,
+                      const SizedBox(width: 12),
+                    ] else if (shouldShowBackButton) ...[
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.textPrimary,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).pop();
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    // Title
+                    if (!centerTitle)
+                      Expanded(
+                        child: Transform.translate(
+                          offset: Offset(0, titleOffset),
+                          child: Opacity(
+                            opacity: titleOpacity,
+                            child: Text(title, style: effectiveTitleStyle),
+                          ),
+                        ),
+                      )
+                    else ...[
+                      const Spacer(),
+                      Transform.translate(
                         offset: Offset(0, titleOffset),
                         child: Opacity(
                           opacity: titleOpacity,
-                          child: Text(title, style: titleStyle),
+                          child: Text(title, style: effectiveTitleStyle),
                         ),
                       ),
-                    )
-                  else ...[
-                    const Spacer(),
-                    Transform.translate(
-                      offset: Offset(0, titleOffset),
-                      child: Opacity(
-                        opacity: titleOpacity,
-                        child: Text(title, style: AppTypography.h2),
-                      ),
-                    ),
-                    const Spacer(),
+                      const Spacer(),
+                    ],
+                    // Actions
+                    if (actions != null)
+                      ...actions!
+                    else
+                      const SizedBox.shrink(),
                   ],
-                  // Actions
-                  if (actions != null) ...actions! else const SizedBox.shrink(),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

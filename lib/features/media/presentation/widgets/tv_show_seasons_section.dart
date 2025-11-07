@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/app/theme/theme.dart';
@@ -36,16 +37,11 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Seasons',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.5,
-          ),
+          style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
         ),
-        const SizedBox(height: 16),
+        AppSpacing.gapVerticalMD,
         ...widget.seasons.asMap().entries.map((entry) {
           final index = entry.key;
           final season = entry.value;
@@ -55,6 +51,7 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
             season: season,
             isExpanded: isExpanded,
             onToggle: () {
+              HapticFeedback.lightImpact();
               setState(() {
                 _expandedSeasonIndex = isExpanded ? null : index;
               });
@@ -86,124 +83,164 @@ class _SeasonCard extends StatelessWidget {
         season.episodes ??
         BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner>();
     final episodeCount = episodes.length;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
+      decoration: ShapeDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
-      child: Column(
-        children: [
-          // Season header
-          InkWell(
-            onTap: onToggle,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // Season poster thumbnail
-                  if (season.posterUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: DCachedImage(
-                        imageUrl: season.posterUrl!,
-                        width: 60,
-                        height: 90,
-                        fit: BoxFit.cover,
-                        // Increased for high-DPI displays (3x = 180x270)
-                        cacheWidth: 240,
-                        cacheHeight: 360,
-                        showLoadingIndicator: false,
-                        errorWidget: Container(
-                          width: 60,
-                          height: 90,
-                          color: AppColors.surface,
-                          child: const Icon(
-                            Icons.movie,
-                            color: AppColors.textSecondary,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      width: 60,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.movie,
-                        color: AppColors.textSecondary,
-                        size: 24,
-                      ),
-                    ),
-                  const SizedBox(width: 16),
-
-                  // Season info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          season.name ??
-                              'Season ${season.seasonNumber ?? 'Unknown'}',
-                          style: AppTypography.h3.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '$episodeCount episode${episodeCount != 1 ? 's' : ''}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        if (season.airDate != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            '${season.airDate!.year}',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textTertiary,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: [
+            // Season header
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onToggle,
+                onTapDown: (_) => HapticFeedback.lightImpact(),
+                child: Padding(
+                  padding: EdgeInsets.all(
+                    isMobile ? AppSpacing.sm : AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      // Season poster thumbnail
+                      if (season.posterUrl != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: DCachedImage(
+                            imageUrl: season.posterUrl!,
+                            width: isMobile ? 50 : 60,
+                            height: isMobile ? 75 : 90,
+                            fit: BoxFit.cover,
+                            cacheWidth: 240,
+                            cacheHeight: 360,
+                            showLoadingIndicator: false,
+                            errorWidget: Container(
+                              width: isMobile ? 50 : 60,
+                              height: isMobile ? 75 : 90,
+                              color: AppColors.surface,
+                              child: Icon(
+                                Icons.movie,
+                                color: AppColors.textSecondary,
+                                size: isMobile ? 20 : 24,
+                              ),
                             ),
                           ),
-                        ],
-                      ],
-                    ),
-                  ),
+                        )
+                      else
+                        Container(
+                          width: isMobile ? 50 : 60,
+                          height: isMobile ? 75 : 90,
+                          decoration: ShapeDecoration(
+                            color: AppColors.surface,
+                            shape: RoundedSuperellipseBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.movie,
+                            color: AppColors.textSecondary,
+                            size: isMobile ? 20 : 24,
+                          ),
+                        ),
+                      SizedBox(width: isMobile ? AppSpacing.sm : AppSpacing.md),
 
-                  // Expand icon
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
+                      // Season info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              season.name ??
+                                  'Season ${season.seasonNumber ?? 'Unknown'}',
+                              style:
+                                  (isMobile
+                                          ? AppTypography.bodyLarge
+                                          : AppTypography.h3)
+                                      .copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  '$episodeCount episode${episodeCount != 1 ? 's' : ''}',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                if (season.airDate != null) ...[
+                                  Text(
+                                    ' • ${season.airDate!.year}',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textTertiary,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: AppSpacing.xs),
 
-          // Episodes list
-          if (isExpanded && episodes.isNotEmpty)
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: AppColors.border, width: 1),
+                      // Expand icon
+                      Container(
+                        padding: EdgeInsets.all(AppSpacing.xxs),
+                        decoration: ShapeDecoration(
+                          color: AppColors.surface,
+                          shape: RoundedSuperellipseBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: AppColors.textSecondary,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Column(
-                children: episodes.map((episode) {
-                  return _EpisodeItem(episode: episode, onPlay: onEpisodePlay);
-                }).toList(),
-              ),
             ),
-        ],
+
+            // Episodes list
+            if (isExpanded && episodes.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.border.withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  children: episodes.map((episode) {
+                    return _EpisodeItem(
+                      episode: episode,
+                      onPlay: onEpisodePlay,
+                      isMobile: isMobile,
+                    );
+                  }).toList(),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -212,143 +249,199 @@ class _SeasonCard extends StatelessWidget {
 class _EpisodeItem extends StatelessWidget {
   final ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner episode;
   final Function(String episodeId, String episodeTitle)? onPlay;
+  final bool isMobile;
 
-  const _EpisodeItem({required this.episode, this.onPlay});
+  const _EpisodeItem({
+    required this.episode,
+    this.onPlay,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        if (onPlay != null && episode.id != null) {
-          onPlay!(
-            episode.id!,
-            episode.title ?? 'Episode ${episode.episodeNumber ?? 'Unknown'}',
-          );
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Episode thumbnail
-            if (episode.stillUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: DCachedImage(
-                  imageUrl: episode.stillUrl!,
-                  width: 120,
-                  height: 68,
-                  fit: BoxFit.cover,
-                  // Increased for high-DPI displays (3x = 360x204)
-                  cacheWidth: 480,
-                  cacheHeight: 270,
-                  showLoadingIndicator: false,
-                  errorWidget: Container(
-                    width: 120,
-                    height: 68,
-                    color: AppColors.surface,
-                    child: const Icon(
-                      Icons.play_circle_outline,
-                      color: AppColors.textSecondary,
-                      size: 32,
-                    ),
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: 120,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.play_circle_outline,
-                  color: AppColors.textSecondary,
-                  size: 32,
-                ),
-              ),
-            const SizedBox(width: 16),
+    final thumbnailWidth = isMobile ? 100.0 : 140.0;
+    final thumbnailHeight = isMobile ? 56.0 : 79.0;
 
-            // Episode info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'E${episode.episodeNumber ?? '?'}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          episode.title ??
-                              'Episode ${episode.episodeNumber ?? 'Unknown'}',
-                          style: AppTypography.bodyBase.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (episode.runtime != null) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '${episode.runtime}m',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (episode.overview != null &&
-                      episode.overview!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      episode.overview!,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  if (episode.airDate != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDate(episode.airDate!),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (onPlay != null && episode.id != null) {
+            HapticFeedback.lightImpact();
+            onPlay!(
+              episode.id!,
+              episode.title ?? 'Episode ${episode.episodeNumber ?? 'Unknown'}',
+            );
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.all(isMobile ? AppSpacing.sm : AppSpacing.md),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.border.withValues(alpha: 0.3),
+                width: 1,
               ),
             ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Episode thumbnail with play overlay
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (episode.stillUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: DCachedImage(
+                        imageUrl: episode.stillUrl!,
+                        width: thumbnailWidth,
+                        height: thumbnailHeight,
+                        fit: BoxFit.cover,
+                        cacheWidth: 480,
+                        cacheHeight: 270,
+                        showLoadingIndicator: false,
+                        errorWidget: Container(
+                          width: thumbnailWidth,
+                          height: thumbnailHeight,
+                          color: AppColors.surface,
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            color: AppColors.textSecondary,
+                            size: isMobile ? 24 : 32,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: thumbnailWidth,
+                      height: thumbnailHeight,
+                      decoration: ShapeDecoration(
+                        color: AppColors.surface,
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.play_circle_outline,
+                        color: AppColors.textSecondary,
+                        size: isMobile ? 24 : 32,
+                      ),
+                    ),
+                  // Play overlay
+                  Container(
+                    width: isMobile ? 32 : 40,
+                    height: isMobile ? 32 : 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.black,
+                      size: isMobile ? 20 : 24,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(width: isMobile ? AppSpacing.sm : AppSpacing.md),
 
-            // Play icon
-            const SizedBox(width: 8),
-            Icon(Icons.play_arrow, color: AppColors.primary, size: 28),
-          ],
+              // Episode info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Episode number and title
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xs,
+                            vertical: 4,
+                          ),
+                          decoration: ShapeDecoration(
+                            color: AppColors.surface,
+                            shape: RoundedSuperellipseBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          child: Text(
+                            'E${episode.episodeNumber ?? '?'}',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: AppSpacing.xs),
+                        if (!isMobile && episode.runtime != null) ...[
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xs,
+                              vertical: 4,
+                            ),
+                            decoration: ShapeDecoration(
+                              color: AppColors.surface,
+                              shape: RoundedSuperellipseBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            child: Text(
+                              '${episode.runtime}m',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.xs),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      episode.title ??
+                          'Episode ${episode.episodeNumber ?? 'Unknown'}',
+                      style:
+                          (isMobile
+                                  ? AppTypography.bodySmall
+                                  : AppTypography.bodyBase)
+                              .copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                      maxLines: isMobile ? 1 : 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (episode.overview != null &&
+                        episode.overview!.isNotEmpty &&
+                        !isMobile) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        episode.overview!,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (episode.airDate != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(episode.airDate!),
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dester/app/theme/theme.dart';
 
 class DSettingsItem extends StatefulWidget {
   final String title;
@@ -63,7 +64,10 @@ class _DSettingsItemState extends State<DSettingsItem> {
             width: double.infinity,
             padding:
                 widget.padding ??
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
             decoration: ShapeDecoration(
               color: backgroundColor,
               shape: RoundedSuperellipseBorder(
@@ -75,7 +79,7 @@ class _DSettingsItemState extends State<DSettingsItem> {
                 // Icon
                 if (widget.icon != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.xs),
                     decoration: ShapeDecoration(
                       color: widget.isActive
                           ? Colors.black.withValues(alpha: 0.1)
@@ -86,7 +90,7 @@ class _DSettingsItemState extends State<DSettingsItem> {
                     ),
                     child: Icon(widget.icon, size: 20, color: textColor),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.gapHorizontalSM,
                 ],
 
                 // Content
@@ -103,6 +107,8 @@ class _DSettingsItemState extends State<DSettingsItem> {
                           letterSpacing: -0.5,
                           color: textColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (widget.subtitle != null) ...[
                         const SizedBox(height: 2),
@@ -114,6 +120,8 @@ class _DSettingsItemState extends State<DSettingsItem> {
                             letterSpacing: -0.1,
                             color: subtitleColor,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ],
@@ -122,7 +130,7 @@ class _DSettingsItemState extends State<DSettingsItem> {
 
                 // Trailing widget
                 if (widget.trailing != null) ...[
-                  const SizedBox(width: 12),
+                  AppSpacing.gapHorizontalSM,
                   widget.trailing!,
                 ],
               ],
