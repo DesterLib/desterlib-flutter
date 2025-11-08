@@ -31,12 +31,7 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-      'TvShowSeasonsSection: Building with ${widget.seasons.length} seasons',
-    );
-
     if (widget.seasons.isEmpty) {
-      debugPrint('TvShowSeasonsSection: No seasons to display');
       return const SizedBox.shrink();
     }
 

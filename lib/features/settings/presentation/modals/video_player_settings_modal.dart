@@ -318,8 +318,7 @@ class _VideoPlayerSettingsContentState
                 Navigator.of(context).pop();
               }
             } catch (e) {
-              debugPrint('❌ Failed to save settings: $e');
-              // Show error to user if needed
+              // Failed to save settings
             }
           },
         ),

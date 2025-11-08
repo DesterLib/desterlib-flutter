@@ -47,8 +47,6 @@ class DCachedImage extends StatelessWidget {
       errorWidget: errorWidget != null
           ? (context, url, error) => errorWidget!
           : (context, url, error) {
-              debugPrint('Image load error: $error');
-              debugPrint('Image URL: $url');
               return Container(
                 color: const Color(0xFF1a1a1a),
                 child: const Center(

@@ -112,19 +112,11 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Initialize the player
   Future<void> initialize() async {
-    debugPrint(
-      '🎯 Initialize called for media: $mediaId, disposed: $_disposed, isInitializing: $_isInitializing',
-    );
-
     // Prevent multiple initializations or initialization after disposal
     if (_disposed || _isInitializing) {
-      debugPrint(
-        '⚠️ Skipping initialization: disposed=$_disposed, isInitializing=$_isInitializing',
-      );
       return;
     }
 
-    debugPrint('🚀 Starting initialization process...');
     _isInitializing = true;
 
     try {
@@ -144,8 +136,6 @@ class VideoPlayerController extends ChangeNotifier {
       if (_disposed) return; // Check after async operation
       final streamUrl = '${ApiConfig.baseUrl}/api/v1/stream/$mediaId';
 
-      debugPrint('🎬 Opening stream: $streamUrl');
-
       // Load media - await to catch any errors
       await player.open(
         Media(streamUrl),
@@ -153,7 +143,6 @@ class VideoPlayerController extends ChangeNotifier {
       );
 
       if (_disposed) return; // Check after async operation
-      debugPrint('✅ Stream opened successfully');
 
       // Apply default playback speed from settings
       if (playerSettings.defaultPlaybackSpeed != 1.0) {
@@ -164,9 +153,6 @@ class VideoPlayerController extends ChangeNotifier {
             state!.copyWith(playbackSpeed: playerSettings.defaultPlaybackSpeed),
           );
         }
-        debugPrint(
-          '⚙️ Applied default playback speed: ${playerSettings.defaultPlaybackSpeed}x',
-        );
       }
 
       // Start hide controls timer
@@ -174,7 +160,6 @@ class VideoPlayerController extends ChangeNotifier {
         _startHideControlsTimer();
       }
     } catch (e) {
-      debugPrint('❌ Stream error: $e');
       if (_disposed) return;
 
       if (state != null) {
@@ -203,7 +188,6 @@ class VideoPlayerController extends ChangeNotifier {
 
     // Error listener
     player.stream.error.listen((error) {
-      debugPrint('❌ Player error: $error');
       if (state != null) {
         _updateState(state!.copyWith(error: 'Playback error: $error'));
       }
@@ -356,7 +340,6 @@ class VideoPlayerController extends ChangeNotifier {
     if (player == null) return;
 
     await player.setAudioTrack(track);
-    debugPrint('🎵 Audio track changed to: ${track.title} (${track.language})');
   }
 
   /// Set subtitle track
@@ -366,9 +349,6 @@ class VideoPlayerController extends ChangeNotifier {
     if (player == null) return;
 
     await player.setSubtitleTrack(track);
-    debugPrint(
-      '💬 Subtitle track changed to: ${track.title} (${track.language})',
-    );
   }
 
   /// Toggle fullscreen
@@ -504,7 +484,6 @@ final videoPlayerControllerProvider = Provider.autoDispose
       );
 
       ref.onDispose(() {
-        debugPrint('🗑️ Disposing video player controller for media: $mediaId');
         controller.dispose();
       });
 

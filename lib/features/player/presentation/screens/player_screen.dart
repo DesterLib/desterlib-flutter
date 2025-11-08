@@ -44,7 +44,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint('📱 PlayerScreen initState for media: ${widget.mediaId}');
 
     // Lock orientation to landscape only
     SystemChrome.setPreferredOrientations([
@@ -57,7 +56,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       if (!mounted || _initialized) return;
       _initialized = true;
 
-      debugPrint('🎬 PostFrameCallback: Calling initialize()');
       ref
           .read(
             videoPlayerControllerProvider((widget.mediaId, widget.mediaTitle)),
@@ -89,13 +87,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final videoPlayerSettings = ref.watch(videoPlayerSettingsProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 900;
-
-    debugPrint(
-      '🔍 Player State: ${playerState == null ? "null" : "initialized"}, Duration: ${playerState?.duration}, Error: ${playerState?.error}, isBuffering: ${playerState?.isBuffering}, showControls: ${playerState?.showControls}',
-    );
-    debugPrint(
-      '📝 Subtitle Settings: size=${videoPlayerSettings.subtitleSize}px, bgOpacity=${videoPlayerSettings.subtitleBackgroundOpacity}',
-    );
 
     // Show loading if player is not initialized
     if (playerState == null) {
@@ -219,7 +210,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           Positioned.fill(
             child: GestureDetector(
               onTap: () {
-                debugPrint('🖐️ Screen tapped - toggling controls');
                 playerController.toggleControls();
               },
               behavior: HitTestBehavior.translucent,
@@ -241,15 +231,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   child: _CenterPlaybackControls(
                     isPlaying: playerState.isPlaying,
                     onPlayPause: () {
-                      debugPrint('📞 Play/Pause tapped');
                       playerController.togglePlayPause();
                     },
                     onSeekBackward: () {
-                      debugPrint('⏪ Seek backward tapped');
                       playerController.seekBackward();
                     },
                     onSeekForward: () {
-                      debugPrint('⏩ Seek forward tapped');
                       playerController.seekForward();
                     },
                   ),
@@ -304,11 +291,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   playerController.seek(position);
                 },
                 onSeekStart: () {
-                  debugPrint('🎯 Seek started - canceling hide timer');
                   playerController.cancelHideControlsTimer();
                 },
                 onSeekEnd: () {
-                  debugPrint('🎯 Seek ended - resetting hide timer');
                   playerController.resetHideControlsTimer();
                 },
                 onSeekForward: () {
@@ -473,17 +458,14 @@ class _CenterPlaybackControls extends StatelessWidget {
   });
 
   void _handlePlayPause() {
-    debugPrint('🎮 Play/Pause button tapped!');
     onPlayPause();
   }
 
   void _handleSeekBackward() {
-    debugPrint('⏪ Seek backward tapped');
     onSeekBackward();
   }
 
   void _handleSeekForward() {
-    debugPrint('⏩ Seek forward tapped');
     onSeekForward();
   }
 
@@ -540,7 +522,6 @@ class _CompletedOverlay extends StatelessWidget {
   const _CompletedOverlay({required this.onReplay});
 
   void _handleReplay() {
-    debugPrint('🔄 Replay tapped');
     onReplay();
   }
 

@@ -63,7 +63,6 @@ class _VideoGestureDetectorState extends State<VideoGestureDetector> {
 
     return GestureDetector(
       onTap: () {
-        debugPrint('🖐️ VideoGestureDetector tap caught');
         widget.onTap();
       },
       behavior: HitTestBehavior

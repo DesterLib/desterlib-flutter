@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -71,7 +70,6 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       );
     } catch (e) {
       // If loading fails, keep default values
-      debugPrint('⚠️ Failed to load video player settings: $e');
     }
   }
 
@@ -82,7 +80,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       await prefs.setString(_keyAudioTrack, track);
       state = state.copyWith(defaultAudioTrack: track);
     } catch (e) {
-      debugPrint('⚠️ Failed to save default audio track: $e');
+      // Failed to save
     }
   }
 
@@ -93,7 +91,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       await prefs.setString(_keySubtitleTrack, track);
       state = state.copyWith(defaultSubtitleTrack: track);
     } catch (e) {
-      debugPrint('⚠️ Failed to save default subtitle track: $e');
+      // Failed to save
     }
   }
 
@@ -104,7 +102,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       await prefs.setDouble(_keyPlaybackSpeed, speed);
       state = state.copyWith(defaultPlaybackSpeed: speed);
     } catch (e) {
-      debugPrint('⚠️ Failed to save default playback speed: $e');
+      // Failed to save
     }
   }
 
@@ -115,7 +113,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       await prefs.setDouble(_keySubtitleSize, size);
       state = state.copyWith(subtitleSize: size);
     } catch (e) {
-      debugPrint('⚠️ Failed to save subtitle size: $e');
+      // Failed to save
     }
   }
 
@@ -126,7 +124,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
       await prefs.setDouble(_keySubtitleBgOpacity, opacity);
       state = state.copyWith(subtitleBackgroundOpacity: opacity);
     } catch (e) {
-      debugPrint('⚠️ Failed to save subtitle background opacity: $e');
+      // Failed to save
     }
   }
 
@@ -155,10 +153,7 @@ class VideoPlayerSettingsNotifier extends Notifier<VideoPlayerSettings> {
         subtitleSize: subtitleSize,
         subtitleBackgroundOpacity: subtitleBackgroundOpacity,
       );
-
-      debugPrint('✅ Video player settings saved successfully');
     } catch (e) {
-      debugPrint('⚠️ Failed to save video player settings: $e');
       rethrow;
     }
   }

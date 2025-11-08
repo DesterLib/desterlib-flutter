@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// WebSocket service for real-time server updates
@@ -27,7 +26,6 @@ class WebSocketService {
 
     // If connecting to a different URL, close existing connection first
     if (_baseUrl != null && _baseUrl != baseUrl) {
-      debugPrint('🔄 Base URL changed, closing old connection...');
       _shouldReconnect = false;
       _reconnectTimer?.cancel();
       await _channel?.sink.close();
@@ -47,13 +45,10 @@ class WebSocketService {
           .replaceFirst('http://', 'ws://')
           .replaceFirst('https://', 'wss://');
 
-      debugPrint('🔌 Connecting to WebSocket: $wsUrl/ws');
-
       _channel = WebSocketChannel.connect(Uri.parse('$wsUrl/ws'));
 
       await _channel!.ready;
 
-      debugPrint('✅ WebSocket connected');
       _connectionStateController.add(true);
       _isConnecting = false;
 
@@ -65,7 +60,6 @@ class WebSocketService {
         cancelOnError: false,
       );
     } catch (e) {
-      debugPrint('❌ WebSocket connection error: $e');
       _isConnecting = false;
       _connectionStateController.add(false);
       _scheduleReconnect();
@@ -108,25 +102,22 @@ class WebSocketService {
           );
           break;
         case 'connection:established':
-          debugPrint('📨 ${data['message']}');
           break;
         default:
-          debugPrint('📨 Unknown WebSocket message type: $type');
+          break;
       }
     } catch (e) {
-      debugPrint('❌ Error parsing WebSocket message: $e');
+      // Error parsing message
     }
   }
 
   /// Handle WebSocket errors
   void _handleError(dynamic error) {
-    debugPrint('❌ WebSocket error: $error');
     _connectionStateController.add(false);
   }
 
   /// Handle WebSocket disconnection
   void _handleDisconnect() {
-    debugPrint('🔌 WebSocket disconnected');
     _channel = null;
     _connectionStateController.add(false);
 
@@ -140,7 +131,6 @@ class WebSocketService {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
       if (_baseUrl != null && _shouldReconnect) {
-        debugPrint('🔄 Attempting to reconnect WebSocket...');
         connect(_baseUrl!);
       }
     });
@@ -153,7 +143,6 @@ class WebSocketService {
     _channel?.sink.close();
     _channel = null;
     _connectionStateController.add(false);
-    debugPrint('👋 WebSocket disconnected');
   }
 
   /// Dispose resources
