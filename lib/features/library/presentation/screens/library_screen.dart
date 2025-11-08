@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/card.dart';
@@ -331,9 +332,25 @@ class _GenreCardState extends State<_GenreCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Generate mesh gradient colors and text color deterministically from genre name
-    final meshColors = GenreColorGenerator.generateMeshColors(widget.genre);
-    final textColor = GenreColorGenerator.generateTextColor(widget.genre);
+    // Generate mesh gradient colors deterministically from genre name
+    final originalColors = GenreColorGenerator.generateMeshColors(widget.genre);
+
+    // Create dramatic dark mesh with light spots
+    // First color stays relatively bright (the light spot)
+    // Other colors are darkened significantly (the dark base)
+    final meshColors = List.generate(originalColors.length, (index) {
+      final hsl = HSLColor.fromColor(originalColors[index]);
+
+      if (index == 0) {
+        // Keep first color brighter for the light spot (50-70% lightness)
+        final targetLightness = (hsl.lightness * 0.8).clamp(0.5, 0.7);
+        return hsl.withLightness(targetLightness).toColor();
+      } else {
+        // Make other colors much darker (15-30% lightness)
+        final targetLightness = (hsl.lightness * 0.4).clamp(0.15, 0.3);
+        return hsl.withLightness(targetLightness).toColor();
+      }
+    });
 
     // Split genre name into words for multi-line display
     final words = widget.genre.split(' ');
@@ -360,9 +377,16 @@ class _GenreCardState extends State<_GenreCard> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: _isHovered
+            decoration: ShapeDecoration(
+              shape: RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 0.5,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+              ),
+              shadows: _isHovered
                   ? [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.4),
@@ -378,44 +402,83 @@ class _GenreCardState extends State<_GenreCard> {
                       ),
                     ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                children: [
-                  // Static gradient background
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [meshColors[0], meshColors[1], meshColors[2]],
+            child: ClipPath(
+              clipper: _SuperellipseClipper(borderRadius: 12),
+              child: SizedBox.expand(
+                child: Stack(
+                  children: [
+                    // Non-animated mesh gradient background
+                    Positioned.fill(
+                      child: MeshGradient(
+                        points: [
+                          MeshGradientPoint(
+                            position: const Offset(0.0, 0.0),
+                            color: meshColors[0],
+                          ),
+                          MeshGradientPoint(
+                            position: const Offset(1.0, 0.0),
+                            color: meshColors[1],
+                          ),
+                          MeshGradientPoint(
+                            position: const Offset(0.0, 1.0),
+                            color: meshColors[2],
+                          ),
+                          MeshGradientPoint(
+                            position: const Offset(1.0, 1.0),
+                            color: meshColors[3],
+                          ),
+                        ],
+                        options: MeshGradientOptions(
+                          blend: 3.5,
+                          noiseIntensity: 0.0,
                         ),
                       ),
                     ),
-                  ),
-                  // Text overlay
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      displayText,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.8,
-                        height: 1.1,
+                    // White text overlay
+                    Positioned.fill(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          displayText,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.8,
+                            height: 1.1,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                      textAlign: TextAlign.left,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+// Custom clipper for superellipse shape
+class _SuperellipseClipper extends CustomClipper<Path> {
+  final double borderRadius;
+
+  _SuperellipseClipper({required this.borderRadius});
+
+  @override
+  Path getClip(Size size) {
+    final shape = RoundedSuperellipseBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    );
+    return shape.getOuterPath(Offset.zero & size);
+  }
+
+  @override
+  bool shouldReclip(_SuperellipseClipper oldClipper) {
+    return oldClipper.borderRadius != borderRadius;
   }
 }

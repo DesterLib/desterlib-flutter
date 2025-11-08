@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/modals/configurable_modal.dart';
 import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
+import 'package:dester/shared/utils/error_parser.dart';
 import 'package:dester/app/providers.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 import 'package:dester/features/settings/presentation/widgets/library_type_selector.dart';
@@ -119,31 +119,10 @@ class AddLibraryModal {
 
               // Refresh libraries to show the scanning state via WebSocket
               ref.read(refreshLibrariesProvider)();
-            } on DioException catch (e) {
-              // Handle Dio/API errors - extract the actual error message
-              String errorMessage = 'Failed to scan path';
-
-              // Try to extract error from response
-              if (e.response?.data != null) {
-                final data = e.response!.data;
-
-                // If response is a Map, look for 'message' or 'error' field
-                if (data is Map<String, dynamic>) {
-                  errorMessage =
-                      data['message'] as String? ??
-                      data['error'] as String? ??
-                      errorMessage;
-                } else if (data is String) {
-                  errorMessage = data;
-                }
-              } else if (e.message != null) {
-                errorMessage = e.message!;
-              }
-
-              throw Exception(errorMessage);
             } catch (e) {
-              // Handle any other errors
-              throw Exception('Failed to start scan: ${e.toString()}');
+              // Use ErrorParser to extract meaningful error message
+              final errorMessage = ErrorParser.parseScanError(e);
+              throw Exception(errorMessage);
             }
           },
         ),

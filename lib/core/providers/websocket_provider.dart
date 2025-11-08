@@ -9,6 +9,10 @@ final websocketServiceProvider = Provider<WebSocketService>((ref) {
 
   // Auto-connect when baseUrl changes
   ref.listen(baseUrlProvider, (previous, next) {
+    // Disconnect from old URL first, then connect to new URL
+    if (previous != null && previous != next) {
+      service.disconnect();
+    }
     service.connect(next);
   });
 

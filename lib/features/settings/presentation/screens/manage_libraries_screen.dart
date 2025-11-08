@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/widgets/ui/toast.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
+import 'package:dester/shared/utils/error_parser.dart';
 import 'package:dester/features/library/data/providers/library_provider.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/app/providers.dart';
@@ -17,12 +19,61 @@ import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
 import '../modals/library_modals.dart';
 
-class ManageLibrariesScreen extends ConsumerWidget {
+class ManageLibrariesScreen extends ConsumerStatefulWidget {
   const ManageLibrariesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ManageLibrariesScreen> createState() =>
+      _ManageLibrariesScreenState();
+}
+
+class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
+  @override
+  Widget build(BuildContext context) {
     final librariesAsync = ref.watch(actualLibrariesProvider);
+
+    // Listen for scan completion and show toast notifications
+    ref.listen<ScanProgressState>(scanProgressProvider, (previous, next) {
+      if (!mounted) return;
+
+      // Check for newly completed or errored scans
+      for (final entry in next.libraryProgress.entries) {
+        final libraryId = entry.key;
+        final progress = entry.value;
+        final previousProgress = previous?.libraryProgress[libraryId];
+
+        // Check if this scan just completed
+        final justCompleted =
+            progress.isComplete &&
+            (previousProgress == null || !previousProgress.isComplete);
+
+        if (justCompleted) {
+          DToast.show(
+            context,
+            message: progress.message.isNotEmpty
+                ? progress.message
+                : 'Scan completed successfully',
+            type: DToastType.success,
+          );
+        }
+
+        // Check if this scan just errored
+        final justErrored =
+            progress.isError &&
+            (previousProgress == null || !previousProgress.isError);
+
+        if (justErrored) {
+          DToast.show(
+            context,
+            message: progress.message.isNotEmpty
+                ? progress.message
+                : 'Scan failed',
+            type: DToastType.error,
+            duration: const Duration(seconds: 4),
+          );
+        }
+      }
+    });
 
     return AnimatedAppBarPage(
       title: 'Manage Libraries',
@@ -38,6 +89,12 @@ class ManageLibrariesScreen extends ConsumerWidget {
           tooltip: 'Refresh libraries',
           onPressed: () {
             ref.read(refreshLibrariesProvider)();
+            DToast.show(
+              context,
+              message: 'Refreshing libraries...',
+              type: DToastType.info,
+              duration: const Duration(seconds: 2),
+            );
           },
         ),
         const SizedBox(width: 4),
@@ -51,9 +108,19 @@ class ManageLibrariesScreen extends ConsumerWidget {
           tooltip: 'Add library',
           onPressed: () async {
             final result = await AddLibraryModal.show(context, ref);
+            if (!mounted) return;
+
             if (result == true) {
               // Library was added successfully, refresh to show scan progress
               ref.read(refreshLibrariesProvider)();
+
+              if (!mounted) return;
+              DToast.show(
+                context,
+                message: 'Library scan started...',
+                type: DToastType.success,
+                duration: const Duration(seconds: 2),
+              );
             }
           },
         ),
@@ -303,11 +370,10 @@ class _LibrariesList extends ConsumerWidget {
   ) async {
     // Validate library has required data
     if (library.libraryPath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot rescan: Library path is missing'),
-          backgroundColor: AppColors.error,
-        ),
+      DToast.show(
+        context,
+        message: 'Cannot rescan: Library path is missing',
+        type: DToastType.error,
       );
       return;
     }
@@ -325,11 +391,10 @@ class _LibrariesList extends ConsumerWidget {
           mediaType = ApiV1ScanPathPostRequestOptionsMediaTypeEnum.tv;
           break;
         default:
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cannot rescan: Unsupported library type'),
-              backgroundColor: AppColors.error,
-            ),
+          DToast.show(
+            context,
+            message: 'Cannot rescan: Unsupported library type',
+            type: DToastType.error,
           );
           return;
       }
@@ -351,12 +416,11 @@ class _LibrariesList extends ConsumerWidget {
 
       // Show success message
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Rescanning "${library.name}"...'),
-            backgroundColor: AppColors.success,
-            duration: const Duration(seconds: 2),
-          ),
+        DToast.show(
+          context,
+          message: 'Rescanning "${library.name}"...',
+          type: DToastType.success,
+          duration: const Duration(seconds: 2),
         );
       }
 
@@ -365,17 +429,12 @@ class _LibrariesList extends ConsumerWidget {
     } catch (e) {
       // Show error message
       if (context.mounted) {
-        String errorMessage = 'Failed to start rescan';
-        if (e.toString().contains('Exception:')) {
-          errorMessage = e.toString().replaceFirst('Exception:', '').trim();
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 4),
-          ),
+        final errorMessage = ErrorParser.parseScanError(e);
+        DToast.show(
+          context,
+          message: errorMessage,
+          type: DToastType.error,
+          duration: const Duration(seconds: 4),
         );
       }
     }

@@ -83,6 +83,8 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.trash : Icons.cleaning_services_outlined;
   static IconData get restore =>
       isApplePlatform ? CupertinoIcons.refresh : Icons.restore_outlined;
+  static IconData get chevronLeft =>
+      isApplePlatform ? CupertinoIcons.chevron_left : Icons.chevron_left;
   static IconData get chevronRight =>
       isApplePlatform ? CupertinoIcons.chevron_right : Icons.chevron_right;
 
@@ -104,6 +106,9 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.arrow_clockwise : Icons.refresh;
   static IconData get info =>
       isApplePlatform ? CupertinoIcons.info_circle : Icons.info_outline;
+  static IconData get warning => isApplePlatform
+      ? CupertinoIcons.exclamationmark_triangle_fill
+      : Icons.warning;
 
   // Other icons
   static IconData get moreHoriz =>

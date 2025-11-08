@@ -25,9 +25,21 @@ class WebSocketService {
   Future<void> connect(String baseUrl) async {
     if (_isConnecting) return;
 
+    // If connecting to a different URL, close existing connection first
+    if (_baseUrl != null && _baseUrl != baseUrl) {
+      debugPrint('🔄 Base URL changed, closing old connection...');
+      _shouldReconnect = false;
+      _reconnectTimer?.cancel();
+      await _channel?.sink.close();
+      _channel = null;
+    }
+
     _baseUrl = baseUrl;
     _isConnecting = true;
     _shouldReconnect = true;
+
+    // Cancel any pending reconnect attempts
+    _reconnectTimer?.cancel();
 
     try {
       // Convert HTTP URL to WebSocket URL

@@ -14,6 +14,8 @@ class AnimatedAppBarPage extends StatefulWidget {
   final bool extendBodyBehindAppBar;
   final bool addBottomNavPadding;
   final bool
+  addTopPadding; // Add top padding when extendBodyBehindAppBar is true
+  final bool
   showTitleOnScroll; // Reverse animation: fade IN on scroll instead of OUT
   final double?
   scrollThresholdForTitle; // Custom scroll distance before title appears
@@ -29,8 +31,9 @@ class AnimatedAppBarPage extends StatefulWidget {
     this.centerTitle = false,
     this.appBarHeight = 120.0,
     this.maxWidthConstraint,
-    this.extendBodyBehindAppBar = false,
+    this.extendBodyBehindAppBar = true,
     this.addBottomNavPadding = true,
+    this.addTopPadding = true, // Default to true for backward compatibility
     this.showTitleOnScroll = false,
     this.scrollThresholdForTitle,
     this.titleStyle,
@@ -45,11 +48,16 @@ class AnimatedAppBarPage extends StatefulWidget {
 
 class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
   final ScrollController _scrollController = ScrollController();
-  double _scrollOffset = 0.0;
+  late double _scrollOffset;
 
   @override
   void initState() {
     super.initState();
+    // Initialize scroll offset based on top padding
+    // If no top padding and body extends behind app bar, start as "scrolled"
+    _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar) 
+        ? widget.appBarHeight 
+        : 0.0;
     _scrollController.addListener(_onScroll);
   }
 
@@ -147,12 +155,13 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
             parent: AlwaysScrollableScrollPhysics(),
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: screenHeight - widget.appBarHeight + bottomPadding,
-            ),
+            constraints: BoxConstraints(minHeight: screenHeight),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Add top padding when body extends behind app bar (if enabled)
+                if (widget.extendBodyBehindAppBar && widget.addTopPadding)
+                  SizedBox(height: widget.appBarHeight),
                 Padding(
                   padding: EdgeInsets.only(bottom: bottomPadding),
                   child: childWidget,

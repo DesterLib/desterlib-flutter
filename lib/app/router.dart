@@ -90,16 +90,24 @@ CustomTransitionPage _buildPageWithTransition(
       const end = 1.0;
       final scaleTween = Tween(begin: begin, end: end);
 
-      // Outer wrapper: just fade
+      // Fade out the old page
+      final secondaryFade = Tween<double>(begin: 1.0, end: 0.0).animate(
+        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
+      );
+
+      // Outer wrapper: fade in new page, fade out old page
       return FadeTransition(
         opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
-        child: Container(
-          color: const Color(0xFF0a0a0a),
-          child: ScaleTransition(
-            scale: animation.drive(
-              scaleTween.chain(CurveTween(curve: Curves.easeInOut)),
+        child: FadeTransition(
+          opacity: secondaryFade,
+          child: Container(
+            color: const Color(0xFF0a0a0a),
+            child: ScaleTransition(
+              scale: animation.drive(
+                scaleTween.chain(CurveTween(curve: Curves.easeInOut)),
+              ),
+              child: child,
             ),
-            child: child,
           ),
         ),
       );
@@ -217,8 +225,11 @@ class _DesktopLayout extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Content area with left margin for sidebar
-        Padding(padding: const EdgeInsets.only(left: 340), child: child),
+        // Content area with symmetric margins (sidebar + matching right margin)
+        Padding(
+          padding: const EdgeInsets.only(left: 340, right: 20),
+          child: child,
+        ),
         // Sidebar positioned on the left
         Positioned(
           left: 0,

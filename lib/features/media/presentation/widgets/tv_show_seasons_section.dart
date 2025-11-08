@@ -34,6 +34,14 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
       return const SizedBox.shrink();
     }
 
+    // Sort seasons by season number (numeric, not string)
+    final sortedSeasons = widget.seasons.toList()
+      ..sort((a, b) {
+        final aNum = a.seasonNumber ?? 0;
+        final bNum = b.seasonNumber ?? 0;
+        return aNum.compareTo(bNum);
+      });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -42,7 +50,7 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
           style: AppTypography.h2.copyWith(color: AppColors.textPrimary),
         ),
         AppSpacing.gapVerticalMD,
-        ...widget.seasons.asMap().entries.map((entry) {
+        ...sortedSeasons.asMap().entries.map((entry) {
           final index = entry.key;
           final season = entry.value;
           final isExpanded = _expandedSeasonIndex == index;
@@ -79,9 +87,18 @@ class _SeasonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final episodes =
+    final rawEpisodes =
         season.episodes ??
         BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner>();
+
+    // Sort episodes by episode number (numeric, not string)
+    final episodes = rawEpisodes.toList()
+      ..sort((a, b) {
+        final aNum = a.episodeNumber ?? 0;
+        final bNum = b.episodeNumber ?? 0;
+        return aNum.compareTo(bNum);
+      });
+
     final episodeCount = episodes.length;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;

@@ -1,9 +1,9 @@
+import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onComplete;
-
   const SplashScreen({super.key, required this.onComplete});
 
   @override
@@ -13,47 +13,17 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _sweepAnimation;
-  late Animation<double> _logoScaleAnimation;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-
-    // Single controller for all animations
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500),
-    );
+      duration: const Duration(milliseconds: 1500),
+    )..forward();
 
-    // Sweep animation: 0-1800ms
-    _sweepAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.72, curve: Curves.easeOut),
-      ),
-    );
-
-    // Logo animation: synchronized with sweep
-    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.72, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Fade out: last 500ms
-    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.8, 1.0, curve: Curves.easeIn),
-      ),
-    );
-
-    // Start animation and complete when done
-    _controller.forward().then((_) {
-      if (mounted) {
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
         widget.onComplete();
       }
     });
@@ -69,40 +39,35 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Stack(
-          children: [
-            // Animated radial gradient background - pie chart style
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: AnimatedBuilder(
-                  animation: _sweepAnimation,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: RadialSweepPainter(
-                        progress: _sweepAnimation.value,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            // Logo in center with bounce animation
-            Center(
-              child: RepaintBoundary(
-                child: ScaleTransition(
-                  scale: _logoScaleAnimation,
-                  child: Image.asset(
-                    'assets/icon/icon.png',
-                    width: 120,
-                    height: 120,
+      body: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          // Logo animations
+          final fadeIn = _controller.value.clamp(0.0, 0.3) / 0.3;
+          final scaleUp = Curves.easeOutBack.transform(
+            (_controller.value.clamp(0.0, 0.5) / 0.5),
+          );
+
+          return CustomPaint(
+            painter: RadialSweepPainter(progress: _controller.value),
+            child: Center(
+              child: Opacity(
+                opacity: fadeIn,
+                child: Transform.scale(
+                  scale: 0.5 + (scaleUp * 0.5),
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    child: Image.asset(
+                      'assets/icon/icon.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -110,53 +75,87 @@ class _SplashScreenState extends State<SplashScreen>
 
 class RadialSweepPainter extends CustomPainter {
   final double progress;
-
-  // Cache the gradient colors as a constant - Apple-style palette
-  static const _sweepColors = [
-    Color(0xFF007AFF), // Apple Blue
-    Color(0xFF5856D6), // Apple Purple
-    Color(0xFFAF52DE), // Apple Violet
-    Color(0xFFFF2D55), // Apple Pink/Red
-    Color(0xFFFF3B30), // Apple Red
-    Color(0xFF34C759), // Apple Green
-    Color(0xFF00C7BE), // Apple Teal
-    Color(0xFF007AFF), // Back to Apple Blue for smooth loop
-  ];
-
   RadialSweepPainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    // Optimized radius calculation
-    final radius = math.max(size.width, size.height) * 0.7;
+    final center = size.center(Offset.zero);
+    final radius = size.longestSide; // Fill the entire screen
 
-    // Start angle at 180 degrees (bottom)
-    const startAngle = math.pi;
-    // Sweep angle based on progress (0 to 2*pi for full circle)
-    final sweepAngle = progress * 2 * math.pi;
+    // Start with full circle (2π), sweep clockwise to nothing (0)
+    final sweepAngle = (1 - progress) * 2 * pi;
 
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    // Start edge moves clockwise, sweeping away the circle
+    final startAngle = progress * 2 * pi;
 
-    // Single layer with combined gradients for best performance
-    final combinedPaint = Paint()
-      ..shader = SweepGradient(
-        colors: _sweepColors,
-        startAngle: 0,
-        endAngle: 2 * math.pi,
-        transform: const GradientRotation(math.pi),
-      ).createShader(rect)
+    // Cyan, Green, Blue, Purple gradient
+    const cyan = Color(0xFF00E5FF);
+    const green = Color(0xFF00E676);
+    const blue = Color(0xFF2979FF);
+    const purple = Color(0xFF651FFF);
+
+    // Rotate gradient with the sweep so colors move clockwise
+    // The gradient should rotate at the same rate as the startAngle
+    final gradientRotation = startAngle;
+
+    final gradient = SweepGradient(
+      startAngle: 0,
+      endAngle: 2 * pi,
+      colors: [
+        Colors.transparent,
+        cyan.withOpacity(0.2),
+        cyan.withOpacity(0.5),
+        cyan.withOpacity(0.8),
+        cyan,
+        green,
+        blue,
+        purple,
+        purple.withOpacity(0.8),
+        purple.withOpacity(0.5),
+        purple.withOpacity(0.2),
+        Colors.transparent,
+      ],
+      stops: const [
+        0.0,
+        0.03,
+        0.06,
+        0.09,
+        0.12,
+        0.35,
+        0.58,
+        0.75,
+        0.85,
+        0.92,
+        0.97,
+        1.0,
+      ],
+      transform: GradientRotation(gradientRotation),
+    );
+
+    final paint = Paint()
+      ..shader = gradient.createShader(
+        Rect.fromCircle(center: center, radius: radius),
+      )
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
-    canvas.drawArc(rect, startAngle, sweepAngle, true, combinedPaint);
+    // Draw sweeping slice (only if there's something to draw)
+    if (sweepAngle > 0) {
+      final path = Path()
+        ..moveTo(center.dx, center.dy)
+        ..arcTo(
+          Rect.fromCircle(center: center, radius: radius),
+          startAngle,
+          sweepAngle,
+          false,
+        )
+        ..close();
+
+      canvas.drawPath(path, paint);
+    }
   }
 
   @override
-  bool shouldRepaint(RadialSweepPainter oldDelegate) {
-    return oldDelegate.progress != progress;
-  }
-
-  @override
-  bool shouldRebuildSemantics(RadialSweepPainter oldDelegate) => false;
+  bool shouldRepaint(covariant RadialSweepPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

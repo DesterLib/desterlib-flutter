@@ -7,6 +7,7 @@ import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/ui/toast.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import '../widgets/media_data.dart';
 import '../widgets/media_hero_section.dart';
@@ -24,11 +25,11 @@ class MediaDetailScreen extends ConsumerWidget {
     if (mediaId == null) return;
 
     // TODO: Navigate to player screen with mediaId
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Playing media: $mediaId'),
-        duration: const Duration(milliseconds: 1500),
-      ),
+    DToast.show(
+      context,
+      message: 'Playing media: $mediaId',
+      type: DToastType.info,
+      duration: const Duration(milliseconds: 1500),
     );
   }
 
@@ -38,11 +39,11 @@ class MediaDetailScreen extends ConsumerWidget {
     String episodeTitle,
   ) {
     // TODO: Navigate to player screen with episodeId
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Playing: $episodeTitle'),
-        duration: const Duration(milliseconds: 1500),
-      ),
+    DToast.show(
+      context,
+      message: 'Playing: $episodeTitle',
+      type: DToastType.info,
+      duration: const Duration(milliseconds: 1500),
     );
   }
 
@@ -73,9 +74,9 @@ class MediaDetailScreen extends ConsumerWidget {
 
     return AnimatedAppBarPage(
       title: appBarTitle,
-      extendBodyBehindAppBar: true,
-      showTitleOnScroll: true, // Show title when scrolling
+      showTitleOnScroll: true,
       appBarHeight: appBarHeight,
+      addTopPadding: false, // Hero section starts from top
       scrollThresholdForTitle:
           heroHeight -
           appBarHeight, // Start fade when hero is almost off screen (minus app bar height)
