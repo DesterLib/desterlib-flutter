@@ -4,13 +4,10 @@
 
 import 'dart:async';
 
-import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
 import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 
 class ScanApi {

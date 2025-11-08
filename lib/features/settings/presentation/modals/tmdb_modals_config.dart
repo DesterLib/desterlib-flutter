@@ -10,7 +10,7 @@ class TmdbApiKeyModal {
   static Future<bool?> show(BuildContext context, WidgetRef ref) async {
     String? initialApiKey;
     final currentApiKeyAsync = ref.read(tmdbSettingsProvider);
-    await currentApiKeyAsync.whenData((data) {
+    currentApiKeyAsync.whenData((data) {
       initialApiKey = data;
     });
 
