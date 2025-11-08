@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
+import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'media_data.dart';
 
@@ -41,11 +43,11 @@ class MediaHeroSection extends StatelessWidget {
                     clipBehavior: Clip.hardEdge,
                     decoration: const ShapeDecoration(
                       shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
+                        borderRadius: BorderRadius.zero,
                       ),
                     ),
-                child: Stack(
-                  children: [
+                    child: Stack(
+                      children: [
                         // Combined background and gradient in single layer
                         Positioned.fill(
                           child: _buildBackgroundWithGradient(
@@ -53,15 +55,15 @@ class MediaHeroSection extends StatelessWidget {
                             imageUrl,
                           ),
                         ),
-                    // Content positioned at the bottom with proper padding
-                    Positioned(
-                      left: 24,
-                      right: 24,
-                      bottom: 12,
-                      child: _buildContent(),
+                        // Content positioned at the bottom with proper padding
+                        Positioned(
+                          left: 24,
+                          right: 24,
+                          bottom: 12,
+                          child: _buildContent(),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
                   );
                 },
               ),
@@ -84,12 +86,12 @@ class MediaHeroSection extends StatelessWidget {
                       decoration: const ShapeDecoration(
                         shape: RoundedSuperellipseBorder(
                           borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
+                            bottomLeft: Radius.circular(24),
                           ),
                         ),
-                  ),
-                  child: Stack(
-                    children: [
+                      ),
+                      child: Stack(
+                        children: [
                           // Combined background and gradient in single layer
                           Positioned.fill(
                             child: _buildBackgroundWithGradient(
@@ -97,15 +99,15 @@ class MediaHeroSection extends StatelessWidget {
                               imageUrl,
                             ),
                           ),
-                      // Content positioned at the bottom with proper padding
-                      Positioned(
-                        left: 40,
-                        right: 40,
-                        bottom: 40,
-                        child: _buildContent(),
+                          // Content positioned at the bottom with proper padding
+                          Positioned(
+                            left: 40,
+                            right: 40,
+                            bottom: 40,
+                            child: _buildContent(),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                     );
                   },
                 ),
@@ -207,14 +209,14 @@ class MediaHeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        DButton(
-          label: 'Add to List',
-          icon: PlatformIcons.add,
-          variant: DButtonVariant.secondary,
-          onTap: () {
-            // TODO: Implement add to list functionality
-          },
-        ),
+        // DButton(
+        //   label: 'Add to List',
+        //   icon: PlatformIcons.add,
+        //   variant: DButtonVariant.secondary,
+        //   onTap: () {
+        //     // TODO: Implement add to list functionality
+        //   },
+        // ),
       ],
     );
   }
@@ -230,13 +232,13 @@ class MediaHeroSection extends StatelessWidget {
         ),
         const SizedBox(width: 16),
 
-        DButton(
-          icon: PlatformIcons.add,
-          variant: DButtonVariant.secondary,
-          onTap: () {
-            // TODO: Implement add to list functionality
-          },
-        ),
+        // DButton(
+        //   icon: PlatformIcons.add,
+        //   variant: DButtonVariant.secondary,
+        //   onTap: () {
+        //     // TODO: Implement add to list functionality
+        //   },
+        // ),
       ],
     );
   }
@@ -266,11 +268,27 @@ class MediaHeroSection extends StatelessWidget {
             },
             blendMode: BlendMode
                 .dstIn, // Makes the image transparent where mask is transparent
-            child: Image.network(
-              imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
+              placeholder: (context, url) => Container(
+                color: Colors.black,
+                child: const Center(child: DLoadingIndicator()),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: const Color(0xFF1a1a1a),
+                child: const Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: Color(0xFF666666),
+                    size: 48,
+                  ),
+                ),
+              ),
+              fadeInDuration: const Duration(milliseconds: 300),
+              fadeOutDuration: const Duration(milliseconds: 150),
             ),
           ),
         ),
@@ -280,12 +298,12 @@ class MediaHeroSection extends StatelessWidget {
     // No image - show gradient background only
     return SizedBox.expand(
       child: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF2a2a2a), Color(0xFF1a1a1a)],
-        ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF2a2a2a), Color(0xFF1a1a1a)],
+          ),
         ),
       ),
     );

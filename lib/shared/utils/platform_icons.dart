@@ -45,7 +45,7 @@ class PlatformIcons {
   static IconData get speed =>
       isApplePlatform ? CupertinoIcons.speedometer : Icons.speed_rounded;
   static IconData get subtitles =>
-      isApplePlatform ? CupertinoIcons.textbox : Icons.subtitles_rounded;
+      isApplePlatform ? CupertinoIcons.captions_bubble : Icons.subtitles_rounded;
   static IconData get movie =>
       isApplePlatform ? CupertinoIcons.film : Icons.movie_outlined;
   static IconData get add =>

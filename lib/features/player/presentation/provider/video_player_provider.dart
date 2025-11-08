@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import '../../../../core/config/api_config.dart';
+import '../../data/video_player_settings_provider.dart';
 
 /// Video player state
 class VideoPlayerState {
@@ -85,6 +86,7 @@ class VideoPlayerState {
 class VideoPlayerController extends ChangeNotifier {
   final String mediaId;
   final String? mediaTitle;
+  final VideoPlayerSettings playerSettings;
 
   VideoPlayerState? _state;
   VideoPlayerState? get state => _state;
@@ -97,20 +99,40 @@ class VideoPlayerController extends ChangeNotifier {
   StreamSubscription<bool>? _bufferingSubscription;
   StreamSubscription<bool>? _completedSubscription;
 
-  VideoPlayerController(this.mediaId, this.mediaTitle);
+  bool _disposed = false;
+  bool _isInitializing = false;
+
+  VideoPlayerController(this.mediaId, this.mediaTitle, this.playerSettings);
 
   void _updateState(VideoPlayerState? newState) {
+    if (_disposed) return; // Don't update if already disposed
     _state = newState;
     notifyListeners();
   }
 
   /// Initialize the player
   Future<void> initialize() async {
+    debugPrint(
+      '🎯 Initialize called for media: $mediaId, disposed: $_disposed, isInitializing: $_isInitializing',
+    );
+
+    // Prevent multiple initializations or initialization after disposal
+    if (_disposed || _isInitializing) {
+      debugPrint(
+        '⚠️ Skipping initialization: disposed=$_disposed, isInitializing=$_isInitializing',
+      );
+      return;
+    }
+
+    debugPrint('🚀 Starting initialization process...');
+    _isInitializing = true;
+
     try {
       // Create player and controller
       final player = Player();
       final controller = VideoController(player);
 
+      if (_disposed) return; // Check again after async operations
       _updateState(VideoPlayerState(player: player, controller: controller));
 
       // Set up stream listeners
@@ -118,6 +140,8 @@ class VideoPlayerController extends ChangeNotifier {
 
       // Build stream URL
       await ApiConfig.loadBaseUrl();
+
+      if (_disposed) return; // Check after async operation
       final streamUrl = '${ApiConfig.baseUrl}/api/v1/stream/$mediaId';
 
       debugPrint('🎬 Opening stream: $streamUrl');
@@ -125,15 +149,34 @@ class VideoPlayerController extends ChangeNotifier {
       // Load media - await to catch any errors
       await player.open(
         Media(streamUrl),
-        play: false, // Don't auto-play, wait for user
+        play: true, // Auto-play video
       );
 
+      if (_disposed) return; // Check after async operation
       debugPrint('✅ Stream opened successfully');
 
+      // Apply default playback speed from settings
+      if (playerSettings.defaultPlaybackSpeed != 1.0) {
+        if (_disposed) return;
+        player.setRate(playerSettings.defaultPlaybackSpeed);
+        if (state != null && !_disposed) {
+          _updateState(
+            state!.copyWith(playbackSpeed: playerSettings.defaultPlaybackSpeed),
+          );
+        }
+        debugPrint(
+          '⚙️ Applied default playback speed: ${playerSettings.defaultPlaybackSpeed}x',
+        );
+      }
+
       // Start hide controls timer
-      _startHideControlsTimer();
+      if (!_disposed) {
+        _startHideControlsTimer();
+      }
     } catch (e) {
       debugPrint('❌ Stream error: $e');
+      if (_disposed) return;
+
       if (state != null) {
         _updateState(state!.copyWith(error: 'Failed to load stream: $e'));
       } else {
@@ -148,6 +191,8 @@ class VideoPlayerController extends ChangeNotifier {
           ),
         );
       }
+    } finally {
+      _isInitializing = false;
     }
   }
 
@@ -218,6 +263,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Play/Pause toggle
   void togglePlayPause() {
+    if (_disposed) return;
     final player = state?.player;
     if (player == null) return;
 
@@ -226,6 +272,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Seek to position
   void seek(Duration position) {
+    if (_disposed) return;
     final player = state?.player;
     if (player == null) return;
 
@@ -234,6 +281,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Seek forward by seconds
   void seekForward([int seconds = 10]) {
+    if (_disposed) return;
     final currentPosition = state?.position ?? Duration.zero;
     final duration = state?.duration ?? Duration.zero;
     final newPosition = currentPosition + Duration(seconds: seconds);
@@ -242,6 +290,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Seek backward by seconds
   void seekBackward([int seconds = 10]) {
+    if (_disposed) return;
     final currentPosition = state?.position ?? Duration.zero;
     final newPosition = currentPosition - Duration(seconds: seconds);
     seek(newPosition < Duration.zero ? Duration.zero : newPosition);
@@ -249,6 +298,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Set volume (0.0 to 1.0)
   void setVolume(double volume) {
+    if (_disposed) return;
     final player = state?.player;
     if (player == null) return;
 
@@ -261,6 +311,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Set playback speed
   void setPlaybackSpeed(double speed) {
+    if (_disposed) return;
     final player = state?.player;
     if (player == null) return;
 
@@ -268,6 +319,56 @@ class VideoPlayerController extends ChangeNotifier {
     if (state != null) {
       _updateState(state!.copyWith(playbackSpeed: speed));
     }
+  }
+
+  /// Get available audio tracks
+  List<AudioTrack> getAudioTracks() {
+    final player = state?.player;
+    if (player == null) return [];
+    return player.state.tracks.audio;
+  }
+
+  /// Get available subtitle tracks
+  List<SubtitleTrack> getSubtitleTracks() {
+    final player = state?.player;
+    if (player == null) return [];
+    return player.state.tracks.subtitle;
+  }
+
+  /// Get selected audio track
+  AudioTrack getSelectedAudioTrack() {
+    final player = state?.player;
+    if (player == null) return const AudioTrack('auto', '', '');
+    return player.state.track.audio;
+  }
+
+  /// Get selected subtitle track
+  SubtitleTrack getSelectedSubtitleTrack() {
+    final player = state?.player;
+    if (player == null) return const SubtitleTrack('auto', '', '');
+    return player.state.track.subtitle;
+  }
+
+  /// Set audio track
+  Future<void> setAudioTrack(AudioTrack track) async {
+    if (_disposed) return;
+    final player = state?.player;
+    if (player == null) return;
+
+    await player.setAudioTrack(track);
+    debugPrint('🎵 Audio track changed to: ${track.title} (${track.language})');
+  }
+
+  /// Set subtitle track
+  Future<void> setSubtitleTrack(SubtitleTrack track) async {
+    if (_disposed) return;
+    final player = state?.player;
+    if (player == null) return;
+
+    await player.setSubtitleTrack(track);
+    debugPrint(
+      '💬 Subtitle track changed to: ${track.title} (${track.language})',
+    );
   }
 
   /// Toggle fullscreen
@@ -292,6 +393,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Show controls
   void _showControls() {
+    if (_disposed) return;
     if (state != null) {
       _updateState(state!.copyWith(showControls: true));
     }
@@ -299,6 +401,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Hide controls
   void _hideControls() {
+    if (_disposed) return;
     final currentState = state;
     if (currentState == null) return;
 
@@ -312,6 +415,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Toggle controls visibility
   void toggleControls() {
+    if (_disposed) return;
     final currentState = state;
     if (currentState == null) return;
 
@@ -327,6 +431,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Start timer to hide controls
   void _startHideControlsTimer() {
+    if (_disposed) return;
     _cancelHideControlsTimer();
     _hideControlsTimer = Timer(const Duration(seconds: 3), () {
       _hideControls();
@@ -341,6 +446,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Reset hide controls timer
   void resetHideControlsTimer() {
+    if (_disposed) return;
     final currentState = state;
     if (currentState != null && currentState.showControls) {
       _startHideControlsTimer();
@@ -352,6 +458,7 @@ class VideoPlayerController extends ChangeNotifier {
 
   /// Replay video from beginning
   void replay() {
+    if (_disposed) return;
     seek(Duration.zero);
     state?.player.play();
     if (state != null) {
@@ -362,6 +469,9 @@ class VideoPlayerController extends ChangeNotifier {
   /// Clean up resources
   @override
   void dispose() {
+    // Set disposed flag first to stop any ongoing operations
+    _disposed = true;
+
     _cancelHideControlsTimer();
     _positionSubscription?.cancel();
     _durationSubscription?.cancel();
@@ -385,9 +495,16 @@ class VideoPlayerController extends ChangeNotifier {
 final videoPlayerControllerProvider = Provider.autoDispose
     .family<VideoPlayerController, (String, String?)>((ref, params) {
       final (mediaId, mediaTitle) = params;
-      final controller = VideoPlayerController(mediaId, mediaTitle);
+      // Use read instead of watch to prevent recreation when settings change
+      final playerSettings = ref.read(videoPlayerSettingsProvider);
+      final controller = VideoPlayerController(
+        mediaId,
+        mediaTitle,
+        playerSettings,
+      );
 
       ref.onDispose(() {
+        debugPrint('🗑️ Disposing video player controller for media: $mediaId');
         controller.dispose();
       });
 

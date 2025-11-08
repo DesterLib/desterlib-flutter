@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'loading_indicator.dart';
 
 /// A cached network image widget with consistent error and loading states
 class DCachedImage extends StatelessWidget {
@@ -40,12 +41,7 @@ class DCachedImage extends StatelessWidget {
           : (showLoadingIndicator
                 ? (context, url) => Container(
                     color: const Color(0xFF1a1a1a),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        strokeWidth: 2,
-                      ),
-                    ),
+                    child: const Center(child: DLoadingIndicator()),
                   )
                 : (context, url) => Container(color: const Color(0xFF1a1a1a))),
       errorWidget: errorWidget != null
@@ -64,8 +60,8 @@ class DCachedImage extends StatelessWidget {
                 ),
               );
             },
-      fadeInDuration: const Duration(milliseconds: 200),
-      fadeOutDuration: const Duration(milliseconds: 100),
+      fadeInDuration: const Duration(milliseconds: 300),
+      fadeOutDuration: const Duration(milliseconds: 150),
     );
   }
 }

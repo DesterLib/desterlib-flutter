@@ -8,7 +8,13 @@ import 'package:dester/shared/widgets/ui/cached_image.dart';
 /// Section showing seasons and episodes for TV shows
 class TvShowSeasonsSection extends StatefulWidget {
   final BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner> seasons;
-  final Function(String episodeId, String episodeTitle)? onEpisodePlay;
+  final Function(
+    String episodeId,
+    String episodeTitle,
+    int seasonNumber,
+    int episodeNumber,
+  )?
+  onEpisodePlay;
 
   const TvShowSeasonsSection({
     super.key,
@@ -72,11 +78,17 @@ class _TvShowSeasonsSectionState extends State<TvShowSeasonsSection> {
   }
 }
 
-class _SeasonCard extends StatelessWidget {
+class _SeasonCard extends StatefulWidget {
   final ApiV1TvshowsIdGet200ResponseDataSeasonsInner season;
   final bool isExpanded;
   final VoidCallback onToggle;
-  final Function(String episodeId, String episodeTitle)? onEpisodePlay;
+  final Function(
+    String episodeId,
+    String episodeTitle,
+    int seasonNumber,
+    int episodeNumber,
+  )?
+  onEpisodePlay;
 
   const _SeasonCard({
     required this.season,
@@ -86,9 +98,16 @@ class _SeasonCard extends StatelessWidget {
   });
 
   @override
+  State<_SeasonCard> createState() => _SeasonCardState();
+}
+
+class _SeasonCardState extends State<_SeasonCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final rawEpisodes =
-        season.episodes ??
+        widget.season.episodes ??
         BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner>();
 
     // Sort episodes by episode number (numeric, not string)
@@ -116,11 +135,18 @@ class _SeasonCard extends StatelessWidget {
         child: Column(
           children: [
             // Season header
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onToggle,
-                onTapDown: (_) => HapticFeedback.lightImpact(),
+            GestureDetector(
+              onTapDown: (_) {
+                HapticFeedback.lightImpact();
+                setState(() => _isPressed = true);
+              },
+              onTapUp: (_) => setState(() => _isPressed = false),
+              onTapCancel: () => setState(() => _isPressed = false),
+              onTap: widget.onToggle,
+              child: AnimatedOpacity(
+                opacity: _isPressed ? 0.6 : 1.0,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeInOut,
                 child: Padding(
                   padding: EdgeInsets.all(
                     isMobile ? AppSpacing.sm : AppSpacing.md,
@@ -128,11 +154,11 @@ class _SeasonCard extends StatelessWidget {
                   child: Row(
                     children: [
                       // Season poster thumbnail
-                      if (season.posterUrl != null)
+                      if (widget.season.posterUrl != null)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: DCachedImage(
-                            imageUrl: season.posterUrl!,
+                            imageUrl: widget.season.posterUrl!,
                             width: isMobile ? 50 : 60,
                             height: isMobile ? 75 : 90,
                             fit: BoxFit.cover,
@@ -175,8 +201,8 @@ class _SeasonCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              season.name ??
-                                  'Season ${season.seasonNumber ?? 'Unknown'}',
+                              widget.season.name ??
+                                  'Season ${widget.season.seasonNumber ?? 'Unknown'}',
                               style:
                                   (isMobile
                                           ? AppTypography.bodyLarge
@@ -197,9 +223,9 @@ class _SeasonCard extends StatelessWidget {
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
-                                if (season.airDate != null) ...[
+                                if (widget.season.airDate != null) ...[
                                   Text(
-                                    ' • ${season.airDate!.year}',
+                                    ' • ${widget.season.airDate!.year}',
                                     style: AppTypography.bodySmall.copyWith(
                                       color: AppColors.textTertiary,
                                     ),
@@ -222,7 +248,7 @@ class _SeasonCard extends StatelessWidget {
                           ),
                         ),
                         child: Icon(
-                          isExpanded
+                          widget.isExpanded
                               ? Icons.keyboard_arrow_up
                               : Icons.keyboard_arrow_down,
                           color: AppColors.textSecondary,
@@ -236,7 +262,7 @@ class _SeasonCard extends StatelessWidget {
             ),
 
             // Episodes list
-            if (isExpanded && episodes.isNotEmpty)
+            if (widget.isExpanded && episodes.isNotEmpty)
               Container(
                 decoration: BoxDecoration(
                   border: Border(
@@ -250,7 +276,8 @@ class _SeasonCard extends StatelessWidget {
                   children: episodes.map((episode) {
                     return _EpisodeItem(
                       episode: episode,
-                      onPlay: onEpisodePlay,
+                      seasonNumber: widget.season.seasonNumber ?? 0,
+                      onPlay: widget.onEpisodePlay,
                       isMobile: isMobile,
                     );
                   }).toList(),
@@ -263,36 +290,61 @@ class _SeasonCard extends StatelessWidget {
   }
 }
 
-class _EpisodeItem extends StatelessWidget {
+class _EpisodeItem extends StatefulWidget {
   final ApiV1TvshowsIdGet200ResponseDataSeasonsInnerEpisodesInner episode;
-  final Function(String episodeId, String episodeTitle)? onPlay;
+  final int seasonNumber;
+  final Function(
+    String episodeId,
+    String episodeTitle,
+    int seasonNumber,
+    int episodeNumber,
+  )?
+  onPlay;
   final bool isMobile;
 
   const _EpisodeItem({
     required this.episode,
+    required this.seasonNumber,
     this.onPlay,
     this.isMobile = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final thumbnailWidth = isMobile ? 100.0 : 140.0;
-    final thumbnailHeight = isMobile ? 56.0 : 79.0;
+  State<_EpisodeItem> createState() => _EpisodeItemState();
+}
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (onPlay != null && episode.id != null) {
-            HapticFeedback.lightImpact();
-            onPlay!(
-              episode.id!,
-              episode.title ?? 'Episode ${episode.episodeNumber ?? 'Unknown'}',
-            );
-          }
-        },
+class _EpisodeItemState extends State<_EpisodeItem> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final thumbnailWidth = widget.isMobile ? 100.0 : 140.0;
+    final thumbnailHeight = widget.isMobile ? 56.0 : 79.0;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: () {
+        if (widget.onPlay != null && widget.episode.id != null) {
+          HapticFeedback.lightImpact();
+          widget.onPlay!(
+            widget.episode.id!,
+            widget.episode.title ??
+                'Episode ${widget.episode.episodeNumber ?? 'Unknown'}',
+            widget.seasonNumber,
+            widget.episode.episodeNumber ?? 0,
+          );
+        }
+      },
+      child: AnimatedOpacity(
+        opacity: _isPressed ? 0.6 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
         child: Container(
-          padding: EdgeInsets.all(isMobile ? AppSpacing.sm : AppSpacing.md),
+          padding: EdgeInsets.all(
+            widget.isMobile ? AppSpacing.sm : AppSpacing.md,
+          ),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -308,11 +360,11 @@ class _EpisodeItem extends StatelessWidget {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (episode.stillUrl != null)
+                  if (widget.episode.stillUrl != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: DCachedImage(
-                        imageUrl: episode.stillUrl!,
+                        imageUrl: widget.episode.stillUrl!,
                         width: thumbnailWidth,
                         height: thumbnailHeight,
                         fit: BoxFit.cover,
@@ -326,7 +378,7 @@ class _EpisodeItem extends StatelessWidget {
                           child: Icon(
                             Icons.play_circle_outline,
                             color: AppColors.textSecondary,
-                            size: isMobile ? 24 : 32,
+                            size: widget.isMobile ? 24 : 32,
                           ),
                         ),
                       ),
@@ -344,13 +396,13 @@ class _EpisodeItem extends StatelessWidget {
                       child: Icon(
                         Icons.play_circle_outline,
                         color: AppColors.textSecondary,
-                        size: isMobile ? 24 : 32,
+                        size: widget.isMobile ? 24 : 32,
                       ),
                     ),
                   // Play overlay
                   Container(
-                    width: isMobile ? 32 : 40,
-                    height: isMobile ? 32 : 40,
+                    width: widget.isMobile ? 32 : 40,
+                    height: widget.isMobile ? 32 : 40,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -358,12 +410,12 @@ class _EpisodeItem extends StatelessWidget {
                     child: Icon(
                       Icons.play_arrow_rounded,
                       color: Colors.black,
-                      size: isMobile ? 20 : 24,
+                      size: widget.isMobile ? 20 : 24,
                     ),
                   ),
                 ],
               ),
-              SizedBox(width: isMobile ? AppSpacing.sm : AppSpacing.md),
+              SizedBox(width: widget.isMobile ? AppSpacing.sm : AppSpacing.md),
 
               // Episode info
               Expanded(
@@ -385,7 +437,7 @@ class _EpisodeItem extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'E${episode.episodeNumber ?? '?'}',
+                            'E${widget.episode.episodeNumber ?? '?'}',
                             style: AppTypography.labelSmall.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
@@ -393,7 +445,8 @@ class _EpisodeItem extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: AppSpacing.xs),
-                        if (!isMobile && episode.runtime != null) ...[
+                        if (!widget.isMobile &&
+                            widget.episode.runtime != null) ...[
                           Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: AppSpacing.xs,
@@ -406,7 +459,7 @@ class _EpisodeItem extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              '${episode.runtime}m',
+                              '${widget.episode.runtime}m',
                               style: AppTypography.labelSmall.copyWith(
                                 color: AppColors.textTertiary,
                                 fontWeight: FontWeight.w600,
@@ -419,25 +472,25 @@ class _EpisodeItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      episode.title ??
-                          'Episode ${episode.episodeNumber ?? 'Unknown'}',
+                      widget.episode.title ??
+                          'Episode ${widget.episode.episodeNumber ?? 'Unknown'}',
                       style:
-                          (isMobile
+                          (widget.isMobile
                                   ? AppTypography.bodySmall
                                   : AppTypography.bodyBase)
                               .copyWith(
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w600,
                               ),
-                      maxLines: isMobile ? 1 : 2,
+                      maxLines: widget.isMobile ? 1 : 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (episode.overview != null &&
-                        episode.overview!.isNotEmpty &&
-                        !isMobile) ...[
+                    if (widget.episode.overview != null &&
+                        widget.episode.overview!.isNotEmpty &&
+                        !widget.isMobile) ...[
                       const SizedBox(height: 4),
                       Text(
-                        episode.overview!,
+                        widget.episode.overview!,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -445,10 +498,10 @@ class _EpisodeItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    if (episode.airDate != null) ...[
+                    if (widget.episode.airDate != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        _formatDate(episode.airDate!),
+                        _formatDate(widget.episode.airDate!),
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.textTertiary,
                         ),

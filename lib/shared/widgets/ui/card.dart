@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../utils/platform_icons.dart';
 import 'cached_image.dart';
 
@@ -146,7 +147,12 @@ class _DCardState extends State<DCard> {
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.onTap,
+        onTap: widget.onTap != null
+            ? () {
+                HapticFeedback.lightImpact();
+                widget.onTap!();
+              }
+            : null,
         child: content,
       ),
     );

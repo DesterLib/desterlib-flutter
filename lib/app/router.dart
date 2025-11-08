@@ -71,9 +71,6 @@ final GoRouter router = GoRouter(
             );
           },
         ),
-        // Note: TMDB modals are now called directly via TmdbApiKeyModal.show()
-        // and TmdbRequiredModal.show() from other screens.
-        // No need for dedicated routes since they're overlay modals, not pages.
       ],
     ),
     // Player route (outside shell to be fullscreen)
@@ -82,10 +79,25 @@ final GoRouter router = GoRouter(
       pageBuilder: (BuildContext context, GoRouterState state) {
         final id = state.pathParameters['id']!;
         final title = state.uri.queryParameters['title'];
-        return MaterialPage(
-          key: state.pageKey,
-          child: ConnectionGuard(
-            child: PlayerScreen(mediaId: id, mediaTitle: title),
+        final episodeTitle = state.uri.queryParameters['episodeTitle'];
+        final seasonStr = state.uri.queryParameters['season'];
+        final episodeStr = state.uri.queryParameters['episode'];
+
+        final seasonNumber = seasonStr != null ? int.tryParse(seasonStr) : null;
+        final episodeNumber = episodeStr != null
+            ? int.tryParse(episodeStr)
+            : null;
+
+        return _buildPageWithTransition(
+          state,
+          ConnectionGuard(
+            child: PlayerScreen(
+              mediaId: id,
+              mediaTitle: title,
+              episodeTitle: episodeTitle,
+              seasonNumber: seasonNumber,
+              episodeNumber: episodeNumber,
+            ),
           ),
         );
       },
@@ -240,11 +252,7 @@ class _DesktopLayout extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Content area with symmetric margins (sidebar + matching right margin)
-        Padding(
-          padding: const EdgeInsets.only(left: 340, right: 20),
-          child: child,
-        ),
+        Padding(padding: const EdgeInsets.only(left: 340), child: child),
         // Sidebar positioned on the left
         Positioned(
           left: 0,

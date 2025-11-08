@@ -36,6 +36,9 @@ class _SpeedSelectorOverlayState extends State<SpeedSelectorOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     return BaseOverlay(
       key: _overlayKey,
       onClose: widget.onClose,
@@ -43,84 +46,92 @@ class _SpeedSelectorOverlayState extends State<SpeedSelectorOverlay> {
         onTap: () {}, // Prevent closing when tapping inside
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Title
-                const Text(
-                  'Playback Speed',
-                  style: TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
+            constraints: BoxConstraints(
+              maxWidth: isDesktop ? 500 : double.infinity,
+              maxHeight: isDesktop ? 600 : double.infinity,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title
+                  const Text(
+                    'Playback Speed',
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                AppSpacing.gapVerticalLG,
-                // Speed options
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _SpeedSelectorOverlayState.speeds.length,
-                    itemBuilder: (context, index) {
-                      final speed = _SpeedSelectorOverlayState.speeds[index];
-                      final isSelected = speed == widget.currentSpeed;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: InkWell(
-                          onTap: () => _handleSpeedSelect(speed),
-                          borderRadius: AppRadius.radiusMD,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.15)
-                                  : Colors.transparent,
-                              borderRadius: AppRadius.radiusMD,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${speed}x',
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? const Color(0xFFFFFFFF)
-                                        : const Color(0x99FFFFFF),
-                                    fontSize: 16,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
+                  AppSpacing.gapVerticalLG,
+                  // Speed options
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _SpeedSelectorOverlayState.speeds.length,
+                      itemBuilder: (context, index) {
+                        final speed = _SpeedSelectorOverlayState.speeds[index];
+                        final isSelected = speed == widget.currentSpeed;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: InkWell(
+                            onTap: () => _handleSpeedSelect(speed),
+                            borderRadius: AppRadius.radiusMD,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.white.withValues(alpha: 0.15)
+                                    : Colors.transparent,
+                                borderRadius: AppRadius.radiusMD,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '${speed}x',
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? const Color(0xFFFFFFFF)
+                                          : const Color(0x99FFFFFF),
+                                      fontSize: 16,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                    ),
                                   ),
-                                ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check_rounded,
-                                    color: Color(0xFFFFFFFF),
-                                    size: 20,
-                                  ),
-                              ],
+                                  if (isSelected)
+                                    const Icon(
+                                      Icons.check_rounded,
+                                      color: Color(0xFFFFFFFF),
+                                      size: 20,
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                AppSpacing.gapVerticalMD,
-                // Close button
-                DButton(
-                  label: 'Close',
-                  variant: DButtonVariant.secondary,
-                  fullWidth: true,
-                  onTap: _handleClose,
-                ),
-              ],
+                  AppSpacing.gapVerticalMD,
+                  // Close button
+                  DButton(
+                    label: 'Close',
+                    variant: DButtonVariant.secondary,
+                    size: DButtonSize.sm,
+                    fullWidth: true,
+                    onTap: _handleClose,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

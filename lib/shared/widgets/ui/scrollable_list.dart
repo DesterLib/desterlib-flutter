@@ -97,25 +97,16 @@ class _DScrollableListState extends State<DScrollableList> {
     );
   }
 
-  double _getResponsiveCardWidth(double containerWidth) {
-    // Responsive card widths based on container width
-    if (containerWidth < 600) {
-      return containerWidth * 0.5; // Mobile: 70% of container width
-    } else if (containerWidth < 900) {
-      return 280.0; // Tablet
-    } else if (containerWidth < 1200) {
-      return 300.0; // Desktop
-    } else {
-      return 320.0; // Large Desktop
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = _getResponsiveCardWidth(constraints.maxWidth);
+        final cardWidth = isDesktop ? 320.0 : 200.0;
         final cardHeight = cardWidth * 10 / 16; // 16:10 aspect ratio
+        final itemSpacing = isDesktop ? 24.0 : widget.spacing;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +215,7 @@ class _DScrollableListState extends State<DScrollableList> {
                       cacheExtent: cardWidth * 2, // Cache 2 cards ahead
                       itemCount: widget.items.length,
                       separatorBuilder: (context, index) =>
-                          SizedBox(width: widget.spacing),
+                          SizedBox(width: itemSpacing),
                       itemBuilder: (context, index) {
                         final item = widget.items[index];
                         return RepaintBoundary(

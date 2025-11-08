@@ -30,13 +30,15 @@ class DGrid extends StatelessWidget {
       builder: (context, constraints) {
         final containerWidth = constraints.maxWidth;
         final columns = _getResponsiveCrossAxisCount(containerWidth);
+        final isDesktop = containerWidth > 900;
+        final gridSpacing = isDesktop ? 24.0 : 16.0;
 
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             childAspectRatio: 1 / 1,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: gridSpacing,
+            mainAxisSpacing: gridSpacing,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {

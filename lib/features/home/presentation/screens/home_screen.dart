@@ -14,6 +14,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final moviesAsync = ref.watch(moviesProvider);
     final tvShowsAsync = ref.watch(tvShowsProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
 
     return AnimatedAppBarPage(
       title: 'Home',
@@ -49,16 +51,28 @@ class HomeScreen extends ConsumerWidget {
               );
             }).toList();
 
+            final listPadding = isDesktop
+                ? const EdgeInsets.only(left: 24, right: 44)
+                : const EdgeInsets.symmetric(horizontal: 24);
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
                 if (movieCards.isNotEmpty) ...[
-                  DScrollableList(title: 'Movies', items: movieCards),
+                  DScrollableList(
+                    title: 'Movies',
+                    items: movieCards,
+                    padding: listPadding,
+                  ),
                   const SizedBox(height: 32),
                 ],
                 if (tvShowCards.isNotEmpty) ...[
-                  DScrollableList(title: 'TV Shows', items: tvShowCards),
+                  DScrollableList(
+                    title: 'TV Shows',
+                    items: tvShowCards,
+                    padding: listPadding,
+                  ),
                   const SizedBox(height: 24),
                 ],
                 if (movieCards.isEmpty && tvShowCards.isEmpty)

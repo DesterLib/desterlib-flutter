@@ -9,6 +9,7 @@ import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
 import '../../data/tmdb_settings_provider.dart';
 import '../modals/settings_modals.dart';
+import '../modals/video_player_settings_modal.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -23,6 +24,25 @@ class SettingsScreen extends ConsumerWidget {
       maxWidthConstraint: 1220,
       child: DSettingsLayout(
         groups: [
+          // General Settings
+          DSettingsGroup(
+            title: 'General',
+            items: [
+              DSettingsItem(
+                title: 'Video Player',
+                subtitle: 'Audio, subtitles and more',
+                icon: PlatformIcons.playCircle,
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
+                onTap: () async {
+                  await VideoPlayerSettingsModal.show(context, ref);
+                },
+              ),
+            ],
+          ),
           // API Connection Settings
           DSettingsGroup(
             title: 'API Connection',

@@ -20,10 +20,55 @@ class MediaDetailScreen extends ConsumerWidget {
 
   const MediaDetailScreen({super.key, required this.id, this.mediaType});
 
-  void _handlePlayTapped(BuildContext context, String? mediaId, String? title) {
+  void _handlePlayTapped(
+    BuildContext context,
+    String? mediaId,
+    String? title,
+    BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>? tvShowSeasons,
+  ) {
     if (mediaId == null) return;
 
-    // Navigate to player screen
+    // If it's a TV show with seasons, play the first available episode
+    if (tvShowSeasons != null && tvShowSeasons.isNotEmpty) {
+      // Sort seasons by season number
+      final sortedSeasons = tvShowSeasons.toList()
+        ..sort((a, b) {
+          final aNum = a.seasonNumber ?? 0;
+          final bNum = b.seasonNumber ?? 0;
+          return aNum.compareTo(bNum);
+        });
+
+      // Find first season with episodes
+      for (final season in sortedSeasons) {
+        final episodes = season.episodes;
+        if (episodes != null && episodes.isNotEmpty) {
+          // Sort episodes by episode number
+          final sortedEpisodes = episodes.toList()
+            ..sort((a, b) {
+              final aNum = a.episodeNumber ?? 0;
+              final bNum = b.episodeNumber ?? 0;
+              return aNum.compareTo(bNum);
+            });
+
+          // Play first episode
+          final firstEpisode = sortedEpisodes.first;
+          if (firstEpisode.id != null) {
+            _handleEpisodePlay(
+              context,
+              firstEpisode.id!,
+              firstEpisode.title ??
+                  'Episode ${firstEpisode.episodeNumber ?? 1}',
+              title ?? 'Unknown Show',
+              season.seasonNumber ?? 1,
+              firstEpisode.episodeNumber ?? 1,
+            );
+            return;
+          }
+        }
+      }
+    }
+
+    // Fallback for movies or if no episodes found
     context.push('/player/$mediaId?title=${Uri.encodeComponent(title ?? '')}');
   }
 
@@ -31,10 +76,13 @@ class MediaDetailScreen extends ConsumerWidget {
     BuildContext context,
     String episodeId,
     String episodeTitle,
+    String showTitle,
+    int seasonNumber,
+    int episodeNumber,
   ) {
     // Navigate to player screen with episode
     context.push(
-      '/player/$episodeId?title=${Uri.encodeComponent(episodeTitle)}',
+      '/player/$episodeId?title=${Uri.encodeComponent(showTitle)}&episodeTitle=${Uri.encodeComponent(episodeTitle)}&season=$seasonNumber&episode=$episodeNumber',
     );
   }
 
@@ -96,10 +144,22 @@ class MediaDetailScreen extends ConsumerWidget {
             mediaData: mediaData,
             isMobile: isMobile,
             tvShowSeasons: tvShowSeasons,
-            onPlayTapped: () =>
-                _handlePlayTapped(context, mediaData.id, mediaData.title),
-            onEpisodePlay: (episodeId, episodeTitle) =>
-                _handleEpisodePlay(context, episodeId, episodeTitle),
+            onPlayTapped: () => _handlePlayTapped(
+              context,
+              mediaData.id,
+              mediaData.title,
+              tvShowSeasons,
+            ),
+            onEpisodePlay:
+                (episodeId, episodeTitle, seasonNumber, episodeNumber) =>
+                    _handleEpisodePlay(
+                      context,
+                      episodeId,
+                      episodeTitle,
+                      mediaData.title, // Pass show title
+                      seasonNumber,
+                      episodeNumber,
+                    ),
           );
         },
         loading: () => const _LoadingIndicator(),
@@ -165,7 +225,13 @@ class _MediaDetailContent extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPlayTapped;
   final BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>? tvShowSeasons;
-  final Function(String episodeId, String episodeTitle)? onEpisodePlay;
+  final Function(
+    String episodeId,
+    String episodeTitle,
+    int seasonNumber,
+    int episodeNumber,
+  )?
+  onEpisodePlay;
 
   const _MediaDetailContent({
     required this.mediaData,
@@ -177,6 +243,9 @@ class _MediaDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -189,7 +258,7 @@ class _MediaDetailContent extends StatelessWidget {
 
         // Rest of content
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.only(left: 24, right: isDesktop ? 44 : 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

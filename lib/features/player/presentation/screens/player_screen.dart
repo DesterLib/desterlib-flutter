@@ -2,21 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
+import 'package:dester/shared/utils/track_helper.dart';
+import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import '../provider/video_player_provider.dart';
 import '../widgets/player_controls.dart';
 import '../widgets/player_overlay_speed.dart';
 import '../widgets/player_overlay_tracks.dart';
 import '../widgets/player_button.dart';
+import '../../data/video_player_settings_provider.dart';
 
 /// Video player screen with custom controls
 class PlayerScreen extends ConsumerStatefulWidget {
   final String mediaId;
-  final String? mediaTitle;
+  final String? mediaTitle; // Movie title or TV show title
+  final String? episodeTitle; // Episode-specific title (only for TV shows)
+  final int? seasonNumber;
+  final int? episodeNumber;
 
-  const PlayerScreen({super.key, required this.mediaId, this.mediaTitle});
+  const PlayerScreen({
+    super.key,
+    required this.mediaId,
+    this.mediaTitle,
+    this.episodeTitle,
+    this.seasonNumber,
+    this.episodeNumber,
+  });
 
   @override
   ConsumerState<PlayerScreen> createState() => _PlayerScreenState();
@@ -25,17 +39,25 @@ class PlayerScreen extends ConsumerStatefulWidget {
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   bool _showSpeedSelector = false;
   bool _showTracksSelector = false;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
+    debugPrint('📱 PlayerScreen initState for media: ${widget.mediaId}');
+
     // Lock orientation to landscape only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+
     // Initialize player after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _initialized) return;
+      _initialized = true;
+
+      debugPrint('🎬 PostFrameCallback: Calling initialize()');
       ref
           .read(
             videoPlayerControllerProvider((widget.mediaId, widget.mediaTitle)),
@@ -64,9 +86,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final playerController = ref.read(
       videoPlayerControllerProvider((widget.mediaId, widget.mediaTitle)),
     );
+    final videoPlayerSettings = ref.watch(videoPlayerSettingsProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
 
     debugPrint(
       '🔍 Player State: ${playerState == null ? "null" : "initialized"}, Duration: ${playerState?.duration}, Error: ${playerState?.error}, isBuffering: ${playerState?.isBuffering}, showControls: ${playerState?.showControls}',
+    );
+    debugPrint(
+      '📝 Subtitle Settings: size=${videoPlayerSettings.subtitleSize}px, bgOpacity=${videoPlayerSettings.subtitleBackgroundOpacity}',
     );
 
     // Show loading if player is not initialized
@@ -77,7 +105,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(color: AppColors.primary),
+              const DLoadingIndicator(),
               AppSpacing.gapVerticalMD,
               Text(
                 'Initializing player...',
@@ -147,8 +175,41 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 height:
                     playerState.controller.player.state.height?.toDouble() ?? 9,
                 child: Video(
+                  key: ValueKey(
+                    'video_${videoPlayerSettings.subtitleSize}_${videoPlayerSettings.subtitleBackgroundOpacity}',
+                  ),
                   controller: playerState.controller,
                   controls: NoVideoControls,
+                  subtitleViewConfiguration: SubtitleViewConfiguration(
+                    style: TextStyle(
+                      height: 1.4,
+                      fontSize: videoPlayerSettings.subtitleSize,
+                      letterSpacing: 0.0,
+                      wordSpacing: 0.0,
+                      color: const Color(0xFFFFFFFF),
+                      fontWeight: FontWeight.normal,
+                      backgroundColor: Color.fromRGBO(
+                        0,
+                        0,
+                        0,
+                        videoPlayerSettings.subtitleBackgroundOpacity,
+                      ),
+                      shadows: const [
+                        Shadow(
+                          color: Color(0xCC000000),
+                          blurRadius: 4,
+                          offset: Offset(1, 1),
+                        ),
+                        Shadow(
+                          color: Color(0x99000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                    padding: const EdgeInsets.all(24.0),
+                  ),
                 ),
               ),
             ),
@@ -166,8 +227,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             ),
           ),
 
-          // Center controls with fade animation
-          if (!playerState.isBuffering && !playerState.isCompleted)
+          // Center controls with fade animation (mobile only - desktop has inline controls)
+          if (!isDesktop &&
+              !playerState.isBuffering &&
+              !playerState.isCompleted)
             AnimatedOpacity(
               opacity: playerState.showControls ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
@@ -212,21 +275,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
           // Buffering indicator (always visible when buffering, doesn't block pointer events)
           if (playerState.isBuffering)
-            IgnorePointer(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: AppRadius.radiusLG,
-                  ),
-                  child: const CircularProgressIndicator(
-                    color: AppColors.primary,
-                    strokeWidth: 3,
-                  ),
-                ),
-              ),
-            ),
+            const IgnorePointer(child: Center(child: DLoadingIndicator())),
 
           // Controls overlay (top and bottom bars only) with fade animation
           AnimatedOpacity(
@@ -245,6 +294,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 volume: playerState.volume,
                 playbackSpeed: playerState.playbackSpeed,
                 title: widget.mediaTitle,
+                episodeTitle: widget.episodeTitle,
+                seasonNumber: widget.seasonNumber,
+                episodeNumber: widget.episodeNumber,
                 onPlayPause: () {
                   playerController.togglePlayPause();
                 },
@@ -296,25 +348,105 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           // Tracks selector overlay with fade animation
           if (_showTracksSelector)
             TracksSelectorOverlay(
-              audioTracks: const [
-                TrackOption(id: 'en', label: 'English [Original]'),
-                TrackOption(id: 'hi', label: 'Hindi'),
-                TrackOption(id: 'en-ad', label: 'English - Audio Description'),
-              ],
-              subtitleTracks: const [
-                TrackOption(id: 'off', label: 'Off'),
-                TrackOption(id: 'hi', label: 'Hindi'),
-                TrackOption(id: 'en', label: 'English [CC]'),
-              ],
-              selectedAudioId: 'en', // TODO: Get from player state
-              selectedSubtitleId: 'off', // TODO: Get from player state
+              audioTracks: () {
+                final allTracks = playerController.getAudioTracks();
+
+                // Add "Auto" option if there's an auto track
+                final hasAutoTrack = allTracks.any(
+                  (t) => t.id == 'auto' || t.id == 'no',
+                );
+                final autoOption = hasAutoTrack
+                    ? [const TrackOption(id: 'auto', label: 'Auto')]
+                    : <TrackOption>[];
+
+                // Filter valid tracks and create options with context-aware labels
+                final validTracks = allTracks
+                    .where((track) => TrackHelper.isValidTrack(track))
+                    .map((track) {
+                      final label = TrackHelper.getTrackLabelWithContext(
+                        track,
+                        allTracks,
+                      );
+                      return TrackOption(id: track.id, label: label);
+                    })
+                    .toList();
+
+                return [...autoOption, ...validTracks];
+              }(),
+              subtitleTracks: () {
+                final allTracks = playerController.getSubtitleTracks();
+
+                // Add "Auto" option if there's an auto track
+                final hasAutoTrack = allTracks.any((t) => t.id == 'auto');
+                final autoOption = hasAutoTrack
+                    ? [const TrackOption(id: 'auto', label: 'Auto')]
+                    : <TrackOption>[];
+
+                // Filter valid tracks and create options with context-aware labels
+                final validTracks = allTracks
+                    .where((track) => TrackHelper.isValidTrack(track))
+                    .map((track) {
+                      final label = TrackHelper.getTrackLabelWithContext(
+                        track,
+                        allTracks,
+                      );
+                      return TrackOption(id: track.id, label: label);
+                    })
+                    .toList();
+
+                return [
+                  const TrackOption(id: 'no', label: 'Off'),
+                  ...autoOption,
+                  ...validTracks,
+                ];
+              }(),
+              selectedAudioId: playerController.getSelectedAudioTrack().id,
+              selectedSubtitleId: playerController
+                  .getSelectedSubtitleTrack()
+                  .id,
               onAudioChanged: (id) {
-                debugPrint('🎵 Audio changed to: $id');
-                // TODO: Implement audio track change
+                // Handle "Auto" selection
+                if (id == 'auto') {
+                  final autoTrack = playerController
+                      .getAudioTracks()
+                      .firstWhere(
+                        (t) => t.id == 'auto' || t.id == 'no',
+                        orElse: () => const AudioTrack('auto', '', ''),
+                      );
+                  playerController.setAudioTrack(autoTrack);
+                  return;
+                }
+
+                final track = playerController.getAudioTracks().firstWhere(
+                  (t) => t.id == id,
+                );
+                playerController.setAudioTrack(track);
               },
               onSubtitleChanged: (id) {
-                debugPrint('📝 Subtitle changed to: $id');
-                // TODO: Implement subtitle track change
+                // Handle "Off" selection
+                if (id == 'no') {
+                  playerController.setSubtitleTrack(
+                    const SubtitleTrack('no', '', ''),
+                  );
+                  return;
+                }
+
+                // Handle "Auto" selection
+                if (id == 'auto') {
+                  final autoTrack = playerController
+                      .getSubtitleTracks()
+                      .firstWhere(
+                        (t) => t.id == 'auto',
+                        orElse: () => const SubtitleTrack('auto', '', ''),
+                      );
+                  playerController.setSubtitleTrack(autoTrack);
+                  return;
+                }
+
+                final track = playerController.getSubtitleTracks().firstWhere(
+                  (t) => t.id == id,
+                );
+                playerController.setSubtitleTrack(track);
               },
               onClose: () {
                 setState(() => _showTracksSelector = false);
@@ -357,35 +489,47 @@ class _CenterPlaybackControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 48),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Seek backward
-          VideoPlayerButton(
-            icon: PlatformIcons.replay10,
-            onTap: _handleSeekBackward,
-            size: VideoPlayerButtonSize.large,
-            tooltip: 'Rewind 10 seconds',
-          ),
-          // Play/Pause
-          VideoPlayerButton(
-            icon: isPlaying ? PlatformIcons.pause : PlatformIcons.playArrow,
-            onTap: _handlePlayPause,
-            size: VideoPlayerButtonSize.extraLarge,
-            tooltip: isPlaying ? 'Pause' : 'Play',
-          ),
-          // Seek forward
-          VideoPlayerButton(
-            icon: PlatformIcons.forward10,
-            onTap: _handleSeekForward,
-            size: VideoPlayerButtonSize.large,
-            tooltip: 'Forward 10 seconds',
-          ),
-        ],
-      ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
+    Widget controls = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Seek backward
+        VideoPlayerButton(
+          icon: PlatformIcons.replay10,
+          onTap: _handleSeekBackward,
+          size: VideoPlayerButtonSize.large,
+        ),
+        // Play/Pause
+        VideoPlayerButton(
+          icon: isPlaying ? PlatformIcons.pause : PlatformIcons.playArrow,
+          onTap: _handlePlayPause,
+          size: VideoPlayerButtonSize.extraLarge,
+        ),
+        // Seek forward
+        VideoPlayerButton(
+          icon: PlatformIcons.forward10,
+          onTap: _handleSeekForward,
+          size: VideoPlayerButtonSize.large,
+        ),
+      ],
     );
+
+    return isDesktop
+        ? Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: controls,
+              ),
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 48),
+            child: controls,
+          );
   }
 }
 
@@ -409,7 +553,6 @@ class _CompletedOverlay extends StatelessWidget {
           icon: PlatformIcons.replay,
           onTap: _handleReplay,
           size: VideoPlayerButtonSize.extraLarge,
-          tooltip: 'Replay',
         ),
         AppSpacing.gapVerticalMD,
         const Text(

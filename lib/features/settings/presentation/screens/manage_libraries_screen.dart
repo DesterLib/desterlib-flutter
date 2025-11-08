@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/shared/widgets/ui/toast.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/shared/utils/error_parser.dart';
@@ -136,7 +137,7 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
         loading: () => Center(
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.5,
-            child: const Center(child: CircularProgressIndicator()),
+            child: const Center(child: DLoadingIndicator()),
           ),
         ),
         error: (error, stack) => _ErrorState(

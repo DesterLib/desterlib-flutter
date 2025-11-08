@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/app/theme/theme.dart';
 
 /// Configuration-based modal/drawer system
@@ -296,7 +297,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(),
+          child: DLoadingIndicator(),
         ),
       );
     }

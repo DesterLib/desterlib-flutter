@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
@@ -114,7 +115,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             const SizedBox(height: 24),
           // Show media search results or genre cards
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            padding: EdgeInsets.fromLTRB(24, 0, showSidebar ? 44 : 24, 24),
             child: _searchQuery.isEmpty
                 ? _buildGenreGrid(genres)
                 : _buildSearchResults(),
@@ -207,32 +208,67 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           );
         }
 
-        // Use MediaQuery instead of DGrid to avoid LayoutBuilder conflicts
+        // Use row-based layout for proper full-width distribution
         final screenWidth = MediaQuery.of(context).size.width;
         final showSidebar = screenWidth > 900;
+        final gridSpacing = showSidebar ? 24.0 : 16.0;
 
-        // Account for sidebar width on desktop (340px) and horizontal padding (24 * 2 = 48)
+        // Account for sidebar width on desktop (340px) and horizontal padding (24 left + 20 right = 44 on desktop, 48 on mobile)
         final sidebarWidth = showSidebar ? 340 : 0;
-        final availableWidth = screenWidth - sidebarWidth - 48;
+        final horizontalPadding = showSidebar ? 44 : 48;
+        final availableWidth = screenWidth - sidebarWidth - horizontalPadding;
         final crossAxisCount = _getResponsiveCrossAxisCount(availableWidth);
-        final cardWidth =
-            (availableWidth - (16 * (crossAxisCount - 1))) / crossAxisCount;
 
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: allCards.map((card) {
-            return SizedBox(
-              width: cardWidth,
-              child: DCard(
-                title: card.title,
-                year: card.year,
-                imageUrl: card.imageUrl,
-                onTap: card.onTap,
-                isInGrid: true,
-              ),
+        // Calculate number of rows needed
+        final rowCount = (allCards.length / crossAxisCount).ceil();
+
+        return Column(
+          children: List.generate(rowCount, (rowIndex) {
+            final startIndex = rowIndex * crossAxisCount;
+            final endIndex = (startIndex + crossAxisCount).clamp(
+              0,
+              allCards.length,
             );
-          }).toList(),
+            final rowCards = allCards.sublist(startIndex, endIndex);
+
+            // Build row children with spacing
+            final rowChildren = <Widget>[];
+            for (int colIndex = 0; colIndex < crossAxisCount; colIndex++) {
+              if (colIndex < rowCards.length) {
+                // Add card
+                final card = rowCards[colIndex];
+                rowChildren.add(
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 2 / 3, // Poster aspect ratio
+                      child: DCard(
+                        title: card.title,
+                        year: card.year,
+                        imageUrl: card.imageUrl,
+                        onTap: card.onTap,
+                        isInGrid: true,
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                // Add empty spacer for missing cards
+                rowChildren.add(const Expanded(child: SizedBox.shrink()));
+              }
+
+              // Add spacing between columns (except after last column)
+              if (colIndex < crossAxisCount - 1) {
+                rowChildren.add(SizedBox(width: gridSpacing));
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: rowIndex < rowCount - 1 ? gridSpacing : 0,
+              ),
+              child: Row(children: rowChildren),
+            );
+          }),
         );
       },
       loading: () => const Center(
@@ -271,33 +307,69 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   }
 
   Widget _buildGenreGrid(List<String> genres) {
-    // Use MediaQuery instead of LayoutBuilder to avoid scroll physics conflicts
-    final screenWidth = MediaQuery.of(context).size.width;
-    final showSidebar = screenWidth > 900;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final showSidebar = screenWidth > 900;
+        final gridSpacing = showSidebar ? 24.0 : 16.0;
 
-    // Account for sidebar width on desktop (340px) and horizontal padding (24 * 2 = 48)
-    final sidebarWidth = showSidebar ? 340 : 0;
-    final availableWidth = screenWidth - sidebarWidth - 48;
-    final crossAxisCount = _getResponsiveCrossAxisCount(availableWidth);
-    final cardWidth =
-        (availableWidth - (16 * (crossAxisCount - 1))) / crossAxisCount;
-    final cardHeight = cardWidth * 0.6;
+        // Account for sidebar width on desktop (340px) and horizontal padding (24 left + 20 right = 44 on desktop, 48 on mobile)
+        final sidebarWidth = showSidebar ? 340 : 0;
+        final horizontalPadding = showSidebar ? 44 : 48;
+        final availableWidth = screenWidth - sidebarWidth - horizontalPadding;
+        final crossAxisCount = _getResponsiveCrossAxisCount(availableWidth);
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: genres.map((genre) {
-        return SizedBox(
-          width: cardWidth,
-          height: cardHeight,
-          child: _GenreCard(
-            genre: genre,
-            onTap: () {
-              // TODO: Navigate to genre detail screen
-            },
-          ),
+        // Calculate number of rows needed
+        final rowCount = (genres.length / crossAxisCount).ceil();
+
+        return Column(
+          children: List.generate(rowCount, (rowIndex) {
+            final startIndex = rowIndex * crossAxisCount;
+            final endIndex = (startIndex + crossAxisCount).clamp(
+              0,
+              genres.length,
+            );
+            final rowGenres = genres.sublist(startIndex, endIndex);
+
+            // Build row children with spacing
+            final rowChildren = <Widget>[];
+            for (int colIndex = 0; colIndex < crossAxisCount; colIndex++) {
+              if (colIndex < rowGenres.length) {
+                // Add genre card
+                final genre = rowGenres[colIndex];
+                rowChildren.add(
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1 / 0.6,
+                      child: _GenreCard(
+                        genre: genre,
+                        onTap: () {
+                          // TODO: Navigate to genre detail screen
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                // Add empty spacer for missing cards
+                rowChildren.add(const Expanded(child: SizedBox.shrink()));
+              }
+
+              // Add spacing between columns (except after last column)
+              if (colIndex < crossAxisCount - 1) {
+                rowChildren.add(SizedBox(width: gridSpacing));
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: rowIndex < rowCount - 1 ? gridSpacing : 0,
+              ),
+              child: Row(children: rowChildren),
+            );
+          }),
         );
-      }).toList(),
+      },
     );
   }
 
@@ -365,7 +437,12 @@ class _GenreCardState extends State<_GenreCard> {
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.onTap,
+        onTap: widget.onTap != null
+            ? () {
+                HapticFeedback.lightImpact();
+                widget.onTap!();
+              }
+            : null,
         child: AnimatedScale(
           scale: _isPressed
               ? 0.98

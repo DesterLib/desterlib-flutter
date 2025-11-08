@@ -53,7 +53,7 @@ class _PlayerProgressBarState extends State<PlayerProgressBar> {
       behavior: HitTestBehavior.opaque,
       onHorizontalDragStart: widget.enabled
           ? (details) {
-              HapticFeedback.mediumImpact();
+              HapticFeedback.lightImpact();
               widget.onSeekStart?.call();
               setState(() {
                 _isDragging = true;

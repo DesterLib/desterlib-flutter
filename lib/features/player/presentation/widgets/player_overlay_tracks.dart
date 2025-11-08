@@ -60,71 +60,85 @@ class _TracksSelectorOverlayState extends State<TracksSelectorOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     return BaseOverlay(
       key: _overlayKey,
       onClose: widget.onClose,
       child: GestureDetector(
         onTap: () {}, // Prevent closing when tapping inside
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Content area with split lists
-              Flexible(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Audio section
-                    Expanded(
-                      child: _TrackList(
-                        title: 'Audio',
-                        tracks: widget.audioTracks,
-                        selectedId: _selectedAudioId,
-                        onSelect: (id) {
-                          setState(() => _selectedAudioId = id);
-                        },
-                      ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop ? 800 : double.infinity,
+              maxHeight: isDesktop ? 600 : double.infinity,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Content area with split lists
+                  Flexible(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Audio section
+                        Expanded(
+                          child: _TrackList(
+                            title: 'Audio',
+                            tracks: widget.audioTracks,
+                            selectedId: _selectedAudioId,
+                            onSelect: (id) {
+                              setState(() => _selectedAudioId = id);
+                            },
+                          ),
+                        ),
+                        // Divider
+                        Container(
+                          width: 1,
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                        // Subtitles section
+                        Expanded(
+                          child: _TrackList(
+                            title: 'Subtitles',
+                            tracks: widget.subtitleTracks,
+                            selectedId: _selectedSubtitleId,
+                            onSelect: (id) {
+                              setState(() => _selectedSubtitleId = id);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    // Divider
-                    Container(
-                      width: 1,
-                      color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  // Action buttons
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        DButton(
+                          label: 'Close',
+                          variant: DButtonVariant.secondary,
+                          size: DButtonSize.sm,
+                          onTap: _handleCancel,
+                        ),
+                        AppSpacing.gapHorizontalMD,
+                        DButton(
+                          label: 'Apply',
+                          variant: DButtonVariant.primary,
+                          size: DButtonSize.sm,
+                          onTap: _handleApply,
+                        ),
+                      ],
                     ),
-                    // Subtitles section
-                    Expanded(
-                      child: _TrackList(
-                        title: 'Subtitles',
-                        tracks: widget.subtitleTracks,
-                        selectedId: _selectedSubtitleId,
-                        onSelect: (id) {
-                          setState(() => _selectedSubtitleId = id);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              // Action buttons
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    DButton(
-                      label: 'Close',
-                      variant: DButtonVariant.secondary,
-                      onTap: _handleCancel,
-                    ),
-                    AppSpacing.gapHorizontalMD,
-                    DButton(
-                      label: 'Apply',
-                      variant: DButtonVariant.primary,
-                      onTap: _handleApply,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
