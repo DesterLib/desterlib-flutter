@@ -1,7 +1,7 @@
 {
   "name": "dester-flutter",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Dester Flutter mobile and desktop app",
   "scripts": {
     "commit": "TERM=dumb git-cz",

@@ -2,47 +2,70 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths:
+      - 'pubspec.yaml'
 
 permissions:
   contents: write
 
 jobs:
+  check-version:
+    name: Check Version Change
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get current version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version changed
+        id: check
+        run: |
+          git diff HEAD^ HEAD -- pubspec.yaml | grep '^+version:' && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Extract changelog for this version
-        id: changelog
+      - name: Create and push tag
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          # Extract changelog section for this version
-          CHANGELOG=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
-          # Save to file for GitHub release
-          echo "$CHANGELOG" > release_notes.md
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a v${{ needs.check-version.outputs.version }} -m "Release v${{ needs.check-version.outputs.version }}"
+          git push origin v${{ needs.check-version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ steps.version.outputs.version }}
-          body_path: release_notes.md
+          tag_name: v${{ needs.check-version.outputs.version }}
+          name: Dester v${{ needs.check-version.outputs.version }}
           draft: false
           prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
-    needs: release
+    needs: [check-version, release]
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +73,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -59,17 +82,24 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      - name: Rename APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
+
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-ios:
     name: Build iOS
     runs-on: macos-latest
-    needs: release
+    needs: [check-version, release]
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,19 +107,33 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
+      - name: Build iOS IPA (no codesign)
+        run: flutter build ipa --release --no-codesign
+
+      - name: Rename IPA
+        run: |
+          mv build/ios/ipa/*.ipa \
+             build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     name: Build macOS
     runs-on: macos-latest
-    needs: release
+    needs: [check-version, release]
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -97,7 +141,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -106,23 +150,24 @@ jobs:
       - name: Build macOS
         run: flutter build macos --release
 
-      - name: Create DMG
+      - name: Create ZIP archive
         run: |
-          # This is simplified - you'd typically use create-dmg or similar
-          mkdir -p dist
-          cp -r build/macos/Build/Products/Release/Dester.app dist/
+          cd build/macos/Build/Products/Release
+          zip -r Dester-${{ needs.check-version.outputs.version }}-macOS.zip dester.app
           
       - name: Upload macOS build
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/Dester.app
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
-    needs: release
+    needs: [check-version, release]
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -135,10 +180,10 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install Flutter dependencies
         run: flutter pub get
 
       - name: Build Linux
@@ -147,20 +192,21 @@ jobs:
       - name: Create archive
         run: |
           cd build/linux/x64/release/bundle
-          tar -czf ../dester-linux-x64.tar.gz *
-          cd ../
+          tar -czf Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz *
           
       - name: Upload Linux build
         uses: softprops/action-gh-release@v1
         with:
-          files: build/linux/x64/dester-linux-x64.tar.gz
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
-    needs: release
+    needs: [check-version, release]
+    if: needs.check-version.outputs.version_changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -168,7 +214,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -179,12 +225,13 @@ jobs:
 
       - name: Create archive
         run: |
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath dester-windows-x64.zip
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-Windows.zip
           
       - name: Upload Windows build
         uses: softprops/action-gh-release@v1
         with:
-          files: dester-windows-x64.zip
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: Dester-${{ needs.check-version.outputs.version }}-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
