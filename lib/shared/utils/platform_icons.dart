@@ -34,6 +34,18 @@ class PlatformIcons {
   // Media icons
   static IconData get playArrow =>
       isApplePlatform ? CupertinoIcons.play_fill : Icons.play_arrow_rounded;
+  static IconData get pause =>
+      isApplePlatform ? CupertinoIcons.pause_fill : Icons.pause_rounded;
+  static IconData get replay10 =>
+      isApplePlatform ? CupertinoIcons.gobackward_10 : Icons.replay_10_rounded;
+  static IconData get forward10 =>
+      isApplePlatform ? CupertinoIcons.goforward_10 : Icons.forward_10_rounded;
+  static IconData get replay =>
+      isApplePlatform ? CupertinoIcons.arrow_clockwise : Icons.replay_rounded;
+  static IconData get speed =>
+      isApplePlatform ? CupertinoIcons.speedometer : Icons.speed_rounded;
+  static IconData get subtitles =>
+      isApplePlatform ? CupertinoIcons.textbox : Icons.subtitles_rounded;
   static IconData get movie =>
       isApplePlatform ? CupertinoIcons.film : Icons.movie_outlined;
   static IconData get add =>

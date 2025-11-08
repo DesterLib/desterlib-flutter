@@ -334,7 +334,7 @@ class VideoPlayerController extends ChangeNotifier {
   }
 
   /// Cancel hide controls timer
-  void _cancelHideControlsTimer() {
+  void cancelHideControlsTimer() {
     _hideControlsTimer?.cancel();
     _hideControlsTimer = null;
   }
@@ -346,6 +346,9 @@ class VideoPlayerController extends ChangeNotifier {
       _startHideControlsTimer();
     }
   }
+
+  // Private wrapper for internal use
+  void _cancelHideControlsTimer() => cancelHideControlsTimer();
 
   /// Replay video from beginning
   void replay() {

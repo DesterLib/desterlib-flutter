@@ -86,19 +86,19 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
               widget.onSeek(_getDurationFromValue(value));
             }
           : null,
-      child: Container(
-        height: 32,
-        color: Colors.transparent,
-        alignment: Alignment.center,
+      child: SizedBox(
+        height: 48,
+        child: Center(
         child: Stack(
+            clipBehavior: Clip.none,
           alignment: Alignment.centerLeft,
           children: [
             // Background track
             Container(
-              height: 4,
+                height: 5,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(2.5),
               ),
             ),
 
@@ -106,10 +106,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
             FractionallySizedBox(
               widthFactor: _bufferProgress.clamp(0.0, 1.0),
               child: Container(
-                height: 4,
+                  height: 5,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
             ),
@@ -118,10 +118,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
             FractionallySizedBox(
               widthFactor: displayProgress.clamp(0.0, 1.0),
               child: Container(
-                height: 4,
+                  height: 5,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
             ),
@@ -132,25 +132,28 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                 left:
                     (MediaQuery.of(context).size.width - 48) *
                         displayProgress.clamp(0.0, 1.0) -
-                    6,
+                      9,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  width: _isDragging ? 16 : 12,
-                  height: _isDragging ? 16 : 12,
+                    curve: Curves.easeOut,
+                    width: _isDragging ? 20 : 18,
+                    height: _isDragging ? 20 : 18,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                      color: Colors.white,
                     shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.4),
+                          color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: _isDragging ? 8 : 4,
-                        spreadRadius: _isDragging ? 2 : 0,
+                          offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                 ),
               ),
           ],
+          ),
         ),
       ),
     );

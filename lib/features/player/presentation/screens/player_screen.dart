@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:dester/app/theme/theme.dart';
-import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/utils/platform_icons.dart';
 import '../provider/video_player_provider.dart';
-import '../widgets/video_controls.dart';
-import '../widgets/video_settings_overlay.dart';
+import '../widgets/player_controls.dart';
+import '../widgets/player_overlay_speed.dart';
+import '../widgets/player_overlay_tracks.dart';
+import '../widgets/player_button.dart';
 
 /// Video player screen with custom controls
 class PlayerScreen extends ConsumerStatefulWidget {
@@ -21,11 +23,17 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
-  bool _showSettings = false;
+  bool _showSpeedSelector = false;
+  bool _showTracksSelector = false;
 
   @override
   void initState() {
     super.initState();
+    // Lock orientation to landscape only
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     // Initialize player after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
@@ -34,6 +42,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           )
           .initialize();
     });
+  }
+
+  @override
+  void dispose() {
+    // Reset orientation to allow all orientations
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
   }
 
   @override
@@ -117,13 +137,19 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Video player
-          Center(
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Video(
-                controller: playerState.controller,
-                controls: NoVideoControls,
+          // Video player - full screen
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width:
+                    playerState.controller.player.state.width?.toDouble() ?? 16,
+                height:
+                    playerState.controller.player.state.height?.toDouble() ?? 9,
+                child: Video(
+                  controller: playerState.controller,
+                  controls: NoVideoControls,
+                ),
               ),
             ),
           ),
@@ -218,13 +244,19 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 buffer: playerState.buffer,
                 volume: playerState.volume,
                 playbackSpeed: playerState.playbackSpeed,
-                isFullscreen: playerState.isFullscreen,
                 title: widget.mediaTitle,
                 onPlayPause: () {
                   playerController.togglePlayPause();
                 },
                 onSeek: (position) {
                   playerController.seek(position);
+                },
+                onSeekStart: () {
+                  debugPrint('🎯 Seek started - canceling hide timer');
+                  playerController.cancelHideControlsTimer();
+                },
+                onSeekEnd: () {
+                  debugPrint('🎯 Seek ended - resetting hide timer');
                   playerController.resetHideControlsTimer();
                 },
                 onSeekForward: () {
@@ -233,47 +265,61 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 onSeekBackward: () {
                   playerController.seekBackward();
                 },
-                onFullscreen: () {
-                  playerController.toggleFullscreen();
-                },
                 onBack: () {
                   context.pop();
                 },
                 onReplay: () {
                   playerController.replay();
                 },
-                onSettings: () {
-                  setState(() {
-                    _showSettings = true;
-                  });
+                onSpeedSettings: () {
+                  setState(() => _showSpeedSelector = true);
+                },
+                onTracksSettings: () {
+                  setState(() => _showTracksSelector = true);
                 },
               ),
             ),
           ),
 
-          // Settings overlay with fade animation
-          AnimatedOpacity(
-            opacity: _showSettings ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: _showSettings
-                ? VideoSettingsOverlay(
-                    playbackSpeed: playerState.playbackSpeed,
-                    volume: playerState.volume,
-                    onPlaybackSpeedChanged: (speed) {
-                      playerController.setPlaybackSpeed(speed);
-                    },
-                    onVolumeChanged: (volume) {
-                      playerController.setVolume(volume);
-                    },
-                    onClose: () {
-                      setState(() {
-                        _showSettings = false;
-                      });
-                    },
-                  )
-                : const SizedBox.shrink(),
-          ),
+          // Speed selector overlay with fade animation
+          if (_showSpeedSelector)
+            SpeedSelectorOverlay(
+              currentSpeed: playerState.playbackSpeed,
+              onSpeedChanged: (speed) {
+                playerController.setPlaybackSpeed(speed);
+              },
+              onClose: () {
+                setState(() => _showSpeedSelector = false);
+              },
+            ),
+
+          // Tracks selector overlay with fade animation
+          if (_showTracksSelector)
+            TracksSelectorOverlay(
+              audioTracks: const [
+                TrackOption(id: 'en', label: 'English [Original]'),
+                TrackOption(id: 'hi', label: 'Hindi'),
+                TrackOption(id: 'en-ad', label: 'English - Audio Description'),
+              ],
+              subtitleTracks: const [
+                TrackOption(id: 'off', label: 'Off'),
+                TrackOption(id: 'hi', label: 'Hindi'),
+                TrackOption(id: 'en', label: 'English [CC]'),
+              ],
+              selectedAudioId: 'en', // TODO: Get from player state
+              selectedSubtitleId: 'off', // TODO: Get from player state
+              onAudioChanged: (id) {
+                debugPrint('🎵 Audio changed to: $id');
+                // TODO: Implement audio track change
+              },
+              onSubtitleChanged: (id) {
+                debugPrint('📝 Subtitle changed to: $id');
+                // TODO: Implement subtitle track change
+              },
+              onClose: () {
+                setState(() => _showTracksSelector = false);
+              },
+            ),
         ],
       ),
     );
@@ -281,7 +327,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 }
 
 /// Center playback controls (play/pause and seek buttons)
-class _CenterPlaybackControls extends StatefulWidget {
+class _CenterPlaybackControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onPlayPause;
   final VoidCallback onSeekBackward;
@@ -294,172 +340,64 @@ class _CenterPlaybackControls extends StatefulWidget {
     required this.onSeekForward,
   });
 
-  @override
-  State<_CenterPlaybackControls> createState() =>
-      _CenterPlaybackControlsState();
-}
-
-class _CenterPlaybackControlsState extends State<_CenterPlaybackControls>
-    with TickerProviderStateMixin {
-  late AnimationController _playPauseController;
-  late AnimationController _seekBackwardController;
-  late AnimationController _seekForwardController;
-
-  @override
-  void initState() {
-    super.initState();
-    _playPauseController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _seekBackwardController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _seekForwardController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    _playPauseController.dispose();
-    _seekBackwardController.dispose();
-    _seekForwardController.dispose();
-    super.dispose();
-  }
-
   void _handlePlayPause() {
     debugPrint('🎮 Play/Pause button tapped!');
-    HapticFeedback.mediumImpact();
-    _playPauseController.forward().then((_) => _playPauseController.reverse());
-    widget.onPlayPause();
+    onPlayPause();
   }
 
   void _handleSeekBackward() {
-    HapticFeedback.lightImpact();
-    _seekBackwardController.forward().then(
-      (_) => _seekBackwardController.reverse(),
-    );
-    widget.onSeekBackward();
+    debugPrint('⏪ Seek backward tapped');
+    onSeekBackward();
   }
 
   void _handleSeekForward() {
-    HapticFeedback.lightImpact();
-    _seekForwardController.forward().then(
-      (_) => _seekForwardController.reverse(),
-    );
-    widget.onSeekForward();
+    debugPrint('⏩ Seek forward tapped');
+    onSeekForward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Seek backward
-        _BouncyButton(
-          controller: _seekBackwardController,
-          child: DButton(
-            icon: Icons.replay_10_rounded,
-            variant: DButtonVariant.ghost,
-            size: DButtonSize.lg,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 48),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Seek backward
+          VideoPlayerButton(
+            icon: PlatformIcons.replay10,
             onTap: _handleSeekBackward,
+            size: VideoPlayerButtonSize.large,
+            tooltip: 'Rewind 10 seconds',
           ),
-        ),
-        AppSpacing.gapHorizontalXL,
-        // Play/Pause
-        _BouncyButton(
-          controller: _playPauseController,
-          scale: 1.15,
-          child: DButton(
-            icon: widget.isPlaying
-                ? Icons.pause_rounded
-                : Icons.play_arrow_rounded,
-            variant: DButtonVariant.ghost,
-            size: DButtonSize.lg,
-            onTap: () {
-              debugPrint('🎯 DButton onTap called');
-              _handlePlayPause();
-            },
+          // Play/Pause
+          VideoPlayerButton(
+            icon: isPlaying ? PlatformIcons.pause : PlatformIcons.playArrow,
+            onTap: _handlePlayPause,
+            size: VideoPlayerButtonSize.extraLarge,
+            tooltip: isPlaying ? 'Pause' : 'Play',
           ),
-        ),
-        AppSpacing.gapHorizontalXL,
-        // Seek forward
-        _BouncyButton(
-          controller: _seekForwardController,
-          child: DButton(
-            icon: Icons.forward_10_rounded,
-            variant: DButtonVariant.ghost,
-            size: DButtonSize.lg,
+          // Seek forward
+          VideoPlayerButton(
+            icon: PlatformIcons.forward10,
             onTap: _handleSeekForward,
+            size: VideoPlayerButtonSize.large,
+            tooltip: 'Forward 10 seconds',
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Bouncy button wrapper with iOS-style spring animation
-class _BouncyButton extends StatelessWidget {
-  final AnimationController controller;
-  final Widget child;
-  final double scale;
-
-  const _BouncyButton({
-    required this.controller,
-    required this.child,
-    this.scale = 1.0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        final scaleValue = 1.0 - (controller.value * 0.15);
-        return Transform.scale(scale: scaleValue * scale, child: child);
-      },
-      child: child,
+        ],
+      ),
     );
   }
 }
 
 /// Completed overlay with replay button
-class _CompletedOverlay extends StatefulWidget {
+class _CompletedOverlay extends StatelessWidget {
   final VoidCallback onReplay;
 
   const _CompletedOverlay({required this.onReplay});
 
-  @override
-  State<_CompletedOverlay> createState() => _CompletedOverlayState();
-}
-
-class _CompletedOverlayState extends State<_CompletedOverlay>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _replayController;
-
-  @override
-  void initState() {
-    super.initState();
-    _replayController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    _replayController.dispose();
-    super.dispose();
-  }
-
   void _handleReplay() {
-    HapticFeedback.mediumImpact();
-    _replayController.forward().then((_) => _replayController.reverse());
-    widget.onReplay();
+    debugPrint('🔄 Replay tapped');
+    onReplay();
   }
 
   @override
@@ -467,15 +405,11 @@ class _CompletedOverlayState extends State<_CompletedOverlay>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _BouncyButton(
-          controller: _replayController,
-          scale: 1.15,
-          child: DButton(
-            icon: Icons.replay_rounded,
-            variant: DButtonVariant.ghost,
-            size: DButtonSize.lg,
-            onTap: _handleReplay,
-          ),
+        VideoPlayerButton(
+          icon: PlatformIcons.replay,
+          onTap: _handleReplay,
+          size: VideoPlayerButtonSize.extraLarge,
+          tooltip: 'Replay',
         ),
         AppSpacing.gapVerticalMD,
         const Text(
