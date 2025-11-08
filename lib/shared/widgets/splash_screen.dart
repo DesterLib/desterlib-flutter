@@ -55,12 +55,22 @@ class _SplashScreenState extends State<SplashScreen>
                 opacity: fadeIn,
                 child: Transform.scale(
                   scale: 0.5 + (scaleUp * 0.5),
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    child: Image.asset(
-                      'assets/icon/icon.png',
-                      fit: BoxFit.cover,
+                  child: ClipOval(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: Image.asset(
+                          'assets/icon/icon.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -103,16 +113,16 @@ class RadialSweepPainter extends CustomPainter {
       endAngle: 2 * pi,
       colors: [
         Colors.transparent,
-        cyan.withOpacity(0.2),
-        cyan.withOpacity(0.5),
-        cyan.withOpacity(0.8),
+        cyan.withValues(alpha: 0.2),
+        cyan.withValues(alpha: 0.5),
+        cyan.withValues(alpha: 0.8),
         cyan,
         green,
         blue,
         purple,
-        purple.withOpacity(0.8),
-        purple.withOpacity(0.5),
-        purple.withOpacity(0.2),
+        purple.withValues(alpha: 0.8),
+        purple.withValues(alpha: 0.5),
+        purple.withValues(alpha: 0.2),
         Colors.transparent,
       ],
       stops: const [
