@@ -27,13 +27,15 @@ class TmdbApiKeyModal {
 
     return ModalConfig(
       title: 'TMDB API Key',
-      banners: const [
-        ModalBannerConfig(
-          message:
-              'Enter your TMDB API key to enable library management features.',
-          type: SettingsModalBannerType.info,
-        ),
-      ],
+      banners: hasExistingKey
+          ? []
+          : const [
+              ModalBannerConfig(
+                message:
+                    'Enter your TMDB API key to enable library management features.',
+                type: SettingsModalBannerType.info,
+              ),
+            ],
       fields: [
         ModalFieldConfig(
           key: 'apiKey',

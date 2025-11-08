@@ -59,28 +59,59 @@ class ApiConnectionModal {
           onTap: (values, state, context) async {
             final url = values['url']?.trim() ?? '';
 
-            await ApiConfig.saveBaseUrl(url);
-            ref.read(baseUrlProvider.notifier).updateUrl(url);
-
-            final connectionNotifier = ref.read(
-              connectionStatusProvider.notifier,
-            );
-            await connectionNotifier.checkConnection();
-
-            await Future.delayed(const Duration(milliseconds: 200));
-
-            if (!context.mounted) return;
-
-            final status = ref.read(connectionStatusProvider);
-            if (status == ConnectionStatus.connected) {
-              await ref.read(tmdbSettingsProvider.notifier).refresh();
-
-              if (context.mounted) {
-                Navigator.of(context).pop(true);
-              }
-            } else {
+            // Validate URL is not empty
+            if (url.isEmpty) {
               state['hasError'] = true;
-              throw Exception('Failed to connect to API server');
+              throw Exception('Please enter a server URL');
+            }
+
+            // Clear previous error state when starting new attempt
+            state['hasError'] = false;
+
+            // Get container from context BEFORE any async operations
+            final container = ProviderScope.containerOf(context);
+
+            try {
+              // Save the URL first
+              await ApiConfig.saveBaseUrl(url);
+
+              // Read all providers from the container
+              final baseUrlNotifier = container.read(baseUrlProvider.notifier);
+              final connectionNotifier = container.read(
+                connectionStatusProvider.notifier,
+              );
+              final tmdbNotifier = container.read(
+                tmdbSettingsProvider.notifier,
+              );
+
+              // Update URL (this will rebuild the OpenAPI client)
+              baseUrlNotifier.updateUrl(url);
+
+              // Check connection and get the result directly
+              final connectionStatus = await connectionNotifier
+                  .checkConnection();
+
+              if (!context.mounted) return;
+
+              // Use the returned connection status
+              if (connectionStatus == ConnectionStatus.connected) {
+                // Try to refresh TMDB settings in the background
+                try {
+                  await tmdbNotifier.refresh();
+                } catch (e) {
+                  // Ignore errors during refresh, we're already connected
+                }
+
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              } else {
+                state['hasError'] = true;
+                throw Exception('Failed to connect to API server');
+              }
+            } catch (e) {
+              state['hasError'] = true;
+              rethrow;
             }
           },
         ),

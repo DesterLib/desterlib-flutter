@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,12 +18,22 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..forward();
+      duration: const Duration(milliseconds: 1600),
+    );
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         widget.onComplete();
+      }
+    });
+
+    // Wait for the first frame to render, then start animation
+    // Note: Native splash is removed in main.dart after runApp()
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Small delay before starting animation for smooth transition
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (mounted) {
+        _controller.forward();
       }
     });
   }
@@ -42,38 +51,13 @@ class _SplashScreenState extends State<SplashScreen>
       body: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          // Logo animations
-          final fadeIn = _controller.value.clamp(0.0, 0.3) / 0.3;
-          final scaleUp = Curves.easeOutBack.transform(
-            (_controller.value.clamp(0.0, 0.5) / 0.5),
-          );
-
           return CustomPaint(
             painter: RadialSweepPainter(progress: _controller.value),
             child: Center(
-              child: Opacity(
-                opacity: fadeIn,
-                child: Transform.scale(
-                  scale: 0.5 + (scaleUp * 0.5),
-                  child: ClipOval(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child: Image.asset(
-                          'assets/icon/icon.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Image.asset('assets/icon/icon.png', fit: BoxFit.contain),
               ),
             ),
           );

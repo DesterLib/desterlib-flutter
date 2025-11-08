@@ -55,8 +55,8 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     super.initState();
     // Initialize scroll offset based on top padding
     // If no top padding and body extends behind app bar, start as "scrolled"
-    _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar) 
-        ? widget.appBarHeight 
+    _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar)
+        ? widget.appBarHeight
         : 0.0;
     _scrollController.addListener(_onScroll);
   }
@@ -142,6 +142,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
           titleOpacity: opacity,
           titleOffset: -offset,
           titleStyle: widget.titleStyle,
+          showCompactTitle: !widget.showTitleOnScroll && showBackground,
         ),
       ),
       body: Listener(

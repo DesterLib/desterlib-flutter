@@ -15,6 +15,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double titleOpacity;
   final double titleOffset;
   final TextStyle? titleStyle;
+  final bool showCompactTitle; // Show compact title in appbar when scrolled
 
   const DAppBar({
     super.key,
@@ -29,6 +30,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleOpacity = 1.0,
     this.titleOffset = 0.0,
     this.titleStyle,
+    this.showCompactTitle = false,
   });
 
   @override
@@ -106,8 +108,24 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       const SizedBox(width: 12),
                     ],
-                    // Title
-                    if (!centerTitle)
+                    // Title (large title or compact title based on scroll)
+                    if (showCompactTitle) ...[
+                      // Compact title is always centered
+                      const Spacer(),
+                      Opacity(
+                        opacity: backgroundOpacity,
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: AppTypography.fontSizeLG,
+                            fontWeight: AppTypography.semiBold,
+                            color: AppColors.textPrimary,
+                            letterSpacing: AppTypography.letterSpacingTight,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                    ] else if (!centerTitle)
                       Expanded(
                         child: Transform.translate(
                           offset: Offset(0, titleOffset),
