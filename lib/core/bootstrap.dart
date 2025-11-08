@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart';
 import 'config/api_config.dart';
 
 /// Initializes the Flutter app with all required setup.
@@ -7,6 +8,9 @@ import 'config/api_config.dart';
 /// Note: The API client provider will be initialized lazily when first accessed via Riverpod.
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Media Kit for video playback
+  MediaKit.ensureInitialized();
 
   // Setup device orientation and UI mode
   await _setupDeviceConfiguration();

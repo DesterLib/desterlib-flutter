@@ -5,6 +5,7 @@ import '../features/home/home_features.dart';
 import '../features/library/library_features.dart';
 import '../features/settings/settings_features.dart';
 import '../features/media/media_features.dart';
+import '../features/player/player_features.dart';
 import '../shared/widgets/ui/bottom_nav_bar.dart';
 import '../shared/widgets/ui/sidebar/sidebar.dart';
 import '../shared/widgets/connection_guard.dart';
@@ -74,6 +75,20 @@ final GoRouter router = GoRouter(
         // and TmdbRequiredModal.show() from other screens.
         // No need for dedicated routes since they're overlay modals, not pages.
       ],
+    ),
+    // Player route (outside shell to be fullscreen)
+    GoRoute(
+      path: '/player/:id',
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        final id = state.pathParameters['id']!;
+        final title = state.uri.queryParameters['title'];
+        return MaterialPage(
+          key: state.pageKey,
+          child: ConnectionGuard(
+            child: PlayerScreen(mediaId: id, mediaTitle: title),
+          ),
+        );
+      },
     ),
   ],
 );

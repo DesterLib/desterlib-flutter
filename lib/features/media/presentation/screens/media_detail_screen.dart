@@ -7,7 +7,6 @@ import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
-import 'package:dester/shared/widgets/ui/toast.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import '../widgets/media_data.dart';
 import '../widgets/media_hero_section.dart';
@@ -21,16 +20,11 @@ class MediaDetailScreen extends ConsumerWidget {
 
   const MediaDetailScreen({super.key, required this.id, this.mediaType});
 
-  void _handlePlayTapped(BuildContext context, String? mediaId) {
+  void _handlePlayTapped(BuildContext context, String? mediaId, String? title) {
     if (mediaId == null) return;
 
-    // TODO: Navigate to player screen with mediaId
-    DToast.show(
-      context,
-      message: 'Playing media: $mediaId',
-      type: DToastType.info,
-      duration: const Duration(milliseconds: 1500),
-    );
+    // Navigate to player screen
+    context.push('/player/$mediaId?title=${Uri.encodeComponent(title ?? '')}');
   }
 
   void _handleEpisodePlay(
@@ -38,12 +32,9 @@ class MediaDetailScreen extends ConsumerWidget {
     String episodeId,
     String episodeTitle,
   ) {
-    // TODO: Navigate to player screen with episodeId
-    DToast.show(
-      context,
-      message: 'Playing: $episodeTitle',
-      type: DToastType.info,
-      duration: const Duration(milliseconds: 1500),
+    // Navigate to player screen with episode
+    context.push(
+      '/player/$episodeId?title=${Uri.encodeComponent(episodeTitle)}',
     );
   }
 
@@ -105,7 +96,8 @@ class MediaDetailScreen extends ConsumerWidget {
             mediaData: mediaData,
             isMobile: isMobile,
             tvShowSeasons: tvShowSeasons,
-            onPlayTapped: () => _handlePlayTapped(context, mediaData.id),
+            onPlayTapped: () =>
+                _handlePlayTapped(context, mediaData.id, mediaData.title),
             onEpisodePlay: (episodeId, episodeTitle) =>
                 _handleEpisodePlay(context, episodeId, episodeTitle),
           );
