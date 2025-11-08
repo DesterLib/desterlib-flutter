@@ -27,10 +27,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"Dester", origin, size)) {
+  Win32Window::Size min_size(1000, 600); // Minimum size to avoid mobile UI
+  if (!window.Create(L"dester", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
+  
+  // Set minimum window size
+  HWND hwnd = window.GetHandle();
+  if (hwnd) {
+    RECT rect;
+    GetWindowRect(hwnd, &rect);
+    SetWindowPos(hwnd, nullptr, rect.left, rect.top, 
+                 max(rect.right - rect.left, min_size.width),
+                 max(rect.bottom - rect.top, min_size.height),
+                 SWP_NOZORDER | SWP_NOMOVE);
+  }
 
   ::MSG msg;
   while (::GetMessage(&msg, nullptr, 0, 0)) {

@@ -1,6 +1,5 @@
 import Cocoa
 import FlutterMacOS
-import window_manager
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
@@ -9,13 +8,11 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // Set minimum window size to avoid mobile UI
+    self.minSize = NSSize(width: 1000, height: 600)
+
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
-  }
-  
-  override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
-    super.order(place, relativeTo: otherWin)
-    hiddenWindowAtLaunch()
   }
 }
