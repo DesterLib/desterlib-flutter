@@ -1,6 +1,7 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
+#include <algorithm>
 
 #include "flutter_window.h"
 #include "utils.h"
@@ -39,8 +40,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     RECT rect;
     GetWindowRect(hwnd, &rect);
     SetWindowPos(hwnd, nullptr, rect.left, rect.top, 
-                 max(rect.right - rect.left, min_size.width),
-                 max(rect.bottom - rect.top, min_size.height),
+                 std::max(rect.right - rect.left, (LONG)min_size.width),
+                 std::max(rect.bottom - rect.top, (LONG)min_size.height),
                  SWP_NOZORDER | SWP_NOMOVE);
   }
 
