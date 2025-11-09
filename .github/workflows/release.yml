@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   check-version:
-    name: Check Version Change
+    name: Check Version or Workflow Change
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -30,10 +30,17 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Check if version changed
+      - name: Check if version or workflow changed
         id: check
         run: |
-          git diff HEAD^ HEAD -- pubspec.yaml | grep '^+version:' && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+          if git diff HEAD^ HEAD -- pubspec.yaml | grep -q '^+version:'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          elif git diff HEAD^ HEAD -- .github/workflows/release.yml | grep -q '.'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Workflow file changed, triggering release"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
   release:
     name: Create Release
