@@ -55,17 +55,28 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git tag -a v${{ needs.check-version.outputs.version }} -m "Release v${{ needs.check-version.outputs.version }}"
+          git tag -a v${{ needs.check-version.outputs.version }} -m "Alpha Release v${{ needs.check-version.outputs.version }}"
           git push origin v${{ needs.check-version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          name: Dester v${{ needs.check-version.outputs.version }}
+          name: Dester v${{ needs.check-version.outputs.version }} (Alpha)
           draft: false
-          prerelease: false
+          prerelease: true
           generate_release_notes: true
+          body: |
+            🚧 **Alpha Development Build**
+            
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+            - Workflow Run: ${{ github.run_number }}
+            - Build Date: ${{ github.event.head_commit.timestamp }}
+            
+            ⚠️ This is an automated alpha release. Expect bugs and breaking changes.
+            For stable releases, please wait for beta/stable versions.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,13 +103,13 @@ jobs:
       - name: Rename APK
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
+             build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android.apk
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
+          files: build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -125,20 +136,20 @@ jobs:
       - name: Rename IPA
         run: |
           if ls build/ios/ipa/*.ipa 1> /dev/null 2>&1; then
-            mv build/ios/ipa/*.ipa build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+            mv build/ios/ipa/*.ipa build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
           else
             echo "No IPA found, creating archive from .app"
             cd build/ios/archive/Runner.xcarchive/Products/Applications
-            zip -r Dester-${{ needs.check-version.outputs.version }}-iOS.zip Runner.app
+            zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.zip Runner.app
             mkdir -p ../../../../ipa
-            mv Dester-${{ needs.check-version.outputs.version }}-iOS.zip ../../../../ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+            mv Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.zip ../../../../ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
           fi
 
       - name: Upload IPA to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+          files: build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -165,13 +176,13 @@ jobs:
       - name: Create ZIP archive
         run: |
           cd build/macos/Build/Products/Release
-          zip -r Dester-${{ needs.check-version.outputs.version }}-macOS.zip dester.app
+          zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip dester.app
           
       - name: Upload macOS build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-macOS.zip
+          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -203,13 +214,13 @@ jobs:
       - name: Create archive
         run: |
           cd build/linux/x64/release/bundle
-          tar -czf Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz *
+          tar -czf Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz *
           
       - name: Upload Linux build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz
+          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -235,13 +246,13 @@ jobs:
 
       - name: Create archive
         run: |
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-Windows.zip
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
           
       - name: Upload Windows build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: Dester-${{ needs.check-version.outputs.version }}-Windows.zip
+          files: Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
