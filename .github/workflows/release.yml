@@ -75,6 +75,16 @@ jobs:
             - Workflow Run: ${{ github.run_number }}
             - Build Date: ${{ github.event.head_commit.timestamp }}
             
+            **Platform Downloads:**
+            - **Android**: Download the APK matching your device architecture:
+              - `arm64-v8a`: Modern 64-bit devices (2017+) - ~30MB
+              - `armeabi-v7a`: Older 32-bit devices - ~28MB  
+              - `x86_64`: Emulators/Intel devices - ~32MB
+            - **iOS**: Universal binary for all iOS devices
+            - **macOS**: Universal binary (Apple Silicon + Intel) - ~103MB
+            - **Linux**: x64 build - ~32MB
+            - **Windows**: x64 build - ~25MB
+            
             ⚠️ This is an automated alpha release. Expect bugs and breaking changes.
             For stable releases, please wait for beta/stable versions.
         env:
@@ -97,19 +107,24 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Split APKs (per architecture)
+        run: flutter build apk --release --split-per-abi
 
-      - name: Rename APK
+      - name: Rename APKs
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android.apk
+          cd build/app/outputs/flutter-apk
+          mv app-armeabi-v7a-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-armeabi-v7a.apk
+          mv app-arm64-v8a-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-arm64-v8a.apk
+          mv app-x86_64-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-x86_64.apk
 
-      - name: Upload APK to Release
+      - name: Upload Split APKs to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android.apk
+          files: |
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-armeabi-v7a.apk
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-arm64-v8a.apk
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-x86_64.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -176,7 +191,7 @@ jobs:
       - name: Create ZIP archive
         run: |
           cd build/macos/Build/Products/Release
-          zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip dester.app
+          zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip Dester.app
           
       - name: Upload macOS build
         uses: softprops/action-gh-release@v1

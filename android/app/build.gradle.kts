@@ -37,6 +37,16 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Enable APK splits for reduced file sizes
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            isUniversalApk = false  // Don't generate a universal APK
+        }
+    }
 }
 
 flutter {
