@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/websocket_service.dart';
 import '../../app/providers.dart';
-import '../../features/home/presentation/provider/media_provider.dart';
 
 /// WebSocket service provider
 final websocketServiceProvider = Provider<WebSocketService>((ref) {
@@ -83,12 +83,6 @@ class ScanProgressNotifier extends Notifier<ScanProgressState> {
             );
             currentProgress.remove(message.libraryId);
             state = state.copyWith(libraryProgress: currentProgress);
-
-            // Refresh home screen media after scan completes
-            if (message.isComplete) {
-              ref.invalidate(moviesProvider);
-              ref.invalidate(tvShowsProvider);
-            }
           });
         } else {
           newProgress[message.libraryId!] = message;

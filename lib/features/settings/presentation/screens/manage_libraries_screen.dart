@@ -12,7 +12,6 @@ import 'package:dester/features/library/data/providers/library_provider.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/app/providers.dart';
 import 'package:dester/core/providers/websocket_provider.dart';
-import 'package:dester/core/services/websocket_service.dart';
 import 'package:dester/shared/widgets/ui/scan_progress_bar.dart';
 import 'package:dester/features/library/utils/library_helpers.dart';
 import '../widgets/settings_layout.dart';
@@ -115,7 +114,6 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
               // Library was added successfully, refresh to show scan progress
               ref.read(refreshLibrariesProvider)();
 
-              if (!mounted) return;
               DToast.show(
                 context,
                 message: 'Library scan started...',
@@ -228,140 +226,147 @@ class _ErrorState extends StatelessWidget {
 }
 
 // Libraries list widget using DSettingsLayout
-class _LibrariesList extends ConsumerWidget {
+class _LibrariesList extends ConsumerStatefulWidget {
   final BuiltList<ModelLibrary> libraries;
 
   const _LibrariesList({required this.libraries});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_LibrariesList> createState() => _LibrariesListState();
+}
+
+class _LibrariesListState extends ConsumerState<_LibrariesList> {
+  @override
+  Widget build(BuildContext context) {
+    // Listen for WebSocket connection changes and show toast
+    ref.listen<ScanProgressState>(scanProgressProvider, (previous, next) {
+      if (!mounted) return;
+
+      // Show toast when connection state changes
+      if (previous != null && previous.isConnected && !next.isConnected) {
+        DToast.show(
+          context,
+          message: 'WebSocket disconnected - Scan progress updates unavailable',
+          type: DToastType.error,
+          duration: const Duration(seconds: 4),
+        );
+      } else if (previous != null &&
+          !previous.isConnected &&
+          next.isConnected) {
+        DToast.show(
+          context,
+          message: 'WebSocket connected',
+          type: DToastType.success,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    });
+
     return DSettingsLayout(
       groups: [
         DSettingsGroup(
           title: 'Libraries',
-          items: libraries
-              .map((library) => _buildLibraryItem(library, ref, context))
+          items: widget.libraries
+              .map((library) => _buildLibraryItem(library, context))
               .toList(),
         ),
       ],
     );
   }
 
-  DSettingsItem _buildLibraryItem(
-    ModelLibrary library,
-    WidgetRef ref,
-    BuildContext context,
-  ) {
+  DSettingsItem _buildLibraryItem(ModelLibrary library, BuildContext context) {
     final scanProgress = ref.watch(scanProgressProvider);
     final progress = scanProgress.getProgress(library.id);
     final isScanning = progress?.isScanning ?? false;
 
+    // Build subtitle with batch progress info when scanning
+    String subtitle = LibraryHelpers.getLibraryTypeDisplayName(
+      library.libraryType,
+    );
+    if (library.libraryPath != null) {
+      subtitle += ' • ${library.libraryPath}';
+    }
+
+    // Add batch progress info when scanning
+    if (isScanning && progress != null) {
+      final batchMatch = RegExp(
+        r'Batch (\d+)/(\d+)',
+      ).firstMatch(progress.message);
+      if (batchMatch != null) {
+        subtitle += ' • Batch ${batchMatch.group(1)}/${batchMatch.group(2)}';
+      }
+      if (progress.total > 0) {
+        final percent = ((progress.current / progress.total) * 100).toInt();
+        subtitle += ' • ${progress.current}/${progress.total} ($percent%)';
+      }
+      if (progress.batchItemComplete != null) {
+        subtitle += ' • Latest: ${progress.batchItemComplete!.folderName}';
+      }
+    }
+
     return DSettingsItem(
       title: library.name,
-      subtitle: _buildSubtitle(library, progress, context),
+      subtitle: subtitle,
       icon: LibraryHelpers.getLibraryIcon(library.libraryType),
       progressBar: isScanning
           ? ScanProgressBar(progress: progress, height: 2)
           : null,
-      trailing: LayoutBuilder(
-        builder: (context, constraints) {
-          // On very small screens, show compact actions
-          final isVerySmall = MediaQuery.of(context).size.width < 400;
-
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isScanning && !isVerySmall) ...[
-                CompactScanProgress(progress: progress!),
-                const SizedBox(width: 8),
-              ],
-              IconButton(
-                icon: Icon(PlatformIcons.refresh, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Rescan library',
-                onPressed: isScanning
-                    ? null
-                    : () => _handleRescan(context, ref, library),
-              ),
-              const SizedBox(width: 2),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Edit library',
-                onPressed: () async {
-                  final result = await EditLibraryModal.show(
-                    context,
-                    ref,
-                    libraryId: library.id,
-                  );
-                  if (result == true) {
-                    ref.read(refreshLibrariesProvider)();
-                  }
-                },
-              ),
-              const SizedBox(width: 2),
-              IconButton(
-                icon: Icon(PlatformIcons.delete, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Delete library',
-                onPressed: () async {
-                  final result = await DeleteLibraryModal.show(
-                    context,
-                    ref,
-                    libraryId: library.id,
-                  );
-                  if (result == true) {
-                    ref.read(refreshLibrariesProvider)();
-                  }
-                },
-              ),
-            ],
-          );
-        },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isScanning) ...[
+            CompactScanProgress(progress: progress!),
+            const SizedBox(width: 8),
+          ],
+          IconButton(
+            icon: Icon(PlatformIcons.refresh, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Rescan library',
+            onPressed: isScanning
+                ? null
+                : () => _handleRescan(context, ref, library),
+          ),
+          const SizedBox(width: 2),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Edit library',
+            onPressed: () async {
+              final result = await EditLibraryModal.show(
+                context,
+                ref,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.read(refreshLibrariesProvider)();
+              }
+            },
+          ),
+          const SizedBox(width: 2),
+          IconButton(
+            icon: Icon(PlatformIcons.delete, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Delete library',
+            onPressed: () async {
+              final result = await DeleteLibraryModal.show(
+                context,
+                ref,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.read(refreshLibrariesProvider)();
+              }
+            },
+          ),
+        ],
       ),
     );
-  }
-
-  String _buildSubtitle(
-    ModelLibrary library,
-    ScanProgressMessage? progress,
-    BuildContext context,
-  ) {
-    final parts = <String>[];
-
-    // Add type
-    parts.add(LibraryHelpers.getLibraryTypeDisplayName(library.libraryType));
-
-    // Add path if available (truncate if too long on mobile)
-    if (library.libraryPath != null) {
-      String path = library.libraryPath!;
-
-      // On smaller screens, show shortened path
-      if (MediaQuery.of(context).size.width < 600 && path.length > 40) {
-        // Show just the last part of the path
-        final pathParts = path.split('/');
-        if (pathParts.length > 2) {
-          path = '.../${pathParts[pathParts.length - 2]}/${pathParts.last}';
-        }
-      }
-
-      parts.add(path);
-    }
-
-    // Add scan progress message if scanning
-    if (progress != null &&
-        progress.isScanning &&
-        progress.message.isNotEmpty) {
-      parts.add(progress.message);
-    }
-
-    return parts.join(' • ');
   }
 
   Future<void> _handleRescan(

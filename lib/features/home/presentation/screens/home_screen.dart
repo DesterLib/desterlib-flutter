@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,12 +7,63 @@ import 'package:dester/shared/widgets/ui/card.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/features/home/presentation/provider/media_provider.dart';
+import 'package:dester/core/providers/websocket_provider.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Timer? _refreshTimer;
+  bool _needsRefresh = false;
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleRefresh() {
+    if (!_needsRefresh) {
+      _needsRefresh = true;
+    }
+
+    // Cancel existing timer
+    _refreshTimer?.cancel();
+
+    // Wait 5 seconds after last batch-complete before refreshing
+    _refreshTimer = Timer(const Duration(seconds: 5), () {
+      if (_needsRefresh && mounted) {
+        ref.invalidate(moviesProvider);
+        ref.invalidate(tvShowsProvider);
+        _needsRefresh = false;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Listen to scan progress and schedule refresh when batches complete
+    ref.listen(scanProgressProvider, (previous, next) {
+      // Only schedule refresh on batch-complete or scan-complete events
+      for (final entry in next.libraryProgress.entries) {
+        final progress = entry.value;
+        final prevProgress = previous?.libraryProgress[entry.key];
+
+        // Check if this is a NEW batch-complete event (not seen before)
+        final isNewBatchComplete =
+            progress.isBatchComplete &&
+            (prevProgress == null || !prevProgress.isBatchComplete);
+
+        if (isNewBatchComplete || progress.isComplete) {
+          _scheduleRefresh();
+        }
+      }
+    });
+
     final moviesAsync = ref.watch(moviesProvider);
     final tvShowsAsync = ref.watch(tvShowsProvider);
     final screenWidth = MediaQuery.of(context).size.width;

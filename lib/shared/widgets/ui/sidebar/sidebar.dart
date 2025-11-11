@@ -89,7 +89,7 @@ class _DSidebarState extends ConsumerState<DSidebar> {
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(
                   color: Colors.white.withValues(alpha: 0.2),
-                  width: 1,
+                  width: 0.5,
                 ),
               ),
             ),
