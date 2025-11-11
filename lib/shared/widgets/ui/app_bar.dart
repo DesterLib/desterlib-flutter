@@ -16,6 +16,8 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double titleOffset;
   final TextStyle? titleStyle;
   final bool showCompactTitle; // Show compact title in appbar when scrolled
+  final bool
+  automaticallyImplyLeading; // Show automatic back button if no leading provided
 
   const DAppBar({
     super.key,
@@ -31,6 +33,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleOffset = 0.0,
     this.titleStyle,
     this.showCompactTitle = false,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -40,7 +43,8 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     // Determine if we should show a back button
     final canPop = Navigator.of(context).canPop();
-    final shouldShowBackButton = leading == null && canPop;
+    final shouldShowBackButton =
+        automaticallyImplyLeading && leading == null && canPop;
     final effectiveTitleStyle =
         titleStyle ??
         (shouldShowBackButton ? AppTypography.h2 : AppTypography.h1);

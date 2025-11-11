@@ -104,6 +104,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     return AnimatedAppBarPage(
       title: 'Library',
       useCompactHeight: showSidebar,
+      leading: const SizedBox.shrink(), // Prevent automatic back button
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -72,6 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return AnimatedAppBarPage(
       title: 'Home',
       useCompactHeight: isDesktop,
+      leading: const SizedBox.shrink(), // Prevent automatic back button
       child: moviesAsync.when(
         data: (movies) => tvShowsAsync.when(
           data: (tvShows) {

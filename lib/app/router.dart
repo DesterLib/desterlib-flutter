@@ -122,19 +122,24 @@ CustomTransitionPage _buildPageWithTransition(
   return CustomTransitionPage(
     key: state.pageKey,
     child: child,
+    maintainState: false,
+    opaque: true,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = 1.02;
       const end = 1.0;
       final scaleTween = Tween(begin: begin, end: end);
 
-      // Fade out the old page
+      // Use a fast curve to quickly hide the old page
       final secondaryFade = Tween<double>(begin: 1.0, end: 0.0).animate(
-        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
+        CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+        ),
       );
 
-      // Outer wrapper: fade in new page, fade out old page
+      // Outer wrapper: fade in new page quickly, fade out old page immediately
       return FadeTransition(
-        opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
+        opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
         child: FadeTransition(
           opacity: secondaryFade,
           child: Container(

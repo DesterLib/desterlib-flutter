@@ -132,11 +132,14 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(appBarHeight),
         child: DAppBar(
+          key: ValueKey('app_bar_${widget.title}'),
           title: widget.title,
           actions: widget.actions,
           leading: widget.leadingBuilder != null
               ? widget.leadingBuilder!(showBackground)
               : widget.leading,
+          automaticallyImplyLeading:
+              widget.leadingBuilder == null && widget.leading == null,
           centerTitle: widget.centerTitle,
           height: appBarHeight,
           maxWidthConstraint: widget.maxWidthConstraint,

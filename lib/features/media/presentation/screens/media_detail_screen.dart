@@ -112,6 +112,7 @@ class MediaDetailScreen extends ConsumerWidget {
     final appBarHeight = isMobile ? 120.0 : 80.0;
 
     return AnimatedAppBarPage(
+      key: ValueKey('media_detail_$id'),
       title: appBarTitle,
       showTitleOnScroll: true,
       useCompactHeight: !isMobile,

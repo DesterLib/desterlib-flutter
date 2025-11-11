@@ -24,6 +24,7 @@ class LogsScreen extends ConsumerWidget {
     final isDesktop = screenWidth > 900;
 
     return FixedAppBarPage(
+      key: const ValueKey('logs_screen'),
       title: 'API Logs',
       useCompactHeight: isDesktop,
       maxWidthConstraint: 1400,

@@ -80,6 +80,7 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
     });
 
     return AnimatedAppBarPage(
+      key: const ValueKey('manage_libraries_screen'),
       title: 'Manage Libraries',
       useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,

@@ -26,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
       title: 'Settings',
       useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,
+      leading: const SizedBox.shrink(), // Prevent automatic back button
       child: DSettingsLayout(
         groups: [
           // General Settings

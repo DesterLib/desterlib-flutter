@@ -47,11 +47,13 @@ class FixedAppBarPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(appBarHeight),
         child: DAppBar(
+          key: ValueKey('app_bar_$title'),
           title: title,
           actions: actions,
           leading: leadingBuilder != null
               ? leadingBuilder!(false) // Always pass false (not scrolled)
               : leading,
+          automaticallyImplyLeading: leadingBuilder == null && leading == null,
           centerTitle: centerTitle,
           height: appBarHeight,
           maxWidthConstraint: maxWidthConstraint,
