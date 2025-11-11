@@ -6,6 +6,7 @@ import '../features/library/library_features.dart';
 import '../features/settings/settings_features.dart';
 import '../features/media/media_features.dart';
 import '../features/player/player_features.dart';
+import '../features/logs/logs_features.dart';
 import '../shared/widgets/ui/bottom_nav_bar.dart';
 import '../shared/widgets/ui/sidebar/sidebar.dart';
 import '../shared/widgets/connection_guard.dart';
@@ -53,6 +54,15 @@ final GoRouter router = GoRouter(
                 return _buildPageWithTransition(
                   state,
                   const ConnectionGuard(child: ManageLibrariesScreen()),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'logs',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return _buildPageWithTransition(
+                  state,
+                  const ConnectionGuard(child: LogsScreen()),
                 );
               },
             ),

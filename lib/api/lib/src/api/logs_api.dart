@@ -9,23 +9,20 @@ import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
 import 'package:openapi/src/api_util.dart';
-import 'package:openapi/src/model/api_v1_movies_get200_response.dart';
-import 'package:openapi/src/model/api_v1_movies_get500_response.dart';
-import 'package:openapi/src/model/api_v1_movies_id_get200_response.dart';
-import 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
-import 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
-import 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
+import 'package:openapi/src/model/api_v1_logs_delete200_response.dart';
+import 'package:openapi/src/model/api_v1_logs_get200_response.dart';
+import 'package:openapi/src/model/api_v1_logs_get500_response.dart';
 
-class MoviesApi {
+class LogsApi {
 
   final Dio _dio;
 
   final Serializers _serializers;
 
-  const MoviesApi(this._dio, this._serializers);
+  const LogsApi(this._dio, this._serializers);
 
-  /// Get all movies
-  /// Retrieves all movies with their associated media metadata
+  /// Clear all logs
+  /// Clears all log entries from the server
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -35,9 +32,9 @@ class MoviesApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiV1MoviesGet200Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiV1LogsDelete200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiV1MoviesGet200Response>> apiV1MoviesGet({ 
+  Future<Response<ApiV1LogsDelete200Response>> apiV1LogsDelete({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -45,9 +42,9 @@ class MoviesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/api/v1/movies';
+    final _path = r'/api/v1/logs';
     final _options = Options(
-      method: r'GET',
+      method: r'DELETE',
       headers: <String, dynamic>{
         ...?headers,
       },
@@ -66,14 +63,14 @@ class MoviesApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiV1MoviesGet200Response? _responseData;
+    ApiV1LogsDelete200Response? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(ApiV1MoviesGet200Response),
-      ) as ApiV1MoviesGet200Response;
+        specifiedType: const FullType(ApiV1LogsDelete200Response),
+      ) as ApiV1LogsDelete200Response;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -85,7 +82,7 @@ class MoviesApi {
       );
     }
 
-    return Response<ApiV1MoviesGet200Response>(
+    return Response<ApiV1LogsDelete200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -97,11 +94,12 @@ class MoviesApi {
     );
   }
 
-  /// Get a movie by ID
-  /// Retrieves a single movie with its associated media metadata
+  /// Get recent API logs
+  /// Fetches recent log entries from the server with optional filtering
   ///
   /// Parameters:
-  /// * [id] - The movie ID
+  /// * [limit] - Number of logs to retrieve
+  /// * [level] - Filter by log level
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -109,10 +107,11 @@ class MoviesApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiV1MoviesIdGet200Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiV1LogsGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiV1MoviesIdGet200Response>> apiV1MoviesIdGet({ 
-    required String id,
+  Future<Response<ApiV1LogsGet200Response>> apiV1LogsGet({ 
+    num? limit = 100,
+    String? level,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -120,7 +119,7 @@ class MoviesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/api/v1/movies/{id}'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(String)).toString());
+    final _path = r'/api/v1/logs';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -133,22 +132,28 @@ class MoviesApi {
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
+      if (level != null) r'level': encodeQueryParameter(_serializers, level, const FullType(String)),
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiV1MoviesIdGet200Response? _responseData;
+    ApiV1LogsGet200Response? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(ApiV1MoviesIdGet200Response),
-      ) as ApiV1MoviesIdGet200Response;
+        specifiedType: const FullType(ApiV1LogsGet200Response),
+      ) as ApiV1LogsGet200Response;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -160,7 +165,7 @@ class MoviesApi {
       );
     }
 
-    return Response<ApiV1MoviesIdGet200Response>(
+    return Response<ApiV1LogsGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

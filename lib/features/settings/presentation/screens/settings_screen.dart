@@ -68,6 +68,25 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+          // Developer Settings
+          DSettingsGroup(
+            title: 'Developer',
+            items: [
+              DSettingsItem(
+                title: 'API Logs',
+                subtitle: 'View real-time server logs',
+                icon: Icons.terminal,
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
+                onTap: () {
+                  context.push('/settings/logs');
+                },
+              ),
+            ],
+          ),
           // Library Management Settings
           DSettingsGroup(
             title: 'Library Management',

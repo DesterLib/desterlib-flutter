@@ -11,6 +11,7 @@ import 'package:openapi/src/auth/bearer_auth.dart';
 import 'package:openapi/src/auth/oauth.dart';
 import 'package:openapi/src/api/health_api.dart';
 import 'package:openapi/src/api/library_api.dart';
+import 'package:openapi/src/api/logs_api.dart';
 import 'package:openapi/src/api/movies_api.dart';
 import 'package:openapi/src/api/scan_api.dart';
 import 'package:openapi/src/api/search_api.dart';
@@ -82,6 +83,12 @@ class Openapi {
   /// by doing that all interceptors will not be executed
   LibraryApi getLibraryApi() {
     return LibraryApi(dio, serializers);
+  }
+
+  /// Get LogsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  LogsApi getLogsApi() {
+    return LogsApi(dio, serializers);
   }
 
   /// Get MoviesApi instance, base route and serializer can be overridden by a given but be careful,

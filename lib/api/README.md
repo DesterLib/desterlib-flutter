@@ -69,9 +69,14 @@ Class | Method | HTTP request | Description
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryDelete**](doc/LibraryApi.md#apiv1librarydelete) | **DELETE** /api/v1/library | Delete a library and its associated media
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryGet**](doc/LibraryApi.md#apiv1libraryget) | **GET** /api/v1/library | Get all libraries with optional filtering
 [*LibraryApi*](doc/LibraryApi.md) | [**apiV1LibraryPut**](doc/LibraryApi.md#apiv1libraryput) | **PUT** /api/v1/library | Update library details
+[*LogsApi*](doc/LogsApi.md) | [**apiV1LogsDelete**](doc/LogsApi.md#apiv1logsdelete) | **DELETE** /api/v1/logs | Clear all logs
+[*LogsApi*](doc/LogsApi.md) | [**apiV1LogsGet**](doc/LogsApi.md#apiv1logsget) | **GET** /api/v1/logs | Get recent API logs
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesGet**](doc/MoviesApi.md#apiv1moviesget) | **GET** /api/v1/movies | Get all movies
 [*MoviesApi*](doc/MoviesApi.md) | [**apiV1MoviesIdGet**](doc/MoviesApi.md#apiv1moviesidget) | **GET** /api/v1/movies/{id} | Get a movie by ID
+[*ScanApi*](doc/ScanApi.md) | [**apiV1ScanCleanupPost**](doc/ScanApi.md#apiv1scancleanuppost) | **POST** /api/v1/scan/cleanup | Cleanup stale scan jobs
+[*ScanApi*](doc/ScanApi.md) | [**apiV1ScanJobScanJobIdGet**](doc/ScanApi.md#apiv1scanjobscanjobidget) | **GET** /api/v1/scan/job/{scanJobId} | Get scan job status
 [*ScanApi*](doc/ScanApi.md) | [**apiV1ScanPathPost**](doc/ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch TMDB metadata
+[*ScanApi*](doc/ScanApi.md) | [**apiV1ScanResumeScanJobIdPost**](doc/ScanApi.md#apiv1scanresumescanjobidpost) | **POST** /api/v1/scan/resume/{scanJobId} | Resume a failed or paused scan job
 [*SearchApi*](doc/SearchApi.md) | [**apiV1SearchGet**](doc/SearchApi.md#apiv1searchget) | **GET** /api/v1/search | Search media by title
 [*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsFirstRunCompletePost**](doc/SettingsApi.md#apiv1settingsfirstruncompletepost) | **POST** /api/v1/settings/first-run-complete | Complete first run setup
 [*SettingsApi*](doc/SettingsApi.md) | [**apiV1SettingsGet**](doc/SettingsApi.md#apiv1settingsget) | **GET** /api/v1/settings | Get application settings
@@ -94,6 +99,10 @@ Class | Method | HTTP request | Description
  - [ApiV1LibraryPut400Response](doc/ApiV1LibraryPut400Response.md)
  - [ApiV1LibraryPut404Response](doc/ApiV1LibraryPut404Response.md)
  - [ApiV1LibraryPutRequest](doc/ApiV1LibraryPutRequest.md)
+ - [ApiV1LogsDelete200Response](doc/ApiV1LogsDelete200Response.md)
+ - [ApiV1LogsGet200Response](doc/ApiV1LogsGet200Response.md)
+ - [ApiV1LogsGet200ResponseDataInner](doc/ApiV1LogsGet200ResponseDataInner.md)
+ - [ApiV1LogsGet500Response](doc/ApiV1LogsGet500Response.md)
  - [ApiV1MoviesGet200Response](doc/ApiV1MoviesGet200Response.md)
  - [ApiV1MoviesGet200ResponseDataInner](doc/ApiV1MoviesGet200ResponseDataInner.md)
  - [ApiV1MoviesGet200ResponseDataInnerMedia](doc/ApiV1MoviesGet200ResponseDataInnerMedia.md)
@@ -103,6 +112,8 @@ Class | Method | HTTP request | Description
  - [ApiV1MoviesIdGet400Response](doc/ApiV1MoviesIdGet400Response.md)
  - [ApiV1MoviesIdGet404Response](doc/ApiV1MoviesIdGet404Response.md)
  - [ApiV1MoviesIdGet500Response](doc/ApiV1MoviesIdGet500Response.md)
+ - [ApiV1ScanCleanupPost200Response](doc/ApiV1ScanCleanupPost200Response.md)
+ - [ApiV1ScanCleanupPost200ResponseData](doc/ApiV1ScanCleanupPost200ResponseData.md)
  - [ApiV1ScanPathPost200Response](doc/ApiV1ScanPathPost200Response.md)
  - [ApiV1ScanPathPost200ResponseData](doc/ApiV1ScanPathPost200ResponseData.md)
  - [ApiV1ScanPathPost200ResponseDataCacheStats](doc/ApiV1ScanPathPost200ResponseDataCacheStats.md)
@@ -110,6 +121,8 @@ Class | Method | HTTP request | Description
  - [ApiV1ScanPathPost500Response](doc/ApiV1ScanPathPost500Response.md)
  - [ApiV1ScanPathPostRequest](doc/ApiV1ScanPathPostRequest.md)
  - [ApiV1ScanPathPostRequestOptions](doc/ApiV1ScanPathPostRequestOptions.md)
+ - [ApiV1ScanResumeScanJobIdPost202Response](doc/ApiV1ScanResumeScanJobIdPost202Response.md)
+ - [ApiV1ScanResumeScanJobIdPost202ResponseData](doc/ApiV1ScanResumeScanJobIdPost202ResponseData.md)
  - [ApiV1SearchGet200Response](doc/ApiV1SearchGet200Response.md)
  - [ApiV1SearchGet200ResponseData](doc/ApiV1SearchGet200ResponseData.md)
  - [ApiV1SearchGet200ResponseDataMoviesInner](doc/ApiV1SearchGet200ResponseDataMoviesInner.md)

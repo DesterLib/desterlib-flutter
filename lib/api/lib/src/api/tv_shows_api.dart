@@ -4,12 +4,17 @@
 
 import 'dart:async';
 
+import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
 import 'package:openapi/src/api_util.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get400_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get404_response.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get500_response.dart';
 
 class TVShowsApi {
 

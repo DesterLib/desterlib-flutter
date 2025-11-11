@@ -25,6 +25,10 @@ import 'package:openapi/src/model/api_v1_library_put200_response_data.dart';
 import 'package:openapi/src/model/api_v1_library_put400_response.dart';
 import 'package:openapi/src/model/api_v1_library_put404_response.dart';
 import 'package:openapi/src/model/api_v1_library_put_request.dart';
+import 'package:openapi/src/model/api_v1_logs_delete200_response.dart';
+import 'package:openapi/src/model/api_v1_logs_get200_response.dart';
+import 'package:openapi/src/model/api_v1_logs_get200_response_data_inner.dart';
+import 'package:openapi/src/model/api_v1_logs_get500_response.dart';
 import 'package:openapi/src/model/api_v1_movies_get200_response.dart';
 import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner.dart';
 import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media.dart';
@@ -34,6 +38,8 @@ import 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
+import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response.dart';
+import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response_data.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response_data.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response_data_cache_stats.dart';
@@ -41,6 +47,8 @@ import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response.dart';
+import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response_data.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data_movies_inner.dart';
@@ -87,6 +95,10 @@ part 'serializers.g.dart';
   ApiV1LibraryPut400Response,
   ApiV1LibraryPut404Response,
   ApiV1LibraryPutRequest,
+  ApiV1LogsDelete200Response,
+  ApiV1LogsGet200Response,
+  ApiV1LogsGet200ResponseDataInner,
+  ApiV1LogsGet500Response,
   ApiV1MoviesGet200Response,
   ApiV1MoviesGet200ResponseDataInner,
   ApiV1MoviesGet200ResponseDataInnerMedia,
@@ -96,6 +108,8 @@ part 'serializers.g.dart';
   ApiV1MoviesIdGet400Response,
   ApiV1MoviesIdGet404Response,
   ApiV1MoviesIdGet500Response,
+  ApiV1ScanCleanupPost200Response,
+  ApiV1ScanCleanupPost200ResponseData,
   ApiV1ScanPathPost200Response,
   ApiV1ScanPathPost200ResponseData,
   ApiV1ScanPathPost200ResponseDataCacheStats,
@@ -103,6 +117,8 @@ part 'serializers.g.dart';
   ApiV1ScanPathPost500Response,
   ApiV1ScanPathPostRequest,
   ApiV1ScanPathPostRequestOptions,
+  ApiV1ScanResumeScanJobIdPost202Response,
+  ApiV1ScanResumeScanJobIdPost202ResponseData,
   ApiV1SearchGet200Response,
   ApiV1SearchGet200ResponseData,
   ApiV1SearchGet200ResponseDataMoviesInner,

@@ -4,14 +4,19 @@
 
 import 'dart:async';
 
+import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
 
 import 'package:openapi/src/api_util.dart';
 import 'package:openapi/src/model/api_v1_library_delete200_response.dart';
+import 'package:openapi/src/model/api_v1_library_delete400_response.dart';
+import 'package:openapi/src/model/api_v1_library_delete500_response.dart';
 import 'package:openapi/src/model/api_v1_library_delete_request.dart';
 import 'package:openapi/src/model/api_v1_library_get200_response.dart';
 import 'package:openapi/src/model/api_v1_library_put200_response.dart';
+import 'package:openapi/src/model/api_v1_library_put400_response.dart';
+import 'package:openapi/src/model/api_v1_library_put404_response.dart';
 import 'package:openapi/src/model/api_v1_library_put_request.dart';
 
 class LibraryApi {

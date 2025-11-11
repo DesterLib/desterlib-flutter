@@ -8,8 +8,8 @@
     "commit:retry": "TERM=dumb git-cz --retry",
     "prepare": "lefthook install",
     "changelog:generate": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "release": "bash scripts/release.sh",
-    "version:bump": "dart run scripts/version_bump.dart"
+    "version:bump": "dart run scripts/version_bump.dart",
+    "api:generate": "bash scripts/generate_api_client.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
