@@ -84,7 +84,7 @@ class _DSidebarState extends ConsumerState<DSidebar> {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: ShapeDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Colors.black.withValues(alpha: 0.2),
               shape: RoundedSuperellipseBorder(
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(

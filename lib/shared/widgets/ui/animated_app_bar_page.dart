@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/app_bar.dart';
 
 class AnimatedAppBarPage extends StatefulWidget {
@@ -55,7 +56,9 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     super.initState();
     // Initialize scroll offset based on top padding
     // If no top padding and body extends behind app bar, start as "scrolled"
-    final appBarHeight = widget.useCompactHeight ? 80.0 : 120.0;
+    final appBarHeight = widget.useCompactHeight
+        ? AppLayout.appBarHeightCompact
+        : AppLayout.appBarHeightRegular;
     _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar)
         ? appBarHeight
         : 0.0;
@@ -77,7 +80,9 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBarHeight = widget.useCompactHeight ? 80.0 : 120.0;
+    final appBarHeight = widget.useCompactHeight
+        ? AppLayout.appBarHeightCompact
+        : AppLayout.appBarHeightRegular;
 
     final childWidget = widget.maxWidthConstraint != null
         ? Center(
@@ -89,7 +94,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
         : widget.child;
 
     // Calculate opacity and offset based on scroll position
-    const fadeDistance = 40.0;
+    const fadeDistance = AppLayout.extraLargePadding;
     final scrollThreshold = widget.scrollThresholdForTitle ?? 0.0;
 
     final opacity = widget.showTitleOnScroll
@@ -110,13 +115,14 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
               0.5; // Shift up by half the scroll amount
 
     // Calculate bottom padding for bottom navigation bar
-    // Bottom nav is ~68px total (60px pill + 8px padding)
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final isMobile = screenWidth <= 900;
+    final isMobile = AppBreakpoints.isMobile(screenWidth);
     final bottomPadding = widget.addBottomNavPadding && isMobile
-        ? 120.0 // Space for bottom nav bar (80px) + extra padding (40px)
-        : 40.0; // Extra padding for desktop
+        ? AppLayout.bottomNavBarHeight +
+              AppLayout
+                  .extraLargePadding // Space for bottom nav bar + extra padding
+        : AppLayout.extraLargePadding; // Extra padding for desktop
 
     // Show background when scrolled
     // For showTitleOnScroll mode, show on desktop too; otherwise only on mobile

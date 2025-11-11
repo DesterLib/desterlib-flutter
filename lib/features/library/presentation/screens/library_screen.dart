@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/card.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/shared/widgets/ui/search_field.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/features/library/presentation/provider/genres_provider.dart';
 import 'package:dester/features/library/presentation/provider/media_search_provider.dart';
 import 'package:dester/features/library/presentation/provider/library_search_provider.dart';
@@ -89,7 +91,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   Widget build(BuildContext context) {
     final genres = ref.watch(genresProvider);
     final screenWidth = MediaQuery.of(context).size.width;
-    final showSidebar = screenWidth > 900;
+    final showSidebar = AppBreakpoints.isDesktop(screenWidth);
 
     // Listen to provider changes
     ref.listen<String>(librarySearchProvider, (previous, next) {
@@ -110,14 +112,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         children: [
           // Search bar - hidden on desktop since sidebar has it
           if (!showSidebar) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
             _buildSearchBar(),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxl),
           ] else
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
           // Show media search results or genre cards
-          Padding(
-            padding: EdgeInsets.fromLTRB(24, 0, showSidebar ? 44 : 24, 24),
+          RespectSidebar(
+            bottomPadding: AppSpacing.xl,
             child: _searchQuery.isEmpty
                 ? _buildGenreGrid(genres)
                 : _buildSearchResults(),
@@ -129,7 +131,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: DSearchField(
         controller: _searchController,
         focusNode: _searchFocusNode,
@@ -212,12 +214,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
         // Use row-based layout for proper full-width distribution
         final screenWidth = MediaQuery.of(context).size.width;
-        final showSidebar = screenWidth > 900;
-        final gridSpacing = showSidebar ? 24.0 : 16.0;
+        final showSidebar = AppBreakpoints.isDesktop(screenWidth);
+        final gridSpacing = showSidebar ? AppSpacing.xl : AppSpacing.lg;
 
-        // Account for sidebar width on desktop (340px) and horizontal padding (24 left + 20 right = 44 on desktop, 48 on mobile)
-        final sidebarWidth = showSidebar ? 340 : 0;
-        final horizontalPadding = showSidebar ? 44 : 48;
+        // Account for sidebar width on desktop and horizontal padding
+        final sidebarWidth = showSidebar ? AppLayout.sidebarWidth : 0;
+        final horizontalPadding = showSidebar
+            ? AppLayout.desktopHorizontalPadding
+            : AppSpacing.xxxl;
         final availableWidth = screenWidth - sidebarWidth - horizontalPadding;
         final crossAxisCount = _getResponsiveCrossAxisCount(availableWidth);
 
@@ -281,7 +285,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
       error: (error, stack) => Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -312,12 +316,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final screenWidth = MediaQuery.of(context).size.width;
-        final showSidebar = screenWidth > 900;
-        final gridSpacing = showSidebar ? 24.0 : 16.0;
+        final showSidebar = AppBreakpoints.isDesktop(screenWidth);
+        final gridSpacing = showSidebar ? AppSpacing.xl : AppSpacing.lg;
 
-        // Account for sidebar width on desktop (340px) and horizontal padding (24 left + 20 right = 44 on desktop, 48 on mobile)
-        final sidebarWidth = showSidebar ? 340 : 0;
-        final horizontalPadding = showSidebar ? 44 : 48;
+        // Account for sidebar width on desktop and horizontal padding
+        final sidebarWidth = showSidebar ? AppLayout.sidebarWidth : 0;
+        final horizontalPadding = showSidebar
+            ? AppLayout.desktopHorizontalPadding
+            : AppSpacing.xxxl;
         final availableWidth = screenWidth - sidebarWidth - horizontalPadding;
         final crossAxisCount = _getResponsiveCrossAxisCount(availableWidth);
 
@@ -378,7 +384,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   int _getResponsiveCrossAxisCount(double availableWidth) {
     if (availableWidth < 600) {
       return 2; // Mobile: 2 columns
-    } else if (availableWidth < 900) {
+    } else if (availableWidth < AppBreakpoints.desktop) {
       return 3; // Tablet: 3 columns
     } else if (availableWidth < 1200) {
       return 4; // Desktop: 4 columns

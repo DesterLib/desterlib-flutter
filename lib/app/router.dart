@@ -12,6 +12,7 @@ import '../shared/widgets/ui/sidebar/sidebar.dart';
 import '../shared/widgets/connection_guard.dart';
 import '../shared/utils/platform_icons.dart';
 import '../core/providers/connection_provider.dart';
+import '../app/theme/theme.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -216,9 +217,9 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     final connectionStatus = ref.watch(connectionStatusProvider);
     final isConnected = connectionStatus == ConnectionStatus.connected;
 
-    // Show sidebar on desktop and TV screens (> 900px width)
+    // Show sidebar on desktop and TV screens
     final screenWidth = MediaQuery.of(context).size.width;
-    final showSidebar = screenWidth > 900;
+    final showSidebar = AppBreakpoints.isDesktop(screenWidth);
 
     return Scaffold(
       extendBody: true,
@@ -267,13 +268,12 @@ class _DesktopLayout extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 340), child: child),
-        // Sidebar positioned on the left
+        child,
         Positioned(
           left: 0,
           top: 0,
           bottom: 0,
-          width: 340,
+          width: AppLayout.sidebarWidth,
           child: DSidebar(
             currentIndex: selectedIndex,
             showSearch: true,

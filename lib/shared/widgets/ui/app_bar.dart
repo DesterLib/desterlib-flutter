@@ -25,7 +25,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.leading,
     this.centerTitle = false,
-    this.height = 120.0,
+    this.height = AppLayout.appBarHeightRegular,
     this.maxWidthConstraint,
     this.showBackground = true,
     this.backgroundOpacity = 1.0,
@@ -48,6 +48,13 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     final effectiveTitleStyle =
         titleStyle ??
         (shouldShowBackButton ? AppTypography.h2 : AppTypography.h1);
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = AppBreakpoints.isDesktop(screenWidth);
+    // Always respect sidebar on desktop
+    final leftPadding = isDesktop
+        ? AppLayout.sidebarWidth + AppLayout.desktopHorizontalPadding
+        : AppSpacing.lg;
 
     return SizedBox(
       height: height,
@@ -81,82 +88,73 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
           Padding(
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top,
-              left: 20,
-              right: 20,
+              left: leftPadding,
+              right: AppLayout.desktopHorizontalPadding,
             ),
             child: Center(
-              child: ConstrainedBox(
-                constraints: maxWidthConstraint != null
-                    ? BoxConstraints(maxWidth: maxWidthConstraint!)
-                    : const BoxConstraints(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Leading widget or back button
-                    if (leading != null) ...[
-                      leading!,
-                      const SizedBox(width: 12),
-                    ] else if (shouldShowBackButton) ...[
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Leading widget or back button
+                  if (leading != null) ...[
+                    leading!,
+                  ] else if (shouldShowBackButton) ...[
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textPrimary,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.of(context).pop();
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  // Title (large title or compact title based on scroll)
+                  if (showCompactTitle) ...[
+                    // Compact title is always centered
+                    const Spacer(),
+                    Opacity(
+                      opacity: backgroundOpacity,
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: AppTypography.fontSizeLG,
+                          fontWeight: AppTypography.semiBold,
                           color: AppColors.textPrimary,
-                        ),
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.of(context).pop();
-                        },
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                    // Title (large title or compact title based on scroll)
-                    if (showCompactTitle) ...[
-                      // Compact title is always centered
-                      const Spacer(),
-                      Opacity(
-                        opacity: backgroundOpacity,
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: AppTypography.fontSizeLG,
-                            fontWeight: AppTypography.semiBold,
-                            color: AppColors.textPrimary,
-                            letterSpacing: AppTypography.letterSpacingTight,
-                          ),
+                          letterSpacing: AppTypography.letterSpacingTight,
                         ),
                       ),
-                      const Spacer(),
-                    ] else if (!centerTitle)
-                      Expanded(
-                        child: Transform.translate(
-                          offset: Offset(0, titleOffset),
-                          child: Opacity(
-                            opacity: titleOpacity,
-                            child: Text(title, style: effectiveTitleStyle),
-                          ),
-                        ),
-                      )
-                    else ...[
-                      const Spacer(),
-                      Transform.translate(
+                    ),
+                    const Spacer(),
+                  ] else if (!centerTitle)
+                    Expanded(
+                      child: Transform.translate(
                         offset: Offset(0, titleOffset),
                         child: Opacity(
                           opacity: titleOpacity,
                           child: Text(title, style: effectiveTitleStyle),
                         ),
                       ),
-                      const Spacer(),
-                    ],
-                    // Actions
-                    if (actions != null)
-                      ...actions!
-                    else
-                      const SizedBox.shrink(),
+                    )
+                  else ...[
+                    const Spacer(),
+                    Transform.translate(
+                      offset: Offset(0, titleOffset),
+                      child: Opacity(
+                        opacity: titleOpacity,
+                        child: Text(title, style: effectiveTitleStyle),
+                      ),
+                    ),
+                    const Spacer(),
                   ],
-                ),
+                  // Actions
+                  if (actions != null) ...actions! else const SizedBox.shrink(),
+                ],
               ),
             ),
           ),

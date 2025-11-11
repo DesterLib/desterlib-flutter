@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/app_bar.dart';
 
 /// A fixed layout page with app bar - no scrolling or blur effects.
@@ -33,14 +34,18 @@ class FixedAppBarPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appBarHeight = useCompactHeight ? 80.0 : 120.0;
+    final appBarHeight = useCompactHeight
+        ? AppLayout.appBarHeightCompact
+        : AppLayout.appBarHeightRegular;
     final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth <= 900;
+    final isMobile = AppBreakpoints.isMobile(screenWidth);
 
     // Calculate bottom padding for bottom navigation bar
     final bottomPadding = isMobile
-        ? 120.0 // Space for bottom nav bar (80px) + extra padding (40px)
-        : 40.0; // Extra padding for desktop
+        ? AppLayout.bottomNavBarHeight +
+              AppLayout
+                  .extraLargePadding // Space for bottom nav bar + extra padding
+        : AppLayout.extraLargePadding; // Extra padding for desktop
 
     return Scaffold(
       extendBodyBehindAppBar: false,

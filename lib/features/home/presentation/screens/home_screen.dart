@@ -105,28 +105,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }).toList();
 
-            final listPadding = isDesktop
-                ? const EdgeInsets.only(left: 24, right: 44)
-                : const EdgeInsets.symmetric(horizontal: 24);
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
                 if (movieCards.isNotEmpty) ...[
-                  DScrollableList(
-                    title: 'Movies',
-                    items: movieCards,
-                    padding: listPadding,
-                  ),
+                  DScrollableList(title: 'Movies', items: movieCards),
                   const SizedBox(height: 32),
                 ],
                 if (tvShowCards.isNotEmpty) ...[
-                  DScrollableList(
-                    title: 'TV Shows',
-                    items: tvShowCards,
-                    padding: listPadding,
-                  ),
+                  DScrollableList(title: 'TV Shows', items: tvShowCards),
                   const SizedBox(height: 24),
                 ],
                 if (movieCards.isEmpty && tvShowCards.isEmpty)

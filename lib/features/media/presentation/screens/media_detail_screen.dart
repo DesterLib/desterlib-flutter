@@ -7,6 +7,7 @@ import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import '../widgets/media_data.dart';
 import '../widgets/media_hero_section.dart';
@@ -244,9 +245,6 @@ class _MediaDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 900;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,8 +256,7 @@ class _MediaDetailContent extends StatelessWidget {
         ),
 
         // Rest of content
-        Padding(
-          padding: EdgeInsets.only(left: 24, right: isDesktop ? 44 : 24),
+        RespectSidebar(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

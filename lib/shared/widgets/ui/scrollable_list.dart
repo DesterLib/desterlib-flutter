@@ -2,6 +2,7 @@ import 'package:dester/shared/widgets/ui/card.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:dester/app/theme/theme.dart';
 
 class DScrollableList extends StatefulWidget {
   final String? title;
@@ -9,12 +10,15 @@ class DScrollableList extends StatefulWidget {
   final double spacing;
   final EdgeInsets padding;
 
+  final double? cacheExtent;
+
   const DScrollableList({
     super.key,
     this.title,
     required this.items,
     this.spacing = 12,
     this.padding = const EdgeInsets.symmetric(horizontal: 24),
+    this.cacheExtent = 1200,
   });
 
   @override
@@ -23,48 +27,11 @@ class DScrollableList extends StatefulWidget {
 
 class _DScrollableListState extends State<DScrollableList> {
   final ScrollController _scrollController = ScrollController();
-  final ValueNotifier<bool> _showLeftFade = ValueNotifier(false);
-  final ValueNotifier<bool> _showRightFade = ValueNotifier(true);
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_updateFadeVisibility);
-
-    // Check initial scroll state after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateFadeVisibility();
-    });
-  }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_updateFadeVisibility);
     _scrollController.dispose();
-    _showLeftFade.dispose();
-    _showRightFade.dispose();
     super.dispose();
-  }
-
-  void _updateFadeVisibility() {
-    if (!_scrollController.hasClients) return;
-
-    final position = _scrollController.position;
-    final offset = _scrollController.offset;
-    final maxScroll = position.maxScrollExtent;
-
-    // If list doesn't scroll, don't show any fades
-    if (maxScroll <= 0) {
-      _showLeftFade.value = false;
-      _showRightFade.value = false;
-      return;
-    }
-
-    // Show left fade after scrolling ~20px
-    _showLeftFade.value = offset > 20;
-
-    // Show right fade until we're ~20px from the end
-    _showRightFade.value = offset < maxScroll - 20;
   }
 
   void _scrollLeft() {
@@ -97,16 +64,80 @@ class _DScrollableListState extends State<DScrollableList> {
     );
   }
 
+  Widget _buildScrollableContent(
+    double cardWidth,
+    double cardHeight,
+    double itemSpacing,
+    bool isDesktop,
+  ) {
+    // Calculate cache extent: use provided value or default to 3x card width
+    final effectiveCacheExtent = widget.cacheExtent ?? (cardWidth * 3);
+
+    // Calculate the left padding to respect sidebar on desktop
+    final leftPadding = isDesktop
+        ? AppLayout.sidebarWidth + AppLayout.desktopHorizontalPadding
+        : AppLayout.mobileHorizontalPadding;
+
+    final rightPadding = isDesktop
+        ? AppLayout.desktopHorizontalPadding
+        : AppLayout.mobileHorizontalPadding;
+
+    // ListView takes full width - viewport includes the entire screen width
+    // This keeps more items mounted even when they overflow beyond padding
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(
+        height: cardHeight + 90,
+        child: ListView.separated(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+          clipBehavior: Clip.none,
+          physics: const BouncingScrollPhysics(),
+          cacheExtent: effectiveCacheExtent,
+          itemCount: widget.items.length,
+          separatorBuilder: (context, index) => SizedBox(width: itemSpacing),
+          itemBuilder: (context, index) {
+            final item = widget.items[index];
+            return RepaintBoundary(
+              child: DCard(
+                title: item.title,
+                year: item.year,
+                imageUrl: item.imageUrl,
+                onTap: item.onTap,
+                width: cardWidth,
+                height: cardHeight,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 900;
+    final isDesktop = AppBreakpoints.isDesktop(screenWidth);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = isDesktop ? 320.0 : 200.0;
-        final cardHeight = cardWidth * 10 / 16; // 16:10 aspect ratio
-        final itemSpacing = isDesktop ? 24.0 : widget.spacing;
+        final cardWidth = isDesktop
+            ? AppCardSize.desktopWidth
+            : AppCardSize.mobileWidth;
+        final cardHeight = AppCardSize.getHeight(cardWidth);
+        final itemSpacing = isDesktop ? AppSpacing.xl : widget.spacing;
+
+        // Calculate padding for title to respect sidebar
+        final titlePadding = isDesktop
+            ? EdgeInsets.only(
+                left:
+                    AppLayout.sidebarWidth + AppLayout.desktopHorizontalPadding,
+                right: AppLayout.desktopHorizontalPadding,
+              )
+            : EdgeInsets.symmetric(
+                horizontal: AppLayout.mobileHorizontalPadding,
+              );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +145,7 @@ class _DScrollableListState extends State<DScrollableList> {
           children: [
             if (widget.title != null)
               Padding(
-                padding: widget.padding,
+                padding: titlePadding,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -127,46 +158,24 @@ class _DScrollableListState extends State<DScrollableList> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    // Scroll control buttons (always show both to avoid layout shift)
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _showLeftFade,
-                      builder: (context, showLeft, child) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: _showRightFade,
-                          builder: (context, showRight, child) {
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Opacity(
-                                  opacity: showLeft ? 1.0 : 0.3,
-                                  child: IgnorePointer(
-                                    ignoring: !showLeft,
-                                    child: DButton(
-                                      icon: PlatformIcons.chevronLeft,
-                                      variant: DButtonVariant.ghost,
-                                      size: DButtonSize.sm,
-                                      onTap: _scrollLeft,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Opacity(
-                                  opacity: showRight ? 1.0 : 0.3,
-                                  child: IgnorePointer(
-                                    ignoring: !showRight,
-                                    child: DButton(
-                                      icon: PlatformIcons.chevronRight,
-                                      variant: DButtonVariant.ghost,
-                                      size: DButtonSize.sm,
-                                      onTap: _scrollRight,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                    // Scroll control buttons
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DButton(
+                          icon: PlatformIcons.chevronLeft,
+                          variant: DButtonVariant.ghost,
+                          size: DButtonSize.sm,
+                          onTap: _scrollLeft,
+                        ),
+                        const SizedBox(width: 4),
+                        DButton(
+                          icon: PlatformIcons.chevronRight,
+                          variant: DButtonVariant.ghost,
+                          size: DButtonSize.sm,
+                          onTap: _scrollRight,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -176,62 +185,11 @@ class _DScrollableListState extends State<DScrollableList> {
               height:
                   cardHeight +
                   100, // Card height + text area + extra space for hover scaling
-              child: ValueListenableBuilder<bool>(
-                valueListenable: _showLeftFade,
-                builder: (context, showLeft, child) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _showRightFade,
-                    builder: (context, showRight, _) {
-                      return ShaderMask(
-                        shaderCallback: (bounds) {
-                          return LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              showLeft ? Colors.transparent : Colors.white,
-                              Colors.white,
-                              Colors.white,
-                              showRight ? Colors.transparent : Colors.white,
-                            ],
-                            stops: const [0.0, 0.05, 0.95, 1.0],
-                          ).createShader(bounds);
-                        },
-                        blendMode: BlendMode.dstIn,
-                        child: child!,
-                      );
-                    },
-                  );
-                },
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    height: cardHeight + 90,
-                    child: ListView.separated(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      padding: widget.padding,
-                      clipBehavior: Clip.none,
-                      physics: const BouncingScrollPhysics(),
-                      cacheExtent: cardWidth * 2, // Cache 2 cards ahead
-                      itemCount: widget.items.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(width: itemSpacing),
-                      itemBuilder: (context, index) {
-                        final item = widget.items[index];
-                        return RepaintBoundary(
-                          child: DCard(
-                            title: item.title,
-                            year: item.year,
-                            imageUrl: item.imageUrl,
-                            onTap: item.onTap,
-                            width: cardWidth,
-                            height: cardHeight,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+              child: _buildScrollableContent(
+                cardWidth,
+                cardHeight,
+                itemSpacing,
+                isDesktop,
               ),
             ),
           ],

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dester/shared/widgets/ui/fixed_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/core/providers/logs_provider.dart';
 import 'package:dester/app/theme/theme.dart';
@@ -81,10 +82,7 @@ class LogsScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1400),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 44 : AppSpacing.md,
-              ),
+            child: RespectSidebar(
               child: Column(
                 children: [
                   AppSpacing.gapVerticalMD,
