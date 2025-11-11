@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dester/shared/widgets/ui/app_bar.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
@@ -44,6 +45,12 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
           title: 'API Logs',
           height: appBarHeight,
           maxWidthConstraint: 1400,
+          leading: DButton(
+            icon: PlatformIcons.arrowBack,
+            variant: DButtonVariant.neutral,
+            size: DButtonSize.sm,
+            onTap: () => context.pop(),
+          ),
           actions: [
             // Refresh button
             Padding(

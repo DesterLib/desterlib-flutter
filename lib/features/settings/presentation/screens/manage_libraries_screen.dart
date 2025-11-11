@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
@@ -78,6 +79,12 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
     return AnimatedAppBarPage(
       title: 'Manage Libraries',
       maxWidthConstraint: 1220,
+      leadingBuilder: (isScrolled) => DButton(
+        icon: PlatformIcons.arrowBack,
+        variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
+        size: DButtonSize.sm,
+        onTap: () => context.pop(),
+      ),
       actions: [
         // Refresh button
         IconButton(
