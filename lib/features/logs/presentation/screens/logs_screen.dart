@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dester/shared/widgets/ui/app_bar.dart';
+import 'package:dester/shared/widgets/ui/fixed_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
@@ -11,97 +11,79 @@ import '../widgets/log_item.dart';
 import '../widgets/log_filter_bar.dart';
 import '../modals/logs_modals.dart';
 
-class LogsScreen extends ConsumerStatefulWidget {
+class LogsScreen extends ConsumerWidget {
   const LogsScreen({super.key});
 
   @override
-  ConsumerState<LogsScreen> createState() => _LogsScreenState();
-}
-
-class _LogsScreenState extends ConsumerState<LogsScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final logsState = ref.watch(logsProvider);
     // Logs are already in descending order (newest first) from backend
     final logs = logsState.filteredLogs;
 
-    // Responsive app bar height
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 900;
-    final appBarHeight = isDesktop ? 80.0 : 120.0;
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(appBarHeight),
-        child: DAppBar(
-          title: 'API Logs',
-          height: appBarHeight,
-          maxWidthConstraint: 1400,
-          leading: DButton(
-            icon: PlatformIcons.arrowBack,
-            variant: DButtonVariant.neutral,
-            size: DButtonSize.sm,
-            onTap: () => context.pop(),
-          ),
-          actions: [
-            // Refresh button
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.xs),
-              child: DButton(
-                icon: PlatformIcons.refresh,
-                variant: DButtonVariant.ghost,
-                size: DButtonSize.sm,
-                onTap: () async {
-                  await ref.read(logsProvider.notifier).refreshLogs();
-                },
-              ),
-            ),
-            // Clear logs button
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.xs),
-              child: DButton(
-                icon: PlatformIcons.delete,
-                variant: DButtonVariant.ghost,
-                size: DButtonSize.sm,
-                onTap: logs.isEmpty
-                    ? null
-                    : () async {
-                        await ClearLogsModal.show(context, ref);
-                      },
-              ),
-            ),
-            // Connection status badge
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.md),
-              child: DBadge(
-                label: logsState.isConnected ? 'Connected' : 'Disconnected',
-                icon: logsState.isConnected
-                    ? PlatformIcons.checkCircle
-                    : PlatformIcons.errorCircle,
-                backgroundColor: logsState.isConnected
-                    ? Colors.green.withValues(alpha: 0.15)
-                    : Colors.red.withValues(alpha: 0.15),
-                textColor: logsState.isConnected ? Colors.green : Colors.red,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
+    return FixedAppBarPage(
+      title: 'API Logs',
+      useCompactHeight: isDesktop,
+      maxWidthConstraint: 1400,
+      leadingBuilder: (isScrolled) => DButton(
+        icon: PlatformIcons.arrowBack,
+        variant: DButtonVariant.neutral,
+        size: DButtonSize.sm,
+        onTap: () => context.pop(),
       ),
-      body: SafeArea(
+      actions: [
+        // Refresh button
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.xs),
+          child: DButton(
+            icon: PlatformIcons.refresh,
+            variant: DButtonVariant.ghost,
+            size: DButtonSize.sm,
+            onTap: () async {
+              await ref.read(logsProvider.notifier).refreshLogs();
+            },
+          ),
+        ),
+        // Clear logs button
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.xs),
+          child: DButton(
+            icon: PlatformIcons.delete,
+            variant: DButtonVariant.ghost,
+            size: DButtonSize.sm,
+            onTap: logs.isEmpty
+                ? null
+                : () async {
+                    await ClearLogsModal.show(context, ref);
+                  },
+          ),
+        ),
+        // Connection status badge
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.md),
+          child: DBadge(
+            label: logsState.isConnected ? 'Connected' : 'Disconnected',
+            icon: logsState.isConnected
+                ? PlatformIcons.checkCircle
+                : PlatformIcons.errorCircle,
+            backgroundColor: logsState.isConnected
+                ? Colors.green.withValues(alpha: 0.15)
+                : Colors.red.withValues(alpha: 0.15),
+            textColor: logsState.isConnected ? Colors.green : Colors.red,
+            fontSize: 11,
+          ),
+        ),
+      ],
+      child: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1400),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 44 : AppSpacing.md,
+              ),
               child: Column(
                 children: [
                   AppSpacing.gapVerticalMD,
@@ -119,7 +101,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                   Expanded(
                     child: logs.isEmpty
                         ? _buildEmptyState(logsState.isConnected)
-                        : _buildLogsList(logs),
+                        : _buildLogsList(ref, logs),
                   ),
                   AppSpacing.gapVerticalMD,
                 ],
@@ -180,7 +162,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     );
   }
 
-  Widget _buildLogsList(List logs) {
+  Widget _buildLogsList(WidgetRef ref, List logs) {
     return Container(
       decoration: ShapeDecoration(
         color: Colors.black.withValues(alpha: 0.2),
@@ -195,7 +177,6 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: ListView.separated(
-          controller: _scrollController,
           padding: EdgeInsets.zero,
           itemCount: logs.length,
           separatorBuilder: (context, index) => Divider(

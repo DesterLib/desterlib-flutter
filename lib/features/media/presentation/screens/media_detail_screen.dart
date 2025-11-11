@@ -108,13 +108,13 @@ class MediaDetailScreen extends ConsumerWidget {
             600.0,
           ); // 16:9 aspect ratio capped at 600px
 
-    // Responsive app bar height: smaller on desktop, larger on mobile
+    // Calculate app bar height for scroll threshold calculation
     final appBarHeight = isMobile ? 120.0 : 80.0;
 
     return AnimatedAppBarPage(
       title: appBarTitle,
       showTitleOnScroll: true,
-      appBarHeight: appBarHeight,
+      useCompactHeight: !isMobile,
       addTopPadding: false, // Hero section starts from top
       scrollThresholdForTitle:
           heroHeight -

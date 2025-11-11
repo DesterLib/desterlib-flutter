@@ -9,7 +9,7 @@ class AnimatedAppBarPage extends StatefulWidget {
   final Widget Function(bool isScrolled)?
   leadingBuilder; // Dynamic leading based on scroll state
   final bool centerTitle;
-  final double appBarHeight;
+  final bool useCompactHeight; // Use 80px height instead of 120px
   final double? maxWidthConstraint;
   final bool extendBodyBehindAppBar;
   final bool addBottomNavPadding;
@@ -29,7 +29,7 @@ class AnimatedAppBarPage extends StatefulWidget {
     this.leading,
     this.leadingBuilder,
     this.centerTitle = false,
-    this.appBarHeight = 120.0,
+    this.useCompactHeight = false,
     this.maxWidthConstraint,
     this.extendBodyBehindAppBar = true,
     this.addBottomNavPadding = true,
@@ -55,8 +55,9 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     super.initState();
     // Initialize scroll offset based on top padding
     // If no top padding and body extends behind app bar, start as "scrolled"
+    final appBarHeight = widget.useCompactHeight ? 80.0 : 120.0;
     _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar)
-        ? widget.appBarHeight
+        ? appBarHeight
         : 0.0;
     _scrollController.addListener(_onScroll);
   }
@@ -76,6 +77,8 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBarHeight = widget.useCompactHeight ? 80.0 : 120.0;
+
     final childWidget = widget.maxWidthConstraint != null
         ? Center(
             child: ConstrainedBox(
@@ -127,7 +130,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     return Scaffold(
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(widget.appBarHeight),
+        preferredSize: Size.fromHeight(appBarHeight),
         child: DAppBar(
           title: widget.title,
           actions: widget.actions,
@@ -135,7 +138,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
               ? widget.leadingBuilder!(showBackground)
               : widget.leading,
           centerTitle: widget.centerTitle,
-          height: widget.appBarHeight,
+          height: appBarHeight,
           maxWidthConstraint: widget.maxWidthConstraint,
           showBackground: showBackground,
           backgroundOpacity: backgroundOpacity,
@@ -162,7 +165,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
               children: [
                 // Add top padding when body extends behind app bar (if enabled)
                 if (widget.extendBodyBehindAppBar && widget.addTopPadding)
-                  SizedBox(height: widget.appBarHeight),
+                  SizedBox(height: appBarHeight),
                 Padding(
                   padding: EdgeInsets.only(bottom: bottomPadding),
                   child: childWidget,

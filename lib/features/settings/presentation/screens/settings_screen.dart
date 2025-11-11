@@ -19,8 +19,12 @@ class SettingsScreen extends ConsumerWidget {
     final isTmdbConfigured = ref.watch(isTmdbConfiguredProvider);
     final connectionStatus = ref.watch(connectionStatusProvider);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     return AnimatedAppBarPage(
       title: 'Settings',
+      useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,
       child: DSettingsLayout(
         groups: [

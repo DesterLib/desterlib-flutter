@@ -33,6 +33,9 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
   Widget build(BuildContext context) {
     final librariesAsync = ref.watch(actualLibrariesProvider);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
     // Listen for scan completion and show toast notifications
     ref.listen<ScanProgressState>(scanProgressProvider, (previous, next) {
       if (!mounted) return;
@@ -78,6 +81,7 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
 
     return AnimatedAppBarPage(
       title: 'Manage Libraries',
+      useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,
       leadingBuilder: (isScrolled) => DButton(
         icon: PlatformIcons.arrowBack,

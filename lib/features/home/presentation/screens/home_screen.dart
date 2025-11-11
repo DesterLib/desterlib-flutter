@@ -71,6 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return AnimatedAppBarPage(
       title: 'Home',
+      useCompactHeight: isDesktop,
       child: moviesAsync.when(
         data: (movies) => tvShowsAsync.when(
           data: (tvShows) {

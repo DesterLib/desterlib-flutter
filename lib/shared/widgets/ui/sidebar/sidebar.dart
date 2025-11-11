@@ -76,7 +76,7 @@ class _DSidebarState extends ConsumerState<DSidebar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(8),
       width: 300,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),

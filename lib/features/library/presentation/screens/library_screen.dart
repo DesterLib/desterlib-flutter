@@ -103,6 +103,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
     return AnimatedAppBarPage(
       title: 'Library',
+      useCompactHeight: showSidebar,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
