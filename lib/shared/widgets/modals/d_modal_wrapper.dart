@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dester/app/theme/theme.dart';
+import 'package:dester/shared/widgets/ui/button.dart';
+import 'package:dester/shared/utils/platform_icons.dart';
 
 const double _modalMaxWidth = 600.0;
 const double _mobileThreshold = 600.0;
@@ -10,7 +12,7 @@ bool _shouldUseBottomSheet(BuildContext context) {
   return MediaQuery.of(context).size.width < _mobileThreshold;
 }
 
-Future<T?> showSettingsModal<T>({
+Future<T?> showDModal<T>({
   required BuildContext context,
   required String title,
   required Widget Function(BuildContext) builder,
@@ -22,7 +24,7 @@ Future<T?> showSettingsModal<T>({
   final useBottomSheet = _shouldUseBottomSheet(context);
 
   if (useBottomSheet) {
-    return _showSettingsBottomSheet<T>(
+    return _showDModalBottomSheet<T>(
       context: context,
       title: title,
       builder: builder,
@@ -31,7 +33,7 @@ Future<T?> showSettingsModal<T>({
       useFullscreen: useFullscreenOnMobile,
     );
   } else {
-    return _showSettingsDialog<T>(
+    return _showDModalDialog<T>(
       context: context,
       title: title,
       builder: builder,
@@ -42,7 +44,7 @@ Future<T?> showSettingsModal<T>({
   }
 }
 
-Future<T?> _showSettingsBottomSheet<T>({
+Future<T?> _showDModalBottomSheet<T>({
   required BuildContext context,
   required String title,
   required Widget Function(BuildContext) builder,
@@ -61,7 +63,7 @@ Future<T?> _showSettingsBottomSheet<T>({
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black54,
     useRootNavigator: true,
-    builder: (context) => _SettingsModalContainer(
+    builder: (context) => _DModalContainer(
       title: title,
       showCloseButton: showCloseButton,
       isBottomSheet: true,
@@ -72,7 +74,7 @@ Future<T?> _showSettingsBottomSheet<T>({
   );
 }
 
-Future<T?> _showSettingsDialog<T>({
+Future<T?> _showDModalDialog<T>({
   required BuildContext context,
   required String title,
   required Widget Function(BuildContext) builder,
@@ -93,7 +95,7 @@ Future<T?> _showSettingsDialog<T>({
           child: Container(
             constraints: BoxConstraints(maxWidth: maxWidth ?? _modalMaxWidth),
             margin: const EdgeInsets.symmetric(horizontal: 24),
-            child: _SettingsModalContainer(
+            child: _DModalContainer(
               title: title,
               showCloseButton: showCloseButton,
               isBottomSheet: false,
@@ -122,7 +124,7 @@ Future<T?> _showSettingsDialog<T>({
   );
 }
 
-class _SettingsModalContainer extends StatelessWidget {
+class _DModalContainer extends StatelessWidget {
   final String title;
   final bool showCloseButton;
   final bool isBottomSheet;
@@ -130,7 +132,7 @@ class _SettingsModalContainer extends StatelessWidget {
   final double? safeAreaTop;
   final Widget child;
 
-  const _SettingsModalContainer({
+  const _DModalContainer({
     required this.title,
     required this.showCloseButton,
     required this.isBottomSheet,
@@ -173,12 +175,12 @@ class _SettingsModalContainer extends StatelessWidget {
             : AppRadius.radiusXL,
         border: isBottomSheet
             ? null
-            : Border.all(color: AppColors.border, width: 1),
+            : Border.all(color: AppColors.border, width: 0.5),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _ModalHeader(
+          _DModalHeader(
             title: title,
             showCloseButton: showCloseButton,
             isBottomSheet: isBottomSheet,
@@ -211,14 +213,14 @@ class _SettingsModalContainer extends StatelessWidget {
   }
 }
 
-class _ModalHeader extends StatelessWidget {
+class _DModalHeader extends StatelessWidget {
   final String title;
   final bool showCloseButton;
   final bool isBottomSheet;
   final bool useFullscreen;
   final double? safeAreaTop;
 
-  const _ModalHeader({
+  const _DModalHeader({
     required this.title,
     required this.showCloseButton,
     required this.isBottomSheet,
@@ -231,11 +233,11 @@ class _ModalHeader extends StatelessWidget {
     final content = Container(
       padding: EdgeInsets.only(
         left: AppSpacing.xl,
-        right: AppSpacing.xl,
-        bottom: AppSpacing.xl,
+        right: AppSpacing.sm,
+        bottom: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+        border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -257,14 +259,19 @@ class _ModalHeader extends StatelessWidget {
             ),
           ] else ...[
             // Dialog: standard padding
-            SizedBox(height: AppSpacing.xl),
+            SizedBox(height: AppSpacing.sm),
           ],
           Row(
             children: [
               Expanded(child: Text(title, style: AppTypography.h3)),
               if (showCloseButton) ...[
                 const SizedBox(width: 12),
-                _CloseButton(),
+                DButton(
+                  leftIcon: PlatformIcons.close,
+                  variant: DButtonVariant.ghost,
+                  size: DButtonSize.sm,
+                  onTap: () => Navigator.of(context).pop(),
+                ),
               ],
             ],
           ),
@@ -285,39 +292,13 @@ class _ModalHeader extends StatelessWidget {
   }
 }
 
-class _CloseButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => Navigator.of(context).pop(),
-        borderRadius: AppRadius.radiusSM,
-        child: Container(
-          padding: AppSpacing.paddingXS,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: AppRadius.radiusSM,
-            border: Border.all(color: AppColors.border, width: 1),
-          ),
-          child: const Icon(
-            Icons.close,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsModalSection extends StatelessWidget {
+class DModalSection extends StatelessWidget {
   final String? label;
   final String? description;
   final Widget child;
   final EdgeInsets? padding;
 
-  const SettingsModalSection({
+  const DModalSection({
     super.key,
     this.label,
     this.description,
@@ -347,7 +328,7 @@ class SettingsModalSection extends StatelessWidget {
   }
 }
 
-class SettingsModalTextField extends StatelessWidget {
+class DModalTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? hintText;
   final String? label;
@@ -355,7 +336,7 @@ class SettingsModalTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool enabled;
 
-  const SettingsModalTextField({
+  const DModalTextField({
     super.key,
     required this.controller,
     this.hintText,
@@ -367,7 +348,7 @@ class SettingsModalTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsModalSection(
+    return DModalSection(
       label: label,
       child: TextField(
         controller: controller,
@@ -407,11 +388,11 @@ class SettingsModalTextField extends StatelessWidget {
   }
 }
 
-class SettingsModalActions extends StatelessWidget {
+class DModalActions extends StatelessWidget {
   final List<Widget> actions;
   final MainAxisAlignment alignment;
 
-  const SettingsModalActions({
+  const DModalActions({
     super.key,
     required this.actions,
     this.alignment = MainAxisAlignment.end,
@@ -434,15 +415,15 @@ class SettingsModalActions extends StatelessWidget {
   }
 }
 
-class SettingsModalBanner extends StatelessWidget {
+class DModalBanner extends StatelessWidget {
   final String message;
-  final SettingsModalBannerType type;
+  final DModalBannerType type;
   final IconData? icon;
 
-  const SettingsModalBanner({
+  const DModalBanner({
     super.key,
     required this.message,
-    this.type = SettingsModalBannerType.error,
+    this.type = DModalBannerType.error,
     this.icon,
   });
 
@@ -452,15 +433,15 @@ class SettingsModalBanner extends StatelessWidget {
     IconData defaultIcon;
 
     switch (type) {
-      case SettingsModalBannerType.error:
+      case DModalBannerType.error:
         color = AppColors.error;
         defaultIcon = Icons.error_outline;
         break;
-      case SettingsModalBannerType.warning:
+      case DModalBannerType.warning:
         color = AppColors.warning;
         defaultIcon = Icons.warning_amber_outlined;
         break;
-      case SettingsModalBannerType.info:
+      case DModalBannerType.info:
         color = AppColors.primary;
         defaultIcon = Icons.info_outline;
         break;
@@ -490,4 +471,4 @@ class SettingsModalBanner extends StatelessWidget {
   }
 }
 
-enum SettingsModalBannerType { error, warning, info }
+enum DModalBannerType { error, warning, info }

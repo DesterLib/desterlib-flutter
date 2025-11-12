@@ -66,10 +66,10 @@ class RespectSidebar extends StatelessWidget {
             bottom: bottomPadding,
           )
         : EdgeInsets.only(
-            left: leftPadding > AppLayout.desktopHorizontalPadding
+            left: leftPadding >= AppLayout.desktopHorizontalPadding
                 ? AppLayout.mobileHorizontalPadding
                 : leftPadding,
-            right: rightPadding > AppLayout.desktopHorizontalPadding
+            right: rightPadding >= AppLayout.desktopHorizontalPadding
                 ? AppLayout.mobileHorizontalPadding
                 : rightPadding,
             top: topPadding,

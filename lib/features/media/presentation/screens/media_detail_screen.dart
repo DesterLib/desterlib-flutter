@@ -128,12 +128,12 @@ class MediaDetailScreen extends ConsumerWidget {
         letterSpacing: AppTypography.letterSpacingTight,
       ),
       leadingBuilder: (isScrolled) => DButton(
-        icon: PlatformIcons.arrowBack,
+        leftIcon: PlatformIcons.arrowBack,
         variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
         size: DButtonSize.sm,
         onTap: () => context.pop(),
       ),
-      child: mediaDetailAsync.when(
+      childBuilder: (scrollOffset) => mediaDetailAsync.when(
         data: (result) {
           if (result == null) {
             return _buildNotFound(context);
@@ -146,6 +146,7 @@ class MediaDetailScreen extends ConsumerWidget {
             mediaData: mediaData,
             isMobile: isMobile,
             tvShowSeasons: tvShowSeasons,
+            scrollOffset: scrollOffset,
             onPlayTapped: () => _handlePlayTapped(
               context,
               mediaData.id,
@@ -227,6 +228,7 @@ class _MediaDetailContent extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPlayTapped;
   final BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>? tvShowSeasons;
+  final double scrollOffset;
   final Function(
     String episodeId,
     String episodeTitle,
@@ -240,6 +242,7 @@ class _MediaDetailContent extends StatelessWidget {
     required this.isMobile,
     required this.onPlayTapped,
     this.tvShowSeasons,
+    this.scrollOffset = 0.0,
     this.onEpisodePlay,
   });
 
@@ -253,9 +256,10 @@ class _MediaDetailContent extends StatelessWidget {
           mediaData: mediaData,
           isMobile: isMobile,
           onPlayTapped: onPlayTapped,
+          scrollOffset: scrollOffset,
         ),
 
-        // Rest of content
+        // Content sections below hero
         RespectSidebar(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,21 +269,21 @@ class _MediaDetailContent extends StatelessWidget {
               else
                 const SizedBox(height: 40),
 
-              // Overview section
-              if (mediaData.description.isNotEmpty) ...[
-                _OverviewSection(
+              // Overview section (mobile only - desktop shows in hero)
+              if (isMobile && mediaData.description.isNotEmpty) ...[
+                _MediaOverviewSection(
                   description: mediaData.description,
                   director: mediaData.director,
                   cast: mediaData.cast,
-                  isMobile: isMobile,
                 ),
+                if (mediaData.genres.isNotEmpty) const SizedBox(height: 40),
               ],
 
-              if (mediaData.genres.isNotEmpty) ...[
-                const SizedBox(height: 40),
+              // Genres section
+              if (mediaData.genres.isNotEmpty)
                 MediaGenresSection(genres: mediaData.genres),
-              ],
-              // Show seasons and episodes for TV shows
+
+              // TV Show seasons and episodes
               if (tvShowSeasons != null && tvShowSeasons!.isNotEmpty) ...[
                 const SizedBox(height: 48),
                 TvShowSeasonsSection(
@@ -287,6 +291,7 @@ class _MediaDetailContent extends StatelessWidget {
                   onEpisodePlay: onEpisodePlay,
                 ),
               ],
+
               const SizedBox(height: 48),
             ],
           ),
@@ -296,18 +301,16 @@ class _MediaDetailContent extends StatelessWidget {
   }
 }
 
-/// Overview section with description and credits
-class _OverviewSection extends StatelessWidget {
+/// Overview section with description and credits (mobile only)
+class _MediaOverviewSection extends StatelessWidget {
   final String description;
   final String director;
   final List<String> cast;
-  final bool isMobile;
 
-  const _OverviewSection({
+  const _MediaOverviewSection({
     required this.description,
     required this.director,
     required this.cast,
-    required this.isMobile,
   });
 
   @override
@@ -315,11 +318,11 @@ class _OverviewSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Overview',
           style: TextStyle(
             color: Colors.white,
-            fontSize: isMobile ? 18 : 20,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
           ),
@@ -329,14 +332,14 @@ class _OverviewSection extends StatelessWidget {
           description,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.85),
-            fontSize: isMobile ? 14 : 15,
+            fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.5,
             letterSpacing: -0.2,
           ),
         ),
 
-        // Cast and Director
+        // Cast and Director credits
         if (cast.isNotEmpty || director.isNotEmpty) ...[
           const SizedBox(height: 16),
           Wrap(
@@ -344,9 +347,9 @@ class _OverviewSection extends StatelessWidget {
             runSpacing: 12,
             children: [
               if (director.isNotEmpty)
-                _CreditItem(label: 'Director', value: director),
+                _MediaCreditItem(label: 'Director', value: director),
               if (cast.isNotEmpty)
-                _CreditItem(label: 'Cast', value: cast.take(3).join(', ')),
+                _MediaCreditItem(label: 'Cast', value: cast.take(3).join(', ')),
             ],
           ),
         ],
@@ -355,12 +358,12 @@ class _OverviewSection extends StatelessWidget {
   }
 }
 
-/// Credit item widget for director and cast
-class _CreditItem extends StatelessWidget {
+/// Credit item displaying label and value (e.g., Director, Cast)
+class _MediaCreditItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const _CreditItem({required this.label, required this.value});
+  const _MediaCreditItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

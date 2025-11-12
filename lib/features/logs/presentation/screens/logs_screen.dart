@@ -30,7 +30,7 @@ class LogsScreen extends ConsumerWidget {
       useCompactHeight: isDesktop,
       maxWidthConstraint: 1400,
       leadingBuilder: (isScrolled) => DButton(
-        icon: PlatformIcons.arrowBack,
+        leftIcon: PlatformIcons.arrowBack,
         variant: DButtonVariant.neutral,
         size: DButtonSize.sm,
         onTap: () => context.pop(),
@@ -40,7 +40,7 @@ class LogsScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(right: AppSpacing.xs),
           child: DButton(
-            icon: PlatformIcons.refresh,
+            leftIcon: PlatformIcons.refresh,
             variant: DButtonVariant.ghost,
             size: DButtonSize.sm,
             onTap: () async {
@@ -52,7 +52,7 @@ class LogsScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(right: AppSpacing.xs),
           child: DButton(
-            icon: PlatformIcons.delete,
+            leftIcon: PlatformIcons.delete,
             variant: DButtonVariant.ghost,
             size: DButtonSize.sm,
             onTap: logs.isEmpty

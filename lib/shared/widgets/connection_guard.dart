@@ -117,7 +117,7 @@ class _DisconnectedActions extends ConsumerWidget {
           label: 'Retry',
           variant: DButtonVariant.secondary,
           size: DButtonSize.sm,
-          icon: PlatformIcons.refresh,
+          leftIcon: PlatformIcons.refresh,
           onTap: () {
             ref.read(connectionStatusProvider.notifier).checkConnection();
           },
@@ -127,7 +127,7 @@ class _DisconnectedActions extends ConsumerWidget {
           label: 'Configure Connection',
           variant: DButtonVariant.primary,
           size: DButtonSize.sm,
-          icon: PlatformIcons.settings,
+          leftIcon: PlatformIcons.settings,
           onTap: () => ApiConnectionModal.show(context, ref),
         ),
       ],

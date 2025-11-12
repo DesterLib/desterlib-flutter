@@ -38,7 +38,8 @@ class DButtonGroup extends StatelessWidget {
         }
         return DButton(
           label: button.label,
-          icon: button.icon,
+          leftIcon: button.leftIcon,
+          rightIcon: button.rightIcon,
           borderRadius: borderRadius,
         );
       }),

@@ -67,7 +67,7 @@ class VideoPlayerState {
       isFullscreen: isFullscreen ?? this.isFullscreen,
       showControls: showControls ?? this.showControls,
       isCompleted: isCompleted ?? this.isCompleted,
-      error: error,
+      error: error ?? this.error,
     );
   }
 

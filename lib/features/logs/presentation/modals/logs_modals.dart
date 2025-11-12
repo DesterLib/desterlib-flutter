@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dester/shared/widgets/modals/configurable_modal.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/app/theme/theme.dart';
@@ -25,7 +25,7 @@ class ClearLogsModal {
         ModalBannerConfig(
           message:
               'This will clear all logs from the server and the app. This action cannot be undone.',
-          type: SettingsModalBannerType.warning,
+          type: DModalBannerType.warning,
           icon: Icons.warning_amber_outlined,
         ),
       ],

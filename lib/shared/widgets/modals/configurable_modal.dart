@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/app/theme/theme.dart';
@@ -37,13 +37,13 @@ class ModalConfig {
 /// Configuration for banner/alert messages
 class ModalBannerConfig {
   final String message;
-  final SettingsModalBannerType type;
+  final DModalBannerType type;
   final IconData? icon;
   final bool Function()? shouldShow; // Optional condition
 
   const ModalBannerConfig({
     required this.message,
-    this.type = SettingsModalBannerType.info,
+    this.type = DModalBannerType.info,
     this.icon,
     this.shouldShow,
   });
@@ -141,7 +141,7 @@ Future<T?> showConfigurableModal<T>({
   required ModalConfig config,
   Map<String, String>? initialValues,
 }) {
-  return showSettingsModal<T>(
+  return showDModal<T>(
     context: context,
     title: config.title,
     isDismissible: config.isDismissible,
@@ -309,7 +309,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
         widget.config.banners!
             .where((banner) => banner.shouldShow?.call() ?? true)
             .map(
-              (banner) => SettingsModalBanner(
+              (banner) => DModalBanner(
                 message: banner.message,
                 type: banner.type,
                 icon: banner.icon,
@@ -320,10 +320,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
 
     if (_errorMessage != null) {
       allSections.add(
-        SettingsModalBanner(
-          message: _errorMessage!,
-          type: SettingsModalBannerType.error,
-        ),
+        DModalBanner(message: _errorMessage!, type: DModalBannerType.error),
       );
     }
 
@@ -348,7 +345,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
 
       if (field.customBuilder != null) {
         allSections.add(
-          SettingsModalSection(
+          DModalSection(
             label: field.label,
             description: field.description,
             child: field.customBuilder!(context, controller.text, (value) {
@@ -363,7 +360,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SettingsModalTextField(
+              DModalTextField(
                 controller: controller,
                 label: field.label,
                 hintText: field.hintText,
@@ -398,7 +395,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
     }
 
     allSections.add(
-      SettingsModalActions(
+      DModalActions(
         actions: widget.config.actions
             .where(
               (action) => action.shouldShow?.call(_fieldValues, _state) ?? true,
@@ -412,7 +409,7 @@ class _ConfigurableModalContentState extends State<_ConfigurableModalContent> {
 
               return DButton(
                 label: _isLoading ? 'Loading...' : label,
-                icon: icon,
+                leftIcon: icon,
                 variant: action.variant,
                 size: action.size,
                 onTap: _isLoading ? null : () => _handleAction(action),

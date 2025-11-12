@@ -44,8 +44,9 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.arrow_clockwise : Icons.replay_rounded;
   static IconData get speed =>
       isApplePlatform ? CupertinoIcons.speedometer : Icons.speed_rounded;
-  static IconData get subtitles =>
-      isApplePlatform ? CupertinoIcons.captions_bubble : Icons.subtitles_rounded;
+  static IconData get subtitles => isApplePlatform
+      ? CupertinoIcons.captions_bubble
+      : Icons.subtitles_rounded;
   static IconData get movie =>
       isApplePlatform ? CupertinoIcons.film : Icons.movie_outlined;
   static IconData get add =>
@@ -99,7 +100,9 @@ class PlatformIcons {
       isApplePlatform ? CupertinoIcons.chevron_left : Icons.chevron_left;
   static IconData get chevronRight =>
       isApplePlatform ? CupertinoIcons.chevron_right : Icons.chevron_right;
-
+  static IconData get chevronDown => isApplePlatform
+      ? CupertinoIcons.chevron_down
+      : Icons.arrow_drop_down_rounded;
   // Library Management icons
   static IconData get key =>
       isApplePlatform ? CupertinoIcons.lock : Icons.vpn_key_outlined;

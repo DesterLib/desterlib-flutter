@@ -6,116 +6,143 @@ import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
+import 'package:dester/shared/widgets/modals/modals.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:progressive_blur/progressive_blur.dart';
 import 'media_data.dart';
 
 class MediaHeroSection extends StatelessWidget {
   final MediaData mediaData;
   final bool isMobile;
   final VoidCallback onPlayTapped;
+  final double scrollOffset;
 
   const MediaHeroSection({
     super.key,
     required this.mediaData,
     required this.isMobile,
     required this.onPlayTapped,
+    this.scrollOffset = 0.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Use poster on mobile (portrait), backdrop on desktop (landscape)
-    final imageUrl = isMobile
-        ? (mediaData.posterUrl ?? mediaData.backdropUrl)
-        : (mediaData.backdropUrl ?? mediaData.posterUrl);
-    final hasImage = imageUrl != null;
-
     return SizedBox(
       width: double.infinity,
-      child: isMobile
-          ? AspectRatio(
-              aspectRatio: 2 / 3, // Standard poster aspect ratio
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Force integer pixel dimensions to prevent subpixel rendering issues
-                  final width = constraints.maxWidth.floorToDouble();
-                  final height = constraints.maxHeight.floorToDouble();
+      child: isMobile ? _buildMobileHero() : _buildDesktopHero(),
+    );
+  }
 
-                  return Container(
-                    width: width,
-                    height: height,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        // Combined background and gradient in single layer
-                        Positioned.fill(
-                          child: _buildBackgroundWithGradient(
-                            hasImage,
-                            imageUrl,
-                          ),
-                        ),
-                        // Content positioned at the bottom with proper padding
-                        Positioned(
-                          left: AppLayout.mobileHorizontalPadding,
-                          right: AppLayout.mobileHorizontalPadding,
-                          bottom: AppSpacing.sm,
-                          child: _buildContent(),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+  /// Builds mobile hero with poster image and simple gradient
+  Widget _buildMobileHero() {
+    final imageUrl = mediaData.posterUrl ?? mediaData.backdropUrl;
+    final hasImage = imageUrl != null;
+
+    // Calculate corner radius for overscroll (negative scroll)
+    final overscrollAmount = scrollOffset < 0 ? -scrollOffset : 0.0;
+    final cornerRadius = (overscrollAmount / 100 * 32).clamp(0.0, 32.0);
+
+    return AspectRatio(
+      aspectRatio: 2 / 3, // Standard poster aspect ratio
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Force integer pixel dimensions to prevent subpixel rendering issues
+          final width = constraints.maxWidth.floorToDouble();
+          final height = constraints.maxHeight.floorToDouble();
+
+          return Container(
+            width: width,
+            height: height,
+            clipBehavior: Clip.hardEdge,
+            decoration: ShapeDecoration(
+              shape: RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.circular(cornerRadius),
               ),
-            )
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                // Calculate height to match actual image 16:9 aspect ratio
-                final availableWidth =
-                    constraints.maxWidth - AppLayout.sidebarWidth;
-                // Image height based on 16:9 aspect ratio - this is the natural image size
-                final naturalImageHeight = availableWidth * 9 / 16;
-                // Hero matches image with only a minimum height constraint
-                final heroHeight = naturalImageHeight.clamp(
-                  400.0,
-                  double.infinity,
-                );
+            ),
+            child: Stack(
+              children: [
+                // Combined background and gradient in single layer
+                Positioned.fill(
+                  child: _buildMobileBackground(hasImage, imageUrl),
+                ),
+                // Content positioned at the bottom with proper padding
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: AppSpacing.sm,
+                  child: RespectSidebar(child: _buildContent()),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-                return SizedBox(
-                  height: heroHeight,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Full-width hero background that extends under sidebar
-                      Positioned.fill(
-                        child: ClipPath(
-                          clipper: _HeroClipper(),
-                          child: _buildDesktopHeroWithReflection(
-                            hasImage,
-                            imageUrl,
+  /// Builds desktop hero with backdrop image, mesh gradient, and progressive blur
+  Widget _buildDesktopHero() {
+    final imageUrl = mediaData.backdropUrl ?? mediaData.posterUrl;
+
+    // Calculate corner radius for overscroll
+    final overscrollAmount = scrollOffset < 0 ? -scrollOffset : 0.0;
+    final cornerRadius = (overscrollAmount / 100 * 32).clamp(0.0, 32.0);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate height to match actual image 16:9 aspect ratio
+        final availableWidth = constraints.maxWidth - AppLayout.sidebarWidth;
+        final naturalImageHeight = availableWidth * 9 / 16;
+        final heroHeight = naturalImageHeight.clamp(400.0, 800.0);
+
+        return SizedBox(
+          height: heroHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Full-width hero background with blur and mesh
+              Positioned.fill(
+                child: ClipPath(
+                  clipper: _HeroClipper(cornerRadius: cornerRadius),
+                  child: imageUrl != null
+                      ? _DynamicMeshHero(imageUrl: imageUrl)
+                      : _buildDefaultMeshGradient(),
+                ),
+              ),
+              // Content positioned at the bottom with RespectSidebar
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: AppLayout.extraLargePadding,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Calculate available width (excluding sidebar)
+                    final availableWidth =
+                        constraints.maxWidth - AppLayout.sidebarWidth;
+                    // Max content width is 40% of available width
+                    final maxContentWidth = availableWidth * 0.4;
+
+                    return RespectSidebar(
+                      leftPadding: AppLayout.extraLargePadding,
+                      rightPadding: AppLayout.extraLargePadding,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: maxContentWidth,
                           ),
-                        ),
-                      ),
-                      // Content positioned at the bottom with RespectSidebar
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: AppLayout.extraLargePadding,
-                        child: RespectSidebar(
-                          leftPadding: AppLayout.extraLargePadding,
-                          rightPadding: AppLayout.extraLargePadding,
                           child: _buildContent(),
                         ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -193,6 +220,12 @@ class MediaHeroSection extends StatelessWidget {
               .toList(),
         ),
 
+        // Description (desktop only)
+        if (!isMobile && mediaData.description.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          _buildDescriptionSection(),
+        ],
+
         SizedBox(height: isMobile ? AppSpacing.md : AppSpacing.xl),
 
         isMobile ? _buildMobileButtons() : _buildDesktopButtons(),
@@ -206,7 +239,7 @@ class MediaHeroSection extends StatelessWidget {
       children: [
         DButton(
           label: 'Play',
-          icon: PlatformIcons.playArrow,
+          leftIcon: PlatformIcons.playArrow,
           variant: DButtonVariant.primary,
           onTap: onPlayTapped,
         ),
@@ -214,7 +247,7 @@ class MediaHeroSection extends StatelessWidget {
 
         // DButton(
         //   label: 'Add to List',
-        //   icon: PlatformIcons.add,
+        //   leftIcon: PlatformIcons.add,
         //   variant: DButtonVariant.secondary,
         //   onTap: () {
         //     // TODO: Implement add to list functionality
@@ -229,14 +262,14 @@ class MediaHeroSection extends StatelessWidget {
       children: [
         DButton(
           label: 'Play',
-          icon: PlatformIcons.playArrow,
+          leftIcon: PlatformIcons.playArrow,
           variant: DButtonVariant.primary,
           onTap: onPlayTapped,
         ),
         const SizedBox(width: AppSpacing.md),
 
         // DButton(
-        //   icon: PlatformIcons.add,
+        //   leftIcon: PlatformIcons.add,
         //   variant: DButtonVariant.secondary,
         //   onTap: () {
         //     // TODO: Implement add to list functionality
@@ -246,9 +279,70 @@ class MediaHeroSection extends StatelessWidget {
     );
   }
 
-  /// Builds background with gradient mask applied directly to the image
-  /// This eliminates separate layers and prevents pixel shift issues
-  Widget _buildBackgroundWithGradient(bool hasImage, String? imageUrl) {
+  /// Builds description section with max 3 lines and "More" button
+  Widget _buildDescriptionSection() {
+    return Builder(
+      builder: (context) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Description text with right padding to make space for button
+            Padding(
+              padding: const EdgeInsets.only(right: 80),
+              child: Text(
+                mediaData.description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  height: 1.2,
+                  letterSpacing: 0.1,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 3,
+                      color: Colors.black.withValues(alpha: 0.3),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // More button positioned at bottom right
+            Positioned(
+              right: 0,
+              bottom: -0,
+              child: _MoreButton(
+                onTap: () => _showFullDescriptionModal(context),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Shows modal/drawer with full description
+  void _showFullDescriptionModal(BuildContext context) {
+    showDModal(
+      context: context,
+      title: 'Overview',
+      builder: (context) => Text(
+        mediaData.description,
+        style: TextStyle(
+          color: AppColors.textPrimary.withValues(alpha: 0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          height: 1.6,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
+
+  /// Builds mobile background with gradient mask applied directly to the image
+  Widget _buildMobileBackground(bool hasImage, String? imageUrl) {
     if (hasImage && imageUrl != null) {
       // Use ShaderMask to apply gradient directly to the image
       return SizedBox.expand(
@@ -312,14 +406,8 @@ class MediaHeroSection extends StatelessWidget {
     );
   }
 
-  /// Builds desktop hero with faded mask on left and bottom edges
-  /// Image respects sidebar width with mesh gradient background extracted from image
-  Widget _buildDesktopHeroWithReflection(bool hasImage, String? imageUrl) {
-    if (hasImage && imageUrl != null) {
-      return _DynamicMeshHero(imageUrl: imageUrl);
-    }
-
-    // No image - show default grayscale mesh gradient background
+  /// Builds default grayscale mesh gradient when no image is available
+  Widget _buildDefaultMeshGradient() {
     return MeshGradient(
       points: [
         MeshGradientPoint(position: Offset(0, 0), color: Color(0xFF1a1a1a)),
@@ -457,184 +545,166 @@ class _DynamicMeshHeroState extends State<_DynamicMeshHero> {
 
     final hasExtractedColors = _extractedColors != null;
 
-    return Stack(
-      children: [
-        // Base animated mesh with default colors
-        Positioned.fill(
-          child: AnimatedOpacity(
-            opacity: hasExtractedColors ? 0.0 : 1.0,
-            duration: Duration(milliseconds: 1000),
-            child: AnimatedMeshGradient(
-              colors: defaultColors,
-              options: AnimatedMeshGradientOptions(speed: 2, frequency: 2),
-            ),
-          ),
-        ),
-
-        // Extracted colors mesh that fades in
-        if (hasExtractedColors)
+    // Wrap entire hero (mesh + image) with progressive blur on left only
+    return ProgressiveBlurWidget(
+      sigma: 40.0, // Maximum blur strength for horizontal fade
+      linearGradientBlur: const LinearGradientBlur(
+        values: [1, 0.8, 0.5, 0.2, 0], // Full blur left, no blur right
+        stops: [0, 0.15, 0.4, 0.65, 0.85],
+        start: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+      child: Stack(
+        children: [
+          // Base animated mesh with default colors
           Positioned.fill(
             child: AnimatedOpacity(
-              opacity: 1.0,
+              opacity: hasExtractedColors ? 0.0 : 1.0,
               duration: Duration(milliseconds: 1000),
               child: AnimatedMeshGradient(
-                colors: _extractedColors!,
-                options: AnimatedMeshGradientOptions(
-                  speed: _stopAnimation ? 0.01 : 2,
-                  frequency: _stopAnimation ? 0.01 : 2,
-                ),
+                colors: defaultColors,
+                options: AnimatedMeshGradientOptions(speed: 2, frequency: 2),
               ),
             ),
           ),
 
-        // Image positioned after sidebar with left + bottom fade masks
-        Positioned(
-          left: AppLayout.sidebarWidth,
-          top: 0,
-          right: 0,
-          bottom: 0,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: AspectRatio(
-              aspectRatio: 16 / 9, // Standard backdrop aspect ratio
-              child: ShaderMask(
-                // Horizontal gradient for left fade
-                shaderCallback: (rect) {
-                  return LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    stops: const [0.0, 0.3, 1.0],
-                    colors: [
-                      Colors.white.withValues(
-                        alpha: 0.0,
-                      ), // Transparent on left edge
-                      Colors.white.withValues(alpha: 0.7), // Fade in
-                      Colors.white.withValues(
-                        alpha: 1.0,
-                      ), // Fully visible on right
-                    ],
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
+          // Extracted colors mesh that fades in
+          if (hasExtractedColors)
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: 1.0,
+                duration: Duration(milliseconds: 1000),
+                child: AnimatedMeshGradient(
+                  colors: _extractedColors!,
+                  options: AnimatedMeshGradientOptions(
+                    speed: _stopAnimation ? 0.01 : 2,
+                    frequency: _stopAnimation ? 0.01 : 2,
+                  ),
+                ),
+              ),
+            ),
+
+          // Image positioned after sidebar with gradient mask
+          Positioned(
+            left: AppLayout.sidebarWidth,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: AspectRatio(
+                aspectRatio: 16 / 9, // Standard backdrop aspect ratio
                 child: ShaderMask(
-                  // Vertical gradient for bottom fade
+                  // Horizontal gradient mask for left fade
                   shaderCallback: (rect) {
                     return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.5, 0.85, 1.0],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      stops: const [0.0, 0.15, 0.4, 0.7, 1.0],
                       colors: [
-                        Colors.white.withValues(
-                          alpha: 1.0,
-                        ), // Fully visible on top
-                        Colors.white.withValues(alpha: 0.8),
-                        Colors.white.withValues(alpha: 0.3), // Fade out
-                        Colors.white.withValues(
-                          alpha: 0.0,
-                        ), // Transparent at bottom
+                        Colors.white.withValues(alpha: 0.0), // Transparent left
+                        Colors.white.withValues(alpha: 0.3), // Gradual fade
+                        Colors.white.withValues(alpha: 0.6), // Continue
+                        Colors.white.withValues(alpha: 0.9), // Almost visible
+                        Colors.white.withValues(alpha: 1.0), // Fully visible
                       ],
                     ).createShader(rect);
                   },
                   blendMode: BlendMode.dstIn,
-                  child: CachedNetworkImage(
-                    imageUrl: widget.imageUrl,
-                    fit: BoxFit.cover, // Fill the aspect ratio box
-                    alignment: Alignment.center,
-                    placeholder: (context, url) =>
-                        Container(color: Colors.black),
-                    errorWidget: (context, url, error) =>
-                        Container(color: const Color(0xFF1a1a1a)),
-                    fadeInDuration: const Duration(milliseconds: 300),
-                    fadeOutDuration: const Duration(milliseconds: 150),
+                  child: ShaderMask(
+                    // Vertical gradient mask for bottom fade
+                    shaderCallback: (rect) {
+                      return LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.5, 0.75, 0.9, 1.0],
+                        colors: [
+                          Colors.white.withValues(
+                            alpha: 1.0,
+                          ), // Fully visible top
+                          Colors.white.withValues(alpha: 0.9), // Stay strong
+                          Colors.white.withValues(alpha: 0.6), // Start fade
+                          Colors.white.withValues(alpha: 0.3), // Continue fade
+                          Colors.white.withValues(
+                            alpha: 0.0,
+                          ), // Transparent bottom
+                        ],
+                      ).createShader(rect);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.imageUrl,
+                      fit: BoxFit.cover, // Fill the aspect ratio box
+                      alignment:
+                          Alignment.centerRight, // Align image to the right
+                      placeholder: (context, url) =>
+                          Container(color: Colors.black),
+                      errorWidget: (context, url, error) =>
+                          Container(color: const Color(0xFF1a1a1a)),
+                      fadeInDuration: const Duration(milliseconds: 300),
+                      fadeOutDuration: const Duration(milliseconds: 150),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-/// Custom clipper for the hero section with rounded bottom-left corner
+/// Custom clipper for the hero section with optional rounded top corners
 class _HeroClipper extends CustomClipper<Path> {
+  final double cornerRadius;
+
+  const _HeroClipper({this.cornerRadius = 0.0});
+
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    // Simple rectangle with no rounded corners
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    if (cornerRadius > 0) {
+      // Rectangle with rounded top corners
+      path.moveTo(0, cornerRadius);
+      path.quadraticBezierTo(0, 0, cornerRadius, 0);
+      path.lineTo(size.width - cornerRadius, 0);
+      path.quadraticBezierTo(size.width, 0, size.width, cornerRadius);
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+    } else {
+      // Simple rectangle with no rounded corners
+      path.moveTo(0, 0);
+      path.lineTo(size.width, 0);
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+    }
 
     return path;
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(covariant _HeroClipper oldClipper) =>
+      oldClipper.cornerRadius != cornerRadius;
 }
 
-class MediaMetadata extends StatelessWidget {
-  final MediaData mediaData;
+/// "More" button to expand description in modal
+class _MoreButton extends StatelessWidget {
+  final VoidCallback onTap;
 
-  const MediaMetadata({super.key, required this.mediaData});
+  const _MoreButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _MetadataItem(icon: PlatformIcons.star, text: mediaData.rating),
-        const SizedBox(width: 16),
-        _MetadataItem(icon: PlatformIcons.time, text: mediaData.duration),
-        const SizedBox(width: 16),
-        _MetadataItem(icon: PlatformIcons.calendar, text: mediaData.year),
-      ],
-    );
-  }
-}
-
-class _MetadataItem extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _MetadataItem({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 6,
-      ),
-      decoration: ShapeDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 16),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
-          ),
-        ],
-      ),
+    return DButton(
+      label: 'MORE',
+      rightIcon: PlatformIcons.chevronDown,
+      variant: DButtonVariant.secondary,
+      size: DButtonSize.xs,
+      onTap: onTap,
     );
   }
 }

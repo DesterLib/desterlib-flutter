@@ -102,6 +102,11 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // Leading widget or back button
                   if (leading != null) ...[
                     leading!,
+                    // Only add spacing if it's not a shrunk SizedBox (used to hide back button)
+                    if (leading is! SizedBox ||
+                        (leading as SizedBox?)?.width != 0.0 &&
+                            (leading as SizedBox?)?.height != 0.0)
+                      const SizedBox(width: AppSpacing.sm),
                   ] else if (shouldShowBackButton) ...[
                     IconButton(
                       icon: const Icon(

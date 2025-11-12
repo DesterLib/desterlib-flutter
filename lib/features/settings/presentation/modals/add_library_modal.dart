@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/modals/configurable_modal.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/shared/utils/error_parser.dart';
@@ -27,7 +27,7 @@ class AddLibraryModal {
         ModalBannerConfig(
           message:
               'Add a new library by specifying the path to your media folder. The system will scan and fetch metadata automatically.',
-          type: SettingsModalBannerType.info,
+          type: DModalBannerType.info,
         ),
       ],
       asyncInit: () async {

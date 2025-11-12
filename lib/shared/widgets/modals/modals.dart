@@ -9,7 +9,7 @@
 /// import 'package:dester/shared/widgets/modals/modals.dart';
 ///
 /// // Base modal system (auto-adapts to screen size)
-/// showSettingsModal(...)
+/// showDModal(...)
 ///
 /// // Config-based system (declarative approach)
 /// showConfigurableModal(
@@ -18,11 +18,11 @@
 /// )
 ///
 /// // Reusable components
-/// SettingsModalBanner(...)
-/// SettingsModalTextField(...)
-/// SettingsModalActions(...)
+/// DModalBanner(...)
+/// DModalTextField(...)
+/// DModalActions(...)
 /// ```
 library;
 
-export 'settings_modal_wrapper.dart';
+export 'd_modal_wrapper.dart';
 export 'configurable_modal.dart';

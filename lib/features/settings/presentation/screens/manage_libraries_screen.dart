@@ -15,6 +15,7 @@ import 'package:dester/app/providers.dart';
 import 'package:dester/core/providers/websocket_provider.dart';
 import 'package:dester/shared/widgets/ui/scan_progress_bar.dart';
 import 'package:dester/features/library/utils/library_helpers.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import '../widgets/settings_layout.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
@@ -85,7 +86,7 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
       useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,
       leadingBuilder: (isScrolled) => DButton(
-        icon: PlatformIcons.arrowBack,
+        leftIcon: PlatformIcons.arrowBack,
         variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
         size: DButtonSize.sm,
         onTap: () => context.pop(),
@@ -274,15 +275,18 @@ class _LibrariesListState extends ConsumerState<_LibrariesList> {
       }
     });
 
-    return DSettingsLayout(
-      groups: [
-        DSettingsGroup(
-          title: 'Libraries',
-          items: widget.libraries
-              .map((library) => _buildLibraryItem(library, context))
-              .toList(),
-        ),
-      ],
+    return RespectSidebar(
+      child: DSettingsLayout(
+        padding: EdgeInsets.zero, // RespectSidebar handles padding
+        groups: [
+          DSettingsGroup(
+            title: 'Libraries',
+            items: widget.libraries
+                .map((library) => _buildLibraryItem(library, context))
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 

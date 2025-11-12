@@ -5,6 +5,7 @@ import 'package:dester/shared/widgets/ui/app_bar.dart';
 class AnimatedAppBarPage extends StatefulWidget {
   final String title;
   final Widget? child;
+  final Widget Function(double scrollOffset)? childBuilder;
   final List<Widget>? actions;
   final Widget? leading;
   final Widget Function(bool isScrolled)?
@@ -26,6 +27,7 @@ class AnimatedAppBarPage extends StatefulWidget {
     super.key,
     required this.title,
     this.child,
+    this.childBuilder,
     this.actions,
     this.leading,
     this.leadingBuilder,
@@ -41,6 +43,10 @@ class AnimatedAppBarPage extends StatefulWidget {
   }) : assert(
          leading == null || leadingBuilder == null,
          'Cannot provide both leading and leadingBuilder',
+       ),
+       assert(
+         child == null || childBuilder == null,
+         'Cannot provide both child and childBuilder',
        );
 
   @override
@@ -84,14 +90,19 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
         ? AppLayout.appBarHeightCompact
         : AppLayout.appBarHeightRegular;
 
+    // Build child with scroll offset if childBuilder is provided
+    final childContent = widget.childBuilder != null
+        ? widget.childBuilder!(_scrollOffset)
+        : widget.child!;
+
     final childWidget = widget.maxWidthConstraint != null
         ? Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: widget.maxWidthConstraint!),
-              child: widget.child!,
+              child: childContent,
             ),
           )
-        : widget.child!;
+        : childContent;
 
     // Calculate opacity and offset based on scroll position
     const fadeDistance = AppLayout.extraLargePadding;

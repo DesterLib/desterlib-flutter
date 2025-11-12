@@ -163,14 +163,14 @@ class _DScrollableListState extends State<DScrollableList> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DButton(
-                          icon: PlatformIcons.chevronLeft,
+                          leftIcon: PlatformIcons.chevronLeft,
                           variant: DButtonVariant.ghost,
                           size: DButtonSize.sm,
                           onTap: _scrollLeft,
                         ),
                         const SizedBox(width: 4),
                         DButton(
-                          icon: PlatformIcons.chevronRight,
+                          leftIcon: PlatformIcons.chevronRight,
                           variant: DButtonVariant.ghost,
                           size: DButtonSize.sm,
                           onTap: _scrollRight,
