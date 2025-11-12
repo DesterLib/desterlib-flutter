@@ -4,7 +4,7 @@ import 'package:dester/shared/widgets/ui/app_bar.dart';
 
 class AnimatedAppBarPage extends StatefulWidget {
   final String title;
-  final Widget child;
+  final Widget? child;
   final List<Widget>? actions;
   final Widget? leading;
   final Widget Function(bool isScrolled)?
@@ -25,7 +25,7 @@ class AnimatedAppBarPage extends StatefulWidget {
   const AnimatedAppBarPage({
     super.key,
     required this.title,
-    required this.child,
+    this.child,
     this.actions,
     this.leading,
     this.leadingBuilder,
@@ -88,10 +88,10 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
         ? Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: widget.maxWidthConstraint!),
-              child: widget.child,
+              child: widget.child!,
             ),
           )
-        : widget.child;
+        : widget.child!;
 
     // Calculate opacity and offset based on scroll position
     const fadeDistance = AppLayout.extraLargePadding;

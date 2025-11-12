@@ -54,7 +54,10 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Always respect sidebar on desktop
     final leftPadding = isDesktop
         ? AppLayout.sidebarWidth + AppLayout.desktopHorizontalPadding
-        : AppSpacing.lg;
+        : AppLayout.mobileHorizontalPadding;
+    final rightPadding = isDesktop
+        ? AppLayout.desktopHorizontalPadding
+        : AppLayout.mobileHorizontalPadding;
 
     return SizedBox(
       height: height,
@@ -89,7 +92,7 @@ class DAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top,
               left: leftPadding,
-              right: AppLayout.desktopHorizontalPadding,
+              right: rightPadding,
             ),
             child: Center(
               child: Row(
