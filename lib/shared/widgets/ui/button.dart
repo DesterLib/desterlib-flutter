@@ -269,7 +269,9 @@ class _DButtonState extends State<DButton> {
               duration: const Duration(milliseconds: 200),
               child: Icon(
                 widget.leftIcon,
-                key: ValueKey('${widget.leftIcon}_${style.textColor}'),
+                key: ValueKey(
+                  '${widget.hashCode}_left_${widget.leftIcon}_${style.textColor}',
+                ),
                 size: sizeProps.iconSize,
                 color: style.textColor,
               ),
@@ -284,7 +286,9 @@ class _DButtonState extends State<DButton> {
               duration: const Duration(milliseconds: 200),
               child: Icon(
                 widget.rightIcon,
-                key: ValueKey('${widget.rightIcon}_${style.textColor}'),
+                key: ValueKey(
+                  '${widget.hashCode}_right_${widget.rightIcon}_${style.textColor}',
+                ),
                 size: sizeProps.iconSize,
                 color: style.textColor,
               ),
