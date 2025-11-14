@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dester/shared/widgets/ui/scrollable_list.dart';
 import 'package:dester/shared/widgets/ui/card.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
-import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/ui/loading_screen.dart';
 import 'package:dester/features/home/presentation/provider/media_provider.dart';
 import 'package:dester/core/providers/websocket_provider.dart';
 
@@ -130,12 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             );
           },
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(48.0),
-              child: DLoadingIndicator(),
-            ),
-          ),
+          loading: () => const DLoadingScreen(),
           error: (error, stack) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -159,12 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ),
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.all(48.0),
-            child: DLoadingIndicator(),
-          ),
-        ),
+        loading: () => const DLoadingScreen(),
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),

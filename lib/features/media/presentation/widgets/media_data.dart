@@ -11,6 +11,7 @@ class MediaData {
   final List<String> cast;
   final String? posterUrl;
   final String? backdropUrl;
+  final List<String>? meshGradientColors; // Hex color strings for mesh gradient
 
   const MediaData({
     required this.id,
@@ -24,6 +25,7 @@ class MediaData {
     required this.cast,
     this.posterUrl,
     this.backdropUrl,
+    this.meshGradientColors,
   });
 
   factory MediaData.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,9 @@ class MediaData {
       cast: List<String>.from(json['cast'] as List),
       posterUrl: json['posterUrl'] as String?,
       backdropUrl: json['backdropUrl'] as String?,
+      meshGradientColors: json['meshGradientColors'] != null
+          ? List<String>.from(json['meshGradientColors'] as List)
+          : null,
     );
   }
 }

@@ -47,6 +47,7 @@ final mediaDetailProvider =
                   cast: [],
                   posterUrl: media.posterUrl,
                   backdropUrl: media.backdropUrl,
+                  meshGradientColors: media.meshGradientColors?.toList(),
                 ),
               );
             }
@@ -75,6 +76,7 @@ final mediaDetailProvider =
                   cast: [],
                   posterUrl: media.posterUrl,
                   backdropUrl: media.backdropUrl,
+                  meshGradientColors: media.meshGradientColors?.toList(),
                 ),
                 tvShowDetails: tvShow,
               );
@@ -107,6 +109,7 @@ final mediaDetailProvider =
               cast: [],
               posterUrl: media.posterUrl,
               backdropUrl: media.backdropUrl,
+              meshGradientColors: media.meshGradientColors?.toList(),
             ),
           );
         }
@@ -135,6 +138,7 @@ final mediaDetailProvider =
               cast: [],
               posterUrl: media.posterUrl,
               backdropUrl: media.backdropUrl,
+              meshGradientColors: media.meshGradientColors?.toList(),
             ),
             tvShowDetails: tvShow,
           );

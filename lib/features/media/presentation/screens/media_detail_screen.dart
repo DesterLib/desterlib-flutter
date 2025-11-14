@@ -6,7 +6,7 @@ import 'package:openapi/openapi.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
-import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/ui/loading_screen.dart';
 import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import '../widgets/media_data.dart';
@@ -165,7 +165,7 @@ class MediaDetailScreen extends ConsumerWidget {
                     ),
           );
         },
-        loading: () => const _LoadingIndicator(),
+        loading: () => const DLoadingScreen(),
         error: (error, stack) => _buildError(context, error),
       ),
     );
@@ -387,19 +387,6 @@ class _MediaCreditItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Loading indicator widget
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF0a0a0a),
-      child: const Center(child: DLoadingIndicator()),
     );
   }
 }

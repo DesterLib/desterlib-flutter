@@ -8,8 +8,6 @@ import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/shared/widgets/modals/modals.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
-import 'package:palette_generator/palette_generator.dart';
-import 'package:progressive_blur/progressive_blur.dart';
 import 'media_data.dart';
 
 class MediaHeroSection extends StatelessWidget {
@@ -101,12 +99,15 @@ class MediaHeroSection extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Full-width hero background with blur and mesh
+              // Full-width hero background with animated mesh
               Positioned.fill(
                 child: ClipPath(
                   clipper: _HeroClipper(cornerRadius: cornerRadius),
                   child: imageUrl != null
-                      ? _DynamicMeshHero(imageUrl: imageUrl)
+                      ? _AnimatedMeshHero(
+                          imageUrl: imageUrl,
+                          meshColors: mediaData.meshGradientColors,
+                        )
                       : _buildDefaultMeshGradient(),
                 ),
               ),
@@ -420,237 +421,132 @@ class MediaHeroSection extends StatelessWidget {
   }
 }
 
-/// Dynamic hero widget that extracts colors from the image for mesh gradient
-class _DynamicMeshHero extends StatefulWidget {
+/// Animated mesh hero using API-provided colors or fallback to defaults
+class _AnimatedMeshHero extends StatefulWidget {
   final String imageUrl;
+  final List<String>? meshColors; // Hex color strings from API
 
-  const _DynamicMeshHero({required this.imageUrl});
+  const _AnimatedMeshHero({required this.imageUrl, this.meshColors});
 
   @override
-  State<_DynamicMeshHero> createState() => _DynamicMeshHeroState();
+  State<_AnimatedMeshHero> createState() => _AnimatedMeshHeroState();
 }
 
-class _DynamicMeshHeroState extends State<_DynamicMeshHero> {
-  List<Color>? _extractedColors;
-  bool _stopAnimation = false;
+class _AnimatedMeshHeroState extends State<_AnimatedMeshHero> {
+  late List<Color> _meshColors;
 
   @override
   void initState() {
     super.initState();
-    _extractColors();
+    _meshColors = _parseColors(widget.meshColors);
   }
 
   @override
-  void didUpdateWidget(_DynamicMeshHero oldWidget) {
+  void didUpdateWidget(_AnimatedMeshHero oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
+    if (oldWidget.meshColors != widget.meshColors) {
       setState(() {
-        _stopAnimation = false;
+        _meshColors = _parseColors(widget.meshColors);
       });
-      _extractColors();
     }
   }
 
-  /// Darkens a color by reducing its lightness and reduces saturation for grayscale-like colors
-  Color _darkenColor(Color color, {double amount = 0.4}) {
-    final hsl = HSLColor.fromColor(color);
-
-    // If color is very low saturation (grayscale-ish), further reduce saturation
-    final adjustedSaturation = hsl.saturation < 0.2
-        ? hsl.saturation *
-              0.3 // Make it even more grayscale
-        : hsl.saturation;
-
-    final darkened = hsl
-        .withLightness((hsl.lightness * (1 - amount)).clamp(0.0, 1.0))
-        .withSaturation(adjustedSaturation.clamp(0.0, 1.0));
-
-    return darkened.toColor();
-  }
-
-  Future<void> _extractColors() async {
-    try {
-      final imageProvider = CachedNetworkImageProvider(widget.imageUrl);
-      final paletteGenerator = await PaletteGenerator.fromImageProvider(
-        imageProvider,
-        maximumColorCount: 20,
-      );
-
-      if (!mounted) return;
-
-      // Extract colors for the 4 corners
-      // Prefer muted/dark colors over vibrant to avoid blue fallbacks on grayscale images
-      final rawColors = <Color>[
-        paletteGenerator.darkMutedColor?.color ??
-            paletteGenerator.dominantColor?.color ??
-            Color(0xFF1a1a1a), // Top-left - grayscale fallback
-        paletteGenerator.mutedColor?.color ??
-            paletteGenerator.dominantColor?.color ??
-            Color(0xFF2a2a2a), // Top-right - grayscale fallback
-        paletteGenerator.darkMutedColor?.color ??
-            paletteGenerator.darkVibrantColor?.color ??
-            paletteGenerator.dominantColor?.color ??
-            Color(0xFF0a0a0a), // Bottom-left - grayscale fallback (not blue!)
-        paletteGenerator.lightMutedColor?.color ??
-            paletteGenerator.vibrantColor?.color ??
-            paletteGenerator.dominantColor?.color ??
-            Color(0xFF2a2a2a), // Bottom-right - grayscale fallback
-      ];
-
-      // Darken all extracted colors for better background appearance
-      final darkenedColors = rawColors
-          .map((color) => _darkenColor(color, amount: 0.5))
-          .toList();
-
-      setState(() {
-        _extractedColors = darkenedColors;
-      });
-
-      // Wait for fade transition to complete (1000ms fade + 500ms buffer), then stop animation
-      await Future.delayed(Duration(milliseconds: 1500));
-      if (!mounted) return;
-      setState(() {
-        _stopAnimation = true;
-      });
-    } catch (e) {
-      // Fallback to grayscale colors on error
-      if (!mounted) return;
-      setState(() {
-        _extractedColors = [
-          Color(0xFF1a1a1a),
-          Color(0xFF2a2a2a),
-          Color(0xFF0a0a0a),
-          Color(0xFF2a2a2a),
-        ];
-      });
-
-      // Stop animation after error fallback
-      await Future.delayed(Duration(milliseconds: 1500));
-      if (!mounted) return;
-      setState(() {
-        _stopAnimation = true;
-      });
+  /// Parse hex color strings from API or use default fallback colors
+  List<Color> _parseColors(List<String>? hexColors) {
+    if (hexColors != null && hexColors.length >= 4) {
+      try {
+        return hexColors.take(4).map((hex) {
+          // Remove # if present and parse hex
+          final hexCode = hex.replaceAll('#', '');
+          return Color(int.parse('FF$hexCode', radix: 16));
+        }).toList();
+      } catch (e) {
+        // If parsing fails, use defaults
+      }
     }
+
+    // Default vibrant colors
+    return [
+      Color(0xFF7C3AED), // Vibrant purple (top-left)
+      Color(0xFF2563EB), // Bright blue (top-right)
+      Color(0xFFEC4899), // Hot pink (bottom-left)
+      Color(0xFF8B5CF6), // Purple-blue (bottom-right)
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    // Default grayscale colors for initial animation
-    final defaultColors = [
-      Color(0xFF1a1a1a),
-      Color(0xFF2a2a2a),
-      Color(0xFF0a0a0a),
-      Color(0xFF2a2a2a),
-    ];
-
-    final hasExtractedColors = _extractedColors != null;
-
-    // Wrap entire hero (mesh + image) with progressive blur on left only
-    return ProgressiveBlurWidget(
-      sigma: 40.0, // Maximum blur strength for horizontal fade
-      linearGradientBlur: const LinearGradientBlur(
-        values: [1, 0.8, 0.5, 0.2, 0], // Full blur left, no blur right
-        stops: [0, 0.15, 0.4, 0.65, 0.85],
-        start: Alignment.centerLeft,
-        end: Alignment.centerRight,
-      ),
-      child: Stack(
-        children: [
-          // Base animated mesh with default colors
-          Positioned.fill(
-            child: AnimatedOpacity(
-              opacity: hasExtractedColors ? 0.0 : 1.0,
-              duration: Duration(milliseconds: 1000),
-              child: AnimatedMeshGradient(
-                colors: defaultColors,
-                options: AnimatedMeshGradientOptions(speed: 2, frequency: 2),
-              ),
-            ),
+    return Stack(
+      children: [
+        // Animated mesh gradient with static colorful values
+        Positioned.fill(
+          child: AnimatedMeshGradient(
+            colors: _meshColors,
+            options: AnimatedMeshGradientOptions(speed: 3, frequency: 3),
           ),
+        ),
 
-          // Extracted colors mesh that fades in
-          if (hasExtractedColors)
-            Positioned.fill(
-              child: AnimatedOpacity(
-                opacity: 1.0,
-                duration: Duration(milliseconds: 1000),
-                child: AnimatedMeshGradient(
-                  colors: _extractedColors!,
-                  options: AnimatedMeshGradientOptions(
-                    speed: _stopAnimation ? 0.01 : 2,
-                    frequency: _stopAnimation ? 0.01 : 2,
-                  ),
-                ),
-              ),
-            ),
-
-          // Image positioned after sidebar with gradient mask
-          Positioned(
-            left: AppLayout.sidebarWidth,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: AspectRatio(
-                aspectRatio: 16 / 9, // Standard backdrop aspect ratio
+        // Image overlay
+        Positioned(
+          left: AppLayout.sidebarWidth,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ShaderMask(
+                // Horizontal gradient mask for left fade
+                shaderCallback: (rect) {
+                  return LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    stops: const [0.0, 0.15, 0.4, 0.7, 1.0],
+                    colors: [
+                      Colors.white.withValues(alpha: 0.0),
+                      Colors.white.withValues(alpha: 0.3),
+                      Colors.white.withValues(alpha: 0.6),
+                      Colors.white.withValues(alpha: 0.9),
+                      Colors.white.withValues(alpha: 1.0),
+                    ],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
                 child: ShaderMask(
-                  // Horizontal gradient mask for left fade
+                  // Vertical gradient mask for bottom fade
                   shaderCallback: (rect) {
                     return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      stops: const [0.0, 0.15, 0.4, 0.7, 1.0],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.0, 0.5, 0.75, 0.9, 1.0],
                       colors: [
-                        Colors.white.withValues(alpha: 0.0), // Transparent left
-                        Colors.white.withValues(alpha: 0.3), // Gradual fade
-                        Colors.white.withValues(alpha: 0.6), // Continue
-                        Colors.white.withValues(alpha: 0.9), // Almost visible
-                        Colors.white.withValues(alpha: 1.0), // Fully visible
+                        Colors.white.withValues(alpha: 1.0),
+                        Colors.white.withValues(alpha: 0.9),
+                        Colors.white.withValues(alpha: 0.6),
+                        Colors.white.withValues(alpha: 0.3),
+                        Colors.white.withValues(alpha: 0.0),
                       ],
                     ).createShader(rect);
                   },
                   blendMode: BlendMode.dstIn,
-                  child: ShaderMask(
-                    // Vertical gradient mask for bottom fade
-                    shaderCallback: (rect) {
-                      return LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0.0, 0.5, 0.75, 0.9, 1.0],
-                        colors: [
-                          Colors.white.withValues(
-                            alpha: 1.0,
-                          ), // Fully visible top
-                          Colors.white.withValues(alpha: 0.9), // Stay strong
-                          Colors.white.withValues(alpha: 0.6), // Start fade
-                          Colors.white.withValues(alpha: 0.3), // Continue fade
-                          Colors.white.withValues(
-                            alpha: 0.0,
-                          ), // Transparent bottom
-                        ],
-                      ).createShader(rect);
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.imageUrl,
-                      fit: BoxFit.cover, // Fill the aspect ratio box
-                      alignment:
-                          Alignment.centerRight, // Align image to the right
-                      placeholder: (context, url) =>
-                          Container(color: Colors.black),
-                      errorWidget: (context, url, error) =>
-                          Container(color: const Color(0xFF1a1a1a)),
-                      fadeInDuration: const Duration(milliseconds: 300),
-                      fadeOutDuration: const Duration(milliseconds: 150),
-                    ),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrl,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerRight,
+                    placeholder: (context, url) =>
+                        Container(color: Colors.black),
+                    errorWidget: (context, url, error) =>
+                        Container(color: const Color(0xFF1a1a1a)),
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    fadeOutDuration: const Duration(milliseconds: 150),
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
