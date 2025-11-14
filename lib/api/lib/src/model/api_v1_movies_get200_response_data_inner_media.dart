@@ -18,6 +18,7 @@ part 'api_v1_movies_get200_response_data_inner_media.g.dart';
 /// * [description] 
 /// * [posterUrl] 
 /// * [backdropUrl] 
+/// * [meshGradientColors] - Hex color strings for mesh gradient (4 corners)
 /// * [releaseDate] 
 /// * [rating] 
 /// * [createdAt] 
@@ -42,6 +43,10 @@ abstract class ApiV1MoviesGet200ResponseDataInnerMedia implements Built<ApiV1Mov
 
   @BuiltValueField(wireName: r'backdropUrl')
   String? get backdropUrl;
+
+  /// Hex color strings for mesh gradient (4 corners)
+  @BuiltValueField(wireName: r'meshGradientColors')
+  BuiltList<String>? get meshGradientColors;
 
   @BuiltValueField(wireName: r'releaseDate')
   DateTime? get releaseDate;
@@ -118,6 +123,13 @@ class _$ApiV1MoviesGet200ResponseDataInnerMediaSerializer implements PrimitiveSe
       yield serializers.serialize(
         object.backdropUrl,
         specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.meshGradientColors != null) {
+      yield r'meshGradientColors';
+      yield serializers.serialize(
+        object.meshGradientColors,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
       );
     }
     if (object.releaseDate != null) {
@@ -215,6 +227,13 @@ class _$ApiV1MoviesGet200ResponseDataInnerMediaSerializer implements PrimitiveSe
           ) as String?;
           if (valueDes == null) continue;
           result.backdropUrl = valueDes;
+          break;
+        case r'meshGradientColors':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.meshGradientColors.replace(valueDes);
           break;
         case r'releaseDate':
           final valueDes = serializers.deserialize(

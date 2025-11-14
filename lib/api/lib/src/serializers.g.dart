@@ -49,6 +49,10 @@ Serializers _$serializers =
           ..add(ApiV1SearchGet200Response.serializer)
           ..add(ApiV1SearchGet200ResponseData.serializer)
           ..add(ApiV1SearchGet200ResponseDataMoviesInner.serializer)
+          ..add(ApiV1SearchGet200ResponseDataMoviesInnerMedia.serializer)
+          ..add(
+            ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum.serializer,
+          )
           ..add(ApiV1SearchGet200ResponseDataTvShowsInner.serializer)
           ..add(ApiV1SearchGet200ResponseDataTvShowsInnerMedia.serializer)
           ..add(
@@ -68,6 +72,8 @@ Serializers _$serializers =
           ..add(ApiV1StreamIdGet500Response.serializer)
           ..add(ApiV1TvshowsGet200Response.serializer)
           ..add(ApiV1TvshowsGet200ResponseDataInner.serializer)
+          ..add(ApiV1TvshowsGet200ResponseDataInnerMedia.serializer)
+          ..add(ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum.serializer)
           ..add(ApiV1TvshowsGet500Response.serializer)
           ..add(ApiV1TvshowsIdGet200Response.serializer)
           ..add(ApiV1TvshowsIdGet200ResponseData.serializer)
@@ -134,6 +140,14 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(ModelLibrary)]),
             () => ListBuilder<ModelLibrary>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),

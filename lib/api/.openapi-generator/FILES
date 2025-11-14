@@ -39,6 +39,7 @@ doc/ApiV1ScanResumeScanJobIdPost202ResponseData.md
 doc/ApiV1SearchGet200Response.md
 doc/ApiV1SearchGet200ResponseData.md
 doc/ApiV1SearchGet200ResponseDataMoviesInner.md
+doc/ApiV1SearchGet200ResponseDataMoviesInnerMedia.md
 doc/ApiV1SearchGet200ResponseDataTvShowsInner.md
 doc/ApiV1SearchGet200ResponseDataTvShowsInnerMedia.md
 doc/ApiV1SearchGet400Response.md
@@ -55,6 +56,7 @@ doc/ApiV1StreamIdGet416Response.md
 doc/ApiV1StreamIdGet500Response.md
 doc/ApiV1TvshowsGet200Response.md
 doc/ApiV1TvshowsGet200ResponseDataInner.md
+doc/ApiV1TvshowsGet200ResponseDataInnerMedia.md
 doc/ApiV1TvshowsGet500Response.md
 doc/ApiV1TvshowsIdGet200Response.md
 doc/ApiV1TvshowsIdGet200ResponseData.md
@@ -132,6 +134,7 @@ lib/src/model/api_v1_scan_resume_scan_job_id_post202_response_data.dart
 lib/src/model/api_v1_search_get200_response.dart
 lib/src/model/api_v1_search_get200_response_data.dart
 lib/src/model/api_v1_search_get200_response_data_movies_inner.dart
+lib/src/model/api_v1_search_get200_response_data_movies_inner_media.dart
 lib/src/model/api_v1_search_get200_response_data_tv_shows_inner.dart
 lib/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart
 lib/src/model/api_v1_search_get400_response.dart
@@ -148,6 +151,7 @@ lib/src/model/api_v1_stream_id_get416_response.dart
 lib/src/model/api_v1_stream_id_get500_response.dart
 lib/src/model/api_v1_tvshows_get200_response.dart
 lib/src/model/api_v1_tvshows_get200_response_data_inner.dart
+lib/src/model/api_v1_tvshows_get200_response_data_inner_media.dart
 lib/src/model/api_v1_tvshows_get500_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response_data.dart
@@ -163,12 +167,4 @@ lib/src/model/public_settings.dart
 lib/src/model/update_settings_request.dart
 lib/src/serializers.dart
 pubspec.yaml
-test/api_v1_logs_delete200_response_test.dart
-test/api_v1_logs_get200_response_data_inner_test.dart
-test/api_v1_logs_get200_response_test.dart
-test/api_v1_logs_get500_response_test.dart
-test/api_v1_scan_cleanup_post200_response_data_test.dart
-test/api_v1_scan_cleanup_post200_response_test.dart
-test/api_v1_scan_resume_scan_job_id_post202_response_data_test.dart
-test/api_v1_scan_resume_scan_job_id_post202_response_test.dart
-test/logs_api_test.dart
+test/api_v1_search_get200_response_data_movies_inner_media_test.dart

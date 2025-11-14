@@ -7,9 +7,9 @@ import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'api_v1_tvshows_get200_response_data_inner_media.g.dart';
+part 'api_v1_search_get200_response_data_movies_inner_media.g.dart';
 
-/// ApiV1TvshowsGet200ResponseDataInnerMedia
+/// ApiV1SearchGet200ResponseDataMoviesInnerMedia
 ///
 /// Properties:
 /// * [id] 
@@ -18,13 +18,12 @@ part 'api_v1_tvshows_get200_response_data_inner_media.g.dart';
 /// * [description] 
 /// * [posterUrl] 
 /// * [backdropUrl] 
-/// * [meshGradientColors] - Hex color strings for mesh gradient (4 corners)
 /// * [releaseDate] 
 /// * [rating] 
 /// * [createdAt] 
 /// * [updatedAt] 
 @BuiltValue()
-abstract class ApiV1TvshowsGet200ResponseDataInnerMedia implements Built<ApiV1TvshowsGet200ResponseDataInnerMedia, ApiV1TvshowsGet200ResponseDataInnerMediaBuilder> {
+abstract class ApiV1SearchGet200ResponseDataMoviesInnerMedia implements Built<ApiV1SearchGet200ResponseDataMoviesInnerMedia, ApiV1SearchGet200ResponseDataMoviesInnerMediaBuilder> {
   @BuiltValueField(wireName: r'id')
   String? get id;
 
@@ -32,7 +31,7 @@ abstract class ApiV1TvshowsGet200ResponseDataInnerMedia implements Built<ApiV1Tv
   String? get title;
 
   @BuiltValueField(wireName: r'type')
-  ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum? get type;
+  ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum? get type;
   // enum typeEnum {  MOVIE,  TV_SHOW,  MUSIC,  COMIC,  };
 
   @BuiltValueField(wireName: r'description')
@@ -43,10 +42,6 @@ abstract class ApiV1TvshowsGet200ResponseDataInnerMedia implements Built<ApiV1Tv
 
   @BuiltValueField(wireName: r'backdropUrl')
   String? get backdropUrl;
-
-  /// Hex color strings for mesh gradient (4 corners)
-  @BuiltValueField(wireName: r'meshGradientColors')
-  BuiltList<String>? get meshGradientColors;
 
   @BuiltValueField(wireName: r'releaseDate')
   DateTime? get releaseDate;
@@ -60,27 +55,27 @@ abstract class ApiV1TvshowsGet200ResponseDataInnerMedia implements Built<ApiV1Tv
   @BuiltValueField(wireName: r'updatedAt')
   DateTime? get updatedAt;
 
-  ApiV1TvshowsGet200ResponseDataInnerMedia._();
+  ApiV1SearchGet200ResponseDataMoviesInnerMedia._();
 
-  factory ApiV1TvshowsGet200ResponseDataInnerMedia([void updates(ApiV1TvshowsGet200ResponseDataInnerMediaBuilder b)]) = _$ApiV1TvshowsGet200ResponseDataInnerMedia;
+  factory ApiV1SearchGet200ResponseDataMoviesInnerMedia([void updates(ApiV1SearchGet200ResponseDataMoviesInnerMediaBuilder b)]) = _$ApiV1SearchGet200ResponseDataMoviesInnerMedia;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(ApiV1TvshowsGet200ResponseDataInnerMediaBuilder b) => b;
+  static void _defaults(ApiV1SearchGet200ResponseDataMoviesInnerMediaBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<ApiV1TvshowsGet200ResponseDataInnerMedia> get serializer => _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer();
+  static Serializer<ApiV1SearchGet200ResponseDataMoviesInnerMedia> get serializer => _$ApiV1SearchGet200ResponseDataMoviesInnerMediaSerializer();
 }
 
-class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveSerializer<ApiV1TvshowsGet200ResponseDataInnerMedia> {
+class _$ApiV1SearchGet200ResponseDataMoviesInnerMediaSerializer implements PrimitiveSerializer<ApiV1SearchGet200ResponseDataMoviesInnerMedia> {
   @override
-  final Iterable<Type> types = const [ApiV1TvshowsGet200ResponseDataInnerMedia, _$ApiV1TvshowsGet200ResponseDataInnerMedia];
+  final Iterable<Type> types = const [ApiV1SearchGet200ResponseDataMoviesInnerMedia, _$ApiV1SearchGet200ResponseDataMoviesInnerMedia];
 
   @override
-  final String wireName = r'ApiV1TvshowsGet200ResponseDataInnerMedia';
+  final String wireName = r'ApiV1SearchGet200ResponseDataMoviesInnerMedia';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    ApiV1TvshowsGet200ResponseDataInnerMedia object, {
+    ApiV1SearchGet200ResponseDataMoviesInnerMedia object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     if (object.id != null) {
@@ -101,7 +96,7 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
       yield r'type';
       yield serializers.serialize(
         object.type,
-        specifiedType: const FullType(ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum),
+        specifiedType: const FullType(ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum),
       );
     }
     if (object.description != null) {
@@ -123,13 +118,6 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
       yield serializers.serialize(
         object.backdropUrl,
         specifiedType: const FullType.nullable(String),
-      );
-    }
-    if (object.meshGradientColors != null) {
-      yield r'meshGradientColors';
-      yield serializers.serialize(
-        object.meshGradientColors,
-        specifiedType: const FullType(BuiltList, [FullType(String)]),
       );
     }
     if (object.releaseDate != null) {
@@ -165,7 +153,7 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
   @override
   Object serialize(
     Serializers serializers,
-    ApiV1TvshowsGet200ResponseDataInnerMedia object, {
+    ApiV1SearchGet200ResponseDataMoviesInnerMedia object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -176,7 +164,7 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required ApiV1TvshowsGet200ResponseDataInnerMediaBuilder result,
+    required ApiV1SearchGet200ResponseDataMoviesInnerMediaBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
@@ -200,8 +188,8 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
         case r'type':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum),
-          ) as ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum;
+            specifiedType: const FullType(ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum),
+          ) as ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum;
           result.type = valueDes;
           break;
         case r'description':
@@ -227,13 +215,6 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
           ) as String?;
           if (valueDes == null) continue;
           result.backdropUrl = valueDes;
-          break;
-        case r'meshGradientColors':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
-          result.meshGradientColors.replace(valueDes);
           break;
         case r'releaseDate':
           final valueDes = serializers.deserialize(
@@ -274,12 +255,12 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
   }
 
   @override
-  ApiV1TvshowsGet200ResponseDataInnerMedia deserialize(
+  ApiV1SearchGet200ResponseDataMoviesInnerMedia deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = ApiV1TvshowsGet200ResponseDataInnerMediaBuilder();
+    final result = ApiV1SearchGet200ResponseDataMoviesInnerMediaBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(
@@ -294,22 +275,22 @@ class _$ApiV1TvshowsGet200ResponseDataInnerMediaSerializer implements PrimitiveS
   }
 }
 
-class ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum extends EnumClass {
+class ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum extends EnumClass {
 
   @BuiltValueEnumConst(wireName: r'MOVIE')
-  static const ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum MOVIE = _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnum_MOVIE;
+  static const ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum MOVIE = _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum_MOVIE;
   @BuiltValueEnumConst(wireName: r'TV_SHOW')
-  static const ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum TV_SHOW = _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnum_TV_SHOW;
+  static const ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum TV_SHOW = _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum_TV_SHOW;
   @BuiltValueEnumConst(wireName: r'MUSIC')
-  static const ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum MUSIC = _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnum_MUSIC;
+  static const ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum MUSIC = _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum_MUSIC;
   @BuiltValueEnumConst(wireName: r'COMIC')
-  static const ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum COMIC = _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnum_COMIC;
+  static const ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum COMIC = _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum_COMIC;
 
-  static Serializer<ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum> get serializer => _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnumSerializer;
+  static Serializer<ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum> get serializer => _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnumSerializer;
 
-  const ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum._(String name): super(name);
+  const ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum._(String name): super(name);
 
-  static BuiltSet<ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum> get values => _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnumValues;
-  static ApiV1TvshowsGet200ResponseDataInnerMediaTypeEnum valueOf(String name) => _$apiV1TvshowsGet200ResponseDataInnerMediaTypeEnumValueOf(name);
+  static BuiltSet<ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum> get values => _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnumValues;
+  static ApiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnum valueOf(String name) => _$apiV1SearchGet200ResponseDataMoviesInnerMediaTypeEnumValueOf(name);
 }
 

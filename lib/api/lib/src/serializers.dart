@@ -52,6 +52,7 @@ import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_respons
 import 'package:openapi/src/model/api_v1_search_get200_response.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data_movies_inner.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_movies_inner_media.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart';
 import 'package:openapi/src/model/api_v1_search_get400_response.dart';
@@ -68,6 +69,7 @@ import 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data.dart';
@@ -122,6 +124,7 @@ part 'serializers.g.dart';
   ApiV1SearchGet200Response,
   ApiV1SearchGet200ResponseData,
   ApiV1SearchGet200ResponseDataMoviesInner,
+  ApiV1SearchGet200ResponseDataMoviesInnerMedia,
   ApiV1SearchGet200ResponseDataTvShowsInner,
   ApiV1SearchGet200ResponseDataTvShowsInnerMedia,
   ApiV1SearchGet400Response,
@@ -138,6 +141,7 @@ part 'serializers.g.dart';
   ApiV1StreamIdGet500Response,
   ApiV1TvshowsGet200Response,
   ApiV1TvshowsGet200ResponseDataInner,
+  ApiV1TvshowsGet200ResponseDataInnerMedia,
   ApiV1TvshowsGet500Response,
   ApiV1TvshowsIdGet200Response,
   ApiV1TvshowsIdGet200ResponseData,
