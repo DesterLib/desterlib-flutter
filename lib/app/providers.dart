@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:openapi/openapi.dart';
 import '../core/config/api_config.dart';
+import '../core/providers/version_provider.dart';
 
 /// Notifier for managing the API base URL
 class BaseUrlNotifier extends Notifier<String> {
@@ -46,6 +47,43 @@ final openapiClientProvider = Provider<Openapi>((ref) {
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: ApiConfig.timeout, // 30 seconds
       sendTimeout: ApiConfig.timeout,
+      headers: {'X-Client-Version': ApiConfig.clientVersion},
+    ),
+  );
+
+  // Add an interceptor to check API version from response headers
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onResponse: (response, handler) {
+        final apiVersion = response.headers.value('X-API-Version');
+        if (apiVersion != null) {
+          // Update the version provider with the API version
+          try {
+            ref.read(versionInfoProvider.notifier).updateApiVersion(apiVersion);
+          } catch (e) {
+            // Ignore errors when updating version info
+          }
+        }
+        handler.next(response);
+      },
+      onError: (error, handler) {
+        // Check if the error is a version mismatch (HTTP 426)
+        if (error.response?.statusCode == 426) {
+          // Version mismatch error
+          try {
+            final apiVersion =
+                error.response?.data?['data']?['apiVersion'] as String?;
+            if (apiVersion != null) {
+              ref
+                  .read(versionInfoProvider.notifier)
+                  .updateApiVersion(apiVersion);
+            }
+          } catch (e) {
+            // Ignore errors when updating version info
+          }
+        }
+        handler.next(error);
+      },
     ),
   );
 
