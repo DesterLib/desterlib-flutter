@@ -6,11 +6,13 @@ import '../features/library/library_features.dart';
 import '../features/settings/settings_features.dart';
 import '../features/media/media_features.dart';
 import '../features/player/player_features.dart';
+import '../features/logs/logs_features.dart';
 import '../shared/widgets/ui/bottom_nav_bar.dart';
 import '../shared/widgets/ui/sidebar/sidebar.dart';
 import '../shared/widgets/connection_guard.dart';
 import '../shared/utils/platform_icons.dart';
 import '../core/providers/connection_provider.dart';
+import '../app/theme/theme.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -53,6 +55,15 @@ final GoRouter router = GoRouter(
                 return _buildPageWithTransition(
                   state,
                   const ConnectionGuard(child: ManageLibrariesScreen()),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'logs',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return _buildPageWithTransition(
+                  state,
+                  const ConnectionGuard(child: LogsScreen()),
                 );
               },
             ),
@@ -112,19 +123,24 @@ CustomTransitionPage _buildPageWithTransition(
   return CustomTransitionPage(
     key: state.pageKey,
     child: child,
+    maintainState: false,
+    opaque: true,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = 1.02;
       const end = 1.0;
       final scaleTween = Tween(begin: begin, end: end);
 
-      // Fade out the old page
+      // Use a fast curve to quickly hide the old page
       final secondaryFade = Tween<double>(begin: 1.0, end: 0.0).animate(
-        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
+        CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+        ),
       );
 
-      // Outer wrapper: fade in new page, fade out old page
+      // Outer wrapper: fade in new page quickly, fade out old page immediately
       return FadeTransition(
-        opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
+        opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
         child: FadeTransition(
           opacity: secondaryFade,
           child: Container(
@@ -201,9 +217,9 @@ class _ScaffoldWithNavBarState extends ConsumerState<ScaffoldWithNavBar> {
     final connectionStatus = ref.watch(connectionStatusProvider);
     final isConnected = connectionStatus == ConnectionStatus.connected;
 
-    // Show sidebar on desktop and TV screens (> 900px width)
+    // Show sidebar on desktop and TV screens
     final screenWidth = MediaQuery.of(context).size.width;
-    final showSidebar = screenWidth > 900;
+    final showSidebar = AppBreakpoints.isDesktop(screenWidth);
 
     return Scaffold(
       extendBody: true,
@@ -252,13 +268,12 @@ class _DesktopLayout extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 340), child: child),
-        // Sidebar positioned on the left
+        child,
         Positioned(
           left: 0,
           top: 0,
           bottom: 0,
-          width: 340,
+          width: AppLayout.sidebarWidth,
           child: DSidebar(
             currentIndex: selectedIndex,
             showSearch: true,

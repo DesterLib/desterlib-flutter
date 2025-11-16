@@ -67,7 +67,7 @@ class VideoPlayerState {
       isFullscreen: isFullscreen ?? this.isFullscreen,
       showControls: showControls ?? this.showControls,
       isCompleted: isCompleted ?? this.isCompleted,
-      error: error,
+      error: error ?? this.error,
     );
   }
 
@@ -236,11 +236,26 @@ class VideoPlayerController extends ChangeNotifier {
 
     // Completed state
     _completedSubscription = player.stream.completed.listen((isCompleted) {
-      if (state != null) {
-        _updateState(state!.copyWith(isCompleted: isCompleted));
-      }
+      if (state == null) return;
+
+      // Only mark as completed if we're actually near the end of the video
+      // This prevents false "completed" states from stream errors or buffering issues
       if (isCompleted) {
-        _showControls();
+        final duration = state!.duration;
+        final position = state!.position;
+
+        // Consider completed if within last 5 seconds or actually at the end
+        final isActuallyComplete =
+            duration.inSeconds > 0 &&
+            (position.inSeconds >= duration.inSeconds - 5 ||
+                position.inSeconds == duration.inSeconds);
+
+        if (isActuallyComplete) {
+          _updateState(state!.copyWith(isCompleted: true));
+          _showControls();
+        }
+      } else {
+        _updateState(state!.copyWith(isCompleted: false));
       }
     });
   }

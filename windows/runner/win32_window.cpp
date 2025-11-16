@@ -1,5 +1,6 @@
 #include "win32_window.h"
 
+#include <algorithm>
 #include <dwmapi.h>
 #include <flutter_windows.h>
 
@@ -187,6 +188,28 @@ Win32Window::MessageHandler(HWND hwnd,
       }
       return 0;
 
+    case WM_GETMINMAXINFO: {
+      // Enforce minimum window size
+      if (minimum_size_.width > 0 || minimum_size_.height > 0) {
+        MINMAXINFO* mmi = reinterpret_cast<MINMAXINFO*>(lparam);
+        
+        // Get DPI for scaling
+        HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
+        double scale_factor = dpi / 96.0;
+        
+        // Calculate the window frame size (non-client area) in logical pixels
+        // AdjustWindowRect converts client area to window area
+        RECT rect = {0, 0, static_cast<LONG>(minimum_size_.width), static_cast<LONG>(minimum_size_.height)};
+        AdjustWindowRect(&rect, GetWindowLong(hwnd, GWL_STYLE), FALSE);
+        
+        // Convert to physical pixels for ptMinTrackSize (screen coordinates)
+        mmi->ptMinTrackSize.x = static_cast<LONG>((rect.right - rect.left) * scale_factor);
+        mmi->ptMinTrackSize.y = static_cast<LONG>((rect.bottom - rect.top) * scale_factor);
+      }
+      return 0;
+    }
+
     case WM_DPICHANGED: {
       auto newRectSize = reinterpret_cast<RECT*>(lparam);
       LONG newWidth = newRectSize->right - newRectSize->left;
@@ -261,6 +284,39 @@ HWND Win32Window::GetHandle() {
 
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
+}
+
+void Win32Window::SetMinimumSize(const Size& min_size) {
+  minimum_size_ = min_size;
+  
+  // If window is already created, enforce the minimum size immediately
+  if (window_handle_ != nullptr) {
+    RECT rect;
+    GetWindowRect(window_handle_, &rect);
+    LONG currentWidth = rect.right - rect.left;
+    LONG currentHeight = rect.bottom - rect.top;
+    
+    // Get DPI for scaling
+    HMONITOR monitor = MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
+    UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
+    double scale_factor = dpi / 96.0;
+    
+    // Calculate minimum window size including frame (in logical pixels)
+    RECT minRect = {0, 0, static_cast<LONG>(min_size.width), static_cast<LONG>(min_size.height)};
+    AdjustWindowRect(&minRect, GetWindowLong(window_handle_, GWL_STYLE), FALSE);
+    
+    // Convert to physical pixels for comparison with GetWindowRect result
+    LONG minWidth = static_cast<LONG>((minRect.right - minRect.left) * scale_factor);
+    LONG minHeight = static_cast<LONG>((minRect.bottom - minRect.top) * scale_factor);
+    
+    // Enforce minimum if current size is smaller
+    if (currentWidth < minWidth || currentHeight < minHeight) {
+      SetWindowPos(window_handle_, nullptr, rect.left, rect.top,
+                   std::max(currentWidth, minWidth),
+                   std::max(currentHeight, minHeight),
+                   SWP_NOZORDER | SWP_NOMOVE);
+    }
+  }
 }
 
 bool Win32Window::OnCreate() {

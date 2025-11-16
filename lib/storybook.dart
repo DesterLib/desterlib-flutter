@@ -28,12 +28,12 @@ class StorybookApp extends StatelessWidget {
         ),
         Story(
           name: 'Button / Primary / Icon Only',
-          builder: (_) => DButton(icon: PlatformIcons.playArrow),
+          builder: (_) => DButton(leftIcon: PlatformIcons.playArrow),
         ),
         Story(
           name: 'Button / Primary / Icon and Label',
           builder: (_) =>
-              DButton(label: 'Continue', icon: PlatformIcons.arrowForward),
+              DButton(label: 'Continue', leftIcon: PlatformIcons.arrowForward),
         ),
         Story(
           name: 'Button / Primary / Full Width',
@@ -44,7 +44,7 @@ class StorybookApp extends StatelessWidget {
           name: 'Button / Primary / Full Width with Icon',
           builder: (_) => DButton(
             label: 'Play Video',
-            icon: PlatformIcons.playArrow,
+            leftIcon: PlatformIcons.playArrow,
             fullWidth: true,
           ),
         ),
@@ -58,7 +58,7 @@ class StorybookApp extends StatelessWidget {
         Story(
           name: 'Button / Secondary / Icon Only',
           builder: (_) => DButton(
-            icon: PlatformIcons.close,
+            leftIcon: PlatformIcons.close,
             variant: DButtonVariant.secondary,
           ),
         ),
@@ -66,7 +66,7 @@ class StorybookApp extends StatelessWidget {
           name: 'Button / Secondary / Icon and Label',
           builder: (_) => DButton(
             label: 'Settings',
-            icon: PlatformIcons.settings,
+            leftIcon: PlatformIcons.settings,
             variant: DButtonVariant.secondary,
           ),
         ),
@@ -82,7 +82,7 @@ class StorybookApp extends StatelessWidget {
           name: 'Button / Secondary / Full Width with Icon',
           builder: (_) => DButton(
             label: 'More Options',
-            icon: PlatformIcons.moreHoriz,
+            leftIcon: PlatformIcons.moreHoriz,
             variant: DButtonVariant.secondary,
             fullWidth: true,
           ),
@@ -205,7 +205,11 @@ class StorybookApp extends StatelessWidget {
             title: 'Appearance',
             subtitle: 'Choose your preferred theme',
             icon: PlatformIcons.palette,
-            trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+            trailing: Icon(
+              PlatformIcons.chevronRight,
+              size: 20,
+              color: Colors.white70,
+            ),
           ),
         ),
         Story(
@@ -249,7 +253,11 @@ class StorybookApp extends StatelessWidget {
                 title: 'Language',
                 subtitle: 'English (US)',
                 icon: PlatformIcons.language,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
               ),
             ],
           ),
@@ -263,7 +271,11 @@ class StorybookApp extends StatelessWidget {
                 title: 'Video Quality',
                 subtitle: 'Auto (Recommended)',
                 icon: PlatformIcons.videoSettings,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
               ),
               DSettingsItem(
                 title: 'Auto-play',
@@ -280,7 +292,11 @@ class StorybookApp extends StatelessWidget {
                 title: 'Download Location',
                 subtitle: '~/Downloads',
                 icon: PlatformIcons.folder,
-                trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                trailing: Icon(
+                  PlatformIcons.chevronRight,
+                  size: 20,
+                  color: Colors.white70,
+                ),
               ),
             ],
           ),
@@ -298,13 +314,21 @@ class StorybookApp extends StatelessWidget {
                     title: 'Appearance',
                     subtitle: 'Choose your preferred theme',
                     icon: PlatformIcons.palette,
-                    trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                    trailing: Icon(
+                      PlatformIcons.chevronRight,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
                   ),
                   DSettingsItem(
                     title: 'Language',
                     subtitle: 'English (US)',
                     icon: Icons.language_outlined,
-                    trailing: Icon(Icons.chevron_right, size: 20, color: Colors.white70),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
@@ -315,7 +339,11 @@ class StorybookApp extends StatelessWidget {
                     title: 'Video Quality',
                     subtitle: 'Auto (Recommended)',
                     icon: Icons.video_settings_outlined,
-                    trailing: Icon(Icons.chevron_right, size: 20, color: Colors.white70),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
                   ),
                   DSettingsItem(
                     title: 'Auto-play',
@@ -337,12 +365,13 @@ class StorybookApp extends StatelessWidget {
                     title: 'Profile',
                     subtitle: 'Manage your profile information',
                     icon: PlatformIcons.person,
-                    trailing: Icon(PlatformIcons.chevronRight, size: 20, color: Colors.white70),
+                    trailing: Icon(
+                      PlatformIcons.chevronRight,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
                   ),
-                  DSettingsItem(
-                    title: 'Sign Out',
-                    icon: PlatformIcons.logout,
-                  ),
+                  DSettingsItem(title: 'Sign Out', icon: PlatformIcons.logout),
                 ],
               ),
             ],

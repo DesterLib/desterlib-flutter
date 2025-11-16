@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dester/app/theme/theme.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/features/player/data/video_player_settings_provider.dart';
 
 /// Video player default settings modal
 class VideoPlayerSettingsModal {
   static Future<void> show(BuildContext context, WidgetRef ref) async {
-    return showSettingsModal(
+    return showDModal(
       context: context,
       title: 'Video Player Settings',
       builder: (context) => const _VideoPlayerSettingsContent(),
@@ -363,8 +363,8 @@ class _DropdownItem {
   const _DropdownItem({required this.value, required this.label});
 }
 
-/// Custom dropdown setting
-class _DropdownSetting extends StatelessWidget {
+/// Custom dropdown setting using MenuAnchor for full offset control
+class _DropdownSetting extends StatefulWidget {
   final String value;
   final List<_DropdownItem> items;
   final ValueChanged<String> onChanged;
@@ -376,43 +376,143 @@ class _DropdownSetting extends StatelessWidget {
   });
 
   @override
+  State<_DropdownSetting> createState() => _DropdownSettingState();
+}
+
+class _DropdownSettingState extends State<_DropdownSetting> {
+  final MenuController _menuController = MenuController();
+
+  String get _selectedLabel {
+    final selectedItem = widget.items.firstWhere(
+      (item) => item.value == widget.value,
+      orElse: () => widget.items.first,
+    );
+    return selectedItem.label;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: AppRadius.radiusMD,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          dropdownColor: const Color(0xFF1C1C1E),
-          style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 16),
-          icon: const Icon(
-            Icons.arrow_drop_down_rounded,
-            color: Color(0x99FFFFFF),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return MenuAnchor(
+          controller: _menuController,
+          alignmentOffset: const Offset(0, 4),
+          style: MenuStyle(
+            backgroundColor: WidgetStateProperty.all(const Color(0xFF1C1C1E)),
+            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+            visualDensity: VisualDensity.standard,
+            maximumSize: WidgetStateProperty.all(
+              Size(constraints.maxWidth, 300),
+            ),
+            minimumSize: WidgetStateProperty.all(Size(constraints.maxWidth, 0)),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: AppRadius.radiusMD,
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1,
+                ),
+              ),
+            ),
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(vertical: 8),
+            ),
+            elevation: WidgetStateProperty.all(8),
           ),
-          items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item.value,
-              child: Text(
-                item.label,
-                style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 16),
+          menuChildren: widget.items.map((item) {
+            final isSelected = item.value == widget.value;
+            return MenuItemButton(
+              onPressed: () {
+                widget.onChanged(item.value);
+                _menuController.close();
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
+                    return Colors.white.withValues(alpha: 0.1);
+                  }
+                  return Colors.transparent;
+                }),
+                foregroundColor: WidgetStateProperty.all(
+                  isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                ),
+                padding: WidgetStateProperty.all(
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                minimumSize: WidgetStateProperty.all(
+                  Size(constraints.maxWidth, 40),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
+                  ),
+                  if (isSelected)
+                    const Icon(
+                      Icons.check,
+                      size: 20,
+                      color: AppColors.textPrimary,
+                    ),
+                ],
               ),
             );
           }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              onChanged(value);
-            }
+          builder: (context, controller, child) {
+            return GestureDetector(
+              onTap: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: AppRadius.radiusMD,
+                  border: Border.all(
+                    color: controller.isOpen
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _selectedLabel,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Icon(
+                      controller.isOpen
+                          ? Icons.arrow_drop_up_rounded
+                          : Icons.arrow_drop_down_rounded,
+                      color: const Color(0x99FFFFFF),
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }

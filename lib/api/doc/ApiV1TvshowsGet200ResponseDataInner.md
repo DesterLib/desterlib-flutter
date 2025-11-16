@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **creator** | **String** | Creator of the TV show | [optional] 
 **network** | **String** | Network that aired the TV show | [optional] 
 **mediaId** | **String** |  | [optional] 
-**media** | [**ApiV1SearchGet200ResponseDataTvShowsInnerMedia**](ApiV1SearchGet200ResponseDataTvShowsInnerMedia.md) |  | [optional] 
+**media** | [**ApiV1TvshowsGet200ResponseDataInnerMedia**](ApiV1TvshowsGet200ResponseDataInnerMedia.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

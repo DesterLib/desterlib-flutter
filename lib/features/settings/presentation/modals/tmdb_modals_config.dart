@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dester/shared/widgets/modals/configurable_modal.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/features/settings/data/tmdb_settings_provider.dart';
@@ -33,7 +33,7 @@ class TmdbApiKeyModal {
               ModalBannerConfig(
                 message:
                     'Enter your TMDB API key to enable library management features.',
-                type: SettingsModalBannerType.info,
+                type: DModalBannerType.info,
               ),
             ],
       fields: [
@@ -95,7 +95,7 @@ class TmdbRequiredModal {
             message:
                 'You need to configure your TMDB API key before adding '
                 'library items. This ensures proper metadata fetching for movies and TV shows.',
-            type: SettingsModalBannerType.warning,
+            type: DModalBannerType.warning,
           ),
         ],
         fields: const [],

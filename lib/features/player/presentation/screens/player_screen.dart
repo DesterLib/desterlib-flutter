@@ -7,6 +7,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/shared/utils/track_helper.dart';
+import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
 import '../provider/video_player_provider.dart';
 import '../widgets/player_controls.dart';
@@ -142,9 +143,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 ),
               ),
               AppSpacing.gapVerticalXL,
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text('Go Back'),
+              DButton(
+                label: 'Go Back',
+                onTap: () => context.pop(),
+                size: DButtonSize.sm,
+                variant: DButtonVariant.secondary,
               ),
             ],
           ),

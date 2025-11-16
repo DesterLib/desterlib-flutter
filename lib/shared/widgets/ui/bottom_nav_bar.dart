@@ -106,7 +106,7 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
                               duration: const Duration(milliseconds: 350),
                               curve: Curves.easeInOutCubic,
                               width: _pillWidth,
-                              height: 60,
+                              height: 50,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(50),
@@ -164,7 +164,7 @@ class _NavBarItem extends StatelessWidget {
       },
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -226,8 +226,8 @@ class _SearchButton extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: Container(
-            width: 68,
-            height: 68,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               color: Colors.grey.shade800.withValues(alpha: 0.1),
               shape: BoxShape.circle,

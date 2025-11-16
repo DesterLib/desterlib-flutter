@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/app_bar.dart';
 
 class AnimatedAppBarPage extends StatefulWidget {
   final String title;
-  final Widget child;
+  final Widget? child;
+  final Widget Function(double scrollOffset)? childBuilder;
   final List<Widget>? actions;
   final Widget? leading;
   final Widget Function(bool isScrolled)?
   leadingBuilder; // Dynamic leading based on scroll state
   final bool centerTitle;
-  final double appBarHeight;
+  final bool useCompactHeight; // Use 80px height instead of 120px
   final double? maxWidthConstraint;
   final bool extendBodyBehindAppBar;
   final bool addBottomNavPadding;
@@ -24,12 +26,13 @@ class AnimatedAppBarPage extends StatefulWidget {
   const AnimatedAppBarPage({
     super.key,
     required this.title,
-    required this.child,
+    this.child,
+    this.childBuilder,
     this.actions,
     this.leading,
     this.leadingBuilder,
     this.centerTitle = false,
-    this.appBarHeight = 120.0,
+    this.useCompactHeight = false,
     this.maxWidthConstraint,
     this.extendBodyBehindAppBar = true,
     this.addBottomNavPadding = true,
@@ -40,6 +43,10 @@ class AnimatedAppBarPage extends StatefulWidget {
   }) : assert(
          leading == null || leadingBuilder == null,
          'Cannot provide both leading and leadingBuilder',
+       ),
+       assert(
+         child == null || childBuilder == null,
+         'Cannot provide both child and childBuilder',
        );
 
   @override
@@ -55,8 +62,11 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     super.initState();
     // Initialize scroll offset based on top padding
     // If no top padding and body extends behind app bar, start as "scrolled"
+    final appBarHeight = widget.useCompactHeight
+        ? AppLayout.appBarHeightCompact
+        : AppLayout.appBarHeightRegular;
     _scrollOffset = (!widget.addTopPadding && widget.extendBodyBehindAppBar)
-        ? widget.appBarHeight
+        ? appBarHeight
         : 0.0;
     _scrollController.addListener(_onScroll);
   }
@@ -76,17 +86,26 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBarHeight = widget.useCompactHeight
+        ? AppLayout.appBarHeightCompact
+        : AppLayout.appBarHeightRegular;
+
+    // Build child with scroll offset if childBuilder is provided
+    final childContent = widget.childBuilder != null
+        ? widget.childBuilder!(_scrollOffset)
+        : widget.child!;
+
     final childWidget = widget.maxWidthConstraint != null
         ? Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: widget.maxWidthConstraint!),
-              child: widget.child,
+              child: childContent,
             ),
           )
-        : widget.child;
+        : childContent;
 
     // Calculate opacity and offset based on scroll position
-    const fadeDistance = 40.0;
+    const fadeDistance = AppLayout.extraLargePadding;
     final scrollThreshold = widget.scrollThresholdForTitle ?? 0.0;
 
     final opacity = widget.showTitleOnScroll
@@ -107,13 +126,14 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
               0.5; // Shift up by half the scroll amount
 
     // Calculate bottom padding for bottom navigation bar
-    // Bottom nav is ~68px total (60px pill + 8px padding)
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final isMobile = screenWidth <= 900;
+    final isMobile = AppBreakpoints.isMobile(screenWidth);
     final bottomPadding = widget.addBottomNavPadding && isMobile
-        ? 120.0 // Space for bottom nav bar (80px) + extra padding (40px)
-        : 40.0; // Extra padding for desktop
+        ? AppLayout.bottomNavBarHeight +
+              AppLayout
+                  .extraLargePadding // Space for bottom nav bar + extra padding
+        : AppLayout.extraLargePadding; // Extra padding for desktop
 
     // Show background when scrolled
     // For showTitleOnScroll mode, show on desktop too; otherwise only on mobile
@@ -127,15 +147,18 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
     return Scaffold(
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(widget.appBarHeight),
+        preferredSize: Size.fromHeight(appBarHeight),
         child: DAppBar(
+          key: ValueKey('app_bar_${widget.title}'),
           title: widget.title,
           actions: widget.actions,
           leading: widget.leadingBuilder != null
               ? widget.leadingBuilder!(showBackground)
               : widget.leading,
+          automaticallyImplyLeading:
+              widget.leadingBuilder == null && widget.leading == null,
           centerTitle: widget.centerTitle,
-          height: widget.appBarHeight,
+          height: appBarHeight,
           maxWidthConstraint: widget.maxWidthConstraint,
           showBackground: showBackground,
           backgroundOpacity: backgroundOpacity,
@@ -162,7 +185,7 @@ class _AnimatedAppBarPageState extends State<AnimatedAppBarPage> {
               children: [
                 // Add top padding when body extends behind app bar (if enabled)
                 if (widget.extendBodyBehindAppBar && widget.addTopPadding)
-                  SizedBox(height: widget.appBarHeight),
+                  SizedBox(height: appBarHeight),
                 Padding(
                   padding: EdgeInsets.only(bottom: bottomPadding),
                   child: childWidget,

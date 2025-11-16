@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/modals/configurable_modal.dart';
-import 'package:dester/shared/widgets/modals/settings_modal_wrapper.dart';
+import 'package:dester/shared/widgets/modals/d_modal_wrapper.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
@@ -29,7 +29,7 @@ class DeleteLibraryModal {
         ModalBannerConfig(
           message:
               'Warning: This action cannot be undone. Media files on disk will not be deleted.',
-          type: SettingsModalBannerType.warning,
+          type: DModalBannerType.warning,
           icon: Icons.warning_amber_outlined,
         ),
       ],

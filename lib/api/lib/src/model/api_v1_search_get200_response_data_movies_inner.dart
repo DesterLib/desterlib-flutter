@@ -3,7 +3,7 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_movies_inner_media.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -44,7 +44,7 @@ abstract class ApiV1SearchGet200ResponseDataMoviesInner implements Built<ApiV1Se
   String? get mediaId;
 
   @BuiltValueField(wireName: r'media')
-  ApiV1MoviesGet200ResponseDataInnerMedia? get media;
+  ApiV1SearchGet200ResponseDataMoviesInnerMedia? get media;
 
   ApiV1SearchGet200ResponseDataMoviesInner._();
 
@@ -122,7 +122,7 @@ class _$ApiV1SearchGet200ResponseDataMoviesInnerSerializer implements PrimitiveS
       yield r'media';
       yield serializers.serialize(
         object.media,
-        specifiedType: const FullType(ApiV1MoviesGet200ResponseDataInnerMedia),
+        specifiedType: const FullType(ApiV1SearchGet200ResponseDataMoviesInnerMedia),
       );
     }
   }
@@ -205,8 +205,8 @@ class _$ApiV1SearchGet200ResponseDataMoviesInnerSerializer implements PrimitiveS
         case r'media':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(ApiV1MoviesGet200ResponseDataInnerMedia),
-          ) as ApiV1MoviesGet200ResponseDataInnerMedia;
+            specifiedType: const FullType(ApiV1SearchGet200ResponseDataMoviesInnerMedia),
+          ) as ApiV1SearchGet200ResponseDataMoviesInnerMedia;
           result.media.replace(valueDes);
           break;
         default:

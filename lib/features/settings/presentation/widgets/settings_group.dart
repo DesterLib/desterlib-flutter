@@ -35,7 +35,7 @@ class DSettingsGroup extends StatelessWidget {
             ),
           ),
         ),
-        
+
         Container(
           margin: EdgeInsets.only(
             left: padding?.resolve(TextDirection.ltr).left ?? 16,
@@ -48,7 +48,7 @@ class DSettingsGroup extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
                 color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
+                width: 0.5,
               ),
             ),
           ),
@@ -58,8 +58,8 @@ class DSettingsGroup extends StatelessWidget {
                 _buildItemWithBorderRadius(items[i], i, items.length),
                 if (i < items.length - 1)
                   Divider(
-                    height: 1,
-                    thickness: 1,
+                    height: 0.5,
+                    thickness: 0.5,
                     color: Colors.white.withValues(alpha: 0.2),
                   ),
               ],
@@ -70,9 +70,13 @@ class DSettingsGroup extends StatelessWidget {
     );
   }
 
-  Widget _buildItemWithBorderRadius(DSettingsItem item, int index, int totalItems) {
+  Widget _buildItemWithBorderRadius(
+    DSettingsItem item,
+    int index,
+    int totalItems,
+  ) {
     BorderRadius borderRadius;
-    
+
     if (totalItems == 1) {
       borderRadius = BorderRadius.circular(15);
     } else if (index == 0) {

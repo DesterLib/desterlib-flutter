@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
@@ -12,9 +13,9 @@ import 'package:dester/features/library/data/providers/library_provider.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/app/providers.dart';
 import 'package:dester/core/providers/websocket_provider.dart';
-import 'package:dester/core/services/websocket_service.dart';
 import 'package:dester/shared/widgets/ui/scan_progress_bar.dart';
 import 'package:dester/features/library/utils/library_helpers.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import '../widgets/settings_layout.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
@@ -32,6 +33,9 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
   @override
   Widget build(BuildContext context) {
     final librariesAsync = ref.watch(actualLibrariesProvider);
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
 
     // Listen for scan completion and show toast notifications
     ref.listen<ScanProgressState>(scanProgressProvider, (previous, next) {
@@ -77,8 +81,16 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
     });
 
     return AnimatedAppBarPage(
+      key: const ValueKey('manage_libraries_screen'),
       title: 'Manage Libraries',
+      useCompactHeight: isDesktop,
       maxWidthConstraint: 1220,
+      leadingBuilder: (isScrolled) => DButton(
+        leftIcon: PlatformIcons.arrowBack,
+        variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
+        size: DButtonSize.sm,
+        onTap: () => context.pop(),
+      ),
       actions: [
         // Refresh button
         IconButton(
@@ -115,7 +127,6 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
               // Library was added successfully, refresh to show scan progress
               ref.read(refreshLibrariesProvider)();
 
-              if (!mounted) return;
               DToast.show(
                 context,
                 message: 'Library scan started...',
@@ -134,10 +145,26 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
 
           return _LibrariesList(libraries: libraries);
         },
-        loading: () => Center(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: const Center(child: DLoadingIndicator()),
+        loading: () => RespectSidebar(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Use available height from constraints, or calculate from screen if unbounded
+              final screenHeight = MediaQuery.of(context).size.height;
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isDesktop = screenWidth > 900;
+              final appBarHeight = isDesktop
+                  ? AppLayout.appBarHeightCompact
+                  : AppLayout.appBarHeightRegular;
+
+              final availableHeight = constraints.maxHeight.isFinite
+                  ? constraints.maxHeight
+                  : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+              return SizedBox(
+                height: availableHeight,
+                child: const Center(child: DLoadingIndicator()),
+              );
+            },
           ),
         ),
         error: (error, stack) => _ErrorState(
@@ -153,32 +180,52 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PlatformIcons.videoLibrary,
-              size: 64,
-              color: AppColors.textTertiary,
-            ),
-            AppSpacing.gapVerticalLG,
-            Text(
-              'No libraries found',
-              style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
-            ),
-            AppSpacing.gapVerticalSM,
-            Text(
-              'Click the "Add Library" button to scan your media folders',
-              style: AppTypography.bodyBase.copyWith(
-                color: AppColors.textTertiary,
+    return RespectSidebar(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use available height from constraints, or calculate from screen if unbounded
+          final screenHeight = MediaQuery.of(context).size.height;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final isDesktop = screenWidth > 900;
+          final appBarHeight = isDesktop
+              ? AppLayout.appBarHeightCompact
+              : AppLayout.appBarHeightRegular;
+
+          final availableHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+          return SizedBox(
+            height: availableHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    PlatformIcons.videoLibrary,
+                    size: 64,
+                    color: AppColors.textTertiary,
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  Text(
+                    'No libraries found',
+                    style: AppTypography.h3.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  AppSpacing.gapVerticalSM,
+                  Text(
+                    'Click the "Add Library" button to scan your media folders',
+                    style: AppTypography.bodyBase.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -193,175 +240,207 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-            AppSpacing.gapVerticalLG,
-            Text('Error loading libraries', style: AppTypography.h3),
-            AppSpacing.gapVerticalSM,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                error,
-                style: AppTypography.bodyBase.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
+    return RespectSidebar(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use available height from constraints, or calculate from screen if unbounded
+          final screenHeight = MediaQuery.of(context).size.height;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final isDesktop = screenWidth > 900;
+          final appBarHeight = isDesktop
+              ? AppLayout.appBarHeightCompact
+              : AppLayout.appBarHeightRegular;
+
+          final availableHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+          return SizedBox(
+            height: availableHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  Text('Error loading libraries', style: AppTypography.h3),
+                  AppSpacing.gapVerticalSM,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      error,
+                      style: AppTypography.bodyBase.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  DButton(
+                    label: 'Retry',
+                    variant: DButtonVariant.secondary,
+                    size: DButtonSize.md,
+                    onTap: onRetry,
+                  ),
+                ],
               ),
             ),
-            AppSpacing.gapVerticalLG,
-            DButton(
-              label: 'Retry',
-              variant: DButtonVariant.secondary,
-              size: DButtonSize.md,
-              onTap: onRetry,
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
 // Libraries list widget using DSettingsLayout
-class _LibrariesList extends ConsumerWidget {
+class _LibrariesList extends ConsumerStatefulWidget {
   final BuiltList<ModelLibrary> libraries;
 
   const _LibrariesList({required this.libraries});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DSettingsLayout(
-      groups: [
-        DSettingsGroup(
-          title: 'Libraries',
-          items: libraries
-              .map((library) => _buildLibraryItem(library, ref, context))
-              .toList(),
-        ),
-      ],
-    );
-  }
+  ConsumerState<_LibrariesList> createState() => _LibrariesListState();
+}
 
-  DSettingsItem _buildLibraryItem(
-    ModelLibrary library,
-    WidgetRef ref,
-    BuildContext context,
-  ) {
-    final scanProgress = ref.watch(scanProgressProvider);
-    final progress = scanProgress.getProgress(library.id);
-    final isScanning = progress?.isScanning ?? false;
+class _LibrariesListState extends ConsumerState<_LibrariesList> {
+  @override
+  Widget build(BuildContext context) {
+    // Listen for WebSocket connection changes and show toast
+    ref.listen<ScanProgressState>(scanProgressProvider, (previous, next) {
+      if (!mounted) return;
 
-    return DSettingsItem(
-      title: library.name,
-      subtitle: _buildSubtitle(library, progress, context),
-      icon: LibraryHelpers.getLibraryIcon(library.libraryType),
-      progressBar: isScanning
-          ? ScanProgressBar(progress: progress, height: 2)
-          : null,
-      trailing: LayoutBuilder(
-        builder: (context, constraints) {
-          // On very small screens, show compact actions
-          final isVerySmall = MediaQuery.of(context).size.width < 400;
+      // Show toast when connection state changes
+      if (previous != null && previous.isConnected && !next.isConnected) {
+        DToast.show(
+          context,
+          message: 'WebSocket disconnected - Scan progress updates unavailable',
+          type: DToastType.error,
+          duration: const Duration(seconds: 4),
+        );
+      } else if (previous != null &&
+          !previous.isConnected &&
+          next.isConnected) {
+        DToast.show(
+          context,
+          message: 'WebSocket connected',
+          type: DToastType.success,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    });
 
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isScanning && !isVerySmall) ...[
-                CompactScanProgress(progress: progress!),
-                const SizedBox(width: 8),
-              ],
-              IconButton(
-                icon: Icon(PlatformIcons.refresh, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Rescan library',
-                onPressed: isScanning
-                    ? null
-                    : () => _handleRescan(context, ref, library),
-              ),
-              const SizedBox(width: 2),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Edit library',
-                onPressed: () async {
-                  final result = await EditLibraryModal.show(
-                    context,
-                    ref,
-                    libraryId: library.id,
-                  );
-                  if (result == true) {
-                    ref.read(refreshLibrariesProvider)();
-                  }
-                },
-              ),
-              const SizedBox(width: 2),
-              IconButton(
-                icon: Icon(PlatformIcons.delete, size: 18),
-                color: Colors.white.withValues(alpha: 0.7),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                tooltip: 'Delete library',
-                onPressed: () async {
-                  final result = await DeleteLibraryModal.show(
-                    context,
-                    ref,
-                    libraryId: library.id,
-                  );
-                  if (result == true) {
-                    ref.read(refreshLibrariesProvider)();
-                  }
-                },
-              ),
-            ],
-          );
-        },
+    return RespectSidebar(
+      child: DSettingsLayout(
+        padding: EdgeInsets.zero, // RespectSidebar handles padding
+        groups: [
+          DSettingsGroup(
+            title: 'Libraries',
+            items: widget.libraries
+                .map((library) => _buildLibraryItem(library, context))
+                .toList(),
+          ),
+        ],
       ),
     );
   }
 
-  String _buildSubtitle(
-    ModelLibrary library,
-    ScanProgressMessage? progress,
-    BuildContext context,
-  ) {
-    final parts = <String>[];
+  DSettingsItem _buildLibraryItem(ModelLibrary library, BuildContext context) {
+    final scanProgress = ref.watch(scanProgressProvider);
+    final progress = scanProgress.getProgress(library.id);
+    final isScanning = progress?.isScanning ?? false;
 
-    // Add type
-    parts.add(LibraryHelpers.getLibraryTypeDisplayName(library.libraryType));
-
-    // Add path if available (truncate if too long on mobile)
+    // Build subtitle with batch progress info when scanning
+    String subtitle = LibraryHelpers.getLibraryTypeDisplayName(
+      library.libraryType,
+    );
     if (library.libraryPath != null) {
-      String path = library.libraryPath!;
+      subtitle += ' • ${library.libraryPath}';
+    }
 
-      // On smaller screens, show shortened path
-      if (MediaQuery.of(context).size.width < 600 && path.length > 40) {
-        // Show just the last part of the path
-        final pathParts = path.split('/');
-        if (pathParts.length > 2) {
-          path = '.../${pathParts[pathParts.length - 2]}/${pathParts.last}';
-        }
+    // Add batch progress info when scanning
+    if (isScanning && progress != null) {
+      final batchMatch = RegExp(
+        r'Batch (\d+)/(\d+)',
+      ).firstMatch(progress.message);
+      if (batchMatch != null) {
+        subtitle += ' • Batch ${batchMatch.group(1)}/${batchMatch.group(2)}';
       }
-
-      parts.add(path);
+      if (progress.total > 0) {
+        final percent = ((progress.current / progress.total) * 100).toInt();
+        subtitle += ' • ${progress.current}/${progress.total} ($percent%)';
+      }
+      if (progress.batchItemComplete != null) {
+        subtitle += ' • Latest: ${progress.batchItemComplete!.folderName}';
+      }
     }
 
-    // Add scan progress message if scanning
-    if (progress != null &&
-        progress.isScanning &&
-        progress.message.isNotEmpty) {
-      parts.add(progress.message);
-    }
-
-    return parts.join(' • ');
+    return DSettingsItem(
+      title: library.name,
+      subtitle: subtitle,
+      icon: LibraryHelpers.getLibraryIcon(library.libraryType),
+      progressBar: isScanning
+          ? ScanProgressBar(progress: progress, height: 2)
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isScanning) ...[
+            CompactScanProgress(progress: progress!),
+            const SizedBox(width: 8),
+          ],
+          IconButton(
+            icon: Icon(PlatformIcons.refresh, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Rescan library',
+            onPressed: isScanning
+                ? null
+                : () => _handleRescan(context, ref, library),
+          ),
+          const SizedBox(width: 2),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Edit library',
+            onPressed: () async {
+              final result = await EditLibraryModal.show(
+                context,
+                ref,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.read(refreshLibrariesProvider)();
+              }
+            },
+          ),
+          const SizedBox(width: 2),
+          IconButton(
+            icon: Icon(PlatformIcons.delete, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Delete library',
+            onPressed: () async {
+              final result = await DeleteLibraryModal.show(
+                context,
+                ref,
+                libraryId: library.id,
+              );
+              if (result == true) {
+                ref.read(refreshLibrariesProvider)();
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleRescan(

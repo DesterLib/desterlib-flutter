@@ -105,6 +105,8 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
   @override
   final String? backdropUrl;
   @override
+  final BuiltList<String>? meshGradientColors;
+  @override
   final DateTime? releaseDate;
   @override
   final num? rating;
@@ -125,6 +127,7 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
     this.description,
     this.posterUrl,
     this.backdropUrl,
+    this.meshGradientColors,
     this.releaseDate,
     this.rating,
     this.createdAt,
@@ -149,6 +152,7 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
         description == other.description &&
         posterUrl == other.posterUrl &&
         backdropUrl == other.backdropUrl &&
+        meshGradientColors == other.meshGradientColors &&
         releaseDate == other.releaseDate &&
         rating == other.rating &&
         createdAt == other.createdAt &&
@@ -164,6 +168,7 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
     _$hash = $jc(_$hash, description.hashCode);
     _$hash = $jc(_$hash, posterUrl.hashCode);
     _$hash = $jc(_$hash, backdropUrl.hashCode);
+    _$hash = $jc(_$hash, meshGradientColors.hashCode);
     _$hash = $jc(_$hash, releaseDate.hashCode);
     _$hash = $jc(_$hash, rating.hashCode);
     _$hash = $jc(_$hash, createdAt.hashCode);
@@ -183,6 +188,7 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
           ..add('description', description)
           ..add('posterUrl', posterUrl)
           ..add('backdropUrl', backdropUrl)
+          ..add('meshGradientColors', meshGradientColors)
           ..add('releaseDate', releaseDate)
           ..add('rating', rating)
           ..add('createdAt', createdAt)
@@ -224,6 +230,12 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
   String? get backdropUrl => _$this._backdropUrl;
   set backdropUrl(String? backdropUrl) => _$this._backdropUrl = backdropUrl;
 
+  ListBuilder<String>? _meshGradientColors;
+  ListBuilder<String> get meshGradientColors =>
+      _$this._meshGradientColors ??= ListBuilder<String>();
+  set meshGradientColors(ListBuilder<String>? meshGradientColors) =>
+      _$this._meshGradientColors = meshGradientColors;
+
   DateTime? _releaseDate;
   DateTime? get releaseDate => _$this._releaseDate;
   set releaseDate(DateTime? releaseDate) => _$this._releaseDate = releaseDate;
@@ -253,6 +265,7 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
       _description = $v.description;
       _posterUrl = $v.posterUrl;
       _backdropUrl = $v.backdropUrl;
+      _meshGradientColors = $v.meshGradientColors?.toBuilder();
       _releaseDate = $v.releaseDate;
       _rating = $v.rating;
       _createdAt = $v.createdAt;
@@ -278,20 +291,37 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
   ApiV1MoviesGet200ResponseDataInnerMedia build() => _build();
 
   _$ApiV1MoviesGet200ResponseDataInnerMedia _build() {
-    final _$result =
-        _$v ??
-        _$ApiV1MoviesGet200ResponseDataInnerMedia._(
-          id: id,
-          title: title,
-          type: type,
-          description: description,
-          posterUrl: posterUrl,
-          backdropUrl: backdropUrl,
-          releaseDate: releaseDate,
-          rating: rating,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+    _$ApiV1MoviesGet200ResponseDataInnerMedia _$result;
+    try {
+      _$result =
+          _$v ??
+          _$ApiV1MoviesGet200ResponseDataInnerMedia._(
+            id: id,
+            title: title,
+            type: type,
+            description: description,
+            posterUrl: posterUrl,
+            backdropUrl: backdropUrl,
+            meshGradientColors: _meshGradientColors?.build(),
+            releaseDate: releaseDate,
+            rating: rating,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'meshGradientColors';
+        _meshGradientColors?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'ApiV1MoviesGet200ResponseDataInnerMedia',
+          _$failedField,
+          e.toString(),
         );
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

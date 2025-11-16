@@ -4,7 +4,7 @@ import 'dart:ui';
 
 enum DButtonVariant { primary, secondary, ghost, danger, neutral }
 
-enum DButtonSize { sm, md, lg }
+enum DButtonSize { sm, md, lg, xs }
 
 class _ButtonStyle {
   final Color backgroundColor;
@@ -28,7 +28,8 @@ class _ButtonStyle {
 
 class DButton extends StatefulWidget {
   final String? label;
-  final IconData? icon;
+  final IconData? leftIcon;
+  final IconData? rightIcon;
   final BorderRadius borderRadius;
   final bool fullWidth;
   final DButtonVariant variant;
@@ -37,7 +38,8 @@ class DButton extends StatefulWidget {
   const DButton({
     super.key,
     this.label,
-    this.icon,
+    this.leftIcon,
+    this.rightIcon,
     this.borderRadius = const BorderRadius.all(Radius.circular(50)),
     this.fullWidth = false,
     this.variant = DButtonVariant.primary,
@@ -55,6 +57,12 @@ class _DButtonState extends State<DButton> {
 
   ({double iconSize, double fontSize, EdgeInsets padding}) get _sizeProperties {
     switch (widget.size) {
+      case DButtonSize.xs:
+        return (
+          iconSize: 16,
+          fontSize: 12,
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        );
       case DButtonSize.sm:
         return (
           iconSize: 20,
@@ -184,11 +192,7 @@ class _DButtonState extends State<DButton> {
         onPointerUp: (_) => setState(() => _isPressed = false),
         onPointerCancel: (_) => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed
-              ? 0.98
-              : _isHovered
-              ? 1.02
-              : 1.0,
+          scale: _isPressed ? 0.96 : 1.0,
           duration: const Duration(milliseconds: 100),
           child:
               (widget.variant == DButtonVariant.secondary ||
@@ -247,25 +251,50 @@ class _DButtonState extends State<DButton> {
   Widget _buildButtonContent(_ButtonStyle style) {
     final sizeProps = _sizeProperties;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: style.alignment,
-      children: [
-        if (widget.icon != null)
-          Icon(widget.icon, size: sizeProps.iconSize, color: style.textColor),
-        if (widget.icon != null && widget.label != null)
-          SizedBox(width: style.iconLabelSpacing),
-        if (widget.label != null)
-          Text(
-            widget.label!,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: sizeProps.fontSize,
-              letterSpacing: -0.5,
-              color: style.textColor,
+    return AnimatedDefaultTextStyle(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontSize: sizeProps.fontSize,
+        letterSpacing: -0.5,
+        color: style.textColor,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: style.alignment,
+        children: [
+          if (widget.leftIcon != null)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                widget.leftIcon,
+                key: ValueKey(
+                  '${widget.hashCode}_left_${widget.leftIcon}_${style.textColor}',
+                ),
+                size: sizeProps.iconSize,
+                color: style.textColor,
+              ),
             ),
-          ),
-      ],
+          if (widget.leftIcon != null && widget.label != null)
+            SizedBox(width: style.iconLabelSpacing),
+          if (widget.label != null) Text(widget.label!),
+          if (widget.rightIcon != null && widget.label != null)
+            SizedBox(width: style.iconLabelSpacing),
+          if (widget.rightIcon != null)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                widget.rightIcon,
+                key: ValueKey(
+                  '${widget.hashCode}_right_${widget.rightIcon}_${style.textColor}',
+                ),
+                size: sizeProps.iconSize,
+                color: style.textColor,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

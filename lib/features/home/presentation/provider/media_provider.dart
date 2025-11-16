@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openapi/openapi.dart';
 import 'package:dester/app/providers.dart';
 
-/// Provider for fetching movies (limited to 10 items)
+/// Provider for fetching movies (API returns 10 most recent)
 final moviesProvider =
     FutureProvider.autoDispose<BuiltList<ApiV1MoviesGet200ResponseDataInner>>((
       ref,
@@ -13,20 +13,14 @@ final moviesProvider =
 
       try {
         final response = await moviesApi.apiV1MoviesGet();
-        final movies =
-            response.data?.data ??
+        return response.data?.data ??
             BuiltList<ApiV1MoviesGet200ResponseDataInner>();
-
-        // Limit to 10 items
-        return movies.length > 10
-            ? BuiltList<ApiV1MoviesGet200ResponseDataInner>(movies.take(10))
-            : movies;
       } catch (e) {
         throw Exception('Failed to load movies: $e');
       }
     });
 
-/// Provider for fetching TV shows (limited to 10 items)
+/// Provider for fetching TV shows (API returns 10 most recent)
 final tvShowsProvider =
     FutureProvider.autoDispose<BuiltList<ApiV1TvshowsGet200ResponseDataInner>>((
       ref,
@@ -36,14 +30,8 @@ final tvShowsProvider =
 
       try {
         final response = await tvShowsApi.apiV1TvshowsGet();
-        final tvShows =
-            response.data?.data ??
+        return response.data?.data ??
             BuiltList<ApiV1TvshowsGet200ResponseDataInner>();
-
-        // Limit to 10 items
-        return tvShows.length > 10
-            ? BuiltList<ApiV1TvshowsGet200ResponseDataInner>(tvShows.take(10))
-            : tvShows;
       } catch (e) {
         throw Exception('Failed to load TV shows: $e');
       }

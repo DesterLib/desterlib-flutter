@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **description** | **String** |  | [optional] 
 **posterUrl** | **String** |  | [optional] 
 **backdropUrl** | **String** |  | [optional] 
+**meshGradientColors** | **BuiltList&lt;String&gt;** | Hex color strings for mesh gradient (4 corners) | [optional] 
 **releaseDate** | [**DateTime**](DateTime.md) |  | [optional] 
 **rating** | **num** |  | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | [optional] 

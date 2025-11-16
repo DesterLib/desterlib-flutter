@@ -76,7 +76,7 @@ class _DSidebarState extends ConsumerState<DSidebar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(8),
       width: 300,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -84,12 +84,12 @@ class _DSidebarState extends ConsumerState<DSidebar> {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: ShapeDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Colors.black.withValues(alpha: 0.2),
               shape: RoundedSuperellipseBorder(
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(
                   color: Colors.white.withValues(alpha: 0.2),
-                  width: 1,
+                  width: 0.5,
                 ),
               ),
             ),

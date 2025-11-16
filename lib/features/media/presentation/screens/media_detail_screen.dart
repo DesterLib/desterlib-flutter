@@ -6,7 +6,8 @@ import 'package:openapi/openapi.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/ui/animated_app_bar_page.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
-import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/ui/loading_screen.dart';
+import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import '../widgets/media_data.dart';
 import '../widgets/media_hero_section.dart';
@@ -108,13 +109,14 @@ class MediaDetailScreen extends ConsumerWidget {
             600.0,
           ); // 16:9 aspect ratio capped at 600px
 
-    // Responsive app bar height: smaller on desktop, larger on mobile
+    // Calculate app bar height for scroll threshold calculation
     final appBarHeight = isMobile ? 120.0 : 80.0;
 
     return AnimatedAppBarPage(
+      key: ValueKey('media_detail_$id'),
       title: appBarTitle,
       showTitleOnScroll: true,
-      appBarHeight: appBarHeight,
+      useCompactHeight: !isMobile,
       addTopPadding: false, // Hero section starts from top
       scrollThresholdForTitle:
           heroHeight -
@@ -126,12 +128,12 @@ class MediaDetailScreen extends ConsumerWidget {
         letterSpacing: AppTypography.letterSpacingTight,
       ),
       leadingBuilder: (isScrolled) => DButton(
-        icon: PlatformIcons.arrowBack,
+        leftIcon: PlatformIcons.arrowBack,
         variant: isScrolled ? DButtonVariant.ghost : DButtonVariant.neutral,
         size: DButtonSize.sm,
         onTap: () => context.pop(),
       ),
-      child: mediaDetailAsync.when(
+      childBuilder: (scrollOffset) => mediaDetailAsync.when(
         data: (result) {
           if (result == null) {
             return _buildNotFound(context);
@@ -144,6 +146,7 @@ class MediaDetailScreen extends ConsumerWidget {
             mediaData: mediaData,
             isMobile: isMobile,
             tvShowSeasons: tvShowSeasons,
+            scrollOffset: scrollOffset,
             onPlayTapped: () => _handlePlayTapped(
               context,
               mediaData.id,
@@ -162,7 +165,7 @@ class MediaDetailScreen extends ConsumerWidget {
                     ),
           );
         },
-        loading: () => const _LoadingIndicator(),
+        loading: () => const DLoadingScreen(),
         error: (error, stack) => _buildError(context, error),
       ),
     );
@@ -225,6 +228,7 @@ class _MediaDetailContent extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPlayTapped;
   final BuiltList<ApiV1TvshowsIdGet200ResponseDataSeasonsInner>? tvShowSeasons;
+  final double scrollOffset;
   final Function(
     String episodeId,
     String episodeTitle,
@@ -238,14 +242,12 @@ class _MediaDetailContent extends StatelessWidget {
     required this.isMobile,
     required this.onPlayTapped,
     this.tvShowSeasons,
+    this.scrollOffset = 0.0,
     this.onEpisodePlay,
   });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 900;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,11 +256,11 @@ class _MediaDetailContent extends StatelessWidget {
           mediaData: mediaData,
           isMobile: isMobile,
           onPlayTapped: onPlayTapped,
+          scrollOffset: scrollOffset,
         ),
 
-        // Rest of content
-        Padding(
-          padding: EdgeInsets.only(left: 24, right: isDesktop ? 44 : 24),
+        // Content sections below hero
+        RespectSidebar(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -267,21 +269,21 @@ class _MediaDetailContent extends StatelessWidget {
               else
                 const SizedBox(height: 40),
 
-              // Overview section
-              if (mediaData.description.isNotEmpty) ...[
-                _OverviewSection(
+              // Overview section (mobile only - desktop shows in hero)
+              if (isMobile && mediaData.description.isNotEmpty) ...[
+                _MediaOverviewSection(
                   description: mediaData.description,
                   director: mediaData.director,
                   cast: mediaData.cast,
-                  isMobile: isMobile,
                 ),
+                if (mediaData.genres.isNotEmpty) const SizedBox(height: 40),
               ],
 
-              if (mediaData.genres.isNotEmpty) ...[
-                const SizedBox(height: 40),
+              // Genres section
+              if (mediaData.genres.isNotEmpty)
                 MediaGenresSection(genres: mediaData.genres),
-              ],
-              // Show seasons and episodes for TV shows
+
+              // TV Show seasons and episodes
               if (tvShowSeasons != null && tvShowSeasons!.isNotEmpty) ...[
                 const SizedBox(height: 48),
                 TvShowSeasonsSection(
@@ -289,6 +291,7 @@ class _MediaDetailContent extends StatelessWidget {
                   onEpisodePlay: onEpisodePlay,
                 ),
               ],
+
               const SizedBox(height: 48),
             ],
           ),
@@ -298,18 +301,16 @@ class _MediaDetailContent extends StatelessWidget {
   }
 }
 
-/// Overview section with description and credits
-class _OverviewSection extends StatelessWidget {
+/// Overview section with description and credits (mobile only)
+class _MediaOverviewSection extends StatelessWidget {
   final String description;
   final String director;
   final List<String> cast;
-  final bool isMobile;
 
-  const _OverviewSection({
+  const _MediaOverviewSection({
     required this.description,
     required this.director,
     required this.cast,
-    required this.isMobile,
   });
 
   @override
@@ -317,11 +318,11 @@ class _OverviewSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Overview',
           style: TextStyle(
             color: Colors.white,
-            fontSize: isMobile ? 18 : 20,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
           ),
@@ -331,14 +332,14 @@ class _OverviewSection extends StatelessWidget {
           description,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.85),
-            fontSize: isMobile ? 14 : 15,
+            fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.5,
             letterSpacing: -0.2,
           ),
         ),
 
-        // Cast and Director
+        // Cast and Director credits
         if (cast.isNotEmpty || director.isNotEmpty) ...[
           const SizedBox(height: 16),
           Wrap(
@@ -346,9 +347,9 @@ class _OverviewSection extends StatelessWidget {
             runSpacing: 12,
             children: [
               if (director.isNotEmpty)
-                _CreditItem(label: 'Director', value: director),
+                _MediaCreditItem(label: 'Director', value: director),
               if (cast.isNotEmpty)
-                _CreditItem(label: 'Cast', value: cast.take(3).join(', ')),
+                _MediaCreditItem(label: 'Cast', value: cast.take(3).join(', ')),
             ],
           ),
         ],
@@ -357,12 +358,12 @@ class _OverviewSection extends StatelessWidget {
   }
 }
 
-/// Credit item widget for director and cast
-class _CreditItem extends StatelessWidget {
+/// Credit item displaying label and value (e.g., Director, Cast)
+class _MediaCreditItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const _CreditItem({required this.label, required this.value});
+  const _MediaCreditItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -386,19 +387,6 @@ class _CreditItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Loading indicator widget
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF0a0a0a),
-      child: const Center(child: DLoadingIndicator()),
     );
   }
 }
