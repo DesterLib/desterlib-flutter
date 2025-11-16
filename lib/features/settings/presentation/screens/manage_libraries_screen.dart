@@ -145,10 +145,26 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
 
           return _LibrariesList(libraries: libraries);
         },
-        loading: () => Center(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: const Center(child: DLoadingIndicator()),
+        loading: () => RespectSidebar(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Use available height from constraints, or calculate from screen if unbounded
+              final screenHeight = MediaQuery.of(context).size.height;
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isDesktop = screenWidth > 900;
+              final appBarHeight = isDesktop
+                  ? AppLayout.appBarHeightCompact
+                  : AppLayout.appBarHeightRegular;
+
+              final availableHeight = constraints.maxHeight.isFinite
+                  ? constraints.maxHeight
+                  : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+              return SizedBox(
+                height: availableHeight,
+                child: const Center(child: DLoadingIndicator()),
+              );
+            },
           ),
         ),
         error: (error, stack) => _ErrorState(
@@ -164,32 +180,52 @@ class _ManageLibrariesScreenState extends ConsumerState<ManageLibrariesScreen> {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PlatformIcons.videoLibrary,
-              size: 64,
-              color: AppColors.textTertiary,
-            ),
-            AppSpacing.gapVerticalLG,
-            Text(
-              'No libraries found',
-              style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
-            ),
-            AppSpacing.gapVerticalSM,
-            Text(
-              'Click the "Add Library" button to scan your media folders',
-              style: AppTypography.bodyBase.copyWith(
-                color: AppColors.textTertiary,
+    return RespectSidebar(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use available height from constraints, or calculate from screen if unbounded
+          final screenHeight = MediaQuery.of(context).size.height;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final isDesktop = screenWidth > 900;
+          final appBarHeight = isDesktop
+              ? AppLayout.appBarHeightCompact
+              : AppLayout.appBarHeightRegular;
+
+          final availableHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+          return SizedBox(
+            height: availableHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    PlatformIcons.videoLibrary,
+                    size: 64,
+                    color: AppColors.textTertiary,
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  Text(
+                    'No libraries found',
+                    style: AppTypography.h3.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  AppSpacing.gapVerticalSM,
+                  Text(
+                    'Click the "Add Library" button to scan your media folders',
+                    style: AppTypography.bodyBase.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -204,35 +240,57 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-            AppSpacing.gapVerticalLG,
-            Text('Error loading libraries', style: AppTypography.h3),
-            AppSpacing.gapVerticalSM,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                error,
-                style: AppTypography.bodyBase.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
+    return RespectSidebar(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use available height from constraints, or calculate from screen if unbounded
+          final screenHeight = MediaQuery.of(context).size.height;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final isDesktop = screenWidth > 900;
+          final appBarHeight = isDesktop
+              ? AppLayout.appBarHeightCompact
+              : AppLayout.appBarHeightRegular;
+
+          final availableHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : screenHeight - appBarHeight - AppLayout.extraLargePadding;
+
+          return SizedBox(
+            height: availableHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  Text('Error loading libraries', style: AppTypography.h3),
+                  AppSpacing.gapVerticalSM,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      error,
+                      style: AppTypography.bodyBase.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  AppSpacing.gapVerticalLG,
+                  DButton(
+                    label: 'Retry',
+                    variant: DButtonVariant.secondary,
+                    size: DButtonSize.md,
+                    onTap: onRetry,
+                  ),
+                ],
               ),
             ),
-            AppSpacing.gapVerticalLG,
-            DButton(
-              label: 'Retry',
-              variant: DButtonVariant.secondary,
-              size: DButtonSize.md,
-              onTap: onRetry,
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

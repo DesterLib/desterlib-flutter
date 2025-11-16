@@ -10,7 +10,7 @@ class ApiConfig {
   /// Client semantic version (e.g., '0.1.0')
   /// This should match the version in pubspec.yaml and is synced from root package.json
   /// The actual API semantic version will be fetched from the /health endpoint
-  static const String clientVersion = '0.1.0'; // Synced from root package.json // Synced from root package.json
+  static const String clientVersion = '0.2.0'; // Synced from root package.json // Synced from root package.json // Synced from root package.json
 
   static const Duration timeout = Duration(seconds: 30);
   static const String _baseUrlKey = 'api_base_url';

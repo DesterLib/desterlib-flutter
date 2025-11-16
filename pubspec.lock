@@ -686,7 +686,7 @@ packages:
       path: "lib/api"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "0.2.0"
   package_config:
     dependency: transitive
     description:
