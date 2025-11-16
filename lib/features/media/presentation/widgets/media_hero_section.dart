@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dester/shared/widgets/ui/button.dart';
 import 'package:dester/shared/widgets/ui/badge.dart';
 import 'package:dester/shared/widgets/ui/loading_indicator.dart';
+import 'package:dester/shared/widgets/ui/cached_image.dart';
 import 'package:dester/shared/utils/platform_icons.dart';
 import 'package:dester/app/theme/theme.dart';
 import 'package:dester/shared/widgets/layout/respect_sidebar.dart';
@@ -15,6 +16,12 @@ class MediaHeroSection extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onPlayTapped;
   final double scrollOffset;
+
+  // Constants
+  static const double _maxCornerRadius = 32.0;
+  static const double _overscrollDivisor = 100.0;
+  static const double _desktopContentMaxWidth = 500.0;
+  static const double _descriptionRightPadding = 80.0;
 
   const MediaHeroSection({
     super.key,
@@ -32,14 +39,20 @@ class MediaHeroSection extends StatelessWidget {
     );
   }
 
+  /// Calculates corner radius based on scroll offset (for overscroll effect)
+  double _calculateCornerRadius() {
+    final overscrollAmount = scrollOffset < 0 ? -scrollOffset : 0.0;
+    return (overscrollAmount / _overscrollDivisor * _maxCornerRadius).clamp(
+      0.0,
+      _maxCornerRadius,
+    );
+  }
+
   /// Builds mobile hero with poster image and simple gradient
   Widget _buildMobileHero() {
     final imageUrl = mediaData.posterUrl ?? mediaData.backdropUrl;
     final hasImage = imageUrl != null;
-
-    // Calculate corner radius for overscroll (negative scroll)
-    final overscrollAmount = scrollOffset < 0 ? -scrollOffset : 0.0;
-    final cornerRadius = (overscrollAmount / 100 * 32).clamp(0.0, 32.0);
+    final cornerRadius = _calculateCornerRadius();
 
     return AspectRatio(
       aspectRatio: 2 / 3, // Standard poster aspect ratio
@@ -82,10 +95,7 @@ class MediaHeroSection extends StatelessWidget {
   /// Builds desktop hero with backdrop image, mesh gradient, and progressive blur
   Widget _buildDesktopHero() {
     final imageUrl = mediaData.backdropUrl ?? mediaData.posterUrl;
-
-    // Calculate corner radius for overscroll
-    final overscrollAmount = scrollOffset < 0 ? -scrollOffset : 0.0;
-    final cornerRadius = (overscrollAmount / 100 * 32).clamp(0.0, 32.0);
+    final cornerRadius = _calculateCornerRadius();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -118,11 +128,12 @@ class MediaHeroSection extends StatelessWidget {
                 bottom: AppLayout.extraLargePadding,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    // Calculate available width (excluding sidebar)
                     final availableWidth =
                         constraints.maxWidth - AppLayout.sidebarWidth;
-                    // Max content width is 40% of available width
-                    final maxContentWidth = availableWidth * 0.4;
+                    final maxContentWidth = _desktopContentMaxWidth.clamp(
+                      0.0,
+                      availableWidth,
+                    );
 
                     return RespectSidebar(
                       leftPadding: AppLayout.extraLargePadding,
@@ -180,23 +191,13 @@ class MediaHeroSection extends StatelessWidget {
           runSpacing: AppSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            DBadge(
+            _buildMetadataBadge(
               icon: PlatformIcons.star,
               label: mediaData.rating,
-              fontSize: isMobile ? 11 : 12,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? AppSpacing.xs : 10,
-                vertical: isMobile ? 5 : 6,
-              ),
             ),
-            DBadge(
+            _buildMetadataBadge(
               icon: PlatformIcons.calendar,
               label: mediaData.year,
-              fontSize: isMobile ? 11 : 12,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? AppSpacing.xs : 10,
-                vertical: isMobile ? 5 : 6,
-              ),
             ),
           ],
         ),
@@ -208,16 +209,7 @@ class MediaHeroSection extends StatelessWidget {
           runSpacing: AppSpacing.xxs,
           children: mediaData.genres
               .take(3)
-              .map(
-                (genre) => DBadge(
-                  label: genre,
-                  fontSize: isMobile ? 11 : 12,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? AppSpacing.xs : 10,
-                    vertical: isMobile ? AppSpacing.xxs : 5,
-                  ),
-                ),
-              )
+              .map((genre) => _buildGenreBadge(genre))
               .toList(),
         ),
 
@@ -280,6 +272,31 @@ class MediaHeroSection extends StatelessWidget {
     );
   }
 
+  /// Builds metadata badge with icon
+  Widget _buildMetadataBadge({required IconData icon, required String label}) {
+    return DBadge(
+      icon: icon,
+      label: label,
+      fontSize: isMobile ? 11 : 12,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? AppSpacing.xs : 10,
+        vertical: isMobile ? 5 : 6,
+      ),
+    );
+  }
+
+  /// Builds genre badge
+  Widget _buildGenreBadge(String genre) {
+    return DBadge(
+      label: genre,
+      fontSize: isMobile ? 11 : 12,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? AppSpacing.xs : 10,
+        vertical: isMobile ? AppSpacing.xxs : 5,
+      ),
+    );
+  }
+
   /// Builds description section with max 3 lines and "More" button
   Widget _buildDescriptionSection() {
     return Builder(
@@ -289,7 +306,7 @@ class MediaHeroSection extends StatelessWidget {
           children: [
             // Description text with right padding to make space for button
             Padding(
-              padding: const EdgeInsets.only(right: 80),
+              padding: const EdgeInsets.only(right: _descriptionRightPadding),
               child: Text(
                 mediaData.description,
                 maxLines: 3,
@@ -313,7 +330,7 @@ class MediaHeroSection extends StatelessWidget {
             // More button positioned at bottom right
             Positioned(
               right: 0,
-              bottom: -0,
+              bottom: 0,
               child: _MoreButton(
                 onTap: () => _showFullDescriptionModal(context),
               ),
@@ -366,27 +383,15 @@ class MediaHeroSection extends StatelessWidget {
             },
             blendMode: BlendMode
                 .dstIn, // Makes the image transparent where mask is transparent
-            child: CachedNetworkImage(
+            child: DCachedImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
-              placeholder: (context, url) => Container(
+              placeholder: Container(
                 color: Colors.black,
                 child: const Center(child: DLoadingIndicator()),
               ),
-              errorWidget: (context, url, error) => Container(
-                color: const Color(0xFF1a1a1a),
-                child: const Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: Color(0xFF666666),
-                    size: 48,
-                  ),
-                ),
-              ),
-              fadeInDuration: const Duration(milliseconds: 300),
-              fadeOutDuration: const Duration(milliseconds: 150),
             ),
           ),
         ),
@@ -478,11 +483,28 @@ class _AnimatedMeshHeroState extends State<_AnimatedMeshHero> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Animated mesh gradient with static colorful values
+        // Animated mesh gradient with fade-out mask at bottom
         Positioned.fill(
-          child: AnimatedMeshGradient(
-            colors: _meshColors,
-            options: AnimatedMeshGradientOptions(speed: 3, frequency: 3),
+          child: ShaderMask(
+            shaderCallback: (rect) {
+              // Vertical gradient mask to fade mesh to black at bottom
+              // Simple two-point gradient - starts fading from 30% for smoother transition
+              return LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 1.0],
+                colors: [
+                  Colors.white.withValues(alpha: 1.0), // Fully visible at top
+                  Colors.white.withValues(alpha: 0.0), // Transparent at bottom
+                ],
+              ).createShader(rect);
+            },
+            blendMode:
+                BlendMode.dstIn, // Makes mesh fade where mask is transparent
+            child: AnimatedMeshGradient(
+              colors: _meshColors,
+              options: AnimatedMeshGradientOptions(speed: 3, frequency: 3),
+            ),
           ),
         ),
 

@@ -55,6 +55,9 @@ class Win32Window {
   // Return a RECT representing the bounds of the current client area.
   RECT GetClientArea();
 
+  // Set the minimum window size. This will be enforced via WM_GETMINMAXINFO.
+  void SetMinimumSize(const Size& min_size);
+
  protected:
   // Processes and route salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
@@ -97,6 +100,9 @@ class Win32Window {
 
   // window handle for hosted content.
   HWND child_content_ = nullptr;
+
+  // Minimum window size (0,0 means no minimum).
+  Size minimum_size_ = Size(0, 0);
 };
 
 #endif  // RUNNER_WIN32_WINDOW_H_

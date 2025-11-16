@@ -53,9 +53,18 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "dester");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
-  // Set minimum window size to avoid mobile UI
-  gtk_widget_set_size_request(GTK_WIDGET(window), 1000, 600);
+  // Set minimum window size first to avoid mobile UI
+  // This must be set before default size to ensure it's enforced
+  const int min_width = 1200;
+  const int min_height = 800;
+  gtk_widget_set_size_request(GTK_WIDGET(window), min_width, min_height);
+  
+  // Set default size, ensuring it respects minimum
+  const int default_width = 1280;
+  const int default_height = 720;
+  gtk_window_set_default_size(window, 
+                               default_width >= min_width ? default_width : min_width,
+                               default_height >= min_height ? default_height : min_height);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
