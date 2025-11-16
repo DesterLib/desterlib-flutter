@@ -6,13 +6,14 @@ on:
       - main
     paths:
       - 'pubspec.yaml'
+      - '.github/workflows/release.yml'
 
 permissions:
   contents: write
 
 jobs:
   check-version:
-    name: Check Version Change
+    name: Check Version or Workflow Change
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -29,10 +30,17 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Check if version changed
+      - name: Check if version or workflow changed
         id: check
         run: |
-          git diff HEAD^ HEAD -- pubspec.yaml | grep '^+version:' && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+          if git diff HEAD^ HEAD -- pubspec.yaml | grep -q '^+version:'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          elif git diff HEAD^ HEAD -- .github/workflows/release.yml | grep -q '.'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Workflow file changed, triggering release"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
   release:
     name: Create Release
@@ -47,17 +55,38 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git tag -a v${{ needs.check-version.outputs.version }} -m "Release v${{ needs.check-version.outputs.version }}"
+          git tag -a v${{ needs.check-version.outputs.version }} -m "Alpha Release v${{ needs.check-version.outputs.version }}"
           git push origin v${{ needs.check-version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          name: Dester v${{ needs.check-version.outputs.version }}
+          name: Dester v${{ needs.check-version.outputs.version }} (Alpha)
           draft: false
-          prerelease: false
+          prerelease: true
           generate_release_notes: true
+          body: |
+            🚧 **Alpha Development Build**
+            
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+            - Workflow Run: ${{ github.run_number }}
+            - Build Date: ${{ github.event.head_commit.timestamp }}
+            
+            **Platform Downloads:**
+            - **Android**: Download the APK matching your device architecture:
+              - `arm64-v8a`: Modern 64-bit devices (2017+) - ~30MB
+              - `armeabi-v7a`: Older 32-bit devices - ~28MB  
+              - `x86_64`: Emulators/Intel devices - ~32MB
+            - **iOS**: Universal binary for all iOS devices
+            - **macOS**: Universal binary (Apple Silicon + Intel) - ~103MB
+            - **Linux**: x64 build - ~32MB
+            - **Windows**: x64 build - ~25MB
+            
+            ⚠️ This is an automated alpha release. Expect bugs and breaking changes.
+            For stable releases, please wait for beta/stable versions.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,25 +102,29 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Split APKs (per architecture)
+        run: flutter build apk --release --split-per-abi
 
-      - name: Rename APK
+      - name: Rename APKs
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
+          cd build/app/outputs/flutter-apk
+          mv app-armeabi-v7a-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-armeabi-v7a.apk
+          mv app-arm64-v8a-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-arm64-v8a.apk
+          mv app-x86_64-release.apk Dester-${{ needs.check-version.outputs.version }}-alpha-Android-x86_64.apk
 
-      - name: Upload APK to Release
+      - name: Upload Split APKs to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-Android.apk
+          files: |
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-armeabi-v7a.apk
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-arm64-v8a.apk
+            build/app/outputs/flutter-apk/Dester-${{ needs.check-version.outputs.version }}-alpha-Android-x86_64.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -107,7 +140,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -118,14 +150,21 @@ jobs:
 
       - name: Rename IPA
         run: |
-          mv build/ios/ipa/*.ipa \
-             build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+          if ls build/ios/ipa/*.ipa 1> /dev/null 2>&1; then
+            mv build/ios/ipa/*.ipa build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
+          else
+            echo "No IPA found, creating archive from .app"
+            cd build/ios/archive/Runner.xcarchive/Products/Applications
+            zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.zip Runner.app
+            mkdir -p ../../../../ipa
+            mv Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.zip ../../../../ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
+          fi
 
       - name: Upload IPA to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-iOS.ipa
+          files: build/ios/ipa/Dester-${{ needs.check-version.outputs.version }}-alpha-iOS.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -141,7 +180,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -153,13 +191,13 @@ jobs:
       - name: Create ZIP archive
         run: |
           cd build/macos/Build/Products/Release
-          zip -r Dester-${{ needs.check-version.outputs.version }}-macOS.zip dester.app
+          zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip Dester.app
           
       - name: Upload macOS build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-macOS.zip
+          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -175,12 +213,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libasound2-dev libmpv-dev
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install Flutter dependencies
@@ -192,13 +229,13 @@ jobs:
       - name: Create archive
         run: |
           cd build/linux/x64/release/bundle
-          tar -czf Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz *
+          tar -czf Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz *
           
       - name: Upload Linux build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz
+          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -214,7 +251,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -225,13 +261,13 @@ jobs:
 
       - name: Create archive
         run: |
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-Windows.zip
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
           
       - name: Upload Windows build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: Dester-${{ needs.check-version.outputs.version }}-Windows.zip
+          files: Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
