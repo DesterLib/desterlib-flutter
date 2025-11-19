@@ -67,13 +67,13 @@ jobs:
           generate_release_notes: true
           body: |
             🚧 **Alpha Development Build**
-            
+
             **Build Information:**
             - Commit: ${{ github.sha }}
             - Branch: ${{ github.ref_name }}
             - Workflow Run: ${{ github.run_number }}
             - Build Date: ${{ github.event.head_commit.timestamp }}
-            
+
             **Platform Downloads:**
             - **Android**: Download the APK matching your device architecture:
               - `arm64-v8a`: Modern 64-bit devices (2017+) - ~30MB
@@ -83,7 +83,7 @@ jobs:
             - **macOS**: Universal binary (Apple Silicon + Intel) - ~103MB
             - **Linux**: x64 build - ~32MB
             - **Windows**: x64 build - ~25MB
-            
+
             ⚠️ This is an automated alpha release. Expect bugs and breaking changes.
             For stable releases, please wait for beta/stable versions.
         env:
