@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'pubspec.yaml'
-      - '.github/workflows/release.yml'
+      - "pubspec.yaml"
 
 permissions:
   contents: write
@@ -102,7 +101,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: "3.27.0"
+          channel: "stable"
 
       - name: Install dependencies
         run: flutter pub get
@@ -140,7 +140,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: "3.27.0"
+          channel: "stable"
 
       - name: Install dependencies
         run: flutter pub get
@@ -180,7 +181,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: "3.27.0"
+          channel: "stable"
 
       - name: Install dependencies
         run: flutter pub get
@@ -191,13 +193,13 @@ jobs:
       - name: Create ZIP archive
         run: |
           cd build/macos/Build/Products/Release
-          zip -r Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip Dester.app
-          
+          zip -r Dester-${{ needs.check-version.outputs.version }}-macOS.zip dester.app
+
       - name: Upload macOS build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-alpha-macOS.zip
+          files: build/macos/Build/Products/Release/Dester-${{ needs.check-version.outputs.version }}-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -218,7 +220,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: "3.27.0"
+          channel: "stable"
 
       - name: Install Flutter dependencies
         run: flutter pub get
@@ -229,13 +232,13 @@ jobs:
       - name: Create archive
         run: |
           cd build/linux/x64/release/bundle
-          tar -czf Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz *
-          
+          tar -czf Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz *
+
       - name: Upload Linux build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-alpha-Linux.tar.gz
+          files: build/linux/x64/release/bundle/Dester-${{ needs.check-version.outputs.version }}-Linux.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -251,7 +254,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: "3.27.0"
+          channel: "stable"
 
       - name: Install dependencies
         run: flutter pub get
@@ -261,13 +265,12 @@ jobs:
 
       - name: Create archive
         run: |
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
-          
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath Dester-${{ needs.check-version.outputs.version }}-Windows.zip
+
       - name: Upload Windows build
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          files: Dester-${{ needs.check-version.outputs.version }}-alpha-Windows.zip
+          files: Dester-${{ needs.check-version.outputs.version }}-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
