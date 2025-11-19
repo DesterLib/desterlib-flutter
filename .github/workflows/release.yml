@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "pubspec.yaml"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force release even if version unchanged"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
   contents: write
@@ -32,13 +39,37 @@ jobs:
       - name: Check if version or workflow changed
         id: check
         run: |
-          if git diff HEAD^ HEAD -- pubspec.yaml | grep -q '^+version:'; then
+          # If manually triggered with force=true, always proceed
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ github.event.inputs.force }}" == "true" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-          elif git diff HEAD^ HEAD -- .github/workflows/release.yml | grep -q '.'; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Workflow file changed, triggering release"
+            echo "Manual run with force=true, triggering release"
+          # If manually triggered without force, check if there's a previous commit to compare
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+              if git diff HEAD^ HEAD -- pubspec.yaml | grep -q '^+version:'; then
+                echo "changed=true" >> $GITHUB_OUTPUT
+              elif git diff HEAD^ HEAD -- .github/workflows/release.yml | grep -q '.'; then
+                echo "changed=true" >> $GITHUB_OUTPUT
+                echo "Workflow file changed, triggering release"
+              else
+                echo "changed=false" >> $GITHUB_OUTPUT
+                echo "Version unchanged. Use 'force' input to trigger release anyway."
+              fi
+            else
+              # No previous commit, proceed with manual run
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "Manual run on first commit, triggering release"
+            fi
+          # Automatic push trigger
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            if git diff HEAD^ HEAD -- pubspec.yaml | grep -q '^+version:'; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            elif git diff HEAD^ HEAD -- .github/workflows/release.yml | grep -q '.'; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "Workflow file changed, triggering release"
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
   release:
