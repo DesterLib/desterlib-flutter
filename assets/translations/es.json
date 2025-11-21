@@ -15,6 +15,8 @@
     "error": "Error de Conexión",
     "checking": "Verificando...",
     "apiUrl": "URL de API",
+    "enterApiUrl": "Ingresar URL de API",
+    "save": "Guardar",
     "close": "Cerrar",
     "noInternetConnection": "Sin conexión a internet",
     "apiUrlNotConfigured": "URL de API no configurada",

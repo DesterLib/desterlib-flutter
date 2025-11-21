@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/providers/connection_guard_provider.dart';
-import '../../features/connection/presentation/widgets/connection_status_modal.dart';
+import '../connection/presentation/widgets/connection_status_modal.dart';
+import 'app_logger.dart';
 
 /// Helper class for connection-related operations
 class ConnectionHelper {
@@ -9,9 +10,12 @@ class ConnectionHelper {
   /// Requires a WidgetRef to access the provider
   static Future<bool> setApiUrl(String url, WidgetRef ref) async {
     try {
+      AppLogger.d('Setting API URL: $url');
       await ref.read(connectionGuardProvider.notifier).setApiUrl(url);
+      AppLogger.i('API URL set successfully');
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.e('Error setting API URL', e, stackTrace);
       return false;
     }
   }

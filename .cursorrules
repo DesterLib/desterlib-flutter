@@ -26,6 +26,30 @@ lib/
 ├── core/                             # Shared/core functionality
 │   ├── constants/
 │   │   └── app_constants.dart
+│   ├── connection/                   # Connection management (infrastructure)
+│   │   ├── connection_service.dart   # Dependency injection factory
+│   │   ├── data/                     # Data layer
+│   │   │   ├── datasources/
+│   │   │   │   ├── network_data_source.dart
+│   │   │   │   └── preferences_data_source.dart
+│   │   │   └── repository/
+│   │   │       └── connection_repository_impl.dart
+│   │   ├── domain/                   # Domain layer (business logic)
+│   │   │   ├── entities/
+│   │   │   │   └── connection_status.dart
+│   │   │   ├── repository/
+│   │   │   │   └── connection_repository.dart  # Repository interface
+│   │   │   └── usecases/
+│   │   │       ├── check_connection.dart       # Interface
+│   │   │       ├── check_connection_impl.dart  # Implementation
+│   │   │       ├── set_api_url.dart
+│   │   │       ├── set_api_url_impl.dart
+│   │   │       ├── clear_api_url.dart
+│   │   │       └── clear_api_url_impl.dart
+│   │   └── presentation/             # Presentation layer (UI)
+│   │       └── widgets/
+│   │           ├── connection_status_modal.dart
+│   │           └── connection_guard_wrapper.dart
 │   ├── errors/                       # Error handling
 │   ├── network/
 │   │   └── api_client/               # API client utilities
@@ -41,31 +65,6 @@ lib/
 │   └── widgets/                      # Shared/reusable widgets
 │
 └── features/                         # Feature modules (Clean Architecture)
-    ├── connection/                   # Connection management feature
-    │   ├── connection_feature.dart   # Dependency injection factory
-    │   ├── data/                     # Data layer
-    │   │   ├── datasources/
-    │   │   │   ├── network_data_source.dart
-    │   │   │   └── preferences_data_source.dart
-    │   │   └── repository/
-    │   │       └── connection_repository_impl.dart
-    │   ├── domain/                   # Domain layer (business logic)
-    │   │   ├── entities/
-    │   │   │   └── connection_status.dart
-    │   │   ├── repository/
-    │   │   │   └── connection_repository.dart  # Repository interface
-    │   │   └── usecases/
-    │   │       ├── check_connection.dart       # Interface
-    │   │       ├── check_connection_impl.dart  # Implementation
-    │   │       ├── set_api_url.dart
-    │   │       ├── set_api_url_impl.dart
-    │   │       ├── clear_api_url.dart
-    │   │       └── clear_api_url_impl.dart
-    │   └── presentation/             # Presentation layer (UI)
-    │       └── widgets/
-    │           ├── connection_status_modal.dart
-    │           └── connection_guard_wrapper.dart
-    │
     └── home/                         # Home feature (example)
         ├── home_feature.dart         # Dependency injection factory
         ├── data/
@@ -218,9 +217,10 @@ context.goNamed('home');
 context.go('/home');
 ```
 
-## Connection Guard
+## Connection Service (Core Infrastructure)
 
 ### Architecture
+- **Location**: `lib/core/connection/` (infrastructure, not a feature)
 - **Domain**: Connection status entities, repository interface, use cases
 - **Data**: Network and preferences data sources, repository implementation
 - **Presentation**: Modal/drawer widgets, Riverpod provider
@@ -233,6 +233,7 @@ context.go('/home');
 - Automatically monitors connection on app startup
 - Shows modal/drawer on connection errors
 - API URL stored in SharedPreferences
+- Close button disabled when API is not connected
 
 ## Code Style Guidelines
 

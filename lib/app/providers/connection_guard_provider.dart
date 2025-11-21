@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/storage/preferences_service.dart';
-import '../../features/connection/connection_feature.dart';
-import '../../features/connection/domain/entities/connection_status.dart';
+import '../../core/connection/connection_service.dart';
+import '../../core/connection/domain/entities/connection_status.dart';
 
 /// Provider for PreferencesService initialization
 final preferencesServiceProvider = FutureProvider<void>((ref) async {
@@ -21,10 +21,10 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
-  // Use cases (injected via feature factory)
-  late final _checkConnection = ConnectionFeature.createCheckConnection();
-  late final _setApiUrl = ConnectionFeature.createSetApiUrl();
-  late final _clearApiUrl = ConnectionFeature.createClearApiUrl();
+  // Use cases (injected via service factory)
+  late final _checkConnection = ConnectionService.createCheckConnection();
+  late final _setApiUrl = ConnectionService.createSetApiUrl();
+  late final _clearApiUrl = ConnectionService.createClearApiUrl();
 
   @override
   ConnectionGuardState build() {

@@ -17,5 +17,7 @@ class AppLocalization {
   static const String connectionError = 'connection.error';
   static const String checking = 'connection.checking';
   static const String apiUrl = 'connection.apiUrl';
+  static const String enterApiUrl = 'connection.enterApiUrl';
+  static const String save = 'connection.save';
   static const String close = 'connection.close';
 }

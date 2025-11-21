@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/router/app_router.dart';
-import 'features/connection/presentation/widgets/connection_guard_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,18 +25,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigatorKey = GlobalKey<NavigatorState>();
-
-    return ConnectionGuardWrapper(
-      navigatorKey: navigatorKey,
-      child: MaterialApp.router(
-        title: 'Dester',
-        theme: ThemeData.dark(),
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        routerConfig: AppRouter.router,
-      ),
+    return MaterialApp.router(
+      title: 'Dester',
+      theme: ThemeData.dark(),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      routerConfig: AppRouter.router,
     );
   }
 }

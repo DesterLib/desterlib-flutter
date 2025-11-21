@@ -9,14 +9,12 @@ class ConnectionGuardWrapper extends ConsumerStatefulWidget {
   final Widget child;
   final bool showOnError;
   final bool autoCheck;
-  final GlobalKey<NavigatorState>? navigatorKey;
 
   const ConnectionGuardWrapper({
     super.key,
     required this.child,
     this.showOnError = true,
     this.autoCheck = true,
-    this.navigatorKey,
   });
 
   @override
@@ -56,10 +54,9 @@ class _ConnectionGuardWrapperState
   }
 
   void _showConnectionModal() {
-    final navigatorContext = widget.navigatorKey?.currentContext ?? context;
-    if (navigatorContext.mounted) {
+    if (mounted && context.mounted) {
       ConnectionStatusModal.show(
-        navigatorContext,
+        context,
         onRetry: () {
           ref.read(connectionGuardProvider.notifier).checkConnection();
         },

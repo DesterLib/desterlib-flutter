@@ -1,4 +1,4 @@
-import '../../../../core/storage/preferences_service.dart';
+import '../../../storage/preferences_service.dart';
 
 /// Data source for preferences storage
 abstract class PreferencesDataSource {
