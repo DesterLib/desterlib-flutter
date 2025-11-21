@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Dester",
+    "movies": "Películas",
+    "tvShows": "Programas de TV",
+    "retry": "Reintentar",
+    "error": "Error",
+    "noMoviesAvailable": "No hay películas disponibles",
+    "noTVShowsAvailable": "No hay programas de TV disponibles"
+  },
+  "connection": {
+    "status": "Estado de Conexión",
+    "connected": "Conectado",
+    "disconnected": "Sin Internet",
+    "error": "Error de Conexión",
+    "checking": "Verificando...",
+    "apiUrl": "URL de API",
+    "close": "Cerrar",
+    "noInternetConnection": "Sin conexión a internet",
+    "apiUrlNotConfigured": "URL de API no configurada",
+    "failedToConnect": "Error al conectar"
+  }
+}

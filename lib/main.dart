@@ -1,21 +1,43 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'app/app.dart';
-import 'core/bootstrap.dart';
+import 'app/router/app_router.dart';
+import 'features/connection/presentation/widgets/connection_guard_wrapper.dart';
 
 void main() async {
-  // Preserve the native splash screen
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
 
-  await bootstrap();
+  await EasyLocalization.ensureInitialized();
 
-  // The base URL will be loaded from ApiConfig in the provider's build method
-  runApp(const ProviderScope(child: App()));
+  runApp(
+    ProviderScope(
+      child: EasyLocalization(
+        supportedLocales: const [Locale('en'), Locale('es')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        child: const MainApp(),
+      ),
+    ),
+  );
+}
 
-  // Remove native splash after runApp to prevent black screen on iOS
-  // This ensures the app widget tree has started building before removing native splash
-  await Future.delayed(const Duration(milliseconds: 100));
-  FlutterNativeSplash.remove();
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    return ConnectionGuardWrapper(
+      navigatorKey: navigatorKey,
+      child: MaterialApp.router(
+        title: 'Dester',
+        theme: ThemeData.dark(),
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        routerConfig: AppRouter.router,
+      ),
+    );
+  }
 }

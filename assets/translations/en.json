@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Dester",
+    "movies": "Movies",
+    "tvShows": "TV Shows",
+    "retry": "Retry",
+    "error": "Error",
+    "noMoviesAvailable": "No movies available",
+    "noTVShowsAvailable": "No TV shows available"
+  },
+  "connection": {
+    "status": "Connection Status",
+    "connected": "Connected",
+    "disconnected": "No Internet",
+    "error": "Connection Error",
+    "checking": "Checking...",
+    "apiUrl": "API URL",
+    "close": "Close",
+    "noInternetConnection": "No internet connection",
+    "apiUrlNotConfigured": "API URL not configured",
+    "failedToConnect": "Failed to connect"
+  }
+}

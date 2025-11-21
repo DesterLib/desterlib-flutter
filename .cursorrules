@@ -1,0 +1,340 @@
+# Dester Project Architecture & Conventions
+
+## Project Overview
+Dester is a Flutter application following **Clean Architecture** principles with **Riverpod** for state management, **GoRouter** for navigation, and **easy_localization** for internationalization.
+
+## Technology Stack
+- **Flutter SDK**: ^3.10.0
+- **State Management**: flutter_riverpod ^3.0.3
+- **Navigation**: go_router ^17.0.0
+- **Localization**: easy_localization ^3.0.8
+- **Network**: http ^1.2.2, connectivity_plus ^6.1.0
+- **Storage**: shared_preferences ^2.3.3
+
+## Project Structure
+
+```
+lib/
+├── app/                              # App-level configuration
+│   ├── localization/
+│   │   └── app_localization.dart     # Localization keys constants
+│   ├── providers/                    # App-wide Riverpod providers
+│   │   └── connection_guard_provider.dart
+│   └── router/
+│       └── app_router.dart           # GoRouter configuration
+│
+├── core/                             # Shared/core functionality
+│   ├── constants/
+│   │   └── app_constants.dart
+│   ├── errors/                       # Error handling
+│   ├── network/
+│   │   └── api_client/               # API client utilities
+│   ├── storage/
+│   │   ├── preferences_service.dart  # SharedPreferences wrapper
+│   │   └── storage_keys.dart         # Storage key constants
+│   ├── theme/
+│   │   ├── app_colors.dart
+│   │   ├── app_text_styles.dart
+│   │   └── app_theme.dart
+│   ├── utils/                        # Utility classes
+│   │   └── connection_helper.dart
+│   └── widgets/                      # Shared/reusable widgets
+│
+└── features/                         # Feature modules (Clean Architecture)
+    ├── connection/                   # Connection management feature
+    │   ├── connection_feature.dart   # Dependency injection factory
+    │   ├── data/                     # Data layer
+    │   │   ├── datasources/
+    │   │   │   ├── network_data_source.dart
+    │   │   │   └── preferences_data_source.dart
+    │   │   └── repository/
+    │   │       └── connection_repository_impl.dart
+    │   ├── domain/                   # Domain layer (business logic)
+    │   │   ├── entities/
+    │   │   │   └── connection_status.dart
+    │   │   ├── repository/
+    │   │   │   └── connection_repository.dart  # Repository interface
+    │   │   └── usecases/
+    │   │       ├── check_connection.dart       # Interface
+    │   │       ├── check_connection_impl.dart  # Implementation
+    │   │       ├── set_api_url.dart
+    │   │       ├── set_api_url_impl.dart
+    │   │       ├── clear_api_url.dart
+    │   │       └── clear_api_url_impl.dart
+    │   └── presentation/             # Presentation layer (UI)
+    │       └── widgets/
+    │           ├── connection_status_modal.dart
+    │           └── connection_guard_wrapper.dart
+    │
+    └── home/                         # Home feature (example)
+        ├── home_feature.dart         # Dependency injection factory
+        ├── data/
+        │   ├── datasources/
+        │   │   └── home_datasource.dart
+        │   ├── mappers/
+        │   │   ├── movie_mapper.dart
+        │   │   └── tv_show_mapper.dart
+        │   └── repository/
+        │       └── home_repository_impl.dart
+        ├── domain/
+        │   ├── entities/
+        │   │   ├── movie.dart
+        │   │   └── tv_show.dart
+        │   ├── repository/
+        │   │   └── home_repository.dart
+        │   └── usecases/
+        │       ├── get_movies_list.dart
+        │       ├── get_movies_list_impl.dart
+        │       ├── get_tv_shows_list.dart
+        │       └── get_tv_shows_list_impl.dart
+        └── presentation/
+            ├── controllers/
+            │   └── home_controller.dart
+            ├── screens/
+            │   └── home_screen.dart
+            └── widgets/
+                ├── movie_card.dart
+                └── tv_show_card.dart
+```
+
+## Clean Architecture Principles
+
+### Layer Separation
+1. **Domain Layer** (innermost, no dependencies)
+   - Entities: Pure data classes
+   - Repository Interfaces: Abstract contracts
+   - Use Case Interfaces: Abstract business logic contracts
+   - Use Case Implementations: Business logic implementations
+
+2. **Data Layer** (depends on Domain)
+   - Data Sources: External data access (API, local storage)
+   - Repository Implementations: Implements domain repository interfaces
+   - Mappers: Convert data models to domain entities
+
+3. **Presentation Layer** (depends on Domain)
+   - Controllers: State management (ChangeNotifier or Riverpod)
+   - Screens: Page-level widgets
+   - Widgets: Reusable UI components
+
+### Dependency Rule
+- **Domain** ← **Data** (Data implements Domain interfaces)
+- **Domain** ← **Presentation** (Presentation uses Domain entities/use cases)
+- **Data** and **Presentation** are independent
+
+## File Naming Conventions
+
+### Use Cases
+- **Interface**: `{use_case_name}.dart` (e.g., `check_connection.dart`)
+- **Implementation**: `{use_case_name}_impl.dart` (e.g., `check_connection_impl.dart`)
+
+### Repositories
+- **Interface**: `{feature}_repository.dart` (in domain layer)
+- **Implementation**: `{feature}_repository_impl.dart` (in data layer)
+
+### Data Sources
+- **Interface**: `{source}_data_source.dart`
+- **Implementation**: `{source}_data_source_impl.dart`
+
+### Features
+- **Factory**: `{feature}_feature.dart` (dependency injection setup)
+
+## Dependency Injection Pattern
+
+Each feature has a factory class that creates and wires dependencies:
+
+```dart
+class ConnectionFeature {
+  static CheckConnection createCheckConnection() {
+    final preferencesDataSource = PreferencesDataSourceImpl();
+    final networkDataSource = NetworkDataSourceImpl();
+    final repository = ConnectionRepositoryImpl(
+      preferencesDataSource: preferencesDataSource,
+      networkDataSource: networkDataSource,
+    );
+    return CheckConnectionImpl(repository);
+  }
+}
+```
+
+## State Management (Riverpod)
+
+### Provider Types
+- **NotifierProvider**: For stateful providers (Riverpod 3.0)
+- **FutureProvider**: For async initialization
+- **StateNotifierProvider**: Deprecated in Riverpod 3.0, use NotifierProvider
+
+### Provider Location
+- App-wide providers: `lib/app/providers/`
+- Feature-specific providers: Can be in feature's presentation layer if needed
+
+### Provider Pattern
+```dart
+final myProvider = NotifierProvider<MyNotifier, MyState>(
+  MyNotifier.new,
+);
+
+class MyNotifier extends Notifier<MyState> {
+  @override
+  MyState build() {
+    // Initialization
+    return MyState.initial();
+  }
+}
+```
+
+## Localization
+
+### Structure
+- Translation files: `assets/translations/{locale}.json`
+- Keys helper: `lib/app/localization/app_localization.dart`
+
+### Usage
+```dart
+// Using helper constants
+Text(AppLocalization.appTitle.tr())
+
+// Direct key
+Text('app.title'.tr())
+```
+
+### Adding New Translations
+1. Add key to `app_localization.dart`
+2. Add translations to `en.json` and `es.json`
+3. Use `{key}.tr()` in widgets
+
+## Routing (GoRouter)
+
+### Configuration
+- Router config: `lib/app/router/app_router.dart`
+- Routes defined using `GoRoute`
+- Named routes for navigation
+
+### Navigation
+```dart
+// Using route name
+context.goNamed('home');
+
+// Using path
+context.go('/home');
+```
+
+## Connection Guard
+
+### Architecture
+- **Domain**: Connection status entities, repository interface, use cases
+- **Data**: Network and preferences data sources, repository implementation
+- **Presentation**: Modal/drawer widgets, Riverpod provider
+
+### Platform Adaptation
+- **Desktop** (Windows, Linux, macOS): Modal dialog
+- **Mobile** (iOS, Android): Bottom drawer
+
+### Usage
+- Automatically monitors connection on app startup
+- Shows modal/drawer on connection errors
+- API URL stored in SharedPreferences
+
+## Code Style Guidelines
+
+### Imports Order
+1. Dart SDK imports
+2. Flutter imports
+3. Package imports (third-party)
+4. Project imports (relative)
+
+### Widget Naming
+- Screens: `{Feature}Screen` (e.g., `HomeScreen`)
+- Widgets: `{Purpose}Widget` or descriptive name (e.g., `MovieCard`)
+- Controllers: `{Feature}Controller` (e.g., `HomeController`)
+
+### Class Naming
+- Entities: Noun (e.g., `Movie`, `ConnectionGuardState`)
+- Use Cases: Verb phrase (e.g., `CheckConnection`, `GetMoviesList`)
+- Repositories: `{Feature}Repository` (interface), `{Feature}RepositoryImpl` (implementation)
+- Data Sources: `{Source}DataSource` (interface), `{Source}DataSourceImpl` (implementation)
+
+## Testing Structure (Future)
+
+```
+test/
+├── features/
+│   ├── connection/
+│   │   ├── domain/
+│   │   │   └── usecases/
+│   │   └── data/
+│   └── home/
+└── core/
+```
+
+## Important Notes
+
+1. **Always separate interface and implementation** for use cases
+2. **Domain layer must never depend on other layers**
+3. **Use dependency injection factories** for feature setup
+4. **Riverpod providers** should be in `app/providers/` for app-wide state
+5. **Platform-specific UI** should adapt based on `Platform.isDesktop` checks
+6. **Localization keys** should be centralized in `app_localization.dart`
+7. **Storage keys** should be in `storage_keys.dart` constants
+
+## Adding a New Feature
+
+1. Create feature folder: `lib/features/{feature_name}/`
+2. Set up domain layer:
+   - Entities
+   - Repository interface
+   - Use case interfaces and implementations
+3. Set up data layer:
+   - Data sources
+   - Repository implementation
+   - Mappers (if needed)
+4. Set up presentation layer:
+   - Controllers (if using ChangeNotifier)
+   - Screens
+   - Widgets
+5. Create feature factory: `{feature}_feature.dart`
+6. Add routes in `app_router.dart`
+7. Add translations if needed
+
+## Common Patterns
+
+### Use Case Pattern
+```dart
+// Interface
+abstract class MyUseCase {
+  Future<Result> call(Params params);
+}
+
+// Implementation
+class MyUseCaseImpl implements MyUseCase {
+  final MyRepository repository;
+  
+  MyUseCaseImpl(this.repository);
+  
+  @override
+  Future<Result> call(Params params) async {
+    // Business logic
+  }
+}
+```
+
+### Repository Pattern
+```dart
+// Domain interface
+abstract class MyRepository {
+  Future<Entity> getData();
+}
+
+// Data implementation
+class MyRepositoryImpl implements MyRepository {
+  final MyDataSource dataSource;
+  
+  MyRepositoryImpl({required this.dataSource});
+  
+  @override
+  Future<Entity> getData() async {
+    final data = await dataSource.fetch();
+    return EntityMapper.fromData(data);
+  }
+}
+```
+

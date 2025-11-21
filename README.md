@@ -1,69 +1,52 @@
-# Dester Client
+# Dester
 
-Cross-platform client application for **DesterLib** - Your personal media streaming app.
+A Flutter application following Clean Architecture principles.
 
-## 📱 Platforms
+## Architecture
 
-- Android, iOS, macOS, Linux, Windows
-- Coming soon: Android TV, Apple TV
+This project follows **Clean Architecture** with clear separation of concerns:
 
-## 🚀 Quick Start
+- **Domain Layer**: Business logic, entities, and use cases
+- **Data Layer**: Data sources, repositories, and mappers
+- **Presentation Layer**: UI components, screens, and state management
+
+## Tech Stack
+
+- **Flutter** ^3.10.0
+- **Riverpod** ^3.0.3 (State Management)
+- **GoRouter** ^17.0.0 (Navigation)
+- **easy_localization** ^3.0.8 (i18n)
+- **connectivity_plus** ^6.1.0 (Network monitoring)
+- **http** ^1.2.2 (HTTP client)
+- **shared_preferences** ^2.3.3 (Local storage)
+
+## Project Structure
+
+See [.cursorrules](.cursorrules) for detailed architecture documentation, conventions, and patterns.
+
+## Features
+
+- ✅ Clean Architecture implementation
+- ✅ Riverpod state management
+- ✅ GoRouter navigation
+- ✅ Multi-language support (English, Spanish)
+- ✅ Connection guard with platform-adaptive UI
+- ✅ Local API URL configuration
+
+## Getting Started
+
+1. Install dependencies:
 
 ```bash
-# Clone and setup
-git clone https://github.com/DesterLib/desterlib-flutter.git
-cd desterlib-flutter
-bash scripts/setup.sh
+flutter pub get
+```
 
-# Run
+2. Run the app:
+
+```bash
 flutter run
 ```
 
-## 📖 Documentation
+## Documentation
 
-📖 **[Full Client Documentation](https://desterlib.github.io/desterlib/clients/overview)**
-
-The documentation covers:
-- [Platform Setup](https://desterlib.github.io/desterlib/clients/flutter) - Detailed installation
-- [Server Configuration](https://desterlib.github.io/desterlib/clients/overview#connecting) - How to connect to API
-- [Contributing](https://desterlib.github.io/desterlib/development/contributing) - Development guide
-- [Versioning](https://desterlib.github.io/desterlib/development/versioning) - Version management
-
-## 🎨 Features
-
-- Browse and stream media
-- Watch progress tracking
-- Search and filters
-- Dark mode
-- Cross-platform
-
-## 🛠️ Development
-
-```bash
-# Run app
-flutter run
-
-# Run tests
-flutter test
-
-# Build for release
-flutter build apk      # Android
-flutter build ios      # iOS  
-flutter build macos    # macOS
-```
-
-See [CODE_STRUCTURE.md](CODE_STRUCTURE.md) for project structure.
-
-## 📚 Resources
-
-- [Documentation](https://desterlib.github.io/desterlib)
-- [API Server](https://github.com/DesterLib/desterlib)
-- [Report Issues](https://github.com/DesterLib/desterlib-flutter/issues)
-
-## 📄 License
-
-GNU Affero General Public License v3.0 (AGPL-3.0)
-
----
-
-**Made with ❤️ by the DesterLib community**
+For detailed architecture, conventions, and development guidelines, see [.cursorrules](.cursorrules).

@@ -1,63 +1,27 @@
 name: dester
-description: "A desterlib flutter client"
+description: "A new Flutter project."
 publish_to: "none"
-version: 0.2.0
+version: 0.1.0
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.0
 
 dependencies:
+  connectivity_plus: ^6.1.0
+  easy_localization: ^3.0.8
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  media_kit: ^1.2.1
-  media_kit_video: ^1.3.1
-  media_kit_libs_video: ^1.0.7
-  go_router: ^16.2.5
   flutter_riverpod: ^3.0.3
-  storybook_flutter: ^0.14.1
-  google_fonts: ^6.2.1
-  shared_preferences: ^2.2.2
-  http: ^1.1.0
-  built_collection: ^5.1.1
-  built_value: ^8.9.2
-  cached_network_image: ^3.4.1
-  openapi:
-    path: ./lib/api
-  dio: ^5.7.0
-  web_socket_channel: ^3.0.3
-  mesh_gradient: ^1.3.8
-  flutter_native_splash: ^2.4.3
-  palette_generator: ^0.3.3+4
-  progressive_blur: ^0.0.2
+  go_router: ^17.0.0
+  http: ^1.2.2
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.13.1
-  build_runner: any
-  built_value_generator: ^8.4.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/icon/
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/icon/icon.png"
-  min_sdk_android: 21
-  web:
-    generate: true
-    image_path: "assets/icon/icon.png"
-    background_color: "#1a1a1a"
-    theme_color: "#1a1a1a"
-  windows:
-    generate: true
-    image_path: "assets/icon/icon.png"
-    icon_size: 48
-  macos:
-    generate: true
-    image_path: "assets/icon/icon.png"
+    - assets/translations/

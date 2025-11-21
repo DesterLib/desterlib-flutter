@@ -43,12 +43,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Node.js dependencies (for commit tools)
-node_modules/
-package-lock.json
-.npm/
-
-# Lefthook
-.lefthook/
-.lefthook-local.yml

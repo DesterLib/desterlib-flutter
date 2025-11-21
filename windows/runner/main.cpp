@@ -1,7 +1,6 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
-#include <algorithm>
 
 #include "flutter_window.h"
 #include "utils.h"
@@ -28,19 +27,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  Win32Window::Size min_size(1200, 800); // Minimum size to avoid mobile UI
-  
-  // Set minimum size before creating window to ensure it's enforced from the start
-  window.SetMinimumSize(min_size);
-  
-  // Ensure initial size respects minimum
-  if (size.width < min_size.width) {
-    size.width = min_size.width;
-  }
-  if (size.height < min_size.height) {
-    size.height = min_size.height;
-  }
-  
   if (!window.Create(L"dester", origin, size)) {
     return EXIT_FAILURE;
   }
