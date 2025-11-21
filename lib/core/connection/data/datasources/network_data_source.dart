@@ -1,6 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
-import '../../../../core/utils/app_logger.dart';
+import '../../../utils/app_logger.dart';
 import '../../domain/entities/connection_status.dart';
 
 /// Data source for network connectivity

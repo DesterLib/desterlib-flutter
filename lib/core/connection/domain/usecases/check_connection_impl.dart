@@ -1,4 +1,4 @@
-import '../../../../../core/utils/app_logger.dart';
+import '../../../utils/app_logger.dart';
 import '../entities/connection_status.dart';
 import '../repository/connection_repository.dart';
 import 'check_connection.dart';

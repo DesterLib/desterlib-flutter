@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/entities/tv_show.dart';
-import '../../domain/usecases/get_movies_list_impl.dart';
-import '../../domain/usecases/get_tv_shows_list_impl.dart';
+import '../../domain/usecases/get_movies_list.dart';
+import '../../domain/usecases/get_tv_shows_list.dart';
 
 class HomeController extends ChangeNotifier {
-  final GetMoviesListImpl getMoviesList;
-  final GetTVShowsListImpl getTVShowsList;
+  final GetMoviesList getMoviesList;
+  final GetTVShowsList getTVShowsList;
 
   HomeController({required this.getMoviesList, required this.getTVShowsList});
 
