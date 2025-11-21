@@ -15,8 +15,8 @@ NC='\033[0m' # No Color
 # API configuration
 API_URL="${API_URL:-http://localhost:3001}"
 SWAGGER_JSON_URL="${API_URL}/api/docs/swagger.json"
-OUTPUT_DIR="lib/api"
-SDK_VERSION="3.9.2"
+OUTPUT_DIR="lib/core/network/api_client"
+SDK_VERSION="3.10.0"
 
 echo -e "${BLUE}🔧 DesterLib API Client Generator${NC}"
 echo ""
@@ -83,8 +83,10 @@ dart run build_runner build --delete-conflicting-outputs
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to build API client${NC}"
+    cd - > /dev/null  # Return to original directory
     exit 1
 fi
+cd - > /dev/null  # Return to project root
 echo -e "${GREEN}✅ API client built successfully${NC}"
 echo ""
 
