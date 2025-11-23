@@ -1,6 +1,9 @@
 {
   "app": {
-    "title": "Dester",
+    "title": "Dester"
+  },
+  "home": {
+    "title": "Home",
     "movies": "Movies",
     "tvShows": "TV Shows",
     "retry": "Retry",
@@ -8,18 +11,59 @@
     "noMoviesAvailable": "No movies available",
     "noTVShowsAvailable": "No TV shows available"
   },
-  "connection": {
-    "status": "Connection Status",
-    "connected": "Connected",
-    "disconnected": "No Internet",
-    "error": "Connection Error",
-    "checking": "Checking...",
-    "apiUrl": "API URL",
-    "enterApiUrl": "Enter API URL",
-    "save": "Save",
-    "close": "Close",
-    "noInternetConnection": "No internet connection",
-    "apiUrlNotConfigured": "API URL not configured",
-    "failedToConnect": "Failed to connect"
+  "settings": {
+    "title": "Settings",
+    "servers": {
+      "title": "Servers",
+      "connectionStatus": "Connection Status",
+      "manageServers": "Manage Servers",
+      "connected": "Connected",
+      "disconnected": "No Internet",
+      "error": "Connection Error",
+      "checking": "Checking...",
+      "apiUrl": "API URL",
+      "enterApiUrl": "Enter API URL",
+      "save": "Save",
+      "close": "Close",
+      "manageApiConnection": "Manage API connection and URL",
+      "statusTab": "Status",
+      "apisTab": "APIs",
+      "addApi": "Add API",
+      "apiLabel": "Label",
+      "enterApiLabel": "Enter label (e.g., Production, Staging)",
+      "setActive": "Set Active",
+      "active": "Active",
+      "delete": "Delete",
+      "noApisConfigured": "No APIs configured",
+      "addFirstApi": "Add your first API configuration"
+    },
+    "libraries": {
+      "title": "Libraries",
+      "manageLibraries": "Manage Libraries",
+      "noLibrariesAvailable": "No libraries available",
+      "addFirstLibrary": "Add your first library",
+      "addLibrary": "Add Library",
+      "libraryName": "Library Name",
+      "libraryDescription": "Description",
+      "libraryType": "Type",
+      "libraryPath": "Path",
+      "enterLibraryName": "Enter library name",
+      "enterLibraryDescription": "Enter library description (optional)",
+      "enterLibraryPath": "Enter library path",
+      "editLibrary": "Edit Library",
+      "deleteLibrary": "Delete Library",
+      "confirmDeleteLibrary": "Are you sure you want to delete this library?",
+      "mediaCount": "Media Count"
+    },
+    "tmdb": {
+      "title": "TMDB Settings",
+      "apiKey": "TMDB API Key",
+      "enterApiKey": "Enter TMDB API key",
+      "apiKeyHelper": "Get your API key from https://www.themoviedb.org/settings/api",
+      "apiKeyRequired": "TMDB API key is required",
+      "apiKeyNotSet": "Not set",
+      "apiKeySaved": "TMDB API key saved successfully",
+      "apiKeyRequiredForLibrary": "TMDB API key is required to create libraries. Please configure it in Settings."
+    }
   }
 }

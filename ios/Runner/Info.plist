@@ -45,5 +45,21 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow cleartext HTTP for local network connections (iOS 14+) -->
+		<!-- This allows HTTP connections to local network IPs (192.168.x.x, 10.x.x.x, etc.) -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<!-- Allow cleartext HTTP for localhost -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

@@ -3,6 +3,26 @@
 ## Project Overview
 Dester is a Flutter application following **Clean Architecture** principles with **Riverpod** for state management, **GoRouter** for navigation, and **easy_localization** for internationalization.
 
+## ⚠️ CRITICAL RULES - STRICT ENFORCEMENT
+
+### Dependency Rules (NEVER VIOLATE)
+1. **Domain layer MUST NEVER import from data or presentation layers**
+2. **Presentation layer MUST NEVER import from data layer**
+3. **Data layer MUST NEVER import from presentation layer**
+
+### Factory Pattern Rules (NEVER VIOLATE)
+1. **All feature factory methods MUST be static** (never instance methods)
+2. **Providers MUST use static factory methods** (never instantiate feature classes)
+3. **Screens MUST use use cases via providers** (never data sources directly)
+
+### Validation Checklist
+Before committing any code, verify:
+- [ ] Domain layer has NO imports from `../data/` or `../presentation/`
+- [ ] Presentation layer has NO imports from `../data/`
+- [ ] Feature factories use ONLY static methods
+- [ ] Providers call static factory methods
+- [ ] All API models are mapped to domain entities
+
 ## Technology Stack
 - **Flutter SDK**: ^3.10.0
 - **State Management**: flutter_riverpod ^3.0.3
@@ -115,10 +135,30 @@ lib/
    - Screens: Page-level widgets
    - Widgets: Reusable UI components
 
-### Dependency Rule
+### Dependency Rule (STRICT - NEVER VIOLATE)
 - **Domain** ← **Data** (Data implements Domain interfaces)
 - **Domain** ← **Presentation** (Presentation uses Domain entities/use cases)
 - **Data** and **Presentation** are independent
+- **Domain layer MUST NEVER import from data or presentation layers**
+- **Presentation layer MUST NEVER import from data layer** (use domain layer only)
+- **Data layer MUST NEVER import from presentation layer**
+
+### Strict Import Rules
+1. **Domain layer imports**: Only Dart SDK, Flutter framework, and other domain files
+   - ❌ NEVER import from `../data/` or `../../data/`
+   - ❌ NEVER import from `../presentation/` or `../../presentation/`
+   - ❌ NEVER import data sources, repositories implementations, or presentation files
+   
+2. **Data layer imports**: Domain interfaces, data sources, mappers, external APIs
+   - ✅ CAN import from domain layer (`../../domain/`)
+   - ✅ CAN import data sources and mappers
+   - ❌ NEVER import from presentation layer (`../presentation/`)
+   
+3. **Presentation layer imports**: Domain entities, use cases, UI framework
+   - ✅ CAN import from domain layer (`../../domain/`)
+   - ✅ CAN import other presentation files
+   - ❌ NEVER import from data layer (`../../data/` or `../data/`)
+   - ❌ NEVER import data sources, repository implementations, or mappers directly
 
 ## File Naming Conventions
 
@@ -139,18 +179,45 @@ lib/
 
 ## Dependency Injection Pattern
 
-Each feature has a factory class that creates and wires dependencies:
+**MANDATORY: All feature factories MUST use static methods (NOT instance methods)**
 
+Each feature has a factory class that creates and wires dependencies. The factory class MUST:
+1. Use ONLY static methods for creating dependencies
+2. Follow the pattern: `static ReturnType createXxx()` or `static ReturnType createXxxUseCase()`
+3. NEVER expose instance methods or getters
+4. Wire dependencies: DataSource → Repository → UseCase
+
+### Correct Pattern (✅ ALWAYS USE THIS)
 ```dart
-class ConnectionFeature {
-  static CheckConnection createCheckConnection() {
-    final preferencesDataSource = PreferencesDataSourceImpl();
-    final networkDataSource = NetworkDataSourceImpl();
-    final repository = ConnectionRepositoryImpl(
-      preferencesDataSource: preferencesDataSource,
-      networkDataSource: networkDataSource,
-    );
-    return CheckConnectionImpl(repository);
+class SettingsFeature {
+  // Screen factories (static)
+  static SettingsScreen createSettingsScreen() {
+    return const SettingsScreen();
+  }
+  
+  // Use case factories (static)
+  static GetSettings createGetSettings() {
+    final dataSource = SettingsDataSource();
+    final repository = SettingsRepositoryImpl(dataSource: dataSource);
+    return GetSettingsImpl(repository);
+  }
+  
+  static UpdateSettings createUpdateSettings() {
+    final dataSource = SettingsDataSource();
+    final repository = SettingsRepositoryImpl(dataSource: dataSource);
+    return UpdateSettingsImpl(repository);
+  }
+}
+```
+
+### Incorrect Pattern (❌ NEVER USE THIS)
+```dart
+class SettingsFeature {
+  // ❌ WRONG: Instance methods
+  GetSettings get getSettings {
+    final dataSource = SettingsDataSource();
+    final repository = SettingsRepositoryImpl(dataSource: dataSource);
+    return GetSettingsImpl(repository);
   }
 }
 ```
@@ -179,6 +246,21 @@ class MyNotifier extends Notifier<MyState> {
     return MyState.initial();
   }
 }
+```
+
+### Use Case Provider Pattern (STRICT)
+**MANDATORY: Providers MUST use static factory methods from feature classes**
+
+```dart
+// ✅ CORRECT: Use static factory methods
+final getSettingsProvider = Provider<GetSettings>((ref) {
+  return SettingsFeature.createGetSettings();
+});
+
+// ❌ WRONG: Creating feature instance
+final getSettingsProvider = Provider<GetSettings>((ref) {
+  return SettingsFeature().getSettings; // NEVER use instance methods
+});
 ```
 
 ## Localization
@@ -270,31 +352,135 @@ test/
 ## Important Notes
 
 1. **Always separate interface and implementation** for use cases
-2. **Domain layer must never depend on other layers**
-3. **Use dependency injection factories** for feature setup
-4. **Riverpod providers** should be in `app/providers/` for app-wide state
-5. **Platform-specific UI** should adapt based on `Platform.isDesktop` checks
-6. **Localization keys** should be centralized in `app_localization.dart`
-7. **Storage keys** should be in `storage_keys.dart` constants
+2. **Domain layer must never depend on other layers** (STRICT RULE)
+3. **Presentation layer must never depend on data layer** (STRICT RULE)
+4. **Use dependency injection factories** with static methods only (STRICT RULE)
+5. **Riverpod providers** should be in `app/providers/` for app-wide state
+6. **Platform-specific UI** should adapt based on `Platform.isDesktop` checks
+7. **Localization keys** should be centralized in `app_localization.dart`
+8. **Storage keys** should be in `storage_keys.dart` constants
+
+## Clean Architecture Enforcement Rules
+
+### ❌ CRITICAL VIOLATIONS (NEVER ALLOW)
+
+1. **Presentation Layer Importing Data Layer**
+   ```dart
+   // ❌ NEVER DO THIS in presentation layer
+   import '../../data/datasources/settings_datasource.dart';
+   import '../../data/repository/settings_repository_impl.dart';
+   
+   // ✅ CORRECT: Use domain layer only
+   import '../../domain/usecases/get_settings.dart';
+   import '../../domain/entities/settings.dart';
+   ```
+
+2. **Domain Layer Importing External Layers**
+   ```dart
+   // ❌ NEVER DO THIS in domain layer
+   import '../../data/repository/settings_repository_impl.dart';
+   import '../../presentation/screens/settings_screen.dart';
+   
+   // ✅ CORRECT: Domain only imports domain or Dart/Flutter SDK
+   import '../entities/settings.dart';
+   import '../repository/settings_repository.dart';
+   ```
+
+3. **Instance Methods in Feature Factories**
+   ```dart
+   // ❌ NEVER DO THIS
+   class SettingsFeature {
+     GetSettings get getSettings { ... }
+   }
+   
+   // ✅ CORRECT: Use static methods
+   class SettingsFeature {
+     static GetSettings createGetSettings() { ... }
+   }
+   ```
+
+4. **Direct Data Source Usage in Presentation**
+   ```dart
+   // ❌ NEVER DO THIS in screens/controllers
+   final dataSource = SettingsDataSource();
+   await dataSource.getSettings();
+   
+   // ✅ CORRECT: Use use cases
+   final getSettings = ref.read(getSettingsProvider);
+   await getSettings();
+   ```
+
+### ✅ REQUIRED PATTERNS (ALWAYS FOLLOW)
+
+1. **Feature Factory Pattern**
+   - All methods MUST be static
+   - Methods return use cases, screens, or other dependencies
+   - Wire dependencies: DataSource → Repository → UseCase
+
+2. **Use Case Provider Pattern**
+   - Providers MUST call static factory methods
+   - Providers return use case interfaces (not implementations)
+   - Use in presentation layer via `ref.read()` or `ref.watch()`
+
+3. **Repository Pattern**
+   - Repository interface in domain layer
+   - Repository implementation in data layer
+   - Implementation MUST implement domain interface
+
+4. **Mapper Pattern**
+   - Always map API models to domain entities
+   - Mappers in data layer only
+   - Domain entities never contain API model types
 
 ## Adding a New Feature
 
-1. Create feature folder: `lib/features/{feature_name}/`
-2. Set up domain layer:
-   - Entities
-   - Repository interface
-   - Use case interfaces and implementations
-3. Set up data layer:
-   - Data sources
-   - Repository implementation
-   - Mappers (if needed)
-4. Set up presentation layer:
-   - Controllers (if using ChangeNotifier)
-   - Screens
-   - Widgets
-5. Create feature factory: `{feature}_feature.dart`
-6. Add routes in `app_router.dart`
-7. Add translations if needed
+**MANDATORY CHECKLIST - Follow ALL steps in order:**
+
+1. **Create feature folder**: `lib/features/{feature_name}/`
+
+2. **Set up domain layer** (NO imports from data/presentation):
+   - Create entities: `domain/entities/{entity}.dart`
+   - Create repository interface: `domain/repository/{feature}_repository.dart`
+   - Create use case interfaces: `domain/usecases/{use_case}.dart`
+   - Create use case implementations: `domain/usecases/{use_case}_impl.dart`
+   - ✅ VERIFY: Domain files only import from domain layer or Dart/Flutter SDK
+
+3. **Set up data layer** (CAN import from domain, NEVER from presentation):
+   - Create data sources: `data/datasources/{source}_datasource.dart`
+   - Create mappers: `data/mappers/{entity}_mapper.dart` (API model → Domain entity)
+   - Create repository implementation: `data/repository/{feature}_repository_impl.dart`
+   - ✅ VERIFY: Data files never import from presentation layer
+
+4. **Set up presentation layer** (CAN import from domain, NEVER from data):
+   - Create controllers: `presentation/controllers/{feature}_controller.dart`
+   - Create screens: `presentation/screens/{feature}_screen.dart`
+   - Create widgets: `presentation/widgets/{widget}.dart`
+   - Create providers: `presentation/providers/{feature}_providers.dart`
+   - ✅ VERIFY: Presentation files never import from data layer
+
+5. **Create feature factory**: `{feature}_feature.dart`
+   - ✅ ALL methods MUST be static
+   - Create static factories for screens: `static ScreenName createScreenName()`
+   - Create static factories for use cases: `static UseCaseName createUseCaseName()`
+   - Wire dependencies: DataSource → Repository → UseCase
+
+6. **Create providers** (if using Riverpod):
+   - ✅ Use static factory methods: `SettingsFeature.createGetSettings()`
+   - ✅ NEVER instantiate feature class: `SettingsFeature().getSettings`
+
+7. **Add routes** in `app_router.dart`:
+   - Use static factory methods: `SettingsFeature.createSettingsScreen()`
+
+8. **Add translations** if needed
+
+### Pre-Commit Validation Checklist
+Before committing any feature code, verify:
+- [ ] Domain layer has NO imports from data or presentation
+- [ ] Presentation layer has NO imports from data layer
+- [ ] Feature factory uses ONLY static methods
+- [ ] Providers use static factory methods (not instance methods)
+- [ ] All API models are mapped to domain entities
+- [ ] Repository implementation implements domain interface
 
 ## Common Patterns
 
@@ -320,12 +506,12 @@ class MyUseCaseImpl implements MyUseCase {
 
 ### Repository Pattern
 ```dart
-// Domain interface
+// Domain interface (domain layer)
 abstract class MyRepository {
   Future<Entity> getData();
 }
 
-// Data implementation
+// Data implementation (data layer)
 class MyRepositoryImpl implements MyRepository {
   final MyDataSource dataSource;
   
@@ -333,9 +519,89 @@ class MyRepositoryImpl implements MyRepository {
   
   @override
   Future<Entity> getData() async {
-    final data = await dataSource.fetch();
-    return EntityMapper.fromData(data);
+    final apiModel = await dataSource.fetch();
+    return EntityMapper.fromApiModel(apiModel); // Always map to domain entity
   }
 }
+```
+
+### Settings Feature Example (Complete Pattern)
+```dart
+// 1. Domain Entity (domain/entities/settings.dart)
+class Settings {
+  final String? tmdbApiKey;
+  final bool firstRun;
+  const Settings({this.tmdbApiKey, required this.firstRun});
+}
+
+// 2. Repository Interface (domain/repository/settings_repository.dart)
+abstract class SettingsRepository {
+  Future<Settings> getSettings();
+  Future<Settings> updateSettings({String? tmdbApiKey});
+}
+
+// 3. Use Case Interface (domain/usecases/get_settings.dart)
+abstract class GetSettings {
+  Future<Settings> call();
+}
+
+// 4. Use Case Implementation (domain/usecases/get_settings_impl.dart)
+class GetSettingsImpl implements GetSettings {
+  final SettingsRepository repository;
+  GetSettingsImpl(this.repository);
+  
+  @override
+  Future<Settings> call() async {
+    return await repository.getSettings();
+  }
+}
+
+// 5. Data Source (data/datasources/settings_datasource.dart)
+class SettingsDataSource {
+  Future<PublicSettings?> getSettings() async { ... }
+  Future<PublicSettings?> updateSettings({String? tmdbApiKey}) async { ... }
+}
+
+// 6. Mapper (data/mappers/settings_mapper.dart)
+class SettingsMapper {
+  static Settings fromApiModel(PublicSettings? apiSettings) {
+    return Settings(
+      tmdbApiKey: apiSettings?.tmdbApiKey,
+      firstRun: apiSettings?.firstRun ?? true,
+    );
+  }
+}
+
+// 7. Repository Implementation (data/repository/settings_repository_impl.dart)
+class SettingsRepositoryImpl implements SettingsRepository {
+  final SettingsDataSource dataSource;
+  SettingsRepositoryImpl({required this.dataSource});
+  
+  @override
+  Future<Settings> getSettings() async {
+    final apiSettings = await dataSource.getSettings();
+    return SettingsMapper.fromApiModel(apiSettings);
+  }
+}
+
+// 8. Feature Factory (settings_feature.dart)
+class SettingsFeature {
+  static GetSettings createGetSettings() {
+    final dataSource = SettingsDataSource();
+    final repository = SettingsRepositoryImpl(dataSource: dataSource);
+    return GetSettingsImpl(repository);
+  }
+}
+
+// 9. Provider (presentation/providers/settings_providers.dart)
+final getSettingsProvider = Provider<GetSettings>((ref) {
+  return SettingsFeature.createGetSettings(); // Static method
+});
+
+// 10. Screen Usage (presentation/screens/settings_screen.dart)
+final settingsProvider = FutureProvider<Settings>((ref) async {
+  final getSettings = ref.watch(getSettingsProvider);
+  return await getSettings(); // Use case, not data source
+});
 ```
 

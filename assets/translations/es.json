@@ -8,18 +8,59 @@
     "noMoviesAvailable": "No hay películas disponibles",
     "noTVShowsAvailable": "No hay programas de TV disponibles"
   },
-  "connection": {
-    "status": "Estado de Conexión",
-    "connected": "Conectado",
-    "disconnected": "Sin Internet",
-    "error": "Error de Conexión",
-    "checking": "Verificando...",
-    "apiUrl": "URL de API",
-    "enterApiUrl": "Ingresar URL de API",
-    "save": "Guardar",
-    "close": "Cerrar",
-    "noInternetConnection": "Sin conexión a internet",
-    "apiUrlNotConfigured": "URL de API no configurada",
-    "failedToConnect": "Error al conectar"
+  "settings": {
+    "title": "Configuración",
+    "servers": {
+      "title": "Servidores",
+      "connectionStatus": "Estado de Conexión",
+      "manageServers": "Gestionar Servidores",
+      "connected": "Conectado",
+      "disconnected": "Sin Internet",
+      "error": "Error de Conexión",
+      "checking": "Verificando...",
+      "apiUrl": "API URL",
+      "enterApiUrl": "Ingresar URL de API",
+      "save": "Guardar",
+      "close": "Cerrar",
+      "manageApiConnection": "Gestionar conexión y URL de API",
+      "statusTab": "Estado",
+      "apisTab": "APIs",
+      "addApi": "Agregar API",
+      "apiLabel": "Etiqueta",
+      "enterApiLabel": "Ingresar etiqueta (ej: Producción, Staging)",
+      "setActive": "Establecer Activa",
+      "active": "Activa",
+      "delete": "Eliminar",
+      "noApisConfigured": "No hay APIs configuradas",
+      "addFirstApi": "Agrega tu primera configuración de API"
+    },
+    "libraries": {
+      "title": "Bibliotecas",
+      "manageLibraries": "Gestionar Bibliotecas",
+      "noLibrariesAvailable": "No hay bibliotecas disponibles",
+      "addFirstLibrary": "Agrega tu primera biblioteca",
+      "addLibrary": "Agregar Biblioteca",
+      "libraryName": "Nombre de la Biblioteca",
+      "libraryDescription": "Descripción",
+      "libraryType": "Tipo",
+      "libraryPath": "Ruta",
+      "enterLibraryName": "Ingresar nombre de biblioteca",
+      "enterLibraryDescription": "Ingresar descripción de biblioteca (opcional)",
+      "enterLibraryPath": "Ingresar ruta de biblioteca",
+      "editLibrary": "Editar Biblioteca",
+      "deleteLibrary": "Eliminar Biblioteca",
+      "confirmDeleteLibrary": "¿Estás seguro de que deseas eliminar esta biblioteca?",
+      "mediaCount": "Cantidad de Medios"
+    },
+    "tmdb": {
+      "title": "Configuración de TMDB",
+      "apiKey": "Clave API de TMDB",
+      "enterApiKey": "Ingresar clave API de TMDB",
+      "apiKeyHelper": "Obtén tu clave API en https://www.themoviedb.org/settings/api",
+      "apiKeyRequired": "La clave API de TMDB es requerida",
+      "apiKeyNotSet": "No configurada",
+      "apiKeySaved": "Clave API de TMDB guardada exitosamente",
+      "apiKeyRequiredForLibrary": "La clave API de TMDB es requerida para crear bibliotecas. Por favor configúrala en Configuración."
+    }
   }
 }
