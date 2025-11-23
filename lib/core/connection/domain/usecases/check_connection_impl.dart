@@ -1,7 +1,11 @@
-import '../../../utils/app_logger.dart';
-import '../entities/connection_status.dart';
-import '../repository/connection_repository.dart';
+// Core
+import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/core/connection/domain/repository/connection_repository.dart';
+import 'package:dester/core/utils/app_logger.dart';
+import 'package:dester/core/utils/url_helper.dart';
+
 import 'check_connection.dart';
+
 
 /// Implementation of check connection use case
 class CheckConnectionImpl implements CheckConnection {
@@ -11,21 +15,11 @@ class CheckConnectionImpl implements CheckConnection {
 
   @override
   Future<ConnectionGuardState> call() async {
-    AppLogger.d('Checking connection...');
+    AppLogger.d('Checking API connection...');
 
-    // Check internet connectivity first
-    final hasInternet = await repository.hasInternetConnectivity();
-
-    if (!hasInternet) {
-      AppLogger.w('No internet connection detected');
-      return ConnectionGuardState(
-        status: ConnectionStatus.disconnected,
-        errorMessage: 'No internet connection',
-      );
-    }
-
-    // Get API URL
-    final apiUrl = await repository.getApiBaseUrl();
+    // Get active API URL
+    final activeConfig = repository.getActiveApiConfiguration();
+    final apiUrl = activeConfig?.url;
 
     if (apiUrl == null || apiUrl.isEmpty) {
       AppLogger.w('API URL not configured');
@@ -36,15 +30,16 @@ class CheckConnectionImpl implements CheckConnection {
       );
     }
 
-    // Check API connection
-    final status = await repository.checkApiConnection(apiUrl);
+    // Check API connection (normalize URL for better cross-platform compatibility)
+    final normalizedUrl = UrlHelper.normalizeUrl(apiUrl);
+    final status = await repository.checkApiConnection(normalizedUrl);
 
     String? errorMessage;
     if (status == ConnectionStatus.error) {
       errorMessage = 'Failed to connect to API';
       AppLogger.w('API connection failed: $errorMessage');
     } else {
-      AppLogger.i('Connection check completed: $status');
+      AppLogger.i('API connection check completed: $status');
     }
 
     return ConnectionGuardState(

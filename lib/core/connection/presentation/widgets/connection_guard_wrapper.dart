@@ -1,8 +1,17 @@
+// External packages
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../app/providers/connection_guard_provider.dart';
+
+// App
+import 'package:dester/app/providers/connection_guard_provider.dart';
+
+// Core
+import 'package:dester/core/connection/presentation/screens/s_connection.dart';
+import 'package:dester/core/constants/app_constants.dart';
+
 import '../../domain/entities/connection_status.dart' as connection;
-import 'connection_status_modal.dart';
+import 'm_connection_status.dart';
+
 
 /// Wrapper widget that monitors connection status and shows modal/drawer when needed
 class ConnectionGuardWrapper extends ConsumerStatefulWidget {
@@ -25,6 +34,8 @@ class ConnectionGuardWrapper extends ConsumerStatefulWidget {
 class _ConnectionGuardWrapperState
     extends ConsumerState<ConnectionGuardWrapper> {
   bool _hasShownError = false;
+  bool _shouldShowConnectionScreen = true; // Always show on initial load
+  bool _hasCompletedInitialCheck = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +45,60 @@ class _ConnectionGuardWrapperState
         previous,
         next,
       ) {
-        if (widget.showOnError &&
-            (next.status == connection.ConnectionStatus.error ||
-                next.status == connection.ConnectionStatus.disconnected) &&
+        // Check if this is the initial check (previous is null or was checking)
+        final isInitialCheck =
+            previous == null ||
+            previous.status == connection.ConnectionStatus.checking;
+        final isApiConnected =
+            next.status == connection.ConnectionStatus.connected;
+        final hasApiError = next.status == connection.ConnectionStatus.error;
+
+        // Mark initial check as completed when status changes from checking
+        if (isInitialCheck &&
+            previous?.status == connection.ConnectionStatus.checking &&
+            next.status != connection.ConnectionStatus.checking) {
+          _hasCompletedInitialCheck = true;
+        }
+
+        // Hide connection screen when API connection is successful after initial check
+        if (isApiConnected &&
+            _shouldShowConnectionScreen &&
+            _hasCompletedInitialCheck) {
+          setState(() {
+            _shouldShowConnectionScreen = false;
+          });
+        }
+        // Show modal for later API errors (not initial load)
+        else if (widget.showOnError &&
+            hasApiError &&
             !_hasShownError &&
+            !isInitialCheck &&
+            !isApiConnected &&
+            !_shouldShowConnectionScreen &&
             mounted) {
           _hasShownError = true;
-          // Delay to ensure navigator is ready
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _showConnectionModal();
           });
-        } else if (next.status == connection.ConnectionStatus.connected) {
+        } else if (isApiConnected) {
           _hasShownError = false;
         }
       });
     }
 
-    return widget.child;
+    // Show connection screen if needed, otherwise show child with fade animation
+    return AnimatedSwitcher(
+      duration: AppConstants.fadeTransition,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: _shouldShowConnectionScreen
+          ? const ConnectionScreen(key: ValueKey('connection_screen'))
+          : KeyedSubtree(
+              key: const ValueKey('app_content'),
+              child: widget.child,
+            ),
+    );
   }
 
   void _showConnectionModal() {

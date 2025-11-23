@@ -1,7 +1,13 @@
+// External packages
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:http/http.dart' as http;
-import '../../../utils/app_logger.dart';
-import '../../domain/entities/connection_status.dart';
+import 'package:dio/dio.dart';
+
+// Core
+import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/core/constants/app_version.dart';
+import 'package:dester/core/utils/app_logger.dart';
+import 'package:dester/core/utils/url_helper.dart';
+
 
 /// Data source for network connectivity
 abstract class NetworkDataSource {
@@ -44,12 +50,47 @@ class NetworkDataSourceImpl implements NetworkDataSource {
 
   @override
   Future<ConnectionStatus> checkApiConnection(String apiUrl) async {
+    final stopwatch = Stopwatch()..start();
     try {
-      AppLogger.d('Checking API connection to: $apiUrl');
-      final uri = Uri.parse(apiUrl);
-      final response = await http.get(uri).timeout(const Duration(seconds: 5));
+      // Normalize URL (replace localhost with 127.0.0.1 for better compatibility)
+      final normalizedUrl = UrlHelper.normalizeUrl(apiUrl);
 
-      if (response.statusCode >= 200 && response.statusCode < 500) {
+      // Use the /health endpoint for connection checking
+      final healthUri = Uri.parse(normalizedUrl).resolve('/health');
+      AppLogger.d('Checking API connection to: $healthUri');
+
+      // Use Dio with reasonable timeout for health check
+      // Health checks should be fast - fail quickly if API is not available
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: normalizedUrl,
+          connectTimeout: const Duration(milliseconds: 5000),
+          receiveTimeout: const Duration(seconds: 5), // Fast timeout for health checks
+          headers: {
+            'X-Client-Version':
+                AppVersion.version, // Include client version header
+          },
+        ),
+      );
+
+      final response = await dio.get('/health');
+
+      stopwatch.stop();
+      final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
+
+      if (durationSeconds > 3) {
+        AppLogger.w(
+          'API connection check took ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): $healthUri',
+        );
+      } else {
+        AppLogger.d(
+          'API connection check completed in ${durationSeconds.toStringAsFixed(2)}s',
+        );
+      }
+
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 400) {
         AppLogger.i('API connection successful: ${response.statusCode}');
         return ConnectionStatus.connected;
       } else {
@@ -59,6 +100,13 @@ class NetworkDataSourceImpl implements NetworkDataSource {
         return ConnectionStatus.error;
       }
     } catch (e, stackTrace) {
+      stopwatch.stop();
+      final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
+      if (durationSeconds > 3) {
+        AppLogger.w(
+          'API connection check failed after ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): $apiUrl',
+        );
+      }
       AppLogger.e('Error checking API connection to $apiUrl', e, stackTrace);
       return ConnectionStatus.error;
     }

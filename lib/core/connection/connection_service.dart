@@ -2,12 +2,17 @@
 import 'data/datasources/network_data_source.dart';
 import 'data/datasources/preferences_data_source.dart';
 import 'data/repository/connection_repository_impl.dart';
+import 'domain/usecases/add_api_configuration.dart';
+import 'domain/usecases/add_api_configuration_impl.dart';
 import 'domain/usecases/check_connection.dart';
 import 'domain/usecases/check_connection_impl.dart';
-import 'domain/usecases/clear_api_url.dart';
-import 'domain/usecases/clear_api_url_impl.dart';
-import 'domain/usecases/set_api_url.dart';
-import 'domain/usecases/set_api_url_impl.dart';
+import 'domain/usecases/delete_api_configuration.dart';
+import 'domain/usecases/delete_api_configuration_impl.dart';
+import 'domain/usecases/get_api_configurations.dart';
+import 'domain/usecases/get_api_configurations_impl.dart';
+import 'domain/usecases/set_active_api_configuration.dart';
+import 'domain/usecases/set_active_api_configuration_impl.dart';
+
 
 class ConnectionService {
   /// Create check connection use case
@@ -21,25 +26,47 @@ class ConnectionService {
     return CheckConnectionImpl(repository);
   }
 
-  /// Create set API URL use case
-  static SetApiUrl createSetApiUrl() {
+  /// Create add API configuration use case
+  static AddApiConfiguration createAddApiConfiguration() {
     final preferencesDataSource = PreferencesDataSourceImpl();
     final networkDataSource = NetworkDataSourceImpl();
     final repository = ConnectionRepositoryImpl(
       preferencesDataSource: preferencesDataSource,
       networkDataSource: networkDataSource,
     );
-    return SetApiUrlImpl(repository);
+    return AddApiConfigurationImpl(repository);
   }
 
-  /// Create clear API URL use case
-  static ClearApiUrl createClearApiUrl() {
+  /// Create set active API configuration use case
+  static SetActiveApiConfiguration createSetActiveApiConfiguration() {
     final preferencesDataSource = PreferencesDataSourceImpl();
     final networkDataSource = NetworkDataSourceImpl();
     final repository = ConnectionRepositoryImpl(
       preferencesDataSource: preferencesDataSource,
       networkDataSource: networkDataSource,
     );
-    return ClearApiUrlImpl(repository);
+    return SetActiveApiConfigurationImpl(repository);
+  }
+
+  /// Create delete API configuration use case
+  static DeleteApiConfiguration createDeleteApiConfiguration() {
+    final preferencesDataSource = PreferencesDataSourceImpl();
+    final networkDataSource = NetworkDataSourceImpl();
+    final repository = ConnectionRepositoryImpl(
+      preferencesDataSource: preferencesDataSource,
+      networkDataSource: networkDataSource,
+    );
+    return DeleteApiConfigurationImpl(repository);
+  }
+
+  /// Create get API configurations use case
+  static GetApiConfigurations createGetApiConfigurations() {
+    final preferencesDataSource = PreferencesDataSourceImpl();
+    final networkDataSource = NetworkDataSourceImpl();
+    final repository = ConnectionRepositoryImpl(
+      preferencesDataSource: preferencesDataSource,
+      networkDataSource: networkDataSource,
+    );
+    return GetApiConfigurationsImpl(repository);
   }
 }

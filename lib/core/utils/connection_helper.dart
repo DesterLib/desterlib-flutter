@@ -1,21 +1,35 @@
+// External packages
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../app/providers/connection_guard_provider.dart';
-import '../connection/presentation/widgets/connection_status_modal.dart';
+
+// App
+import 'package:dester/app/providers/connection_guard_provider.dart';
+
+// Core
+import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
+
 import 'app_logger.dart';
+
 
 /// Helper class for connection-related operations
 class ConnectionHelper {
-  /// Set the API base URL and check connection
+  /// Add a new API configuration
   /// Requires a WidgetRef to access the provider
-  static Future<bool> setApiUrl(String url, WidgetRef ref) async {
+  static Future<bool> addApiConfiguration(
+    String url,
+    String label,
+    WidgetRef ref, {
+    bool setAsActive = false,
+  }) async {
     try {
-      AppLogger.d('Setting API URL: $url');
-      await ref.read(connectionGuardProvider.notifier).setApiUrl(url);
-      AppLogger.i('API URL set successfully');
+      AppLogger.d('Adding API configuration: $label - $url');
+      await ref
+          .read(connectionGuardProvider.notifier)
+          .addApiConfiguration(url, label, setAsActive: setAsActive);
+      AppLogger.i('API configuration added successfully');
       return true;
     } catch (e, stackTrace) {
-      AppLogger.e('Error setting API URL', e, stackTrace);
+      AppLogger.e('Error adding API configuration', e, stackTrace);
       return false;
     }
   }
@@ -30,9 +44,14 @@ class ConnectionHelper {
     ConnectionStatusModal.show(context);
   }
 
-  /// Clear the stored API URL
-  static Future<void> clearApiUrl(WidgetRef ref) async {
-    await ref.read(connectionGuardProvider.notifier).clearApiUrl();
+  /// Delete an API configuration
+  static Future<void> deleteApiConfiguration(
+    String configurationId,
+    WidgetRef ref,
+  ) async {
+    await ref
+        .read(connectionGuardProvider.notifier)
+        .deleteApiConfiguration(configurationId);
   }
 
   /// Check connection manually
