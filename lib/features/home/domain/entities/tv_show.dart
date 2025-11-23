@@ -6,6 +6,8 @@ class TVShow {
   final String? overview;
   final String? firstAirDate;
   final double? rating;
+  final List<String>? meshGradientColors;
+  final DateTime? createdAt;
 
   const TVShow({
     required this.id,
@@ -15,5 +17,7 @@ class TVShow {
     this.overview,
     this.firstAirDate,
     this.rating,
+    this.meshGradientColors,
+    this.createdAt,
   });
 }

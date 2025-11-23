@@ -6,6 +6,7 @@ class Movie {
   final String? overview;
   final String? releaseDate;
   final double? rating;
+  final DateTime? createdAt;
 
   const Movie({
     required this.id,
@@ -15,5 +16,6 @@ class Movie {
     this.overview,
     this.releaseDate,
     this.rating,
+    this.createdAt,
   });
 }

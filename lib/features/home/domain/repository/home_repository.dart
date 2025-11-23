@@ -1,5 +1,7 @@
-import '../entities/movie.dart';
-import '../entities/tv_show.dart';
+// Features
+import 'package:dester/features/home/domain/entities/movie.dart';
+import 'package:dester/features/home/domain/entities/tv_show.dart';
+
 
 // Repository interface (domain layer)
 abstract class HomeRepository {

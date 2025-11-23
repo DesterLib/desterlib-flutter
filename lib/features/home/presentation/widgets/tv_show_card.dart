@@ -1,5 +1,13 @@
+// External packages
 import 'package:flutter/material.dart';
-import '../../domain/entities/tv_show.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+// Core
+import 'package:dester/core/constants/app_constants.dart';
+
+// Features
+import 'package:dester/features/home/domain/entities/tv_show.dart';
+
 
 class TVShowCard extends StatelessWidget {
   final TVShow tvShow;
@@ -12,7 +20,9 @@ class TVShowCard extends StatelessWidget {
       width: 180,
       child: Card(
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusLg),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -29,7 +39,7 @@ class TVShowCard extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) {
                           return const Center(
                             child: Icon(
-                              Icons.tv_outlined,
+                              LucideIcons.tv,
                               size: 48,
                               color: Colors.grey,
                             ),
@@ -38,7 +48,7 @@ class TVShowCard extends StatelessWidget {
                       )
                     : const Center(
                         child: Icon(
-                          Icons.tv_outlined,
+                          LucideIcons.tv,
                           size: 48,
                           color: Colors.grey,
                         ),
@@ -50,7 +60,7 @@ class TVShowCard extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: AppConstants.padding(AppConstants.spacing8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -63,12 +73,16 @@ class TVShowCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    AppConstants.spacingY(AppConstants.spacing4),
                     if (tvShow.rating != null)
                       Row(
                         children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                          const SizedBox(width: 4),
+                          const Icon(
+                            LucideIcons.star,
+                            size: 14,
+                            color: Colors.amber,
+                          ),
+                          AppConstants.spacingX(AppConstants.spacing4),
                           Text(
                             tvShow.rating!.toStringAsFixed(1),
                             style: const TextStyle(
@@ -79,7 +93,7 @@ class TVShowCard extends StatelessWidget {
                         ],
                       ),
                     if (tvShow.firstAirDate != null) ...[
-                      const SizedBox(height: 4),
+                      AppConstants.spacingY(AppConstants.spacing4),
                       Text(
                         tvShow.firstAirDate!,
                         style: const TextStyle(

@@ -1,60 +1,81 @@
-// API client for fetching data from the server
+// External packages
+import 'package:dio/dio.dart';
+
+// Core
+import 'package:dester/core/network/api_client_service.dart';
+
+/// API client for fetching data from the server
 class HomeDataSource {
   // Get movies list from API
   Future<List<Map<String, dynamic>>> getMoviesList() async {
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final client = ApiClientService.getClient();
+      final moviesApi = client.getMoviesApi();
+      final response = await moviesApi.apiV1MoviesGet();
 
-    // Return dummy data (mimicking what Swagger-generated client would return)
-    return [
-      {
-        'id': '1',
-        'title': 'The Dark Knight',
-        'posterPath': '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-        'backdropPath': '/hqkIcbrOHL86UncnHIsHVcVmzue.jpg',
-        'overview': 'Batman raises the stakes in his war on crime...',
-        'releaseDate': '2008-07-18',
-        'rating': 9.0,
-      },
-      {
-        'id': '2',
-        'title': 'Inception',
-        'posterPath': '/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg',
-        'backdropPath': '/s3TBrRGB1iav7gFOCNx3H31MoES.jpg',
-        'overview': 'A skilled thief is given a chance at redemption...',
-        'releaseDate': '2010-07-16',
-        'rating': 8.8,
-      },
-    ];
+      if (response.data?.success == true && response.data?.data != null) {
+        final movies = response.data!.data!;
+        return movies.map((movie) {
+          final media = movie.media;
+          return {
+            'id': movie.id ?? '',
+            'title': media?.title ?? '',
+            'posterPath': media?.posterUrl,
+            'backdropPath': media?.backdropUrl,
+            'overview': media?.description,
+            'releaseDate': media?.releaseDate
+                ?.toIso8601String()
+                .split('T')
+                .first,
+            'rating': media?.rating?.toDouble(),
+            'createdAt': media?.createdAt,
+          };
+        }).toList();
+      }
+
+      return [];
+    } on DioException catch (e) {
+      throw Exception('Failed to fetch movies: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch movies: $e');
+    }
   }
 
   // Get TV shows list from API
   Future<List<Map<String, dynamic>>> getTVShowsList() async {
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final client = ApiClientService.getClient();
+      final tvShowsApi = client.getTVShowsApi();
+      final response = await tvShowsApi.apiV1TvshowsGet();
 
-    // Return dummy data (mimicking what Swagger-generated client would return)
-    return [
-      {
-        'id': '1',
-        'title': 'Breaking Bad',
-        'posterPath': '/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-        'backdropPath': '/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg',
-        'overview':
-            'A high school chemistry teacher turned methamphetamine manufacturer...',
-        'firstAirDate': '2008-01-20',
-        'rating': 9.5,
-      },
-      {
-        'id': '2',
-        'title': 'Game of Thrones',
-        'posterPath': '/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
-        'backdropPath': '/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg',
-        'overview':
-            'Nine noble families fight for control over the lands of Westeros...',
-        'firstAirDate': '2011-04-17',
-        'rating': 9.3,
-      },
-    ];
+      if (response.data?.success == true && response.data?.data != null) {
+        final tvShows = response.data!.data!;
+        return tvShows.map((tvShow) {
+          final media = tvShow.media;
+          return {
+            'id': tvShow.id ?? '',
+            'title': media?.title ?? '',
+            'posterPath': media?.posterUrl,
+            'backdropPath': media?.backdropUrl,
+            'overview': media?.description,
+            'firstAirDate': media?.releaseDate
+                ?.toIso8601String()
+                .split('T')
+                .first,
+            'rating': media?.rating?.toDouble(),
+            'meshGradientColors': media?.meshGradientColors != null
+                ? media!.meshGradientColors!.toList()
+                : null,
+            'createdAt': media?.createdAt,
+          };
+        }).toList();
+      }
+
+      return [];
+    } on DioException catch (e) {
+      throw Exception('Failed to fetch TV shows: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch TV shows: $e');
+    }
   }
 }
