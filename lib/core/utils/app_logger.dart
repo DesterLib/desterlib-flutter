@@ -1,5 +1,7 @@
+// External packages
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+
 
 /// Centralized logging utility for the app
 /// Provides consistent logging across the application
