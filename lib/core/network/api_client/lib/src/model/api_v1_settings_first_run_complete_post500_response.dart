@@ -3,8 +3,10 @@
 //
 
 // ignore_for_file: unused_element
+// External packages
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+
 
 part 'api_v1_settings_first_run_complete_post500_response.g.dart';
 

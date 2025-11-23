@@ -2,12 +2,15 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+// Dart
 import 'dart:convert';
 import 'dart:typed_data';
 
+// External packages
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
+
 
 /// Format the given form parameter object into something that Dio can handle.
 /// Returns primitive or String.

@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner.dart';
+// External packages
 import 'package:built_collection/built_collection.dart';
-import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:openapi/src/model/api_v1_search_get200_response_data_tv_shows_inner_media.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner.dart';
+
 
 part 'api_v1_tvshows_id_get200_response_data.g.dart';
 

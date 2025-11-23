@@ -2,13 +2,15 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+// Dart
 import 'dart:async';
 
+// External packages
 import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
-
 import 'package:openapi/src/model/health_response.dart';
+
 
 class HealthApi {
 

@@ -3,9 +3,11 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+// External packages
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+
 
 part 'api_v1_scan_path_post_request.g.dart';
 

@@ -2,12 +2,13 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+// Dart
 import 'dart:async';
 
+// External packages
 import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
-
 import 'package:openapi/src/api_util.dart';
 import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
@@ -15,6 +16,7 @@ import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response.dart';
+
 
 class ScanApi {
 

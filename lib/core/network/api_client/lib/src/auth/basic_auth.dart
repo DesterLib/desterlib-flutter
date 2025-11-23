@@ -2,10 +2,13 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+// Dart
 import 'dart:convert';
 
+// External packages
 import 'package:dio/dio.dart';
 import 'package:openapi/src/auth/auth.dart';
+
 
 class BasicAuthInfo {
   final String username;

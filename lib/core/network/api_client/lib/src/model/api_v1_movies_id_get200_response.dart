@@ -3,9 +3,11 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
+// External packages
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
+
 
 part 'api_v1_movies_id_get200_response.g.dart';
 
