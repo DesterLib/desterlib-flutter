@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 **fileSize** | **String** |  | [optional] 
 **fileModifiedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **mediaId** | **String** |  | [optional] 
-**media** | [**ApiV1MoviesGet200ResponseDataInnerMedia**](ApiV1MoviesGet200ResponseDataInnerMedia.md) |  | [optional] 
+**media** | [**ApiV1MoviesIdGet200ResponseDataMedia**](ApiV1MoviesIdGet200ResponseDataMedia.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

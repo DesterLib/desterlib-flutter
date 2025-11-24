@@ -12,7 +12,6 @@ import 'package:dester/core/widgets/m_base_modal.dart';
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
 
-
 /// Dialog for confirming library deletion
 class DeleteLibraryDialog {
   static Future<bool?> show(
@@ -25,20 +24,24 @@ class DeleteLibraryDialog {
       content: Text(
         '${AppLocalization.settingsLibrariesConfirmDeleteLibrary.tr()}\n\n"${library.name}"',
       ),
-      actions: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppLocalization.settingsServersClose.tr()),
-          ),
-          AppConstants.spacingX(AppConstants.spacingSm),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalization.settingsServersDelete.tr()),
-          ),
-        ],
+      actions: Builder(
+        builder: (modalContext) => Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(modalContext, rootNavigator: true).pop(false),
+              child: Text(AppLocalization.settingsServersClose.tr()),
+            ),
+            AppConstants.spacingX(AppConstants.spacingSm),
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(modalContext, rootNavigator: true).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(AppLocalization.settingsServersDelete.tr()),
+            ),
+          ],
+        ),
       ),
     );
   }

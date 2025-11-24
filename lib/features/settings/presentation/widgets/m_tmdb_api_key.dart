@@ -10,7 +10,6 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/core/widgets/form_builder.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
 
-
 /// Modal for editing TMDB API key
 class TmdbApiKeyModal extends StatefulWidget {
   final String? initialApiKey;
@@ -98,7 +97,7 @@ class _TmdbApiKeyModalState extends State<TmdbApiKeyModal> {
     widget.onSave(apiKey);
 
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
 }

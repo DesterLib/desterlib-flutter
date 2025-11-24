@@ -3,12 +3,10 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
 import 'package:built_collection/built_collection.dart';
+import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner_episodes_inner.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons_inner_episodes_inner.dart';
-
 
 part 'api_v1_tvshows_id_get200_response_data_seasons_inner.g.dart';
 

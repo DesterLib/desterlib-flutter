@@ -8,6 +8,8 @@ sealed class MediaItem {
   final String title;
   final String? posterPath;
   final String? backdropPath;
+  final String? plainPosterUrl;
+  final String? logoUrl;
   final DateTime? createdAt;
 
   MediaItem({
@@ -15,6 +17,8 @@ sealed class MediaItem {
     required this.title,
     this.posterPath,
     this.backdropPath,
+    this.plainPosterUrl,
+    this.logoUrl,
     this.createdAt,
   });
 }
@@ -22,13 +26,17 @@ sealed class MediaItem {
 /// Movie as a MediaItem
 class MovieMediaItem extends MediaItem {
   final Movie movie;
+  final List<String>? meshGradientColors;
 
   MovieMediaItem({required this.movie})
-    : super(
+    : meshGradientColors = movie.meshGradientColors,
+      super(
         id: movie.id,
         title: movie.title,
         posterPath: movie.posterPath,
         backdropPath: movie.backdropPath,
+        plainPosterUrl: movie.plainPosterUrl,
+        logoUrl: movie.logoUrl,
         createdAt: movie.createdAt,
       );
 }
@@ -45,6 +53,8 @@ class TVShowMediaItem extends MediaItem {
         title: tvShow.title,
         posterPath: tvShow.posterPath,
         backdropPath: tvShow.backdropPath,
+        plainPosterUrl: tvShow.plainPosterUrl,
+        logoUrl: tvShow.logoUrl,
         createdAt: tvShow.createdAt,
       );
 }

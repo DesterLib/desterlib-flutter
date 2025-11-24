@@ -3,12 +3,10 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
 import 'package:built_collection/built_collection.dart';
+import 'package:openapi/src/model/model_library.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-import 'package:openapi/src/model/model_library.dart';
-
 
 part 'api_v1_library_get200_response.g.dart';
 

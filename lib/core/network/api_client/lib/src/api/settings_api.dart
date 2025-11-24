@@ -2,13 +2,12 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
-// Dart
 import 'dart:async';
 
-// External packages
 import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
+
 import 'package:openapi/src/model/api_v1_library_put400_response.dart';
 import 'package:openapi/src/model/api_v1_settings_first_run_complete_post200_response.dart';
 import 'package:openapi/src/model/api_v1_settings_first_run_complete_post500_response.dart';
@@ -17,7 +16,6 @@ import 'package:openapi/src/model/api_v1_settings_get500_response.dart';
 import 'package:openapi/src/model/api_v1_settings_put200_response.dart';
 import 'package:openapi/src/model/api_v1_settings_put500_response.dart';
 import 'package:openapi/src/model/update_settings_request.dart';
-
 
 class SettingsApi {
 

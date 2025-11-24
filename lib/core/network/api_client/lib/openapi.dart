@@ -41,6 +41,7 @@ export 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media
 export 'package:openapi/src/model/api_v1_movies_get500_response.dart';
 export 'package:openapi/src/model/api_v1_movies_id_get200_response.dart';
 export 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
+export 'package:openapi/src/model/api_v1_movies_id_get200_response_data_media.dart';
 export 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
 export 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
 export 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
@@ -74,6 +75,7 @@ export 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
 export 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
 export 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
 export 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner.dart';
+export 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
 export 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
 export 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
 export 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data.dart';

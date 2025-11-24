@@ -4,15 +4,16 @@
 
 // ignore_for_file: unused_import
 
-// External packages
+import 'package:one_of_serializer/any_of_serializer.dart';
+import 'package:one_of_serializer/one_of_serializer.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:built_value/standard_json_plugin.dart';
-import 'package:one_of_serializer/any_of_serializer.dart';
-import 'package:one_of_serializer/one_of_serializer.dart';
+import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:openapi/src/date_serializer.dart';
+import 'package:openapi/src/model/date.dart';
+
 import 'package:openapi/src/model/api_v1_library_delete200_response.dart';
 import 'package:openapi/src/model/api_v1_library_delete200_response_data.dart';
 import 'package:openapi/src/model/api_v1_library_delete400_response.dart';
@@ -34,6 +35,7 @@ import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media
 import 'package:openapi/src/model/api_v1_movies_get500_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get200_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get200_response_data.dart';
+import 'package:openapi/src/model/api_v1_movies_id_get200_response_data_media.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get400_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
@@ -67,6 +69,7 @@ import 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner.dart';
+import 'package:openapi/src/model/api_v1_tvshows_get200_response_data_inner_media.dart';
 import 'package:openapi/src/model/api_v1_tvshows_get500_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data.dart';
@@ -75,12 +78,10 @@ import 'package:openapi/src/model/api_v1_tvshows_id_get200_response_data_seasons
 import 'package:openapi/src/model/api_v1_tvshows_id_get400_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_tvshows_id_get500_response.dart';
-import 'package:openapi/src/model/date.dart';
 import 'package:openapi/src/model/health_response.dart';
 import 'package:openapi/src/model/model_library.dart';
 import 'package:openapi/src/model/public_settings.dart';
 import 'package:openapi/src/model/update_settings_request.dart';
-
 
 part 'serializers.g.dart';
 
@@ -106,6 +107,7 @@ part 'serializers.g.dart';
   ApiV1MoviesGet500Response,
   ApiV1MoviesIdGet200Response,
   ApiV1MoviesIdGet200ResponseData,
+  ApiV1MoviesIdGet200ResponseDataMedia,
   ApiV1MoviesIdGet400Response,
   ApiV1MoviesIdGet404Response,
   ApiV1MoviesIdGet500Response,
@@ -139,6 +141,7 @@ part 'serializers.g.dart';
   ApiV1StreamIdGet500Response,
   ApiV1TvshowsGet200Response,
   ApiV1TvshowsGet200ResponseDataInner,
+  ApiV1TvshowsGet200ResponseDataInnerMedia,
   ApiV1TvshowsGet500Response,
   ApiV1TvshowsIdGet200Response,
   ApiV1TvshowsIdGet200ResponseData,

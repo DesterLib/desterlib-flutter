@@ -208,8 +208,6 @@ class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
     AppBarThemeData appBarTheme,
     double progress,
   ) {
-    final color = appBarTheme.foregroundColor ?? theme.colorScheme.onSurface;
-
     // Sequential fade: large fades out in first half (0.0-0.5), small fades in second half (0.5-1.0)
     final double largeTitleOpacity = progress <= 0.5
         ? 1.0 - (progress * 2.0)
@@ -231,7 +229,7 @@ class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
             style: theme.textTheme.titleLarge?.copyWith(
               fontSize: _expandedFontSize,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: Colors.white,
             ),
           ),
         ),
@@ -247,7 +245,7 @@ class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
               style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: _collapsedFontSize,
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: Colors.white,
               ),
             ),
           ),

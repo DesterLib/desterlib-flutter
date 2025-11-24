@@ -9,7 +9,6 @@ import 'package:dester/app/localization/app_localization.dart';
 // Core
 import 'package:dester/core/constants/app_constants.dart';
 
-
 /// Field configuration for form builder
 class FormFieldConfig {
   final String key;
@@ -328,7 +327,8 @@ class FormActions extends StatelessWidget {
         TextButton(
           onPressed: isSaving
               ? null
-              : (onClose ?? () => Navigator.of(context).pop()),
+              : (onClose ??
+                    () => Navigator.of(context, rootNavigator: true).pop()),
           child: Text(closeLabel ?? AppLocalization.settingsServersClose.tr()),
         ),
         AppConstants.spacingX(AppConstants.spacingSm),

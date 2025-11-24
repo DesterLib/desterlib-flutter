@@ -259,11 +259,13 @@ class ApiManagementScreen extends ConsumerWidget {
         content: Text('Are you sure you want to delete "${config.label}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop(false),
             child: Text(AppLocalization.settingsServersClose.tr()),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(AppLocalization.settingsServersDelete.tr()),
           ),

@@ -9,13 +9,14 @@ import 'package:dester/app/localization/app_localization.dart';
 // Core
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/widgets/custom_app_bar.dart';
-import 'package:dester/core/widgets/mesh_gradient.dart';
 
 // Features
 import 'package:dester/features/home/domain/entities/media_item.dart';
+import 'package:dester/features/home/domain/entities/movie.dart';
+import 'package:dester/features/home/domain/entities/tv_show.dart';
 import 'package:dester/features/home/presentation/controllers/home_controller.dart';
-import 'package:dester/features/home/presentation/widgets/movie_card.dart';
-import 'package:dester/features/home/presentation/widgets/tv_show_card.dart';
+import 'package:dester/features/home/presentation/widgets/media_item_card.dart';
+import 'package:dester/features/home/presentation/widgets/media_item_slider.dart';
 
 import 'package:dester/features/home/presentation/widgets/hero.dart';
 
@@ -67,13 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // Take the top 5 most recently added items
     final recentMediaItems = allMediaItems.take(5).toList();
 
-    // Get mesh gradient colors from the first TV show in recent items
-    final firstTVShowItem = recentMediaItems
-        .whereType<TVShowMediaItem>()
-        .firstOrNull;
-    final meshColors = firstTVShowItem?.meshGradientColors ?? [];
-    final hasValidMeshColors = meshColors.length == 4;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: NotificationListener<ScrollNotification>(
@@ -96,39 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Hero Carousel with recently added media
-                        // Pass mesh gradient colors to blend with image
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            if (hasValidMeshColors)
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                child: TweenAnimationBuilder<double>(
-                                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                                  duration: const Duration(milliseconds: 800),
-                                  curve: Curves.easeIn,
-                                  builder: (context, opacity, child) {
-                                    return Opacity(
-                                      opacity: opacity,
-                                      child: MeshGradient(
-                                        colors: meshColors,
-                                        height: 1200,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            HeroSection(mediaItems: recentMediaItems),
-                          ],
-                        ),
+                        // Hero Section
+                        HeroSection(mediaItems: recentMediaItems),
                         // Movies Section
                         _buildMoviesSection(),
-
                         AppConstants.spacingY(AppConstants.spacing24),
-
                         // TV Shows Section
                         _buildTVShowsSection(),
                       ],
@@ -157,136 +123,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMoviesSection() {
-    return Padding(
-      padding: AppConstants.padding(AppConstants.spacing16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalization.homeMovies.tr(),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-          ),
-          AppConstants.spacingY(AppConstants.spacing16),
-          if (widget.controller.isLoadingMovies)
-            const SizedBox(
-              height: 280,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (widget.controller.moviesError != null)
-            SizedBox(
-              height: 280,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${AppLocalization.homeError.tr()}: ${widget.controller.moviesError}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    AppConstants.spacingY(AppConstants.spacing8),
-                    ElevatedButton(
-                      onPressed: () => widget.controller.loadMovies(),
-                      child: Text(AppLocalization.homeRetry.tr()),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else if (widget.controller.movies.isEmpty)
-            SizedBox(
-              height: 280,
-              child: Center(
-                child: Text(AppLocalization.homeNoMoviesAvailable.tr()),
-              ),
-            )
-          else
-            SizedBox(
-              height: 280,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.controller.movies.length,
-                itemBuilder: (context, index) {
-                  final movie = widget.controller.movies[index];
-                  return Padding(
-                    padding: AppConstants.paddingOnly(
-                      right: index == widget.controller.movies.length - 1
-                          ? AppConstants.spacing0
-                          : AppConstants.spacing12,
-                    ),
-                    child: MovieCard(movie: movie),
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
+    return MediaItemSlider<Movie>(
+      title: AppLocalization.homeMovies.tr(),
+      items: widget.controller.movies,
+      isLoading: widget.controller.isLoadingMovies,
+      error: widget.controller.moviesError != null
+          ? '${AppLocalization.homeError.tr()}: ${widget.controller.moviesError}'
+          : null,
+      emptyMessage: AppLocalization.homeNoMoviesAvailable.tr(),
+      onRetry: () => widget.controller.loadMovies(),
+      retryLabel: AppLocalization.homeRetry.tr(),
+      itemBuilder: (context, movie, index) {
+        return MediaItemCardVertical(
+          number: index + 1,
+          title: movie.title,
+          mediaType: MediaType.movie,
+          imageUrl: movie.posterPath,
+          year: movie.releaseDate?.split('-').first,
+        );
+      },
     );
   }
 
   Widget _buildTVShowsSection() {
-    return Padding(
-      padding: AppConstants.padding(AppConstants.spacing16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalization.homeTvShows.tr(),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-          ),
-          AppConstants.spacingY(AppConstants.spacing16),
-          if (widget.controller.isLoadingTVShows)
-            const SizedBox(
-              height: 280,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (widget.controller.tvShowsError != null)
-            SizedBox(
-              height: 280,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${AppLocalization.homeError.tr()}: ${widget.controller.tvShowsError}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    AppConstants.spacingY(AppConstants.spacing8),
-                    ElevatedButton(
-                      onPressed: () => widget.controller.loadTVShows(),
-                      child: Text(AppLocalization.homeRetry.tr()),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else if (widget.controller.tvShows.isEmpty)
-            SizedBox(
-              height: 280,
-              child: Center(
-                child: Text(AppLocalization.homeNoTVShowsAvailable.tr()),
-              ),
-            )
-          else
-            SizedBox(
-              height: 280,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.controller.tvShows.length,
-                itemBuilder: (context, index) {
-                  final tvShow = widget.controller.tvShows[index];
-                  return Padding(
-                    padding: AppConstants.paddingOnly(
-                      right: index == widget.controller.tvShows.length - 1
-                          ? AppConstants.spacing0
-                          : AppConstants.spacing12,
-                    ),
-                    child: TVShowCard(tvShow: tvShow),
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
+    return MediaItemSlider<TVShow>(
+      title: AppLocalization.homeTvShows.tr(),
+      items: widget.controller.tvShows,
+      isLoading: widget.controller.isLoadingTVShows,
+      error: widget.controller.tvShowsError != null
+          ? '${AppLocalization.homeError.tr()}: ${widget.controller.tvShowsError}'
+          : null,
+      emptyMessage: AppLocalization.homeNoTVShowsAvailable.tr(),
+      onRetry: () => widget.controller.loadTVShows(),
+      retryLabel: AppLocalization.homeRetry.tr(),
+      itemBuilder: (context, tvShow, index) {
+        return MediaItemCardVertical(
+          number: index + 1,
+          title: tvShow.title,
+          mediaType: MediaType.tvShow,
+          imageUrl: tvShow.posterPath,
+          year: tvShow.firstAirDate?.split('-').first,
+        );
+      },
     );
   }
 }

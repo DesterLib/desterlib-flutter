@@ -3,11 +3,9 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-
 
 part 'api_v1_movies_get200_response_data_inner_media.g.dart';
 
@@ -19,7 +17,9 @@ part 'api_v1_movies_get200_response_data_inner_media.g.dart';
 /// * [type] 
 /// * [description] 
 /// * [posterUrl] 
+/// * [plainPosterUrl] - Poster without language-specific text
 /// * [backdropUrl] 
+/// * [logoUrl] - Logo image in English
 /// * [meshGradientColors] - Hex color strings for mesh gradient (4 corners)
 /// * [releaseDate] 
 /// * [rating] 
@@ -43,8 +43,16 @@ abstract class ApiV1MoviesGet200ResponseDataInnerMedia implements Built<ApiV1Mov
   @BuiltValueField(wireName: r'posterUrl')
   String? get posterUrl;
 
+  /// Poster without language-specific text
+  @BuiltValueField(wireName: r'plainPosterUrl')
+  String? get plainPosterUrl;
+
   @BuiltValueField(wireName: r'backdropUrl')
   String? get backdropUrl;
+
+  /// Logo image in English
+  @BuiltValueField(wireName: r'logoUrl')
+  String? get logoUrl;
 
   /// Hex color strings for mesh gradient (4 corners)
   @BuiltValueField(wireName: r'meshGradientColors')
@@ -120,10 +128,24 @@ class _$ApiV1MoviesGet200ResponseDataInnerMediaSerializer implements PrimitiveSe
         specifiedType: const FullType.nullable(String),
       );
     }
+    if (object.plainPosterUrl != null) {
+      yield r'plainPosterUrl';
+      yield serializers.serialize(
+        object.plainPosterUrl,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
     if (object.backdropUrl != null) {
       yield r'backdropUrl';
       yield serializers.serialize(
         object.backdropUrl,
+        specifiedType: const FullType.nullable(String),
+      );
+    }
+    if (object.logoUrl != null) {
+      yield r'logoUrl';
+      yield serializers.serialize(
+        object.logoUrl,
         specifiedType: const FullType.nullable(String),
       );
     }
@@ -222,6 +244,14 @@ class _$ApiV1MoviesGet200ResponseDataInnerMediaSerializer implements PrimitiveSe
           if (valueDes == null) continue;
           result.posterUrl = valueDes;
           break;
+        case r'plainPosterUrl':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.plainPosterUrl = valueDes;
+          break;
         case r'backdropUrl':
           final valueDes = serializers.deserialize(
             value,
@@ -229,6 +259,14 @@ class _$ApiV1MoviesGet200ResponseDataInnerMediaSerializer implements PrimitiveSe
           ) as String?;
           if (valueDes == null) continue;
           result.backdropUrl = valueDes;
+          break;
+        case r'logoUrl':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(String),
+          ) as String?;
+          if (valueDes == null) continue;
+          result.logoUrl = valueDes;
           break;
         case r'meshGradientColors':
           final valueDes = serializers.deserialize(

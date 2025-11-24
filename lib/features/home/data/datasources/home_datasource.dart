@@ -21,13 +21,18 @@ class HomeDataSource {
             'id': movie.id ?? '',
             'title': media?.title ?? '',
             'posterPath': media?.posterUrl,
+            'plainPosterUrl': media?.plainPosterUrl,
             'backdropPath': media?.backdropUrl,
+            'logoUrl': media?.logoUrl,
             'overview': media?.description,
             'releaseDate': media?.releaseDate
                 ?.toIso8601String()
                 .split('T')
                 .first,
             'rating': media?.rating?.toDouble(),
+            'meshGradientColors': media?.meshGradientColors != null
+                ? media!.meshGradientColors!.toList()
+                : null,
             'createdAt': media?.createdAt,
           };
         }).toList();
@@ -56,7 +61,9 @@ class HomeDataSource {
             'id': tvShow.id ?? '',
             'title': media?.title ?? '',
             'posterPath': media?.posterUrl,
+            'plainPosterUrl': media?.plainPosterUrl,
             'backdropPath': media?.backdropUrl,
+            'logoUrl': media?.logoUrl,
             'overview': media?.description,
             'firstAirDate': media?.releaseDate
                 ?.toIso8601String()

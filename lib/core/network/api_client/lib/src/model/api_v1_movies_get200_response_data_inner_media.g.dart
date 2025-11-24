@@ -103,7 +103,11 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
   @override
   final String? posterUrl;
   @override
+  final String? plainPosterUrl;
+  @override
   final String? backdropUrl;
+  @override
+  final String? logoUrl;
   @override
   final BuiltList<String>? meshGradientColors;
   @override
@@ -126,7 +130,9 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
     this.type,
     this.description,
     this.posterUrl,
+    this.plainPosterUrl,
     this.backdropUrl,
+    this.logoUrl,
     this.meshGradientColors,
     this.releaseDate,
     this.rating,
@@ -151,7 +157,9 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
         type == other.type &&
         description == other.description &&
         posterUrl == other.posterUrl &&
+        plainPosterUrl == other.plainPosterUrl &&
         backdropUrl == other.backdropUrl &&
+        logoUrl == other.logoUrl &&
         meshGradientColors == other.meshGradientColors &&
         releaseDate == other.releaseDate &&
         rating == other.rating &&
@@ -167,7 +175,9 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
     _$hash = $jc(_$hash, type.hashCode);
     _$hash = $jc(_$hash, description.hashCode);
     _$hash = $jc(_$hash, posterUrl.hashCode);
+    _$hash = $jc(_$hash, plainPosterUrl.hashCode);
     _$hash = $jc(_$hash, backdropUrl.hashCode);
+    _$hash = $jc(_$hash, logoUrl.hashCode);
     _$hash = $jc(_$hash, meshGradientColors.hashCode);
     _$hash = $jc(_$hash, releaseDate.hashCode);
     _$hash = $jc(_$hash, rating.hashCode);
@@ -187,7 +197,9 @@ class _$ApiV1MoviesGet200ResponseDataInnerMedia
           ..add('type', type)
           ..add('description', description)
           ..add('posterUrl', posterUrl)
+          ..add('plainPosterUrl', plainPosterUrl)
           ..add('backdropUrl', backdropUrl)
+          ..add('logoUrl', logoUrl)
           ..add('meshGradientColors', meshGradientColors)
           ..add('releaseDate', releaseDate)
           ..add('rating', rating)
@@ -226,9 +238,18 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
   String? get posterUrl => _$this._posterUrl;
   set posterUrl(String? posterUrl) => _$this._posterUrl = posterUrl;
 
+  String? _plainPosterUrl;
+  String? get plainPosterUrl => _$this._plainPosterUrl;
+  set plainPosterUrl(String? plainPosterUrl) =>
+      _$this._plainPosterUrl = plainPosterUrl;
+
   String? _backdropUrl;
   String? get backdropUrl => _$this._backdropUrl;
   set backdropUrl(String? backdropUrl) => _$this._backdropUrl = backdropUrl;
+
+  String? _logoUrl;
+  String? get logoUrl => _$this._logoUrl;
+  set logoUrl(String? logoUrl) => _$this._logoUrl = logoUrl;
 
   ListBuilder<String>? _meshGradientColors;
   ListBuilder<String> get meshGradientColors =>
@@ -264,7 +285,9 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
       _type = $v.type;
       _description = $v.description;
       _posterUrl = $v.posterUrl;
+      _plainPosterUrl = $v.plainPosterUrl;
       _backdropUrl = $v.backdropUrl;
+      _logoUrl = $v.logoUrl;
       _meshGradientColors = $v.meshGradientColors?.toBuilder();
       _releaseDate = $v.releaseDate;
       _rating = $v.rating;
@@ -301,7 +324,9 @@ class ApiV1MoviesGet200ResponseDataInnerMediaBuilder
             type: type,
             description: description,
             posterUrl: posterUrl,
+            plainPosterUrl: plainPosterUrl,
             backdropUrl: backdropUrl,
+            logoUrl: logoUrl,
             meshGradientColors: _meshGradientColors?.build(),
             releaseDate: releaseDate,
             rating: rating,

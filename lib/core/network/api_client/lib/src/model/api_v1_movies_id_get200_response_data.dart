@@ -3,11 +3,9 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
+import 'package:openapi/src/model/api_v1_movies_id_get200_response_data_media.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-import 'package:openapi/src/model/api_v1_movies_get200_response_data_inner_media.dart';
-
 
 part 'api_v1_movies_id_get200_response_data.g.dart';
 
@@ -53,7 +51,7 @@ abstract class ApiV1MoviesIdGet200ResponseData implements Built<ApiV1MoviesIdGet
   String? get mediaId;
 
   @BuiltValueField(wireName: r'media')
-  ApiV1MoviesGet200ResponseDataInnerMedia? get media;
+  ApiV1MoviesIdGet200ResponseDataMedia? get media;
 
   ApiV1MoviesIdGet200ResponseData._();
 
@@ -138,7 +136,7 @@ class _$ApiV1MoviesIdGet200ResponseDataSerializer implements PrimitiveSerializer
       yield r'media';
       yield serializers.serialize(
         object.media,
-        specifiedType: const FullType(ApiV1MoviesGet200ResponseDataInnerMedia),
+        specifiedType: const FullType(ApiV1MoviesIdGet200ResponseDataMedia),
       );
     }
   }
@@ -228,8 +226,8 @@ class _$ApiV1MoviesIdGet200ResponseDataSerializer implements PrimitiveSerializer
         case r'media':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(ApiV1MoviesGet200ResponseDataInnerMedia),
-          ) as ApiV1MoviesGet200ResponseDataInnerMedia;
+            specifiedType: const FullType(ApiV1MoviesIdGet200ResponseDataMedia),
+          ) as ApiV1MoviesIdGet200ResponseDataMedia;
           result.media.replace(valueDes);
           break;
         default:

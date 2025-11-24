@@ -2,9 +2,13 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
-// External packages
-import 'package:built_value/serializer.dart';
 import 'package:dio/dio.dart';
+import 'package:built_value/serializer.dart';
+import 'package:openapi/src/serializers.dart';
+import 'package:openapi/src/auth/api_key_auth.dart';
+import 'package:openapi/src/auth/basic_auth.dart';
+import 'package:openapi/src/auth/bearer_auth.dart';
+import 'package:openapi/src/auth/oauth.dart';
 import 'package:openapi/src/api/health_api.dart';
 import 'package:openapi/src/api/library_api.dart';
 import 'package:openapi/src/api/logs_api.dart';
@@ -14,12 +18,6 @@ import 'package:openapi/src/api/search_api.dart';
 import 'package:openapi/src/api/settings_api.dart';
 import 'package:openapi/src/api/stream_api.dart';
 import 'package:openapi/src/api/tv_shows_api.dart';
-import 'package:openapi/src/auth/api_key_auth.dart';
-import 'package:openapi/src/auth/basic_auth.dart';
-import 'package:openapi/src/auth/bearer_auth.dart';
-import 'package:openapi/src/auth/oauth.dart';
-import 'package:openapi/src/serializers.dart';
-
 
 class Openapi {
   static const String basePath = r'http://localhost:3001';

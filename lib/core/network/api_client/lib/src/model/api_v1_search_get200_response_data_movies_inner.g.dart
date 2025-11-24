@@ -23,7 +23,7 @@ class _$ApiV1SearchGet200ResponseDataMoviesInner
   @override
   final String? mediaId;
   @override
-  final ApiV1MoviesGet200ResponseDataInnerMedia? media;
+  final ApiV1MoviesIdGet200ResponseDataMedia? media;
 
   factory _$ApiV1SearchGet200ResponseDataMoviesInner([
     void Function(ApiV1SearchGet200ResponseDataMoviesInnerBuilder)? updates,
@@ -132,10 +132,10 @@ class ApiV1SearchGet200ResponseDataMoviesInnerBuilder
   String? get mediaId => _$this._mediaId;
   set mediaId(String? mediaId) => _$this._mediaId = mediaId;
 
-  ApiV1MoviesGet200ResponseDataInnerMediaBuilder? _media;
-  ApiV1MoviesGet200ResponseDataInnerMediaBuilder get media =>
-      _$this._media ??= ApiV1MoviesGet200ResponseDataInnerMediaBuilder();
-  set media(ApiV1MoviesGet200ResponseDataInnerMediaBuilder? media) =>
+  ApiV1MoviesIdGet200ResponseDataMediaBuilder? _media;
+  ApiV1MoviesIdGet200ResponseDataMediaBuilder get media =>
+      _$this._media ??= ApiV1MoviesIdGet200ResponseDataMediaBuilder();
+  set media(ApiV1MoviesIdGet200ResponseDataMediaBuilder? media) =>
       _$this._media = media;
 
   ApiV1SearchGet200ResponseDataMoviesInnerBuilder() {

@@ -3,11 +3,9 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
+import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response_data.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response_data.dart';
-
 
 part 'api_v1_scan_resume_scan_job_id_post202_response.g.dart';
 

@@ -22,6 +22,7 @@ doc/ApiV1MoviesGet200ResponseDataInnerMedia.md
 doc/ApiV1MoviesGet500Response.md
 doc/ApiV1MoviesIdGet200Response.md
 doc/ApiV1MoviesIdGet200ResponseData.md
+doc/ApiV1MoviesIdGet200ResponseDataMedia.md
 doc/ApiV1MoviesIdGet400Response.md
 doc/ApiV1MoviesIdGet404Response.md
 doc/ApiV1MoviesIdGet500Response.md
@@ -55,6 +56,7 @@ doc/ApiV1StreamIdGet416Response.md
 doc/ApiV1StreamIdGet500Response.md
 doc/ApiV1TvshowsGet200Response.md
 doc/ApiV1TvshowsGet200ResponseDataInner.md
+doc/ApiV1TvshowsGet200ResponseDataInnerMedia.md
 doc/ApiV1TvshowsGet500Response.md
 doc/ApiV1TvshowsIdGet200Response.md
 doc/ApiV1TvshowsIdGet200ResponseData.md
@@ -115,6 +117,7 @@ lib/src/model/api_v1_movies_get200_response_data_inner_media.dart
 lib/src/model/api_v1_movies_get500_response.dart
 lib/src/model/api_v1_movies_id_get200_response.dart
 lib/src/model/api_v1_movies_id_get200_response_data.dart
+lib/src/model/api_v1_movies_id_get200_response_data_media.dart
 lib/src/model/api_v1_movies_id_get400_response.dart
 lib/src/model/api_v1_movies_id_get404_response.dart
 lib/src/model/api_v1_movies_id_get500_response.dart
@@ -148,6 +151,7 @@ lib/src/model/api_v1_stream_id_get416_response.dart
 lib/src/model/api_v1_stream_id_get500_response.dart
 lib/src/model/api_v1_tvshows_get200_response.dart
 lib/src/model/api_v1_tvshows_get200_response_data_inner.dart
+lib/src/model/api_v1_tvshows_get200_response_data_inner_media.dart
 lib/src/model/api_v1_tvshows_get500_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response.dart
 lib/src/model/api_v1_tvshows_id_get200_response_data.dart

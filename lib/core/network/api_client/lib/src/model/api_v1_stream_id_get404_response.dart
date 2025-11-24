@@ -3,10 +3,8 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-
 
 part 'api_v1_stream_id_get404_response.g.dart';
 

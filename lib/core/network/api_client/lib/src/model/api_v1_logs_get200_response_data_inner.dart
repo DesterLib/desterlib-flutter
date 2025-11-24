@@ -3,11 +3,9 @@
 //
 
 // ignore_for_file: unused_element
-// External packages
-import 'package:built_value/built_value.dart';
 import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-
 
 part 'api_v1_logs_get200_response_data_inner.g.dart';
 

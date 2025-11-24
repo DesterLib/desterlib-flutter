@@ -3,6 +3,8 @@ class TVShow {
   final String title;
   final String? posterPath;
   final String? backdropPath;
+  final String? plainPosterUrl;
+  final String? logoUrl;
   final String? overview;
   final String? firstAirDate;
   final double? rating;
@@ -14,6 +16,8 @@ class TVShow {
     required this.title,
     this.posterPath,
     this.backdropPath,
+    this.plainPosterUrl,
+    this.logoUrl,
     this.overview,
     this.firstAirDate,
     this.rating,

@@ -12,7 +12,6 @@ import 'package:dester/core/widgets/m_base_modal.dart';
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
 
-
 /// Modal for editing library details
 class LibraryModal {
   static void show(
@@ -153,7 +152,7 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
     final selectedType = values['type'] as LibraryType?;
 
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     }
 
     await widget.onSave(name, libraryDescription, libraryPath, selectedType);

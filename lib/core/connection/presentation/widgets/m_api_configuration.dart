@@ -11,7 +11,6 @@ import 'package:dester/core/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/widgets/form_builder.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
 
-
 /// Modal for adding/editing API configurations
 class ApiConfigurationModal extends StatefulWidget {
   final ApiConfiguration? initialConfig;
@@ -119,7 +118,7 @@ class _ApiConfigurationModalState extends State<ApiConfigurationModal> {
     widget.onSave(url, label);
 
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
 }
