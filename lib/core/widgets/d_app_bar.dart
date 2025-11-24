@@ -15,7 +15,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 /// - **Title**: Always centered (or left-aligned if specified)
 ///
 /// Note: This widget MUST be used inside [CustomScrollView.slivers]
-class CustomAppBar extends StatelessWidget {
+class DAppBar extends StatelessWidget {
   /// The title text
   final String title;
 
@@ -43,7 +43,7 @@ class CustomAppBar extends StatelessWidget {
   /// If null (default), title is centered if there are no actions, and left-aligned otherwise
   final bool? leftAligned;
 
-  const CustomAppBar({
+  const DAppBar({
     super.key,
     required this.title,
     this.isCompact = false,
@@ -59,7 +59,7 @@ class CustomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
       pinned: true,
-      delegate: _CustomAppBarDelegate(
+      delegate: _DAppBarDelegate(
         title: title,
         isCompact: isCompact,
         leading: leading,
@@ -74,7 +74,7 @@ class CustomAppBar extends StatelessWidget {
   }
 }
 
-class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
+class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
   final String title;
   final bool isCompact;
   final Widget? leading;
@@ -93,7 +93,7 @@ class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
   static const double _scrollThreshold =
       100.0; // Scroll distance for full animation
 
-  _CustomAppBarDelegate({
+  _DAppBarDelegate({
     required this.title,
     required this.isCompact,
     this.leading,
@@ -266,7 +266,7 @@ class _CustomAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => _collapsedAppBarHeight + topPadding;
 
   @override
-  bool shouldRebuild(covariant _CustomAppBarDelegate oldDelegate) {
+  bool shouldRebuild(covariant _DAppBarDelegate oldDelegate) {
     return title != oldDelegate.title ||
         isCompact != oldDelegate.isCompact ||
         leading != oldDelegate.leading ||

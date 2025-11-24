@@ -10,10 +10,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:dester/app/localization/app_localization.dart';
 
 /// Bottom navigation bar widget for app navigation
-class AppBottomNavigationBar extends StatelessWidget {
+class DBottomNavigationBar extends StatelessWidget {
   final String currentRoute;
 
-  const AppBottomNavigationBar({super.key, required this.currentRoute});
+  const DBottomNavigationBar({super.key, required this.currentRoute});
 
   // Map routes to indices
   int _getCurrentIndex() {

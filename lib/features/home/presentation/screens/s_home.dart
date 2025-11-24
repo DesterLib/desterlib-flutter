@@ -8,7 +8,7 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/widgets/custom_app_bar.dart';
+import 'package:dester/core/widgets/d_app_bar.dart';
 
 // Features
 import 'package:dester/features/home/domain/entities/media_item.dart';
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  CustomAppBar(
+                  DAppBar(
                     title: AppLocalization.homeTitle.tr(),
                     leftAligned: true,
                     animateBlur: true,

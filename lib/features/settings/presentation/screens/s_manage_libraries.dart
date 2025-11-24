@@ -12,7 +12,7 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/widgets/empty_state_widget.dart';
 import 'package:dester/core/widgets/error_state_widget.dart';
-import 'package:dester/core/widgets/custom_app_bar.dart';
+import 'package:dester/core/widgets/d_app_bar.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
@@ -38,7 +38,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
         onRefresh: () => controller.refresh(),
         child: CustomScrollView(
           slivers: [
-            CustomAppBar(
+            DAppBar(
               title: AppLocalization.settingsLibrariesManageLibraries.tr(),
               isCompact: true,
               actions: [

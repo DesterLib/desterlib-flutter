@@ -12,7 +12,7 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
-import 'package:dester/core/widgets/custom_app_bar.dart';
+import 'package:dester/core/widgets/d_app_bar.dart';
 
 class ApiManagementScreen extends ConsumerWidget {
   const ApiManagementScreen({super.key});
@@ -27,7 +27,7 @@ class ApiManagementScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          CustomAppBar(
+          DAppBar(
             title: AppLocalization.settingsServersApisTab.tr(),
             isCompact: true,
           ),

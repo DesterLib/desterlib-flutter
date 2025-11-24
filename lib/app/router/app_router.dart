@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 // Core
 import 'package:dester/core/connection/presentation/widgets/connection_guard_wrapper.dart';
-import 'package:dester/core/widgets/app_scaffold.dart';
+import 'package:dester/core/widgets/d_scaffold.dart';
 import 'package:dester/core/widgets/fade_page_transition.dart';
 
 // Features
@@ -27,7 +27,7 @@ class AppRouter {
         routes: [
           ShellRoute(
             builder: (context, state, child) {
-              return AppScaffold(child: child);
+              return DScaffold(child: child);
             },
             routes: [
               GoRoute(

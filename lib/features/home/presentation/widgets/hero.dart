@@ -4,7 +4,11 @@ import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mesh_gradient/mesh_gradient.dart' as mesh_gradient;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:io';
+
+// Core
+import 'package:dester/core/widgets/d_button.dart';
 
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key, this.mediaItems});
@@ -17,7 +21,6 @@ class HeroSection extends StatefulWidget {
 class _HeroSectionState extends State<HeroSection> {
   int _currentIndex = 0;
   Timer? _autoAdvanceTimer;
-  double _dragOffset = 0.0;
 
   // Default mesh gradient colors (vibrant purple-blue theme)
   static const List<String> _defaultMeshColors = [
@@ -333,46 +336,25 @@ class _HeroImage extends StatelessWidget {
                   Row(
                     children: [
                       // Play Button
-                      ElevatedButton.icon(
+                      DButton(
+                        label: 'Watch Now',
+                        leadingIcon: LucideIcons.play,
+                        variant: DButtonVariant.primary,
+                        size: DButtonSize.md,
                         onPressed: () {
                           // TODO: Implement play action
                         },
-                        icon: const Icon(Icons.play_arrow, size: 24),
-                        label: const Text('Play'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
                       ),
                       const SizedBox(width: 12),
                       // More Info Button
-                      OutlinedButton.icon(
+                      DButton(
+                        label: 'More Info',
+                        leadingIcon: LucideIcons.info,
+                        variant: DButtonVariant.secondary,
+                        size: DButtonSize.md,
                         onPressed: () {
                           // TODO: Implement more info action
                         },
-                        icon: const Icon(Icons.info_outline, size: 20),
-                        label: const Text('More Info'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(
-                            color: Colors.white,
-                            width: 1.5,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
                       ),
                     ],
                   ),

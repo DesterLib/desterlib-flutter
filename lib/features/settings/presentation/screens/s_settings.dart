@@ -13,7 +13,7 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
-import 'package:dester/core/widgets/custom_app_bar.dart';
+import 'package:dester/core/widgets/d_app_bar.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
@@ -52,10 +52,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          CustomAppBar(
-            title: AppLocalization.settingsTitle.tr(),
-            leftAligned: true,
-          ),
+          DAppBar(title: AppLocalization.settingsTitle.tr(), leftAligned: true),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),
             sliver: SliverList(

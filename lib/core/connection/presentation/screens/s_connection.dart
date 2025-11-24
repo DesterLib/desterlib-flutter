@@ -14,7 +14,7 @@ import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/widgets/custom_app_bar.dart';
+import 'package:dester/core/widgets/d_app_bar.dart';
 
 /// Full-screen connection setup screen
 /// Shown on initial load when no API is configured or connection fails
@@ -87,7 +87,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          CustomAppBar(
+          DAppBar(
             title: AppLocalization.settingsServersTitle.tr(),
             automaticallyImplyLeading: false,
           ),

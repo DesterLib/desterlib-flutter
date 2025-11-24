@@ -2,14 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'app_bottom_navigation_bar.dart';
+import 'd_bottom_navigation_bar.dart';
 
 /// Scaffold wrapper that includes the bottom navigation bar
 /// Wraps child widgets and adds bottom navigation bar
-class AppScaffold extends StatelessWidget {
+class DScaffold extends StatelessWidget {
   final Widget child;
 
-  const AppScaffold({super.key, required this.child});
+  const DScaffold({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class AppScaffold extends StatelessWidget {
               left: 0,
               right: 0,
               bottom: 0,
-              child: AppBottomNavigationBar(currentRoute: currentRoute),
+              child: DBottomNavigationBar(currentRoute: currentRoute),
             ),
           ],
         ),
@@ -56,7 +56,7 @@ class AppScaffold extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            child: AppBottomNavigationBar(currentRoute: currentRoute),
+            child: DBottomNavigationBar(currentRoute: currentRoute),
           ),
         ],
       ),
