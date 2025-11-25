@@ -123,9 +123,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMoviesSection() {
+    // Create mock movies for testing (10 items total)
+    final mockMovies = List.generate(
+      10,
+      (index) => Movie(
+        id: 'mock-movie-$index',
+        title: 'Mock Movie ${index + 1}',
+        posterPath: null,
+        backdropPath: null,
+        overview: 'This is a mock movie for testing the slider with 10 items.',
+        releaseDate: '2024-01-${(index + 1).toString().padLeft(2, '0')}',
+        rating: 7.5 + (index * 0.1),
+        createdAt: DateTime.now().subtract(Duration(days: index)),
+      ),
+    );
+
+    // Combine actual movies with mock movies, take first 10
+    final allMovies = [
+      ...widget.controller.movies,
+      ...mockMovies,
+    ].take(10).toList();
+
     return MediaItemSlider<Movie>(
       title: AppLocalization.homeMovies.tr(),
-      items: widget.controller.movies,
+      items: allMovies,
       isLoading: widget.controller.isLoadingMovies,
       error: widget.controller.moviesError != null
           ? '${AppLocalization.homeError.tr()}: ${widget.controller.moviesError}'
@@ -138,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
           number: index + 1,
           title: movie.title,
           mediaType: MediaType.movie,
-          imageUrl: movie.posterPath,
+          imageUrl: movie.backdropPath,
           year: movie.releaseDate?.split('-').first,
         );
       },
@@ -146,9 +167,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTVShowsSection() {
+    // Create mock TV shows for testing (10 items total)
+    final mockTVShows = List.generate(
+      10,
+      (index) => TVShow(
+        id: 'mock-tvshow-$index',
+        title: 'Mock TV Show ${index + 1}',
+        posterPath: null,
+        backdropPath: null,
+        overview:
+            'This is a mock TV show for testing the slider with 10 items.',
+        firstAirDate: '2024-01-${(index + 1).toString().padLeft(2, '0')}',
+        rating: 8.0 + (index * 0.1),
+        createdAt: DateTime.now().subtract(Duration(days: index)),
+      ),
+    );
+
+    // Combine actual TV shows with mock TV shows, take first 10
+    final allTVShows = [
+      ...widget.controller.tvShows,
+      ...mockTVShows,
+    ].take(10).toList();
+
     return MediaItemSlider<TVShow>(
       title: AppLocalization.homeTvShows.tr(),
-      items: widget.controller.tvShows,
+      items: allTVShows,
       isLoading: widget.controller.isLoadingTVShows,
       error: widget.controller.tvShowsError != null
           ? '${AppLocalization.homeError.tr()}: ${widget.controller.tvShowsError}'
@@ -161,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
           number: index + 1,
           title: tvShow.title,
           mediaType: MediaType.tvShow,
-          imageUrl: tvShow.posterPath,
+          imageUrl: tvShow.backdropPath,
           year: tvShow.firstAirDate?.split('-').first,
         );
       },

@@ -9,6 +9,7 @@ import 'dart:io';
 
 // Core
 import 'package:dester/core/widgets/d_button.dart';
+import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key, this.mediaItems});
@@ -204,6 +205,7 @@ class _HeroImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     final isIos = Platform.isIOS;
     final overview = _getOverview();
     final releaseDate = _getReleaseDate();
@@ -214,9 +216,11 @@ class _HeroImage extends StatelessWidget {
       child: Stack(
         children: [
           ClipRRect(
-            borderRadius: isIos
-                ? BorderRadius.circular(32)
-                : BorderRadius.circular(16),
+            borderRadius: isMobile
+                ? (isIos
+                      ? BorderRadius.circular(32)
+                      : BorderRadius.circular(16))
+                : BorderRadius.zero,
             child: ShaderMask(
               shaderCallback: (Rect bounds) {
                 return ui.Gradient.linear(
@@ -269,96 +273,99 @@ class _HeroImage extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    item.title,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                          color: Colors.black.withOpacity(0.5),
-                        ),
-                      ],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  // Rating and Release Date
-                  if (rating != null || releaseDate != null)
-                    Row(
-                      children: [
-                        if (rating != null) ...[
-                          Icon(Icons.star, color: Colors.amber, size: 18),
-                          const SizedBox(width: 4),
-                          Text(
-                            rating.toStringAsFixed(1),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                        ],
-                        if (releaseDate != null)
-                          Text(
-                            releaseDate,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
-                            ),
-                          ),
-                      ],
-                    ),
-                  if (overview != null) ...[
-                    const SizedBox(height: 12),
-                    // Overview
+            child: DSidebarSpace(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
                     Text(
-                      overview,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      item.title,
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         color: Colors.white,
-                        height: 1.4,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                        ],
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  const SizedBox(height: 20),
-                  // Action Buttons
-                  Row(
-                    children: [
-                      // Play Button
-                      DButton(
-                        label: 'Watch Now',
-                        leadingIcon: LucideIcons.play,
-                        variant: DButtonVariant.primary,
-                        size: DButtonSize.md,
-                        onPressed: () {
-                          // TODO: Implement play action
-                        },
+                    const SizedBox(height: 12),
+                    // Rating and Release Date
+                    if (rating != null || releaseDate != null)
+                      Row(
+                        children: [
+                          if (rating != null) ...[
+                            Icon(Icons.star, color: Colors.amber, size: 18),
+                            const SizedBox(width: 4),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          if (releaseDate != null)
+                            Text(
+                              releaseDate,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white70,
+                              ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      // More Info Button
-                      DButton(
-                        label: 'More Info',
-                        leadingIcon: LucideIcons.info,
-                        variant: DButtonVariant.secondary,
-                        size: DButtonSize.md,
-                        onPressed: () {
-                          // TODO: Implement more info action
-                        },
+                    if (overview != null) ...[
+                      const SizedBox(height: 12),
+                      // Overview
+                      Text(
+                        overview,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    // Action Buttons
+                    Row(
+                      children: [
+                        // Play Button
+                        DButton(
+                          label: 'Watch Now',
+                          leadingIcon: LucideIcons.play,
+                          variant: DButtonVariant.primary,
+                          size: DButtonSize.md,
+                          onPressed: () {
+                            // TODO: Implement play action
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        // More Info Button
+                        DButton(
+                          label: 'More Info',
+                          leadingIcon: LucideIcons.info,
+                          variant: DButtonVariant.secondary,
+                          size: DButtonSize.md,
+                          blur: true,
+                          onPressed: () {
+                            // TODO: Implement more info action
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -450,6 +457,7 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
       return const SizedBox.shrink();
     }
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
     final isIos = Platform.isIOS;
 
     return Positioned(
@@ -465,9 +473,11 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
               .toList();
 
           return ClipRRect(
-            borderRadius: isIos
-                ? BorderRadius.circular(32)
-                : BorderRadius.circular(16),
+            borderRadius: isMobile
+                ? (isIos
+                      ? BorderRadius.circular(32)
+                      : BorderRadius.circular(16))
+                : BorderRadius.zero,
             child: Stack(
               fit: StackFit.expand,
               children: [

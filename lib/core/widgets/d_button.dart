@@ -1,4 +1,5 @@
 // External packages
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,56 +55,68 @@ class DButton extends StatefulWidget {
   State<DButton> createState() => _DButtonState();
 }
 
-class _DButtonState extends State<DButton> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _tintAnimation;
-  late Animation<double> _scaleAnimation;
+class _DButtonState extends State<DButton> {
+  bool _buttonHeldDown = false;
+  DateTime? _tapDownTime;
+  Timer? _resetTimer;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    _tintAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    // Subtle scale animation: scale down to 0.97 on press
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+  bool get _enabled => !widget.isDisabled && widget.onPressed != null;
+
+  void _handleTapDown(TapDownDetails details) {
+    if (!_enabled) return;
+    _tapDownTime = DateTime.now();
+    setState(() {
+      _buttonHeldDown = true;
+    });
+    HapticFeedback.lightImpact();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (!_enabled) return;
+    _resetButtonState();
+  }
+
+  void _handleTapCancel() {
+    if (!_enabled) return;
+    _resetButtonState();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _resetTimer?.cancel();
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    if (widget.isDisabled || widget.onPressed == null) return;
-    HapticFeedback.lightImpact();
-    _animationController.forward();
-  }
+  void _resetButtonState() {
+    if (_tapDownTime == null) return;
 
-  void _handleTapUp(TapUpDetails details) {
-    if (widget.isDisabled || widget.onPressed == null) return;
-    // Delay the reverse slightly to ensure animation is visible even on quick taps
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _animationController.reverse();
-      }
-    });
-  }
+    // Cancel any existing timer
+    _resetTimer?.cancel();
 
-  void _handleTapCancel() {
-    if (widget.isDisabled || widget.onPressed == null) return;
-    _animationController.reverse();
+    final tapDuration = DateTime.now().difference(_tapDownTime!);
+    final minDuration = const Duration(milliseconds: 100);
+
+    if (tapDuration < minDuration) {
+      // Quick tap - ensure animation is visible for minimum duration
+      _resetTimer = Timer(minDuration - tapDuration, () {
+        if (mounted) {
+          setState(() {
+            _buttonHeldDown = false;
+            _tapDownTime = null;
+          });
+        }
+      });
+    } else {
+      // Normal tap - reset immediately
+      setState(() {
+        _buttonHeldDown = false;
+        _tapDownTime = null;
+      });
+    }
   }
 
   void _handleTap() {
-    if (widget.isDisabled || widget.onPressed == null) return;
+    if (!_enabled) return;
     widget.onPressed?.call();
   }
 
@@ -159,14 +172,6 @@ class _DButtonState extends State<DButton> with SingleTickerProviderStateMixin {
     }
   }
 
-  /// Get border based on variant
-  Border? _getBorder() {
-    if (widget.variant == DButtonVariant.plain) {
-      return null;
-    }
-    return null; // No border for primary and secondary
-  }
-
   /// Get border radius based on variant
   /// Primary and secondary use 50px superellipse, plain has no border radius
   BorderRadius? _getBorderRadius() {
@@ -179,111 +184,78 @@ class _DButtonState extends State<DButton> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Cache computed values to avoid recalculating on every build
     final baseBackgroundColor = _getBackgroundColor();
     final textColor = _getTextColor();
-    final border = _getBorder();
     final horizontalPadding = _getHorizontalPadding();
     final borderRadius = _getBorderRadius();
     final height = _getHeight();
+    final isDisabled = widget.isDisabled;
 
-    Widget buttonContent = AnimatedBuilder(
-      animation: _tintAnimation,
-      builder: (context, child) {
-        // For secondary buttons, animate the background opacity directly
-        Color? animatedBackgroundColor;
-        if (widget.variant == DButtonVariant.secondary && !widget.isDisabled) {
-          final baseOpacity = 0.13;
-          final pressedOpacity = 0.25;
-          final currentOpacity =
-              baseOpacity +
-              (pressedOpacity - baseOpacity) * _tintAnimation.value;
-          animatedBackgroundColor = Colors.white.withOpacity(currentOpacity);
-        } else {
-          animatedBackgroundColor = baseBackgroundColor;
-        }
-
-        return Container(
-          height: height,
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          decoration: BoxDecoration(
-            color: animatedBackgroundColor,
-            border: border,
-            borderRadius: borderRadius,
+    // Build static content that doesn't change with _buttonHeldDown
+    final buttonContent = Container(
+      height: height,
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      decoration: BoxDecoration(
+        color: baseBackgroundColor,
+        borderRadius: borderRadius,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (widget.leadingIcon != null) ...[
+            Icon(
+              widget.leadingIcon,
+              size: AppConstants.sizeLg,
+              color: textColor,
+            ),
+            const SizedBox(width: AppConstants.spacing8),
+          ],
+          Text(
+            widget.label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: AppConstants.sizeSm,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.3,
+            ),
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (widget.leadingIcon != null) ...[
-                    Icon(
-                      widget.leadingIcon,
-                      size: AppConstants.sizeLg,
-                      color: textColor,
-                    ),
-                    const SizedBox(width: AppConstants.spacing8),
-                  ],
-                  Text(
-                    widget.label,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: AppConstants.sizeSm,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  if (widget.trailingIcon != null) ...[
-                    const SizedBox(width: AppConstants.spacing8),
-                    Icon(
-                      widget.trailingIcon,
-                      size: AppConstants.sizeSm,
-                      color: textColor,
-                    ),
-                  ],
-                ],
-              ),
-              // White tint overlay for primary buttons
-              if (widget.variant == DButtonVariant.primary)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(_tintAnimation.value * 0.2),
-                    borderRadius: borderRadius,
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
+          if (widget.trailingIcon != null) ...[
+            const SizedBox(width: AppConstants.spacing8),
+            Icon(
+              widget.trailingIcon,
+              size: AppConstants.sizeSm,
+              color: textColor,
+            ),
+          ],
+        ],
+      ),
     );
 
     // Apply blur if enabled
-    if (widget.blur) {
-      buttonContent = ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.zero,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: buttonContent,
-        ),
-      );
-    }
+    final finalButtonContent = widget.blur
+        ? ClipRRect(
+            borderRadius: borderRadius ?? BorderRadius.zero,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: buttonContent,
+            ),
+          )
+        : buttonContent;
 
     return Opacity(
-      opacity: widget.isDisabled ? 0.5 : 1.0,
+      opacity: isDisabled ? 0.5 : 1.0,
       child: GestureDetector(
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
+        behavior: HitTestBehavior.opaque,
+        onTapDown: _enabled ? _handleTapDown : null,
+        onTapUp: _enabled ? _handleTapUp : null,
+        onTapCancel: _enabled ? _handleTapCancel : null,
         onTap: _handleTap,
-        child: AnimatedBuilder(
-          animation: _scaleAnimation,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: buttonContent,
-            );
-          },
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 100),
+          opacity: _buttonHeldDown ? 0.6 : 1.0,
+          child: finalButtonContent,
         ),
       ),
     );
