@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
+import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/widgets/d_scaffold.dart';
+import 'package:dester/core/widgets/d_sidebar.dart';
 
 /// Custom AppBar widget that implements a SliverPersistentHeader for precise animation control
 ///
@@ -15,7 +18,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 /// - **Title**: Always centered (or left-aligned if specified)
 ///
 /// Note: This widget MUST be used inside [CustomScrollView.slivers]
-class DAppBar extends StatelessWidget {
+class DAppBar extends StatefulWidget {
   /// The title text
   final String title;
 
@@ -56,19 +59,27 @@ class DAppBar extends StatelessWidget {
   });
 
   @override
+  State<DAppBar> createState() => _DAppBarState();
+}
+
+class _DAppBarState extends State<DAppBar> {
+  @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final topPadding = mediaQuery.padding.top;
+
     return SliverPersistentHeader(
       pinned: true,
       delegate: _DAppBarDelegate(
-        title: title,
-        isCompact: isCompact,
-        leading: leading,
-        actions: actions,
-        scrolledBackgroundColor: backgroundColor,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        topPadding: MediaQuery.of(context).padding.top,
-        animateBlur: animateBlur,
-        leftAligned: leftAligned,
+        title: widget.title,
+        isCompact: widget.isCompact,
+        leading: widget.leading,
+        actions: widget.actions,
+        scrolledBackgroundColor: widget.backgroundColor,
+        automaticallyImplyLeading: widget.automaticallyImplyLeading,
+        topPadding: topPadding,
+        animateBlur: widget.animateBlur,
+        leftAligned: widget.leftAligned,
       ),
     );
   }
@@ -90,8 +101,6 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
   static const double _collapsedAppBarHeight = 44.0;
   static const double _expandedFontSize = 32.0;
   static const double _collapsedFontSize = 14.0;
-  static const double _scrollThreshold =
-      100.0; // Scroll distance for full animation
 
   _DAppBarDelegate({
     required this.title,
@@ -115,19 +124,22 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     final appBarTheme = theme.appBarTheme;
 
     // Calculate progress (0.0 = expanded, 1.0 = collapsed)
-    // Use shrinkOffset directly with a threshold for smooth animation
-    final double progress = (shrinkOffset / _scrollThreshold).clamp(0.0, 1.0);
+    // Use shrinkOffset relative to the actual shrink distance (maxExtent - minExtent)
+    final double shrinkDistance = maxExtent - minExtent;
+    final double progress = shrinkDistance > 0
+        ? (shrinkOffset / shrinkDistance).clamp(0.0, 1.0)
+        : 0.0;
 
     // Calculate current height based on mode
     final double currentHeight = isCompact
         ? _collapsedAppBarHeight
         : _lerpDouble(_expandedAppBarHeight, _collapsedAppBarHeight, progress);
 
-    // Blur and Background
-    final double blurSigma = animateBlur ? progress * 12.0 : 12.0;
+    // Blur and Background (matching sidebar style)
+    final double blurSigma = animateBlur ? progress * 40.0 : 40.0;
     final Color currentBackgroundColor = animateBlur
-        ? Colors.black.withValues(alpha: 0.4 * progress)
-        : Colors.black.withValues(alpha: 0.4);
+        ? Colors.grey.shade800.withValues(alpha: 0.1 * progress)
+        : Colors.grey.shade800.withValues(alpha: 0.1);
 
     // Determine Leading Widget
     Widget? effectiveLeading = leading;
@@ -168,7 +180,18 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
       );
     }
 
-    return ClipRect(
+    // Check if we should apply sidebar spacing
+    final useDesktopLayout =
+        DScaffold.isDesktop && DScaffold.isDesktopLayout(context);
+    final sidebarTotalWidth = useDesktopLayout ? DSidebar.getTotalWidth() : 0.0;
+
+    // Apply border radius only on desktop (round bottom left corner to match sidebar)
+    final borderRadius = useDesktopLayout
+        ? BorderRadius.only(bottomLeft: Radius.circular(AppConstants.radius2xl))
+        : null;
+
+    Widget content = ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.zero,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
         child: Container(
@@ -201,6 +224,16 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
         ),
       ),
     );
+
+    // Wrap the entire AppBar with sidebar spacing
+    if (sidebarTotalWidth > 0.0) {
+      return Padding(
+        padding: EdgeInsets.only(left: sidebarTotalWidth),
+        child: content,
+      );
+    }
+
+    return content;
   }
 
   Widget _buildFadingTitle(
