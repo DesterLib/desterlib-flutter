@@ -2,10 +2,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/d_sidebar.dart';
 import 'package:dester/core/widgets/d_scaffold.dart';
@@ -161,13 +162,7 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(widget.title, style: AppTypography.headlineLarge()),
                 // Left/Right navigation buttons (desktop only)
                 if (useDesktopLayout &&
                     !widget.isLoading &&
@@ -176,13 +171,13 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _NavigationButton(
-                        icon: LucideIcons.chevronLeft,
+                        icon: DIconName.chevronLeft,
                         onTap: _scrollLeft,
                         enabled: _showLeftButton,
                       ),
                       const SizedBox(width: AppConstants.spacing8),
                       _NavigationButton(
-                        icon: LucideIcons.chevronRight,
+                        icon: DIconName.chevronRight,
                         onTap: _scrollRight,
                         enabled: _showRightButton,
                       ),
@@ -206,7 +201,7 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
                 children: [
                   Text(
                     widget.error!,
-                    style: const TextStyle(color: Colors.red),
+                    style: AppTypography.bodyMedium(color: Colors.red),
                   ),
                   AppConstants.spacingY(AppConstants.spacing8),
                   ElevatedButton(
@@ -250,7 +245,7 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
 }
 
 class _NavigationButton extends StatelessWidget {
-  final IconData icon;
+  final DIconName icon;
   final VoidCallback onTap;
   final bool enabled;
 
@@ -284,7 +279,7 @@ class _NavigationButton extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Icon(icon, color: Colors.white, size: 20),
+                child: DIcon(icon: icon, size: 20.0, color: Colors.white),
               ),
             ),
           ),

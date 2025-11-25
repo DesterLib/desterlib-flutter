@@ -4,12 +4,15 @@ import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mesh_gradient/mesh_gradient.dart' as mesh_gradient;
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 import 'dart:io';
 
 // Core
 import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
+import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key, this.mediaItems});
@@ -185,22 +188,134 @@ class _HeroImage extends StatelessWidget {
     return null;
   }
 
-  String? _getReleaseDate() {
-    if (item is MovieMediaItem) {
-      return (item as MovieMediaItem).movie.releaseDate;
-    } else if (item is TVShowMediaItem) {
-      return (item as TVShowMediaItem).tvShow.firstAirDate;
-    }
+  List<String>? _getGenres() {
+    // TODO: Add genres to Movie and TVShow entities
     return null;
   }
 
-  double? _getRating() {
-    if (item is MovieMediaItem) {
-      return (item as MovieMediaItem).movie.rating;
-    } else if (item is TVShowMediaItem) {
-      return (item as TVShowMediaItem).tvShow.rating;
+  /// Helper method to add spacing between widgets in a column
+  List<Widget> _buildSpacedChildren({
+    required BuildContext context,
+    required ThemeData theme,
+    String? overview,
+  }) {
+    final children = <Widget>[];
+
+    // Logo
+    if (item.logoUrl != null) {
+      children.add(
+        CachedNetworkImage(
+          imageUrl: item.logoUrl!,
+          height: 80,
+          fit: BoxFit.contain,
+          placeholder: (context, url) => const SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          errorWidget: (context, url, error) => const SizedBox(
+            height: 80,
+            child: Icon(Icons.error, color: Colors.white54),
+          ),
+        ),
+      );
     }
-    return null;
+
+    // Genres
+    final genres = _getGenres();
+    if (genres != null && genres.isNotEmpty) {
+      children.add(
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: AppConstants.spacingSm,
+          runSpacing: AppConstants.spacingSm,
+          children: genres.map((genre) {
+            return Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppConstants.spacing12,
+                vertical: AppConstants.spacing4 + 2,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                genre,
+                style: AppTypography.bodySmall(
+                  color: Colors.white,
+                ).copyWith(fontWeight: AppTypography.weightMedium),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    // Action Buttons
+    children.add(
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          DButton(
+            label: 'Watch Now',
+            leadingIcon: DIconName.play,
+            leadingIconFilled: true,
+            variant: DButtonVariant.primary,
+            size: DButtonSize.md,
+            onPressed: () {
+              // TODO: Implement play action
+            },
+          ),
+          AppConstants.spacingX(AppConstants.spacingSm),
+          DIconButton(
+            icon: DIconName.heart,
+            variant: DIconButtonVariant.secondary,
+            blur: true,
+            onPressed: () {
+              // TODO: Implement more info action
+            },
+          ),
+          AppConstants.spacingX(AppConstants.spacingSm),
+          DIconButton(
+            icon: DIconName.ellipsis,
+            variant: DIconButtonVariant.secondary,
+            blur: true,
+            onPressed: () {
+              // TODO: Implement more info action
+            },
+          ),
+        ],
+      ),
+    );
+
+    // Overview
+    if (overview != null) {
+      children.add(
+        Text(
+          overview,
+          style: AppTypography.bodyMedium(
+            color: Colors.white,
+          ).copyWith(height: 1.4),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }
+
+    // Add spacing between widgets
+    final spacedChildren = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      spacedChildren.add(children[i]);
+      if (i < children.length - 1) {
+        spacedChildren.add(AppConstants.spacingY(AppConstants.spacingMd));
+      }
+    }
+
+    return spacedChildren;
   }
 
   @override
@@ -208,8 +323,6 @@ class _HeroImage extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 768;
     final isIos = Platform.isIOS;
     final overview = _getOverview();
-    final releaseDate = _getReleaseDate();
-    final rating = _getRating();
     final theme = Theme.of(context);
 
     return SizedBox.expand(
@@ -275,96 +388,19 @@ class _HeroImage extends StatelessWidget {
             bottom: 0,
             child: DSidebarSpace(
               child: Container(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                padding: AppConstants.paddingOnly(
+                  left: AppConstants.spacingLg,
+                  right: AppConstants.spacingLg,
+                  bottom: AppConstants.spacingXl,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      item.title,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                            color: Colors.black.withOpacity(0.5),
-                          ),
-                        ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    // Rating and Release Date
-                    if (rating != null || releaseDate != null)
-                      Row(
-                        children: [
-                          if (rating != null) ...[
-                            Icon(Icons.star, color: Colors.amber, size: 18),
-                            const SizedBox(width: 4),
-                            Text(
-                              rating.toStringAsFixed(1),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                          ],
-                          if (releaseDate != null)
-                            Text(
-                              releaseDate,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
-                            ),
-                        ],
-                      ),
-                    if (overview != null) ...[
-                      const SizedBox(height: 12),
-                      // Overview
-                      Text(
-                        overview,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    // Action Buttons
-                    Row(
-                      children: [
-                        // Play Button
-                        DButton(
-                          label: 'Watch Now',
-                          leadingIcon: LucideIcons.play,
-                          variant: DButtonVariant.primary,
-                          size: DButtonSize.md,
-                          onPressed: () {
-                            // TODO: Implement play action
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        // More Info Button
-                        DButton(
-                          label: 'More Info',
-                          leadingIcon: LucideIcons.info,
-                          variant: DButtonVariant.secondary,
-                          size: DButtonSize.md,
-                          blur: true,
-                          onPressed: () {
-                            // TODO: Implement more info action
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: _buildSpacedChildren(
+                    context: context,
+                    theme: theme,
+                    overview: overview,
+                  ),
                 ),
               ),
             ),

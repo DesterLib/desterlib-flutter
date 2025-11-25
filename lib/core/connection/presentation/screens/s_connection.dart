@@ -12,8 +12,8 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 import 'package:dester/core/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
-import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
 
 /// Full-screen connection setup screen
@@ -135,9 +135,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 AppConstants.spacingX(AppConstants.spacingSm),
                 Text(
                   AppLocalization.settingsServersApisTab.tr(),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: AppTypography.titleLarge(),
                 ),
               ],
             ),
@@ -169,14 +167,12 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             AppConstants.spacingY(AppConstants.spacingMd),
             Text(
               AppLocalization.settingsServersNoApisConfigured.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+              style: AppTypography.titleMedium(color: Colors.grey[600]),
             ),
             AppConstants.spacingY(AppConstants.spacingSm),
             Text(
               AppLocalization.settingsServersAddFirstApi.tr(),
-              style: TextStyle(color: Colors.grey[500]),
+              style: AppTypography.bodyMedium(color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
             AppConstants.spacingY(AppConstants.spacingLg),
@@ -217,8 +213,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             Expanded(
               child: Text(
                 config.label,
-                style: TextStyle(
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                style: AppTypography.titleMedium().copyWith(
+                  fontWeight: isActive
+                      ? AppTypography.weightBold
+                      : AppTypography.weightRegular,
                 ),
               ),
             ),
@@ -228,7 +226,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 child: Chip(
                   label: Text(
                     AppLocalization.settingsServersActive.tr(),
-                    style: const TextStyle(fontSize: 10),
+                    style: AppTypography.labelSmall(),
                   ),
                   padding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
@@ -242,7 +240,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             AppConstants.spacingY(AppConstants.spacing4),
             Text(
               config.url,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: AppTypography.bodySmall(color: Colors.grey[600]),
             ),
           ],
         ),

@@ -1,9 +1,11 @@
 // External packages
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 /// Media type enum for card display
 enum MediaType { movie, tvShow }
@@ -47,12 +49,20 @@ abstract class MediaItemCard extends StatelessWidget {
       child: ClipRSuperellipse(
         borderRadius: BorderRadius.circular(16),
         child: imageUrl != null
-            ? Image.network(
-                imageUrl!,
+            ? CachedNetworkImage(
+                imageUrl: imageUrl!,
                 width: 278,
                 height: 160,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
+                placeholder: (context, url) => Container(
+                  width: 278,
+                  height: 160,
+                  color: Colors.grey[800],
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                errorWidget: (context, url, error) {
                   return Container(
                     width: 278,
                     height: 160,
@@ -116,9 +126,9 @@ class MediaItemCardVertical extends MediaItemCard {
                       },
                       child: Text(
                         number.toString(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                        style: AppTypography.inter(
                           fontSize: 36,
+                          fontWeight: AppTypography.weightBold,
                           color: Colors.white,
                           height: 1.0,
                         ),
@@ -135,22 +145,17 @@ class MediaItemCardVertical extends MediaItemCard {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                      style: AppTypography.titleSmall(
                         color: Colors.white,
-                      ),
+                      ).copyWith(height: 1.2),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (year != null) ...[
-                      AppConstants.spacingY(AppConstants.spacing4),
+                      AppConstants.spacingY(AppConstants.spacing2),
                       Text(
                         year!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
+                        style: AppTypography.bodySmall(color: Colors.grey),
                       ),
                     ],
                   ],
@@ -190,29 +195,19 @@ class MediaItemCardHorizontal extends MediaItemCard {
               if (number != null) ...[
                 Text(
                   number.toString(),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTypography.labelSmall(color: Colors.grey),
                 ),
                 AppConstants.spacingY(AppConstants.spacing4),
               ],
               Text(
                 title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: AppTypography.titleMedium(),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               if (year != null) ...[
                 AppConstants.spacingY(AppConstants.spacing4),
-                Text(
-                  year!,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
+                Text(year!, style: AppTypography.bodySmall(color: Colors.grey)),
               ],
             ],
           ),

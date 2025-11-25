@@ -2,6 +2,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
@@ -34,7 +35,67 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
-    widget.controller.loadAll();
+    _loadDataAndPrefetch();
+  }
+
+  Future<void> _loadDataAndPrefetch() async {
+    await widget.controller.loadAll();
+    // Prefetch hero images after data is loaded
+    if (mounted) {
+      _prefetchHeroImages();
+    }
+  }
+
+  /// Prefetch hero images (backdrop/poster + logo) for the top items
+  void _prefetchHeroImages() {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    // Combine movies and TV shows, sort by createdAt (most recent first), take top 5
+    final allMediaItems = <MediaItem>[
+      ...widget.controller.movies.map((movie) => MovieMediaItem(movie: movie)),
+      ...widget.controller.tvShows.map(
+        (tvShow) => TVShowMediaItem(tvShow: tvShow),
+      ),
+    ];
+
+    // Sort by createdAt (most recent first)
+    allMediaItems.sort((a, b) {
+      if (a.createdAt == null && b.createdAt == null) return 0;
+      if (a.createdAt == null) return 1;
+      if (b.createdAt == null) return -1;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
+
+    // Take top 5 items
+    final topItems = allMediaItems.take(5).toList();
+
+    // Prefetch images for each item
+    for (final item in topItems) {
+      // Prefetch backdrop/poster
+      String? imageUrl;
+      if (isMobile) {
+        imageUrl = item.plainPosterUrl ?? item.backdropPath;
+      } else {
+        imageUrl = item.backdropPath ?? item.plainPosterUrl;
+      }
+      if (imageUrl != null) {
+        precacheImage(CachedNetworkImageProvider(imageUrl), context).catchError(
+          (_) {
+            // Ignore prefetch errors
+          },
+        );
+      }
+
+      // Prefetch logo
+      if (item.logoUrl != null) {
+        precacheImage(
+          CachedNetworkImageProvider(item.logoUrl!),
+          context,
+        ).catchError((_) {
+          // Ignore prefetch errors
+        });
+      }
+    }
   }
 
   @override

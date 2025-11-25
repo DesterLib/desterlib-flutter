@@ -11,6 +11,7 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 // Core
 import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
 
 /// Platform-adaptive modal/drawer for connection status
@@ -132,14 +133,7 @@ class ConnectionStatusModal extends ConsumerWidget {
         children: [
           Icon(icon, color: color, size: 28),
           AppConstants.spacingX(AppConstants.spacing12),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
+          Text(label, style: AppTypography.titleMedium(color: color)),
         ],
       ),
     );
@@ -166,19 +160,18 @@ class ConnectionStatusModal extends ConsumerWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall(
                   color: Theme.of(
                     context,
                   ).textTheme.bodySmall?.color?.withOpacity(0.6),
-                  fontSize: 12,
                 ),
               ),
               AppConstants.spacingY(AppConstants.spacing4),
               Text(
                 value,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                style: AppTypography.bodyMedium().copyWith(
+                  fontWeight: AppTypography.weightMedium,
+                ),
               ),
             ],
           ),
@@ -203,7 +196,7 @@ class ConnectionStatusModal extends ConsumerWidget {
           Expanded(
             child: Text(
               errorMessage,
-              style: TextStyle(color: AppConstants.dangerColor, fontSize: 12),
+              style: AppTypography.bodySmall(color: AppConstants.dangerColor),
             ),
           ),
         ],
