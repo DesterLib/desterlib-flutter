@@ -13,6 +13,7 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 class ApiManagementScreen extends ConsumerWidget {
   const ApiManagementScreen({super.key});
@@ -32,7 +33,9 @@ class ApiManagementScreen extends ConsumerWidget {
             isCompact: true,
           ),
           configurations.isEmpty
-              ? SliverFillRemaining(child: _buildEmptyState(context, ref))
+              ? SliverFillRemaining(
+                  child: DSidebarSpace(child: _buildEmptyState(context, ref)),
+                )
               : _buildApiList(
                   context,
                   ref,
@@ -90,120 +93,130 @@ class ApiManagementScreen extends ConsumerWidget {
   ) {
     return SliverPadding(
       padding: AppConstants.padding(AppConstants.spacing16),
-      sliver: SliverList.builder(
-        itemCount: configurations.length,
-        itemBuilder: (context, index) {
-          final config = configurations[index];
-          final isActive = config.isActive;
-          final canDelete = configurations.length > 1;
+      sliver: SliverToBoxAdapter(
+        child: DSidebarSpace(
+          child: Column(
+            children: configurations.map((config) {
+              final isActive = config.isActive;
+              final canDelete = configurations.length > 1;
 
-          return Card(
-            margin: AppConstants.paddingOnly(bottom: AppConstants.spacing12),
-            elevation: isActive ? 4 : 1,
-            shape: RoundedSuperellipseBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: isActive
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
-                width: isActive ? 2 : 0,
-              ),
-            ),
-            color: isActive
-                ? Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3)
-                : null,
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: isActive
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey[300],
-                child: Icon(
-                  isActive ? LucideIcons.cloudCheck300 : LucideIcons.cloud300,
-                  color: isActive ? Colors.white : Colors.grey[600],
+              return Card(
+                margin: AppConstants.paddingOnly(
+                  bottom: AppConstants.spacing12,
                 ),
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      config.label,
-                      style: TextStyle(
-                        fontWeight: isActive
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isActive
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ),
+                elevation: isActive ? 4 : 1,
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isActive
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent,
+                    width: isActive ? 2 : 0,
+                  ),
+                ),
+                color: isActive
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                    : null,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isActive
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey[300],
+                    child: Icon(
+                      isActive
+                          ? LucideIcons.cloudCheck300
+                          : LucideIcons.cloud300,
+                      color: isActive ? Colors.white : Colors.grey[600],
                     ),
                   ),
-                  if (isActive)
-                    Padding(
-                      padding: AppConstants.paddingOnly(
-                        left: AppConstants.spacing8,
-                      ),
-                      child: Chip(
-                        label: Text(
-                          AppLocalization.settingsServersActive.tr(),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          config.label,
                           style: TextStyle(
-                            fontSize: 10,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: isActive
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isActive
+                                ? Theme.of(context).colorScheme.primary
+                                : null,
                           ),
                         ),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
                       ),
-                    ),
-                ],
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppConstants.spacingY(AppConstants.spacing4),
-                  Text(
-                    config.url,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isActive
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Colors.grey[600],
-                    ),
+                      if (isActive)
+                        Padding(
+                          padding: AppConstants.paddingOnly(
+                            left: AppConstants.spacing8,
+                          ),
+                          child: Chip(
+                            label: Text(
+                              AppLocalization.settingsServersActive.tr(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                    ],
                   ),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!isActive)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.check_circle_outline,
-                      ), // Using Material icon as Lucide circleCheck not available
-                      tooltip: AppLocalization.settingsServersSetActive.tr(),
-                      onPressed: () => _handleSetActive(ref, config.id),
-                    ),
-                  IconButton(
-                    icon: const Icon(LucideIcons.pencil300),
-                    tooltip: 'Edit',
-                    onPressed: () => _showEditApiModal(context, ref, config),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppConstants.spacingY(AppConstants.spacing4),
+                      Text(
+                        config.url,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isActive
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(LucideIcons.trash2300),
-                    tooltip: AppLocalization.settingsServersDelete.tr(),
-                    color: Colors.red,
-                    onPressed: canDelete
-                        ? () => _handleDelete(context, ref, config)
-                        : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isActive)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                          ), // Using Material icon as Lucide circleCheck not available
+                          tooltip: AppLocalization.settingsServersSetActive
+                              .tr(),
+                          onPressed: () => _handleSetActive(ref, config.id),
+                        ),
+                      IconButton(
+                        icon: const Icon(LucideIcons.pencil300),
+                        tooltip: 'Edit',
+                        onPressed: () =>
+                            _showEditApiModal(context, ref, config),
+                      ),
+                      IconButton(
+                        icon: const Icon(LucideIcons.trash2300),
+                        tooltip: AppLocalization.settingsServersDelete.tr(),
+                        color: Colors.red,
+                        onPressed: canDelete
+                            ? () => _handleDelete(context, ref, config)
+                            : null,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              isThreeLine: true,
-            ),
-          );
-        },
+                  isThreeLine: true,
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ),
     );
   }

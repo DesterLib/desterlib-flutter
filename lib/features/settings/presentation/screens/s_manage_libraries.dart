@@ -13,6 +13,7 @@ import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/widgets/empty_state_widget.dart';
 import 'package:dester/core/widgets/error_state_widget.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
@@ -58,25 +59,32 @@ class ManageLibrariesScreen extends ConsumerWidget {
               ],
             ),
             state.isLoading && libraries.isEmpty
-                ? const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
+                ? SliverFillRemaining(
+                    child: DSidebarSpace(
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
                   )
                 : state.error != null && libraries.isEmpty
                 ? SliverFillRemaining(
-                    child: ErrorStateWidget(
-                      error: state.error!,
-                      onRetry: () => controller.refresh(),
+                    child: DSidebarSpace(
+                      child: ErrorStateWidget(
+                        error: state.error!,
+                        onRetry: () => controller.refresh(),
+                      ),
                     ),
                   )
                 : libraries.isEmpty
                 ? SliverFillRemaining(
-                    child: EmptyStateWidget(
-                      title: AppLocalization
-                          .settingsLibrariesNoLibrariesAvailable
-                          .tr(),
-                      subtitle: AppLocalization.settingsLibrariesAddFirstLibrary
-                          .tr(),
-                      icon: LucideIcons.library300,
+                    child: DSidebarSpace(
+                      child: EmptyStateWidget(
+                        title: AppLocalization
+                            .settingsLibrariesNoLibrariesAvailable
+                            .tr(),
+                        subtitle: AppLocalization
+                            .settingsLibrariesAddFirstLibrary
+                            .tr(),
+                        icon: LucideIcons.library300,
+                      ),
                     ),
                   )
                 : _buildLibraryList(context, ref, libraries, controller, state),
@@ -102,6 +110,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
         itemCount: libraries.length,
         itemBuilder: (context, index) {
           final library = libraries[index];
+
           // Watch scanProgressProvider directly for real-time updates
           final scanProgressState = ref.watch(scanProgressProvider);
           final scanProgress =
@@ -113,13 +122,15 @@ class ManageLibrariesScreen extends ConsumerWidget {
               : null;
           final isScanning = scanProgress != null;
 
-          return LibraryCard(
-            library: library,
-            isScanning: isScanning,
-            scanProgress: scanProgress,
-            onEdit: () =>
-                _showEditLibraryModal(context, ref, library, controller),
-            onDelete: () => _handleDelete(context, ref, library, controller),
+          return DSidebarSpace(
+            child: LibraryCard(
+              library: library,
+              isScanning: isScanning,
+              scanProgress: scanProgress,
+              onEdit: () =>
+                  _showEditLibraryModal(context, ref, library, controller),
+              onDelete: () => _handleDelete(context, ref, library, controller),
+            ),
           );
         },
       ),

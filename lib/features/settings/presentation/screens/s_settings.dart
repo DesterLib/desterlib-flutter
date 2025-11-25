@@ -14,6 +14,7 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
@@ -55,101 +56,114 @@ class SettingsScreen extends ConsumerWidget {
           DAppBar(title: AppLocalization.settingsTitle.tr(), leftAligned: true),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Servers Section
-                SettingsSection(
-                  title: AppLocalization.settingsServersTitle.tr(),
-                  group: SettingsGroup(
-                    children: [
-                      SettingsItem(
-                        leadingIcon: _getStatusIcon(status),
-                        leadingIconColor: _getStatusColor(status),
-                        title: AppLocalization.settingsServersConnectionStatus
-                            .tr(),
-                        trailingIcon: LucideIcons.chevronRight300,
-                        onTap: () {
-                          ConnectionStatusModal.show(context);
-                        },
-                        isFirst: true,
+            sliver: SliverToBoxAdapter(
+              child: DSidebarSpace(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Servers Section
+                    SettingsSection(
+                      title: AppLocalization.settingsServersTitle.tr(),
+                      group: SettingsGroup(
+                        children: [
+                          SettingsItem(
+                            leadingIcon: _getStatusIcon(status),
+                            leadingIconColor: _getStatusColor(status),
+                            title: AppLocalization
+                                .settingsServersConnectionStatus
+                                .tr(),
+                            trailingIcon: LucideIcons.chevronRight300,
+                            onTap: () {
+                              ConnectionStatusModal.show(context);
+                            },
+                            isFirst: true,
+                          ),
+                          SettingsItem(
+                            leadingIcon: LucideIcons.server300,
+                            title: AppLocalization.settingsServersManageServers
+                                .tr(),
+                            trailingIcon: LucideIcons.chevronRight300,
+                            onTap: () {
+                              context.pushNamed('manage-apis');
+                            },
+                          ),
+                        ],
                       ),
-                      SettingsItem(
-                        leadingIcon: LucideIcons.server300,
-                        title: AppLocalization.settingsServersManageServers
-                            .tr(),
-                        trailingIcon: LucideIcons.chevronRight300,
-                        onTap: () {
-                          context.pushNamed('manage-apis');
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                AppConstants.spacingY(AppConstants.spacing24),
-                // TMDB Settings Section
-                SettingsSection(
-                  title: AppLocalization.settingsTmdbTitle.tr(),
-                  group: ref
-                      .watch(settingsProvider)
-                      .when(
-                        data: (settings) => SettingsGroup(
-                          children: [
-                            SettingsItem(
-                              leadingIcon: LucideIcons.key300,
-                              title: AppLocalization.settingsTmdbApiKey.tr(),
-                              trailingIcon: LucideIcons.chevronRight300,
-                              onTap: () =>
-                                  _showTmdbApiKeyModal(context, ref, settings),
-                              isFirst: true,
+                    ),
+                    AppConstants.spacingY(AppConstants.spacing24),
+                    // TMDB Settings Section
+                    SettingsSection(
+                      title: AppLocalization.settingsTmdbTitle.tr(),
+                      group: ref
+                          .watch(settingsProvider)
+                          .when(
+                            data: (settings) => SettingsGroup(
+                              children: [
+                                SettingsItem(
+                                  leadingIcon: LucideIcons.key300,
+                                  title: AppLocalization.settingsTmdbApiKey
+                                      .tr(),
+                                  trailingIcon: LucideIcons.chevronRight300,
+                                  onTap: () => _showTmdbApiKeyModal(
+                                    context,
+                                    ref,
+                                    settings,
+                                  ),
+                                  isFirst: true,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        loading: () => SettingsGroup(
-                          children: [
-                            SettingsItem(
-                              title: AppLocalization.settingsTmdbApiKey.tr(),
-                              isFirst: true,
+                            loading: () => SettingsGroup(
+                              children: [
+                                SettingsItem(
+                                  title: AppLocalization.settingsTmdbApiKey
+                                      .tr(),
+                                  isFirst: true,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        error: (error, stack) => SettingsGroup(
-                          children: [
-                            SettingsItem(
-                              leadingIcon: Icons.error_outline,
-                              title: AppLocalization.settingsTmdbApiKey.tr(),
-                              trailingIcon: LucideIcons.chevronRight300,
-                              onTap: () => _showTmdbApiKeyModal(
-                                context,
-                                ref,
-                                const Settings(firstRun: true),
-                              ),
-                              isFirst: true,
+                            error: (error, stack) => SettingsGroup(
+                              children: [
+                                SettingsItem(
+                                  leadingIcon: Icons.error_outline,
+                                  title: AppLocalization.settingsTmdbApiKey
+                                      .tr(),
+                                  trailingIcon: LucideIcons.chevronRight300,
+                                  onTap: () => _showTmdbApiKeyModal(
+                                    context,
+                                    ref,
+                                    const Settings(firstRun: true),
+                                  ),
+                                  isFirst: true,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                    ),
+                    AppConstants.spacingY(AppConstants.spacing24),
+                    // Library Settings Section
+                    SettingsSection(
+                      title: AppLocalization.settingsLibrariesTitle.tr(),
+                      group: SettingsGroup(
+                        children: [
+                          SettingsItem(
+                            leadingIcon: LucideIcons.library300,
+                            title: AppLocalization
+                                .settingsLibrariesManageLibraries
+                                .tr(),
+                            trailingIcon: LucideIcons.chevronRight300,
+                            onTap: () {
+                              context.pushNamed('manage-libraries');
+                            },
+                            isFirst: true,
+                          ),
+                        ],
                       ),
+                    ),
+                    AppConstants.spacingY(AppConstants.spacing24),
+                  ],
                 ),
-                AppConstants.spacingY(AppConstants.spacing24),
-                // Library Settings Section
-                SettingsSection(
-                  title: AppLocalization.settingsLibrariesTitle.tr(),
-                  group: SettingsGroup(
-                    children: [
-                      SettingsItem(
-                        leadingIcon: LucideIcons.library300,
-                        title: AppLocalization.settingsLibrariesManageLibraries
-                            .tr(),
-                        trailingIcon: LucideIcons.chevronRight300,
-                        onTap: () {
-                          context.pushNamed('manage-libraries');
-                        },
-                        isFirst: true,
-                      ),
-                    ],
-                  ),
-                ),
-                AppConstants.spacingY(AppConstants.spacing24),
-              ]),
+              ),
             ),
           ),
         ],
