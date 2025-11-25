@@ -7,9 +7,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 import '../../../../app/router/app_router.dart';
-
 
 /// Base modal widget that adapts to platform
 /// Shows as Dialog on desktop, DraggableScrollableSheet on mobile
@@ -249,9 +249,7 @@ class BaseModal extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+            style: AppTypography.titleSmall(),
           ),
         ),
         if (showCloseButton)

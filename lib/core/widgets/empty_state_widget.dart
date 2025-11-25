@@ -1,16 +1,16 @@
 // External packages
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-
+import 'package:dester/core/constants/app_typography.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 /// Reusable empty state widget
 class EmptyStateWidget extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final IconData? icon;
+  final DIconName? icon;
   final Color? iconColor;
   final Widget? action;
 
@@ -31,24 +31,22 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon ?? LucideIcons.inbox,
-              size: 64,
+            DIcon(
+              icon: icon ?? DIconName.inbox,
+              size: 64.0,
               color: iconColor ?? Colors.grey[400],
             ),
             AppConstants.spacingY(AppConstants.spacing16),
             Text(
               title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.grey[600]),
+              style: AppTypography.titleLarge(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
               AppConstants.spacingY(AppConstants.spacing8),
               Text(
                 subtitle!,
-                style: TextStyle(color: Colors.grey[500]),
+                style: AppTypography.bodyMedium(color: Colors.grey[500]),
                 textAlign: TextAlign.center,
               ),
             ],

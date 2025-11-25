@@ -7,6 +7,7 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 /// Reusable error state widget
 class ErrorStateWidget extends StatelessWidget {
@@ -41,7 +42,7 @@ class ErrorStateWidget extends StatelessWidget {
             AppConstants.spacingY(AppConstants.spacing16),
             Text(
               error.startsWith('Error:') ? error : 'Error: $error',
-              style: TextStyle(color: Colors.red[600]),
+              style: AppTypography.bodyMedium(color: Colors.red[600]),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[

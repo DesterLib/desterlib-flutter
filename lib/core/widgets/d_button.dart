@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 /// Button variants
 enum DButtonVariant { primary, secondary, plain }
@@ -31,10 +33,13 @@ class DButton extends StatefulWidget {
   final bool blur;
 
   /// Optional icon to display before the label
-  final IconData? leadingIcon;
+  final DIconName? leadingIcon;
 
   /// Optional icon to display after the label
-  final IconData? trailingIcon;
+  final DIconName? trailingIcon;
+
+  /// Whether the leading icon should be filled (for play icon, etc.)
+  final bool leadingIconFilled;
 
   /// Whether the button is disabled
   final bool isDisabled;
@@ -48,6 +53,7 @@ class DButton extends StatefulWidget {
     this.blur = false,
     this.leadingIcon,
     this.trailingIcon,
+    this.leadingIconFilled = false,
     this.isDisabled = false,
   });
 
@@ -205,27 +211,23 @@ class _DButtonState extends State<DButton> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (widget.leadingIcon != null) ...[
-            Icon(
-              widget.leadingIcon,
-              size: AppConstants.sizeLg,
+            DIcon(
+              icon: widget.leadingIcon!,
+              size: 24.0, // 24px for leading icon
               color: textColor,
+              filled: widget.leadingIconFilled,
             ),
             const SizedBox(width: AppConstants.spacing8),
           ],
           Text(
             widget.label,
-            style: TextStyle(
-              color: textColor,
-              fontSize: AppConstants.sizeSm,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.3,
-            ),
+            style: AppTypography.buttonMedium(color: textColor),
           ),
           if (widget.trailingIcon != null) ...[
             const SizedBox(width: AppConstants.spacing8),
-            Icon(
-              widget.trailingIcon,
-              size: AppConstants.sizeSm,
+            DIcon(
+              icon: widget.trailingIcon!,
+              size: 16.0, // 16px for trailing icon
               color: textColor,
             ),
           ],

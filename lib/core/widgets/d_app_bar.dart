@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_scaffold.dart';
 import 'package:dester/core/widgets/d_sidebar.dart';
 
@@ -123,14 +124,21 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     final theme = Theme.of(context);
     final appBarTheme = theme.appBarTheme;
 
-    // Calculate progress (0.0 = expanded, 1.0 = collapsed)
-    // Use shrinkOffset relative to the actual shrink distance (maxExtent - minExtent)
+    // Calculate the actual current extent (what the sliver expects)
+    // This must exactly match what the sliver calculates: maxExtent - shrinkOffset, clamped
+    final double currentExtent = (maxExtent - shrinkOffset).clamp(
+      minExtent,
+      maxExtent,
+    );
+
+    // Calculate progress (0.0 = expanded, 1.0 = collapsed) for animations
     final double shrinkDistance = maxExtent - minExtent;
     final double progress = shrinkDistance > 0
-        ? (shrinkOffset / shrinkDistance).clamp(0.0, 1.0)
+        ? ((maxExtent - currentExtent) / shrinkDistance).clamp(0.0, 1.0)
         : 0.0;
 
     // Calculate current height based on mode
+    // Note: currentExtent includes topPadding, so we subtract it to get just the app bar height
     final double currentHeight = isCompact
         ? _collapsedAppBarHeight
         : _lerpDouble(_expandedAppBarHeight, _collapsedAppBarHeight, progress);
@@ -138,8 +146,8 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     // Blur and Background (matching sidebar style)
     final double blurSigma = animateBlur ? progress * 40.0 : 40.0;
     final Color currentBackgroundColor = animateBlur
-        ? Colors.grey.shade800.withValues(alpha: 0.1 * progress)
-        : Colors.grey.shade800.withValues(alpha: 0.1);
+        ? Colors.black.withValues(alpha: 0.4 * progress)
+        : Colors.black.withValues(alpha: 0.4);
 
     // Determine Leading Widget
     Widget? effectiveLeading = leading;
@@ -172,9 +180,9 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
         title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: AppTypography.inter(
           fontSize: currentFontSize,
-          fontWeight: FontWeight.w600,
+          fontWeight: AppTypography.weightSemiBold,
           color: appBarTheme.foregroundColor ?? theme.colorScheme.onSurface,
         ),
       );
@@ -190,35 +198,39 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
         ? BorderRadius.only(bottomLeft: Radius.circular(AppConstants.radius2xl))
         : null;
 
-    Widget content = ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.zero,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-        child: Container(
-          height: currentHeight + topPadding,
-          color: currentBackgroundColor,
-          padding: EdgeInsets.only(top: topPadding),
-          child: SizedBox(
-            height: currentHeight,
-            child: NavigationToolbar(
-              leading: effectiveLeading != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: IconTheme(
-                        data: appBarTheme.iconTheme ?? theme.iconTheme,
-                        child: effectiveLeading,
-                      ),
-                    )
-                  : null,
-              middle: titleWidget,
-              trailing: actions != null
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [...actions!, const SizedBox(width: 8.0)],
-                    )
-                  : null,
-              centerMiddle: effectiveCenterTitle,
-              middleSpacing: NavigationToolbar.kMiddleSpacing,
+    // The widget must have exactly the height that matches currentExtent
+    // currentExtent already includes topPadding, so we use it directly
+    Widget content = SizedBox(
+      height: currentExtent,
+      child: ClipRRect(
+        borderRadius: borderRadius ?? BorderRadius.zero,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: Container(
+            color: currentBackgroundColor,
+            padding: EdgeInsets.only(top: topPadding),
+            child: SizedBox(
+              height: currentHeight,
+              child: NavigationToolbar(
+                leading: effectiveLeading != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: IconTheme(
+                          data: appBarTheme.iconTheme ?? theme.iconTheme,
+                          child: effectiveLeading,
+                        ),
+                      )
+                    : null,
+                middle: titleWidget,
+                trailing: actions != null
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [...actions!, const SizedBox(width: 8.0)],
+                      )
+                    : null,
+                centerMiddle: effectiveCenterTitle,
+                middleSpacing: NavigationToolbar.kMiddleSpacing,
+              ),
             ),
           ),
         ),
@@ -259,9 +271,9 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: AppTypography.inter(
               fontSize: _expandedFontSize,
-              fontWeight: FontWeight.w600,
+              fontWeight: AppTypography.weightSemiBold,
               color: Colors.white,
             ),
           ),
@@ -275,9 +287,9 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: AppTypography.inter(
                 fontSize: _collapsedFontSize,
-                fontWeight: FontWeight.w600,
+                fontWeight: AppTypography.weightSemiBold,
                 color: Colors.white,
               ),
             ),

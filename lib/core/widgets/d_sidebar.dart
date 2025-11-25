@@ -11,7 +11,10 @@ import 'dart:ui';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
+
+// Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 /// Desktop sidebar navigation widget
 class DSidebar extends StatelessWidget {
@@ -61,7 +64,7 @@ class DSidebar extends StatelessWidget {
         child: Container(
           width: width,
           decoration: BoxDecoration(
-            color: Colors.grey.shade800.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.07),
@@ -161,14 +164,12 @@ class _SidebarItem extends StatelessWidget {
                 const SizedBox(width: AppConstants.spacing12),
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTypography.navLabel(
                     color: isSelected
                         ? Colors.black
                         : Colors.white.withValues(alpha: 0.6),
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    letterSpacing: -0.2,
-                  ),
+                    isSelected: isSelected,
+                  ).copyWith(letterSpacing: -0.2),
                 ),
               ],
             ),

@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
+
+// Core
+import 'package:dester/core/constants/app_typography.dart';
 
 /// Bottom navigation bar widget for app navigation
 class DBottomNavigationBar extends StatelessWidget {
@@ -46,13 +49,13 @@ class DBottomNavigationBar extends StatelessWidget {
       },
       items: [
         DBottomNavBarItem(
-          icon: Icons.home_rounded,
-          selectedIcon: Icons.home_rounded,
+          icon: DIconName.home,
+          selectedIcon: DIconName.home,
           label: AppLocalization.homeTitle.tr(),
         ),
         DBottomNavBarItem(
-          icon: LucideIcons.settings,
-          selectedIcon: LucideIcons.settings,
+          icon: DIconName.settings,
+          selectedIcon: DIconName.settings,
           label: AppLocalization.settingsTitle.tr(),
         ),
       ],
@@ -142,7 +145,7 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
                   filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
                   child: Container(
                     decoration: ShapeDecoration(
-                      color: Colors.grey.shade800.withValues(alpha: 0.1),
+                      color: Colors.black.withValues(alpha: 0.2),
                       shape: RoundedSuperellipseBorder(
                         borderRadius: BorderRadius.circular(50),
                         side: BorderSide(
@@ -240,10 +243,10 @@ class _NavBarItem extends StatelessWidget {
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               builder: (context, value, child) {
-                return Icon(
-                  isSelected ? item.selectedIcon : item.icon,
+                return DIcon(
+                  filled: item.icon == DIconName.home ? true : false,
+                  icon: isSelected ? item.selectedIcon : item.icon,
                   color: Color.lerp(Colors.white, Colors.black, value),
-                  size: 28,
                 );
               },
             ),
@@ -254,15 +257,13 @@ class _NavBarItem extends StatelessWidget {
               builder: (context, value, child) {
                 return Text(
                   item.label,
-                  style: TextStyle(
+                  style: AppTypography.navLabelSmall(
                     color: Color.lerp(
                       Colors.white.withValues(alpha: 0.55),
                       Colors.black,
                       value,
                     ),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
+                    isSelected: isSelected,
                   ),
                 );
               },
@@ -302,7 +303,11 @@ class _SearchButton extends StatelessWidget {
                 width: 0.33,
               ),
             ),
-            child: Icon(LucideIcons.search, color: Colors.white, size: 24),
+            child: DIcon(
+              icon: DIconName.search,
+              size: 24.0,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -311,8 +316,8 @@ class _SearchButton extends StatelessWidget {
 }
 
 class DBottomNavBarItem {
-  final IconData icon;
-  final IconData selectedIcon;
+  final DIconName icon;
+  final DIconName selectedIcon;
   final String label;
 
   const DBottomNavBarItem({
