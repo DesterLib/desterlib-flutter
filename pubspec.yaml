@@ -24,6 +24,7 @@ dependencies:
   shared_preferences: ^2.3.3
   sliver_tools: ^0.2.12
   web_socket_channel: ^3.0.3
+  window_manager: ^0.5.1
 
 dev_dependencies:
   flutter_test:

@@ -2,12 +2,16 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 
+// Core
 import 'app/router/app_router.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize window_manager (required for desktop platforms)
+  await windowManager.ensureInitialized();
 
   await EasyLocalization.ensureInitialized();
 
