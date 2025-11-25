@@ -2,18 +2,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
-
 
 /// Library card widget for displaying library information
 class LibraryCard extends ConsumerWidget {
@@ -47,15 +47,13 @@ class LibraryCard extends ConsumerWidget {
                   height: 24,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Icon(
-                  _getLibraryIcon(library.libraryType),
+              : DIcon(
+                  icon: _getLibraryIcon(library.libraryType),
+                  size: 24.0,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
         ),
-        title: Text(
-          library.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(library.name, style: AppTypography.titleMedium()),
         subtitle: _buildSubtitle(context),
         trailing: isScanning
             ? null
@@ -63,15 +61,18 @@ class LibraryCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(LucideIcons.pencil300),
+                    icon: const DIcon(icon: DIconName.edit, size: 24.0),
                     tooltip: AppLocalization.settingsLibrariesEditLibrary.tr(),
                     onPressed: onEdit,
                   ),
                   IconButton(
-                    icon: const Icon(LucideIcons.trash2300),
+                    icon: const DIcon(
+                      icon: DIconName.trash,
+                      size: 24.0,
+                      color: Colors.red,
+                    ),
                     tooltip: AppLocalization.settingsLibrariesDeleteLibrary
                         .tr(),
-                    color: Colors.red,
                     onPressed: onDelete,
                   ),
                 ],
@@ -91,11 +92,9 @@ class LibraryCard extends ConsumerWidget {
           // Show scan progress
           Text(
             scanProgress!.message,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTypography.bodySmall(
               color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w500,
-            ),
+            ).copyWith(fontWeight: AppTypography.weightMedium),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -111,7 +110,7 @@ class LibraryCard extends ConsumerWidget {
           if (scanProgress!.total > 0)
             Text(
               '${scanProgress!.current} / ${scanProgress!.total}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: AppTypography.bodySmall(color: Colors.grey[600]),
             ),
           AppConstants.spacingY(AppConstants.spacing2),
         ],
@@ -120,7 +119,7 @@ class LibraryCard extends ConsumerWidget {
             library.description!,
             maxLines: isScanning ? 1 : 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: AppTypography.bodySmall(color: Colors.grey[600]),
           ),
         if (library.description != null &&
             library.description!.isNotEmpty &&
@@ -134,7 +133,7 @@ class LibraryCard extends ConsumerWidget {
           Chip(
             label: Text(
               library.libraryType!.displayName,
-              style: const TextStyle(fontSize: 10),
+              style: AppTypography.labelSmall(),
             ),
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
@@ -146,24 +145,24 @@ class LibraryCard extends ConsumerWidget {
             ),
             child: Text(
               '${AppLocalization.settingsLibrariesMediaCount.tr()}: ${library.mediaCount}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              style: AppTypography.bodySmall(color: Colors.grey[500]),
             ),
           ),
       ],
     );
   }
 
-  IconData _getLibraryIcon(LibraryType? type) {
-    if (type == null) return LucideIcons.library300;
+  DIconName _getLibraryIcon(LibraryType? type) {
+    if (type == null) return DIconName.library;
     switch (type) {
       case LibraryType.movie:
-        return LucideIcons.film300;
+        return DIconName.film;
       case LibraryType.tvShow:
-        return LucideIcons.tv300;
+        return DIconName.tv;
       case LibraryType.music:
-        return LucideIcons.music300;
+        return DIconName.music;
       case LibraryType.comic:
-        return LucideIcons.bookOpen300;
+        return DIconName.bookOpen;
     }
   }
 }

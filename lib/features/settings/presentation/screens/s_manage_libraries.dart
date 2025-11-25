@@ -2,7 +2,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
@@ -50,7 +50,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(LucideIcons.refreshCw300),
+                      : const DIcon(icon: DIconName.refreshCw, size: 24.0),
                   tooltip: 'Refresh',
                   onPressed: state.isLoading
                       ? null
@@ -83,7 +83,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
                         subtitle: AppLocalization
                             .settingsLibrariesAddFirstLibrary
                             .tr(),
-                        icon: LucideIcons.library300,
+                        icon: DIconName.library,
                       ),
                     ),
                   )

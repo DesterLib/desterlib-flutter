@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 
 class SettingsItem extends StatefulWidget {
   final IconData? leadingIcon;
@@ -78,7 +79,7 @@ class _SettingsItemState extends State<SettingsItem> {
                     Expanded(
                       child: Text(
                         widget.title,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: AppTypography.titleSmall(),
                       ),
                     ),
                     if (widget.trailingText != null) ...[
@@ -86,9 +87,7 @@ class _SettingsItemState extends State<SettingsItem> {
                         widget.trailingText!,
                         style:
                             widget.trailingTextStyle ??
-                            Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(fontSize: 12),
+                            AppTypography.bodySmall(),
                       ),
                       SizedBox(width: AppConstants.spacing8),
                     ],

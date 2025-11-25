@@ -8,9 +8,11 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 // App
 import 'package:dester/app/localization/app_localization.dart';
 
+// Core
+import 'package:dester/core/constants/app_typography.dart';
+
 // Features
 import 'package:dester/features/settings/presentation/screens/s_settings.dart';
-
 
 /// Floating action button for adding a library
 class AddLibraryFAB extends ConsumerWidget {
@@ -50,7 +52,7 @@ class AddLibraryFAB extends ConsumerWidget {
             icon: const Icon(LucideIcons.plus300, color: Colors.white70),
             label: Text(
               AppLocalization.settingsLibrariesAddLibrary.tr(),
-              style: const TextStyle(color: Colors.white70),
+              style: AppTypography.buttonMedium(color: Colors.white70),
             ),
             backgroundColor: Colors.grey,
             tooltip: AppLocalization.settingsTmdbApiKeyRequiredForLibrary.tr(),

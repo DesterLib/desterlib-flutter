@@ -1,7 +1,11 @@
+// Dart
+import 'dart:io';
+
 // External packages
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:window_manager/window_manager.dart';
 
 // Core
@@ -10,8 +14,10 @@ import 'app/router/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize window_manager (required for desktop platforms)
-  await windowManager.ensureInitialized();
+  // Initialize window_manager (required for desktop platforms only)
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+  }
 
   await EasyLocalization.ensureInitialized();
 
@@ -43,6 +49,8 @@ class MainApp extends StatelessWidget {
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: const Color(0xFF121212),
         ),
+        // Apply Inter font throughout the app
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
       ),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

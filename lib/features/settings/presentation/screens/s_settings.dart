@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
@@ -14,6 +13,7 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 // Features
@@ -72,17 +72,26 @@ class SettingsScreen extends ConsumerWidget {
                             title: AppLocalization
                                 .settingsServersConnectionStatus
                                 .tr(),
-                            trailingIcon: LucideIcons.chevronRight300,
+                            trailingIcon: getIconDataFromDIconName(
+                              DIconName.chevronRight,
+                              strokeWidth: 2.0,
+                            ),
                             onTap: () {
                               ConnectionStatusModal.show(context);
                             },
                             isFirst: true,
                           ),
                           SettingsItem(
-                            leadingIcon: LucideIcons.server300,
+                            leadingIcon: getIconDataFromDIconName(
+                              DIconName.server,
+                              strokeWidth: 2.0,
+                            ),
                             title: AppLocalization.settingsServersManageServers
                                 .tr(),
-                            trailingIcon: LucideIcons.chevronRight300,
+                            trailingIcon: getIconDataFromDIconName(
+                              DIconName.chevronRight,
+                              strokeWidth: 2.0,
+                            ),
                             onTap: () {
                               context.pushNamed('manage-apis');
                             },
@@ -100,10 +109,16 @@ class SettingsScreen extends ConsumerWidget {
                             data: (settings) => SettingsGroup(
                               children: [
                                 SettingsItem(
-                                  leadingIcon: LucideIcons.key300,
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.key,
+                                    strokeWidth: 2.0,
+                                  ),
                                   title: AppLocalization.settingsTmdbApiKey
                                       .tr(),
-                                  trailingIcon: LucideIcons.chevronRight300,
+                                  trailingIcon: getIconDataFromDIconName(
+                                    DIconName.chevronRight,
+                                    strokeWidth: 2.0,
+                                  ),
                                   onTap: () => _showTmdbApiKeyModal(
                                     context,
                                     ref,
@@ -125,10 +140,16 @@ class SettingsScreen extends ConsumerWidget {
                             error: (error, stack) => SettingsGroup(
                               children: [
                                 SettingsItem(
-                                  leadingIcon: Icons.error_outline,
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.error,
+                                    strokeWidth: 2.0,
+                                  ),
                                   title: AppLocalization.settingsTmdbApiKey
                                       .tr(),
-                                  trailingIcon: LucideIcons.chevronRight300,
+                                  trailingIcon: getIconDataFromDIconName(
+                                    DIconName.chevronRight,
+                                    strokeWidth: 2.0,
+                                  ),
                                   onTap: () => _showTmdbApiKeyModal(
                                     context,
                                     ref,
@@ -147,11 +168,17 @@ class SettingsScreen extends ConsumerWidget {
                       group: SettingsGroup(
                         children: [
                           SettingsItem(
-                            leadingIcon: LucideIcons.library300,
+                            leadingIcon: getIconDataFromDIconName(
+                              DIconName.library,
+                              strokeWidth: 2.0,
+                            ),
                             title: AppLocalization
                                 .settingsLibrariesManageLibraries
                                 .tr(),
-                            trailingIcon: LucideIcons.chevronRight300,
+                            trailingIcon: getIconDataFromDIconName(
+                              DIconName.chevronRight,
+                              strokeWidth: 2.0,
+                            ),
                             onTap: () {
                               context.pushNamed('manage-libraries');
                             },
@@ -174,13 +201,13 @@ class SettingsScreen extends ConsumerWidget {
   IconData _getStatusIcon(ConnectionStatus status) {
     switch (status) {
       case ConnectionStatus.connected:
-        return LucideIcons.link2300;
+        return getIconDataFromDIconName(DIconName.link2, strokeWidth: 2.0);
       case ConnectionStatus.disconnected:
-        return LucideIcons.link2Off300;
+        return getIconDataFromDIconName(DIconName.link2Off, strokeWidth: 2.0);
       case ConnectionStatus.checking:
-        return LucideIcons.refreshCw;
+        return getIconDataFromDIconName(DIconName.refreshCw, strokeWidth: 2.0);
       case ConnectionStatus.error:
-        return Icons.error;
+        return getIconDataFromDIconName(DIconName.error, strokeWidth: 2.0);
     }
   }
 

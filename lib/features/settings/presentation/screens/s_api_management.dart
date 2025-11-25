@@ -10,6 +10,7 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/connection/presentation/widgets/m_api_configuration.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
@@ -63,14 +64,12 @@ class ApiManagementScreen extends ConsumerWidget {
             AppConstants.spacingY(AppConstants.spacing16),
             Text(
               AppLocalization.settingsServersNoApisConfigured.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.grey[600]),
+              style: AppTypography.titleLarge(color: Colors.grey[600]),
             ),
             AppConstants.spacingY(AppConstants.spacing8),
             Text(
               AppLocalization.settingsServersAddFirstApi.tr(),
-              style: TextStyle(color: Colors.grey[500]),
+              style: AppTypography.bodyMedium(color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
             AppConstants.spacingY(AppConstants.spacing24),
@@ -136,14 +135,16 @@ class ApiManagementScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           config.label,
-                          style: TextStyle(
-                            fontWeight: isActive
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isActive
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                          ),
+                          style:
+                              AppTypography.titleMedium(
+                                color: isActive
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                              ).copyWith(
+                                fontWeight: isActive
+                                    ? AppTypography.weightBold
+                                    : AppTypography.weightRegular,
+                              ),
                         ),
                       ),
                       if (isActive)
@@ -154,8 +155,7 @@ class ApiManagementScreen extends ConsumerWidget {
                           child: Chip(
                             label: Text(
                               AppLocalization.settingsServersActive.tr(),
-                              style: TextStyle(
-                                fontSize: 10,
+                              style: AppTypography.labelSmall(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
@@ -174,8 +174,7 @@ class ApiManagementScreen extends ConsumerWidget {
                       AppConstants.spacingY(AppConstants.spacing4),
                       Text(
                         config.url,
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: AppTypography.bodySmall(
                           color: isActive
                               ? Theme.of(context).colorScheme.onPrimaryContainer
                               : Colors.grey[600],
