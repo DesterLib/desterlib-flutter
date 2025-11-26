@@ -92,7 +92,7 @@ class _DIconButtonState extends State<DIconButton> {
     _resetTimer?.cancel();
 
     final tapDuration = DateTime.now().difference(_tapDownTime!);
-    final minDuration = const Duration(milliseconds: 100);
+    final minDuration = AppConstants.iconButtonAnimationDuration;
 
     if (tapDuration < minDuration) {
       // Quick tap - ensure animation is visible for minimum duration
@@ -123,9 +123,9 @@ class _DIconButtonState extends State<DIconButton> {
   double _getSize() {
     switch (widget.size) {
       case DIconButtonSize.sm:
-        return 32;
+        return AppConstants.iconButtonSizeSm;
       case DIconButtonSize.md:
-        return 48;
+        return AppConstants.iconButtonSizeMd;
     }
   }
 
@@ -133,23 +133,23 @@ class _DIconButtonState extends State<DIconButton> {
   double _getIconSize() {
     switch (widget.size) {
       case DIconButtonSize.sm:
-        return AppConstants.sizeSm;
+        return AppConstants.iconButtonIconSizeSm;
       case DIconButtonSize.md:
-        return AppConstants.sizeLg;
+        return AppConstants.iconButtonIconSizeMd;
     }
   }
 
   /// Get background color based on variant
   Color? _getBackgroundColor() {
     if (widget.isDisabled) {
-      return Colors.white.withOpacity(0.05);
+      return Colors.white.withValues(alpha: 0.05);
     }
 
     switch (widget.variant) {
       case DIconButtonVariant.primary:
         return Colors.white;
       case DIconButtonVariant.secondary:
-        return Colors.white.withOpacity(0.13);
+        return Colors.white.withValues(alpha: 0.13);
       case DIconButtonVariant.plain:
         return Colors.transparent;
     }
@@ -158,7 +158,7 @@ class _DIconButtonState extends State<DIconButton> {
   /// Get icon color based on variant
   Color _getIconColor() {
     if (widget.isDisabled) {
-      return Colors.white.withOpacity(0.3);
+      return Colors.white.withValues(alpha: 0.3);
     }
 
     switch (widget.variant) {
@@ -173,7 +173,7 @@ class _DIconButtonState extends State<DIconButton> {
 
   /// Get border radius - always fully rounded (50px) for icon buttons
   BorderRadius _getBorderRadius() {
-    return BorderRadius.circular(50);
+    return BorderRadius.circular(AppConstants.iconButtonBorderRadius);
   }
 
   @override
@@ -222,7 +222,7 @@ class _DIconButtonState extends State<DIconButton> {
         onTapCancel: _enabled ? _handleTapCancel : null,
         onTap: _handleTap,
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 100),
+          duration: AppConstants.iconButtonAnimationDuration,
           opacity: _buttonHeldDown ? 0.6 : 1.0,
           child: finalButtonContent,
         ),

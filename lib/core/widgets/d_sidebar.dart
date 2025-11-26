@@ -58,14 +58,14 @@ class DSidebar extends StatelessWidget {
     final currentIndex = _getCurrentIndex();
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(AppConstants.radius2xl),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
         child: Container(
           width: width,
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppConstants.radius2xl),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.07),
               width: 1,
@@ -150,7 +150,7 @@ class _SidebarItem extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isSelected ? Colors.white : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppConstants.radiusLg),
             ),
             child: Row(
               children: [

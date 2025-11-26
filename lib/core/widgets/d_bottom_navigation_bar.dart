@@ -10,6 +10,7 @@ import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
+import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
 /// Bottom navigation bar widget for app navigation
@@ -130,9 +131,9 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
       child: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).padding.bottom,
-          left: 16.0,
-          right: 16.0,
-          top: 8.0,
+          left: AppConstants.bottomNavPaddingHorizontal,
+          right: AppConstants.bottomNavPaddingHorizontal,
+          top: AppConstants.bottomNavPaddingVertical,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -140,14 +141,21 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
           children: [
             RepaintBoundary(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
+                borderRadius: BorderRadius.circular(
+                  AppConstants.bottomNavPillBorderRadius,
+                ),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+                  filter: ImageFilter.blur(
+                    sigmaX: AppConstants.bottomNavBlurSigma,
+                    sigmaY: AppConstants.bottomNavBlurSigma,
+                  ),
                   child: Container(
                     decoration: ShapeDecoration(
                       color: Colors.black.withValues(alpha: 0.2),
                       shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.bottomNavPillBorderRadius,
+                        ),
                         side: BorderSide(
                           color: Colors.white.withValues(alpha: 0.07),
                           width: 1,
@@ -155,7 +163,7 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: AppConstants.padding(AppConstants.spacing4),
                       child: SizedBox(
                         height: _pillHeight,
                         child: Stack(
@@ -163,18 +171,21 @@ class _DBottomNavBarState extends State<DBottomNavBar> {
                           clipBehavior: Clip.none,
                           children: [
                             AnimatedPositioned(
-                              duration: const Duration(milliseconds: 350),
+                              duration: AppConstants.bottomNavAnimationDuration,
                               curve: Curves.easeInOutCubic,
                               left: _pillLeft,
                               top: 0,
                               child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 350),
+                                duration:
+                                    AppConstants.bottomNavAnimationDuration,
                                 curve: Curves.easeInOutCubic,
                                 width: _pillWidth,
                                 height: _pillHeight,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(50),
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.bottomNavPillBorderRadius,
+                                  ),
                                 ),
                               ),
                             ),
@@ -240,19 +251,20 @@ class _NavBarItem extends StatelessWidget {
           children: [
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-              duration: const Duration(milliseconds: 250),
+              duration: AppConstants.duration250ms,
               curve: Curves.easeInOut,
               builder: (context, value, child) {
                 return DIcon(
                   filled: item.icon == DIconName.home ? true : false,
                   icon: isSelected ? item.selectedIcon : item.icon,
                   color: Color.lerp(Colors.white, Colors.black, value),
+                  size: 28.0,
                 );
               },
             ),
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-              duration: const Duration(milliseconds: 250),
+              duration: AppConstants.duration250ms,
               curve: Curves.easeInOut,
               builder: (context, value, child) {
                 return Text(
@@ -289,7 +301,9 @@ class _SearchButton extends StatelessWidget {
       },
       behavior: HitTestBehavior.opaque,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
+        borderRadius: BorderRadius.circular(
+          AppConstants.bottomNavPillBorderRadius,
+        ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: Container(

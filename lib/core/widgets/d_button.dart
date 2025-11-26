@@ -100,7 +100,7 @@ class _DButtonState extends State<DButton> {
     _resetTimer?.cancel();
 
     final tapDuration = DateTime.now().difference(_tapDownTime!);
-    final minDuration = const Duration(milliseconds: 100);
+    final minDuration = AppConstants.buttonAnimationDuration;
 
     if (tapDuration < minDuration) {
       // Quick tap - ensure animation is visible for minimum duration
@@ -130,9 +130,9 @@ class _DButtonState extends State<DButton> {
   double _getHorizontalPadding() {
     switch (widget.size) {
       case DButtonSize.sm:
-        return AppConstants.spacing12;
+        return AppConstants.buttonPaddingHorizontalSm;
       case DButtonSize.md:
-        return AppConstants.spacing16;
+        return AppConstants.buttonPaddingHorizontalMd;
     }
   }
 
@@ -140,23 +140,23 @@ class _DButtonState extends State<DButton> {
   double _getHeight() {
     switch (widget.size) {
       case DButtonSize.sm:
-        return 32;
+        return AppConstants.buttonHeightSm;
       case DButtonSize.md:
-        return 48;
+        return AppConstants.buttonHeightMd;
     }
   }
 
   /// Get background color based on variant
   Color? _getBackgroundColor() {
     if (widget.isDisabled) {
-      return Colors.white.withOpacity(0.05);
+      return Colors.white.withValues(alpha: 0.05);
     }
 
     switch (widget.variant) {
       case DButtonVariant.primary:
         return Colors.white;
       case DButtonVariant.secondary:
-        return Colors.white.withOpacity(0.13);
+        return Colors.white.withValues(alpha: 0.13);
       case DButtonVariant.plain:
         return Colors.transparent;
     }
@@ -165,7 +165,7 @@ class _DButtonState extends State<DButton> {
   /// Get text color based on variant
   Color _getTextColor() {
     if (widget.isDisabled) {
-      return Colors.white.withOpacity(0.3);
+      return Colors.white.withValues(alpha: 0.3);
     }
 
     switch (widget.variant) {
@@ -185,7 +185,7 @@ class _DButtonState extends State<DButton> {
       return BorderRadius.zero;
     }
     // Superellipse border radius (50px) for primary and secondary
-    return BorderRadius.circular(50);
+    return BorderRadius.circular(AppConstants.buttonBorderRadiusPill);
   }
 
   @override
@@ -213,21 +213,21 @@ class _DButtonState extends State<DButton> {
           if (widget.leadingIcon != null) ...[
             DIcon(
               icon: widget.leadingIcon!,
-              size: 24.0, // 24px for leading icon
+              size: AppConstants.buttonIconSizeLeading,
               color: textColor,
               filled: widget.leadingIconFilled,
             ),
-            const SizedBox(width: AppConstants.spacing8),
+            const SizedBox(width: AppConstants.buttonIconSpacing),
           ],
           Text(
             widget.label,
             style: AppTypography.buttonMedium(color: textColor),
           ),
           if (widget.trailingIcon != null) ...[
-            const SizedBox(width: AppConstants.spacing8),
+            const SizedBox(width: AppConstants.buttonIconSpacing),
             DIcon(
               icon: widget.trailingIcon!,
-              size: 16.0, // 16px for trailing icon
+              size: AppConstants.buttonIconSizeTrailing,
               color: textColor,
             ),
           ],
@@ -255,7 +255,7 @@ class _DButtonState extends State<DButton> {
         onTapCancel: _enabled ? _handleTapCancel : null,
         onTap: _handleTap,
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 100),
+          duration: AppConstants.buttonAnimationDuration,
           opacity: _buttonHeldDown ? 0.6 : 1.0,
           child: finalButtonContent,
         ),

@@ -30,10 +30,10 @@ class BaseModal extends StatelessWidget {
   /// Whether to show the close button (default: true)
   final bool showCloseButton;
 
-  /// Maximum width for desktop modal (default: AppConstants.modalMaxWidth)
+  /// Maximum width for desktop modal (default: AppConstants.baseModalMaxWidth)
   final double? maxWidth;
 
-  /// Maximum height for desktop modal (default: AppConstants.modalMaxHeight)
+  /// Maximum height for desktop modal (default: AppConstants.baseModalMaxHeight)
   final double? maxHeight;
 
   /// Initial child size for mobile bottom sheet (default: 0.7)
@@ -121,8 +121,8 @@ class BaseModal extends StatelessWidget {
     return Dialog(
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: maxWidth ?? AppConstants.modalMaxWidth,
-          maxHeight: maxHeight ?? AppConstants.modalMaxHeight,
+          maxWidth: maxWidth ?? AppConstants.baseModalMaxWidth,
+          maxHeight: maxHeight ?? AppConstants.baseModalMaxHeight,
         ),
         padding: AppConstants.padding(AppConstants.spacingLg),
         child: Column(
@@ -155,7 +155,7 @@ class BaseModal extends StatelessWidget {
                   Theme.of(context).bottomSheetTheme.backgroundColor ??
                   Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.vertical(
-                top: Radius.circular(AppConstants.radiusBottomSheet),
+                top: Radius.circular(AppConstants.baseModalBorderRadius),
               ),
             ),
             child: Column(
@@ -242,9 +242,7 @@ class BaseModal extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (showCloseButton)
-          const SizedBox(
-            width: 36,
-          ), // Match close button width (20 icon + 8*2 padding)
+          const SizedBox(width: AppConstants.baseModalCloseButtonWidth),
         Expanded(
           child: Text(
             title,
@@ -260,7 +258,10 @@ class BaseModal extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppConstants.radiusSm),
             child: Padding(
               padding: AppConstants.padding(AppConstants.spacing8),
-              child: const Icon(LucideIcons.x, size: 20),
+              child: Icon(
+                LucideIcons.x,
+                size: AppConstants.baseModalCloseIconSize,
+              ),
             ),
           ),
       ],
@@ -269,11 +270,13 @@ class BaseModal extends StatelessWidget {
 
   Widget _buildDragHandle(BuildContext context) {
     return Container(
-      width: 48,
-      height: 4,
+      width: AppConstants.baseModalDragHandleWidth,
+      height: AppConstants.baseModalDragHandleHeight,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(2),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(
+          AppConstants.baseModalDragHandleBorderRadius,
+        ),
       ),
     );
   }
