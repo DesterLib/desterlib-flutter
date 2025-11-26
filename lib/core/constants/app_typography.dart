@@ -8,6 +8,7 @@ class AppTypography {
   AppTypography._(); // Private constructor to prevent instantiation
 
   // Font sizes
+  static const double fontSize2xs = 10;
   static const double fontSizeXs = 12;
   static const double fontSizeSm = 14;
   static const double fontSizeMd = 16;
@@ -113,7 +114,7 @@ class AppTypography {
 
   static TextStyle navLabelSmall({Color? color, bool isSelected = false}) =>
       inter(
-        fontSize: fontSizeXs,
+        fontSize: fontSize2xs,
         fontWeight: isSelected ? weightSemiBold : weightMedium,
         color: color,
       );

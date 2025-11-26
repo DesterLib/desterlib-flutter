@@ -1,7 +1,6 @@
 // External packages
 import 'package:flutter/material.dart';
 
-
 /// Application-wide constants following Tailwind-style utility system
 class AppConstants {
   // Spacing scale (Tailwind-style: 0, 1, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, etc.)
@@ -28,15 +27,20 @@ class AppConstants {
   static const double spacing2xl = spacing48;
 
   // Duration scale (milliseconds)
+  static const Duration durationVeryFast = Duration(milliseconds: 100);
   static const Duration durationFast = Duration(milliseconds: 150);
+  static const Duration duration250ms = Duration(milliseconds: 250);
   static const Duration durationNormal = Duration(milliseconds: 300);
+  static const Duration duration350ms = Duration(milliseconds: 350);
   static const Duration durationSlow = Duration(milliseconds: 500);
   static const Duration durationSlower = Duration(milliseconds: 1000);
+  static const Duration duration3000ms = Duration(milliseconds: 3000);
 
   // Duration scale (seconds)
   static const Duration duration1s = Duration(seconds: 1);
   static const Duration duration2s = Duration(seconds: 2);
   static const Duration duration3s = Duration(seconds: 3);
+  static const Duration duration4s = Duration(seconds: 4);
   static const Duration duration5s = Duration(seconds: 5);
 
   // Semantic duration aliases
@@ -45,6 +49,7 @@ class AppConstants {
   static const Duration minimumSpinnerDisplay = duration2s;
   static const Duration additionalDelay = duration1s;
   static const Duration networkTimeout = duration5s;
+  static const Duration networkReceiveTimeout = duration3000ms;
 
   // Border radius scale
   static const double radiusNone = 0;
@@ -59,7 +64,6 @@ class AppConstants {
   // Semantic border radius aliases
   static const double radiusCard = radiusMd;
   static const double radiusBottomSheet = radius3xl;
-  static const double radiusButton = radiusMd;
   static const double radiusSettingsGroup = radius3xl;
 
   // Size scale (for widths, heights, icons, etc.)
@@ -72,9 +76,52 @@ class AppConstants {
   static const double size3xl = 64;
   static const double size4xl = 96;
 
-  // Modal/Dialog constraints
-  static const double modalMaxWidth = 500;
-  static const double modalMaxHeight = 600;
+  // Icon sizes (semantic aliases)
+  static const double iconSizeSm = sizeSm; // 16
+  static const double iconSizeMd = sizeMd; // 20
+  static const double iconSizeLg = sizeLg; // 24
+  static const double iconSizeXl = 28; // 28
+
+  // ============================================================================
+  // Widget-specific constants (global/core widgets)
+  // ============================================================================
+
+  // Button widget constants
+  static const double buttonHeightSm = sizeXl; // 32
+  static const double buttonHeightMd = size2xl; // 48
+  static const double buttonPaddingHorizontalSm = spacing12;
+  static const double buttonPaddingHorizontalMd = spacing16;
+  static const double buttonBorderRadiusPill = 50; // Fully rounded pill buttons
+  static const double buttonIconSizeLeading = iconSizeLg; // 24
+  static const double buttonIconSizeTrailing = iconSizeSm; // 16
+  static const double buttonIconSpacing = spacing8;
+  static const Duration buttonAnimationDuration = durationVeryFast; // 100ms
+
+  // IconButton widget constants
+  static const double iconButtonSizeSm = sizeXl; // 32
+  static const double iconButtonSizeMd = size2xl; // 48
+  static const double iconButtonBorderRadius = 50; // Fully rounded
+  static const double iconButtonIconSizeSm = sizeSm; // 16
+  static const double iconButtonIconSizeMd = sizeLg; // 24
+  static const Duration iconButtonAnimationDuration = durationVeryFast; // 100ms
+
+  // BaseModal widget constants
+  static const double baseModalMaxWidth = 500;
+  static const double baseModalMaxHeight = 600;
+  static const double baseModalDragHandleWidth = spacing48; // 48
+  static const double baseModalDragHandleHeight = spacing4; // 4
+  static const double baseModalDragHandleBorderRadius = radiusSm; // 2
+  static const double baseModalCloseIconSize = iconSizeMd; // 20
+  static const double baseModalCloseButtonWidth = 36; // 20 icon + 8*2 padding
+  static const double baseModalBorderRadius =
+      radiusBottomSheet; // radius3xl (24)
+
+  // BottomNavigationBar widget constants
+  static const double bottomNavPillBorderRadius = 50; // Fully rounded
+  static const Duration bottomNavAnimationDuration = duration350ms; // 350ms
+  static const double bottomNavPaddingHorizontal = spacing16; // 16
+  static const double bottomNavPaddingVertical = spacing8; // 8
+  static const double bottomNavBlurSigma = 40.0;
 
   // Common EdgeInsets utilities
   static EdgeInsets padding(double value) => EdgeInsets.all(value);
