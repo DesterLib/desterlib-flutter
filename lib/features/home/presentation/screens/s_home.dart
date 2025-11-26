@@ -19,7 +19,7 @@ import 'package:dester/features/home/presentation/controllers/home_controller.da
 import 'package:dester/features/home/presentation/widgets/media_item_card.dart';
 import 'package:dester/features/home/presentation/widgets/media_item_slider.dart';
 
-import 'package:dester/features/home/presentation/widgets/hero.dart';
+import 'package:dester/features/home/presentation/widgets/carousel.dart';
 
 class HomeScreen extends StatefulWidget {
   final HomeController controller;
@@ -39,7 +39,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadDataAndPrefetch() async {
-    await widget.controller.loadAll();
+    // Only load if initial load hasn't been done yet
+    if (!widget.controller.hasInitiallyLoaded) {
+      await widget.controller.loadAll();
+    }
     // Prefetch hero images after data is loaded
     if (mounted) {
       _prefetchHeroImages();
@@ -137,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return false;
         },
         child: RefreshIndicator(
-          onRefresh: () => widget.controller.loadAll(),
+          onRefresh: () => widget.controller.loadAll(force: true),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -151,8 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Hero Section
-                        HeroSection(mediaItems: recentMediaItems),
+                        // Hero Carousel
+                        HeroCarousel(mediaItems: recentMediaItems),
                         // Movies Section
                         _buildMoviesSection(),
                         AppConstants.spacingY(AppConstants.spacing24),

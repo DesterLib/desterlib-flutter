@@ -39,7 +39,7 @@ abstract class MediaItemCard extends StatelessWidget {
       height: 160,
       decoration: ShapeDecoration(
         shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppConstants.radiusXl),
           side: BorderSide(
             color: Colors.white.withValues(alpha: 0.07),
             width: 1,

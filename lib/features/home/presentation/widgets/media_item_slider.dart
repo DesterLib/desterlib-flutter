@@ -104,7 +104,7 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
     _scrollController
         .animateTo(
           targetOffset,
-          duration: const Duration(milliseconds: 300),
+          duration: AppConstants.durationNormal,
           curve: Curves.easeOut,
         )
         .then((_) {
@@ -136,7 +136,7 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
     _scrollController
         .animateTo(
           targetOffset,
-          duration: const Duration(milliseconds: 300),
+          duration: AppConstants.durationNormal,
           curve: Curves.easeOut,
         )
         .then((_) {
@@ -260,14 +260,18 @@ class _NavigationButton extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1.0 : 0.3,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
+        borderRadius: BorderRadius.circular(
+          AppConstants.buttonBorderRadiusPill,
+        ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: enabled ? onTap : null,
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(
+                AppConstants.buttonBorderRadiusPill,
+              ),
               child: Container(
                 width: 40,
                 height: 40,

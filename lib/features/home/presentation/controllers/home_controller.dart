@@ -7,7 +7,6 @@ import 'package:dester/features/home/domain/entities/tv_show.dart';
 import 'package:dester/features/home/domain/usecases/get_movies_list.dart';
 import 'package:dester/features/home/domain/usecases/get_tv_shows_list.dart';
 
-
 class HomeController extends ChangeNotifier {
   final GetMoviesList getMoviesList;
   final GetTVShowsList getTVShowsList;
@@ -20,6 +19,7 @@ class HomeController extends ChangeNotifier {
   bool _isLoadingTVShows = false;
   String? _moviesError;
   String? _tvShowsError;
+  bool _hasInitiallyLoaded = false;
 
   List<Movie> get movies => _movies;
   List<TVShow> get tvShows => _tvShows;
@@ -27,6 +27,7 @@ class HomeController extends ChangeNotifier {
   bool get isLoadingTVShows => _isLoadingTVShows;
   String? get moviesError => _moviesError;
   String? get tvShowsError => _tvShowsError;
+  bool get hasInitiallyLoaded => _hasInitiallyLoaded;
 
   Future<void> loadMovies() async {
     _isLoadingMovies = true;
@@ -62,7 +63,12 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  Future<void> loadAll() async {
+  Future<void> loadAll({bool force = false}) async {
+    // Skip if already loaded and not forcing a refresh
+    if (_hasInitiallyLoaded && !force) {
+      return;
+    }
     await Future.wait([loadMovies(), loadTVShows()]);
+    _hasInitiallyLoaded = true;
   }
 }
