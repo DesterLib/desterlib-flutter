@@ -16,6 +16,12 @@ class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
 
+  // Cache the home screen to avoid unnecessary rebuilds on navigation
+  static final Widget _cachedHomeScreen = HomeFeature.createHomeScreen();
+  static const ValueKey<String> _homeScreenKey = ValueKey<String>(
+    'home_screen',
+  );
+
   static final GoRouter router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
@@ -33,8 +39,11 @@ class AppRouter {
               GoRoute(
                 path: '/',
                 name: 'home',
-                pageBuilder: (context, state) =>
-                    fadeTransitionPage(HomeFeature.createHomeScreen(), state),
+                pageBuilder: (context, state) => fadeTransitionPage(
+                  _cachedHomeScreen,
+                  state,
+                  pageKey: _homeScreenKey,
+                ),
               ),
               GoRoute(
                 path: '/settings',

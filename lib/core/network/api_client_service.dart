@@ -3,12 +3,12 @@ import 'package:dio/dio.dart';
 import 'package:openapi/openapi.dart';
 
 // Core
+import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/storage/preferences_service.dart';
 import 'package:dester/core/utils/url_helper.dart';
 
 import 'interceptors/api_logging_interceptor.dart';
 import 'interceptors/client_version_interceptor.dart';
-
 
 /// Service for managing the OpenAPI client instance
 class ApiClientService {
@@ -43,7 +43,7 @@ class ApiClientService {
     final dio = Dio(
       BaseOptions(
         baseUrl: normalizedUrl,
-        connectTimeout: const Duration(milliseconds: 5000),
+        connectTimeout: AppConstants.networkTimeout,
         receiveTimeout: const Duration(
           seconds: 10,
         ), // Short timeout since scan returns 202 immediately
@@ -77,7 +77,7 @@ class ApiClientService {
     final dio = Dio(
       BaseOptions(
         baseUrl: normalizedUrl,
-        connectTimeout: const Duration(milliseconds: 5000),
+        connectTimeout: AppConstants.networkTimeout,
         receiveTimeout: const Duration(
           seconds: 10,
         ), // Short timeout since scan returns 202 immediately

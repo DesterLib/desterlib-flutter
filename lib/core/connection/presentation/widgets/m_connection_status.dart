@@ -125,13 +125,13 @@ class ConnectionStatusModal extends ConsumerWidget {
     return Container(
       padding: AppConstants.padding(AppConstants.spacing16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppConstants.radiusCard),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 28),
+          Icon(icon, color: color, size: AppConstants.iconSizeXl),
           AppConstants.spacingX(AppConstants.spacing12),
           Text(label, style: AppTypography.titleMedium(color: color)),
         ],
@@ -150,8 +150,8 @@ class ConnectionStatusModal extends ConsumerWidget {
       children: [
         Icon(
           icon,
-          size: 20,
-          color: Theme.of(context).iconTheme.color?.withOpacity(0.6),
+          size: AppConstants.iconSizeMd,
+          color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.6),
         ),
         AppConstants.spacingX(AppConstants.spacing12),
         Expanded(
@@ -163,7 +163,7 @@ class ConnectionStatusModal extends ConsumerWidget {
                 style: AppTypography.bodySmall(
                   color: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.color?.withOpacity(0.6),
+                  ).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                 ),
               ),
               AppConstants.spacingY(AppConstants.spacing4),
@@ -184,9 +184,11 @@ class ConnectionStatusModal extends ConsumerWidget {
     return Container(
       padding: AppConstants.padding(AppConstants.spacing12),
       decoration: BoxDecoration(
-        color: AppConstants.dangerColor.withOpacity(0.1),
+        color: AppConstants.dangerColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppConstants.radiusCard),
-        border: Border.all(color: AppConstants.dangerColor.withOpacity(0.3)),
+        border: Border.all(
+          color: AppConstants.dangerColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
