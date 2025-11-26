@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
@@ -14,19 +13,15 @@ import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
-class HeroSection extends StatefulWidget {
-  const HeroSection({super.key, this.mediaItems});
-  final List<MediaItem>? mediaItems;
+/// A reusable hero widget that displays a single media item.
+/// Can be used standalone or within a carousel.
+class HeroWidget extends StatelessWidget {
+  const HeroWidget({super.key, required this.item, this.height});
 
-  @override
-  State<HeroSection> createState() => _HeroSectionState();
-}
+  final MediaItem item;
+  final double? height;
 
-class _HeroSectionState extends State<HeroSection> {
-  int _currentIndex = 0;
-  Timer? _autoAdvanceTimer;
-
-  // Default mesh gradient colors (vibrant purple-blue theme)
+  // Default mesh gradient colors
   static const List<String> _defaultMeshColors = [
     "#000000", // Top-left
     "#000000", // Top-right
@@ -34,39 +29,7 @@ class _HeroSectionState extends State<HeroSection> {
     "#000000", // Bottom-right
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _startAutoAdvance();
-  }
-
-  @override
-  void dispose() {
-    _autoAdvanceTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startAutoAdvance() {
-    _autoAdvanceTimer?.cancel();
-    if (widget.mediaItems == null || widget.mediaItems!.length <= 1) return;
-
-    _autoAdvanceTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
-      setState(() {
-        if (_currentIndex + 1 == widget.mediaItems!.length) {
-          _currentIndex = 0;
-        } else {
-          _currentIndex = _currentIndex + 1;
-        }
-      });
-    });
-  }
-
-  List<String> _getMeshColorsForItem(MediaItem? item) {
+  static List<String> _getMeshColorsForItem(MediaItem? item) {
     if (item is TVShowMediaItem) {
       final colors = item.meshGradientColors;
       if (colors != null && colors.length == 4) {
@@ -81,7 +44,7 @@ class _HeroSectionState extends State<HeroSection> {
     return _defaultMeshColors;
   }
 
-  String? _getImagePath(MediaItem item, BuildContext context) {
+  static String? _getImagePath(MediaItem item, BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     if (isMobile) {
       // On mobile, prefer poster
@@ -92,7 +55,7 @@ class _HeroSectionState extends State<HeroSection> {
     }
   }
 
-  double _getHeroHeight(MediaItem item, BuildContext context) {
+  static double _getHeroHeight(MediaItem item, BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     if (isMobile && item.plainPosterUrl != null) {
       return 720;
@@ -102,17 +65,7 @@ class _HeroSectionState extends State<HeroSection> {
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.mediaItems ?? [];
-    if (items.isEmpty) {
-      return const SizedBox(
-        width: double.infinity,
-        height: 600,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final currentItem = items[_currentIndex];
-    final heroHeight = _getHeroHeight(currentItem, context);
+    final heroHeight = height ?? _getHeroHeight(item, context);
 
     return SizedBox(
       width: double.infinity,
@@ -121,52 +74,15 @@ class _HeroSectionState extends State<HeroSection> {
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-          // Animated Mesh Gradient
+          // Mesh Gradient
           _AnimatedMeshGradient(
-            currentItem: items[_currentIndex],
+            currentItem: item,
             getMeshColors: _getMeshColorsForItem,
             height: 1200,
-            animationDuration: const Duration(milliseconds: 1000),
+            animationDuration: AppConstants.durationSlower,
           ),
-          // Image Carousel with fade transitions
-          GestureDetector(
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity == null) return;
-
-              if (details.primaryVelocity! > 0) {
-                // Swipe right - go to previous
-                setState(() {
-                  if (_currentIndex == 0) {
-                    _currentIndex = items.length - 1;
-                  } else {
-                    _currentIndex = _currentIndex - 1;
-                  }
-                });
-              } else {
-                // Swipe left - go to next
-                setState(() {
-                  if (_currentIndex + 1 == items.length) {
-                    _currentIndex = 0;
-                  } else {
-                    _currentIndex = _currentIndex + 1;
-                  }
-                });
-              }
-            },
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 1000),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              child: _HeroImage(
-                key: ValueKey(
-                  _getImagePath(items[_currentIndex], context) ?? _currentIndex,
-                ),
-                imageUrl: _getImagePath(items[_currentIndex], context) ?? '',
-                item: items[_currentIndex],
-              ),
-            ),
-          ),
+          // Hero Image
+          _HeroImage(imageUrl: _getImagePath(item, context) ?? '', item: item),
         ],
       ),
     );
@@ -177,7 +93,7 @@ class _HeroImage extends StatelessWidget {
   final String imageUrl;
   final MediaItem item;
 
-  const _HeroImage({super.key, required this.imageUrl, required this.item});
+  const _HeroImage({required this.imageUrl, required this.item});
 
   String? _getOverview() {
     if (item is MovieMediaItem) {
@@ -235,10 +151,10 @@ class _HeroImage extends StatelessWidget {
                 vertical: AppConstants.spacing4 + 2,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(AppConstants.radiusXl),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -331,8 +247,8 @@ class _HeroImage extends StatelessWidget {
           ClipRRect(
             borderRadius: isMobile
                 ? (isIos
-                      ? BorderRadius.circular(32)
-                      : BorderRadius.circular(16))
+                      ? BorderRadius.circular(AppConstants.spacing32)
+                      : BorderRadius.circular(AppConstants.radiusXl))
                 : BorderRadius.zero,
             child: ShaderMask(
               shaderCallback: (Rect bounds) {
@@ -341,8 +257,8 @@ class _HeroImage extends StatelessWidget {
                   Offset(0, bounds.height),
                   [
                     Colors.white, // Fully visible at top
-                    Colors.white.withOpacity(0.8),
-                    Colors.white.withOpacity(0.4),
+                    Colors.white.withValues(alpha: 0.8),
+                    Colors.white.withValues(alpha: 0.4),
                     Colors.transparent, // Fully transparent at bottom
                   ],
                   [0.0, 0.3, 0.7, 1.0],
@@ -374,8 +290,8 @@ class _HeroImage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.8),
-                  Colors.black.withOpacity(0.4),
+                  Colors.black.withValues(alpha: 0.8),
+                  Colors.black.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],
               ),
@@ -511,8 +427,8 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
           return ClipRRect(
             borderRadius: isMobile
                 ? (isIos
-                      ? BorderRadius.circular(32)
-                      : BorderRadius.circular(16))
+                      ? BorderRadius.circular(AppConstants.spacing32)
+                      : BorderRadius.circular(AppConstants.radiusXl))
                 : BorderRadius.zero,
             child: Stack(
               fit: StackFit.expand,
