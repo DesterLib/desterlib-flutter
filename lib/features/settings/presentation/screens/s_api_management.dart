@@ -105,7 +105,7 @@ class ApiManagementScreen extends ConsumerWidget {
                 ),
                 elevation: isActive ? 4 : 1,
                 shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusLg),
                   side: BorderSide(
                     color: isActive
                         ? Theme.of(context).colorScheme.primary

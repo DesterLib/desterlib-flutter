@@ -50,7 +50,10 @@ class ManageLibrariesScreen extends ConsumerWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const DIcon(icon: DIconName.refreshCw, size: 24.0),
+                      : DIcon(
+                          icon: DIconName.refreshCw,
+                          size: AppConstants.iconSizeLg,
+                        ),
                   tooltip: 'Refresh',
                   onPressed: state.isLoading
                       ? null
@@ -154,7 +157,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
             AppLocalization.settingsTmdbApiKeyRequiredForLibrary.tr(),
           ),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
+          duration: AppConstants.duration4s,
         ),
       );
       return;
@@ -177,7 +180,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
                   AppLocalization.settingsTmdbApiKeyRequiredForLibrary.tr(),
                 ),
                 backgroundColor: Colors.red,
-                duration: const Duration(seconds: 4),
+                duration: AppConstants.duration4s,
               ),
             );
           }

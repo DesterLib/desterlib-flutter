@@ -37,7 +37,9 @@ class LibraryCard extends ConsumerWidget {
     return Card(
       margin: AppConstants.paddingOnly(bottom: AppConstants.spacing12),
       elevation: 1,
-      shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedSuperellipseBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusLg),
+      ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -61,7 +63,10 @@ class LibraryCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const DIcon(icon: DIconName.edit, size: 24.0),
+                    icon: DIcon(
+                      icon: DIconName.edit,
+                      size: AppConstants.iconSizeLg,
+                    ),
                     tooltip: AppLocalization.settingsLibrariesEditLibrary.tr(),
                     onPressed: onEdit,
                   ),

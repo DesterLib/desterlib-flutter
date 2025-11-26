@@ -6,13 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Core
+import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/websocket/websocket_service.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
 import 'package:dester/features/settings/presentation/providers/manage_libraries_providers.dart';
-
 
 /// State for manage libraries screen
 class ManageLibrariesState {
@@ -84,7 +84,7 @@ class ManageLibrariesController extends Notifier<ManageLibrariesState> {
         _cancelDebounceTimer();
         // Small delay to ensure backend has updated the media count
         // Use background refresh to avoid showing loading indicator
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(AppConstants.durationSlow, () {
           _refreshBackground();
         });
       }
@@ -106,7 +106,7 @@ class ManageLibrariesController extends Notifier<ManageLibrariesState> {
     // This prevents excessive API calls while still updating frequently
     // Using a shorter delay (200ms) to ensure updates happen quickly
     // Use background refresh to avoid showing loading indicator
-    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+    _debounceTimer = Timer(AppConstants.fadeInDelay, () {
       _refreshBackground();
     });
   }

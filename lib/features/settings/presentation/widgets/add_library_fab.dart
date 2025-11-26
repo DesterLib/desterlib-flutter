@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
+import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
 // Features
@@ -45,7 +46,7 @@ class AddLibraryFAB extends ConsumerWidget {
                       context.pushNamed('settings');
                     },
                   ),
-                  duration: const Duration(seconds: 5),
+                  duration: AppConstants.duration5s,
                 ),
               );
             },

@@ -37,7 +37,7 @@ class _SettingsItemState extends State<SettingsItem> {
   @override
   Widget build(BuildContext context) {
     final content = AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
+      duration: AppConstants.durationFast,
       curve: Curves.easeInOut,
       padding: AppConstants.paddingX(AppConstants.spacing16),
       decoration: BoxDecoration(
@@ -114,7 +114,7 @@ class _SettingsItemState extends State<SettingsItem> {
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) async {
           widget.onTap!();
-          await Future.delayed(const Duration(milliseconds: 100));
+          await Future.delayed(AppConstants.durationVeryFast);
           if (mounted) {
             setState(() => _isPressed = false);
           }
