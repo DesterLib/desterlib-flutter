@@ -3,6 +3,7 @@ import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/features/home/presentation/widgets/hero.dart';
+import 'package:dester/core/widgets/d_loading_wrapper.dart';
 
 /// A carousel widget that displays multiple hero items with auto-advance
 /// and swipe gestures. Uses [HeroWidget] for each item.
@@ -30,6 +31,22 @@ class _HeroCarouselState extends State<HeroCarousel> {
   void initState() {
     super.initState();
     _startAutoAdvance();
+  }
+
+  @override
+  void didUpdateWidget(HeroCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset index if out of bounds or empty
+    if (widget.mediaItems.isEmpty) {
+      _currentIndex = 0;
+    } else if (_currentIndex >= widget.mediaItems.length) {
+      _currentIndex = 0;
+    }
+
+    // Restart auto advance if items changed
+    if (widget.mediaItems != oldWidget.mediaItems) {
+      _startAutoAdvance();
+    }
   }
 
   @override
@@ -91,38 +108,49 @@ class _HeroCarouselState extends State<HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.mediaItems.isEmpty) {
-      return const SizedBox(
+    return DLoadingWrapper(
+      isLoading: widget.mediaItems.isEmpty,
+      loader: const SizedBox(
         width: double.infinity,
         height: 600,
         child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final currentItem = widget.mediaItems[_currentIndex];
-
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity == null) return;
-
-        if (details.primaryVelocity! > 0) {
-          // Swipe right - go to previous
-          _goToPrevious();
-        } else {
-          // Swipe left - go to next
-          _goToNext();
-        }
-      },
-      child: AnimatedSwitcher(
-        duration: widget.transitionDuration,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        child: HeroWidget(
-          key: ValueKey(_getImagePath(currentItem, context) ?? _currentIndex),
-          item: currentItem,
-        ),
       ),
+      child: widget.mediaItems.isEmpty
+          ? const SizedBox.shrink()
+          : Builder(
+              builder: (context) {
+                final currentItem = widget.mediaItems[_currentIndex];
+                return GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity == null) return;
+
+                    if (details.primaryVelocity! > 0) {
+                      // Swipe right - go to previous
+                      _goToPrevious();
+                    } else {
+                      // Swipe left - go to next
+                      _goToNext();
+                    }
+                  },
+                  child: AnimatedSwitcher(
+                    duration: widget.transitionDuration,
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                    child: HeroWidget(
+                      key: ValueKey(
+                        _getImagePath(currentItem, context) ?? _currentIndex,
+                      ),
+                      item: currentItem,
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

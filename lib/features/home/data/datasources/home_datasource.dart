@@ -2,12 +2,13 @@
 import 'package:dio/dio.dart';
 
 // Core
+import 'package:dester/core/errors/errors.dart';
 import 'package:dester/core/network/api_client_service.dart';
 
 /// API client for fetching data from the server
 class HomeDataSource {
   // Get movies list from API
-  Future<List<Map<String, dynamic>>> getMoviesList() async {
+  Future<Result<List<Map<String, dynamic>>>> getMoviesList() async {
     try {
       final client = ApiClientService.getClient();
       final moviesApi = client.getMoviesApi();
@@ -15,7 +16,7 @@ class HomeDataSource {
 
       if (response.data?.success == true && response.data?.data != null) {
         final movies = response.data!.data!;
-        return movies.map((movie) {
+        final moviesList = movies.map((movie) {
           final media = movie.media;
           return {
             'id': movie.id ?? '',
@@ -36,18 +37,19 @@ class HomeDataSource {
             'createdAt': media?.createdAt,
           };
         }).toList();
+        return Success(moviesList);
       }
 
-      return [];
+      return Success([]);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch movies: ${e.message}');
+      return ResultFailure(dioExceptionToFailure(e));
     } catch (e) {
-      throw Exception('Failed to fetch movies: $e');
+      return ResultFailure(exceptionToFailure(e, 'Failed to fetch movies'));
     }
   }
 
   // Get TV shows list from API
-  Future<List<Map<String, dynamic>>> getTVShowsList() async {
+  Future<Result<List<Map<String, dynamic>>>> getTVShowsList() async {
     try {
       final client = ApiClientService.getClient();
       final tvShowsApi = client.getTVShowsApi();
@@ -55,7 +57,7 @@ class HomeDataSource {
 
       if (response.data?.success == true && response.data?.data != null) {
         final tvShows = response.data!.data!;
-        return tvShows.map((tvShow) {
+        final tvShowsList = tvShows.map((tvShow) {
           final media = tvShow.media;
           return {
             'id': tvShow.id ?? '',
@@ -76,13 +78,14 @@ class HomeDataSource {
             'createdAt': media?.createdAt,
           };
         }).toList();
+        return Success(tvShowsList);
       }
 
-      return [];
+      return Success([]);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch TV shows: ${e.message}');
+      return ResultFailure(dioExceptionToFailure(e));
     } catch (e) {
-      throw Exception('Failed to fetch TV shows: $e');
+      return ResultFailure(exceptionToFailure(e, 'Failed to fetch TV shows'));
     }
   }
 }

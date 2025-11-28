@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dester/core/widgets/d_icon.dart';
+import 'package:dester/core/widgets/d_loading_wrapper.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
@@ -187,58 +188,64 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
             ),
           ),
         ),
-        if (widget.isLoading)
-          const SizedBox(
+        DLoadingWrapper(
+          isLoading: widget.isLoading,
+          loader: const SizedBox(
             height: 280,
             child: Center(child: CircularProgressIndicator()),
-          )
-        else if (widget.error != null)
-          SizedBox(
-            height: 280,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.error!,
-                    style: AppTypography.bodyMedium(color: Colors.red),
-                  ),
-                  AppConstants.spacingY(AppConstants.spacing8),
-                  ElevatedButton(
-                    onPressed: widget.onRetry,
-                    child: Text(widget.retryLabel),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else if (widget.items.isEmpty)
-          SizedBox(height: 280, child: Center(child: Text(widget.emptyMessage)))
-        else
-          SizedBox(
-            height: 280,
-            child: ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.only(
-                left: AppConstants.spacing16 + sidebarTotalWidth,
-                right: AppConstants.spacing16,
-              ),
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: index == widget.items.length - 1
-                        ? 0
-                        : AppConstants.spacing12,
-                  ),
-                  child: widget.itemBuilder(context, item, index),
-                );
-              },
-            ),
           ),
+          child: widget.error != null
+              ? SizedBox(
+                  height: 280,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.error!,
+                          style: AppTypography.bodyMedium(color: Colors.red),
+                        ),
+                        AppConstants.spacingY(AppConstants.spacing8),
+                        ElevatedButton(
+                          onPressed: widget.onRetry,
+                          child: Text(widget.retryLabel),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : widget.items.isEmpty
+              ? DSidebarSpace(
+                  child: SizedBox(
+                    height: 280,
+                    child: Center(child: Text(widget.emptyMessage)),
+                  ),
+                )
+              : SizedBox(
+                  height: 280,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(
+                      left: AppConstants.spacing16 + sidebarTotalWidth,
+                      right: AppConstants.spacing16,
+                    ),
+                    itemCount: widget.items.length,
+                    itemBuilder: (context, index) {
+                      final item = widget.items[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          right: index == widget.items.length - 1
+                              ? 0
+                              : AppConstants.spacing12,
+                        ),
+                        child: widget.itemBuilder(context, item, index),
+                      );
+                    },
+                  ),
+                ),
+        ),
       ],
     );
   }

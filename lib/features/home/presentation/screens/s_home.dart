@@ -1,6 +1,7 @@
 // External packages
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -9,7 +10,9 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_bottom_nav_space.dart';
 
 // Features
 import 'package:dester/features/home/domain/entities/media_item.dart';
@@ -21,27 +24,29 @@ import 'package:dester/features/home/presentation/widgets/media_item_slider.dart
 
 import 'package:dester/features/home/presentation/widgets/carousel.dart';
 
-class HomeScreen extends StatefulWidget {
-  final HomeController controller;
-
-  const HomeScreen({super.key, required this.controller});
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_onControllerChanged);
-    _loadDataAndPrefetch();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDataAndPrefetch();
+    });
   }
 
   Future<void> _loadDataAndPrefetch() async {
+    final controller = ref.read(homeControllerProvider.notifier);
+    final state = ref.read(homeControllerProvider);
+
     // Only load if initial load hasn't been done yet
-    if (!widget.controller.hasInitiallyLoaded) {
-      await widget.controller.loadAll();
+    if (!state.hasInitiallyLoaded) {
+      await controller.loadAll();
     }
     // Prefetch hero images after data is loaded
     if (mounted) {
@@ -51,14 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Prefetch hero images (backdrop/poster + logo) for the top items
   void _prefetchHeroImages() {
+    final state = ref.read(homeControllerProvider);
     final isMobile = MediaQuery.of(context).size.width < 768;
 
     // Combine movies and TV shows, sort by createdAt (most recent first), take top 5
     final allMediaItems = <MediaItem>[
-      ...widget.controller.movies.map((movie) => MovieMediaItem(movie: movie)),
-      ...widget.controller.tvShows.map(
-        (tvShow) => TVShowMediaItem(tvShow: tvShow),
-      ),
+      ...state.movies.map((movie) => MovieMediaItem(movie: movie)),
+      ...state.tvShows.map((tvShow) => TVShowMediaItem(tvShow: tvShow)),
     ];
 
     // Sort by createdAt (most recent first)
@@ -102,23 +106,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void dispose() {
-    widget.controller.removeListener(_onControllerChanged);
-    super.dispose();
-  }
-
-  void _onControllerChanged() {
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final state = ref.watch(homeControllerProvider);
+    final controller = ref.read(homeControllerProvider.notifier);
+
     // Combine movies and TV shows, sort by createdAt (most recent first), take top 5
     final allMediaItems = <MediaItem>[
-      ...widget.controller.movies.map((movie) => MovieMediaItem(movie: movie)),
-      ...widget.controller.tvShows.map(
-        (tvShow) => TVShowMediaItem(tvShow: tvShow),
-      ),
+      ...state.movies.map((movie) => MovieMediaItem(movie: movie)),
+      ...state.tvShows.map((tvShow) => TVShowMediaItem(tvShow: tvShow)),
     ];
 
     // Sort by createdAt (most recent first), null values go to the end
@@ -140,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return false;
         },
         child: RefreshIndicator(
-          onRefresh: () => widget.controller.loadAll(force: true),
+          onRefresh: () => controller.loadAll(force: true),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -155,7 +150,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Hero Carousel
-                        HeroCarousel(mediaItems: recentMediaItems),
+                        if (recentMediaItems.isNotEmpty ||
+                            state.isLoadingMovies ||
+                            state.isLoadingTVShows)
+                          HeroCarousel(mediaItems: recentMediaItems)
+                        else
+                          Container(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            height: 600,
+                            width: double.infinity,
+                            child: Center(
+                              child: Text(
+                                'No media found',
+                                style: AppTypography.headlineMedium(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ),
+                          ),
                         // Movies Section
                         _buildMoviesSection(),
                         AppConstants.spacingY(AppConstants.spacing24),
@@ -172,11 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               // Add bottom padding to account for floating bottom navigation bar
-              // Height: pill height (60) + padding (8 top + 8 bottom) + safe area + margin
               SliverToBoxAdapter(
-                child: SizedBox(
-                  height:
-                      60 + 8 + 8 + MediaQuery.of(context).padding.bottom + 16,
+                child: DBottomNavSpace(
+                  child: AppConstants.spacingY(AppConstants.spacing16),
                 ),
               ),
             ],
@@ -187,36 +197,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMoviesSection() {
-    // Create mock movies for testing (10 items total)
-    final mockMovies = List.generate(
-      10,
-      (index) => Movie(
-        id: 'mock-movie-$index',
-        title: 'Mock Movie ${index + 1}',
-        posterPath: null,
-        backdropPath: null,
-        overview: 'This is a mock movie for testing the slider with 10 items.',
-        releaseDate: '2024-01-${(index + 1).toString().padLeft(2, '0')}',
-        rating: 7.5 + (index * 0.1),
-        createdAt: DateTime.now().subtract(Duration(days: index)),
-      ),
-    );
+    final state = ref.watch(homeControllerProvider);
+    final controller = ref.read(homeControllerProvider.notifier);
 
-    // Combine actual movies with mock movies, take first 10
-    final allMovies = [
-      ...widget.controller.movies,
-      ...mockMovies,
-    ].take(10).toList();
+    // Use only actual movies from the controller
+    final allMovies = state.movies;
 
     return MediaItemSlider<Movie>(
       title: AppLocalization.homeMovies.tr(),
       items: allMovies,
-      isLoading: widget.controller.isLoadingMovies,
-      error: widget.controller.moviesError != null
-          ? '${AppLocalization.homeError.tr()}: ${widget.controller.moviesError}'
+      isLoading: state.isLoadingMovies,
+      error: state.moviesError != null
+          ? '${AppLocalization.homeError.tr()}: ${state.moviesError}'
           : null,
       emptyMessage: AppLocalization.homeNoMoviesAvailable.tr(),
-      onRetry: () => widget.controller.loadMovies(),
+      onRetry: () => controller.loadMovies(),
       retryLabel: AppLocalization.homeRetry.tr(),
       itemBuilder: (context, movie, index) {
         return MediaItemCardVertical(
@@ -231,37 +226,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTVShowsSection() {
-    // Create mock TV shows for testing (10 items total)
-    final mockTVShows = List.generate(
-      10,
-      (index) => TVShow(
-        id: 'mock-tvshow-$index',
-        title: 'Mock TV Show ${index + 1}',
-        posterPath: null,
-        backdropPath: null,
-        overview:
-            'This is a mock TV show for testing the slider with 10 items.',
-        firstAirDate: '2024-01-${(index + 1).toString().padLeft(2, '0')}',
-        rating: 8.0 + (index * 0.1),
-        createdAt: DateTime.now().subtract(Duration(days: index)),
-      ),
-    );
+    final state = ref.watch(homeControllerProvider);
+    final controller = ref.read(homeControllerProvider.notifier);
 
-    // Combine actual TV shows with mock TV shows, take first 10
-    final allTVShows = [
-      ...widget.controller.tvShows,
-      ...mockTVShows,
-    ].take(10).toList();
+    // Use only actual TV shows from the controller
+    final allTVShows = state.tvShows;
 
     return MediaItemSlider<TVShow>(
       title: AppLocalization.homeTvShows.tr(),
       items: allTVShows,
-      isLoading: widget.controller.isLoadingTVShows,
-      error: widget.controller.tvShowsError != null
-          ? '${AppLocalization.homeError.tr()}: ${widget.controller.tvShowsError}'
+      isLoading: state.isLoadingTVShows,
+      error: state.tvShowsError != null
+          ? '${AppLocalization.homeError.tr()}: ${state.tvShowsError}'
           : null,
       emptyMessage: AppLocalization.homeNoTVShowsAvailable.tr(),
-      onRetry: () => widget.controller.loadTVShows(),
+      onRetry: () => controller.loadTVShows(),
       retryLabel: AppLocalization.homeRetry.tr(),
       itemBuilder: (context, tvShow, index) {
         return MediaItemCardVertical(

@@ -6,9 +6,10 @@ import 'domain/usecases/get_tv_shows_list_impl.dart';
 import 'presentation/controllers/home_controller.dart';
 import 'presentation/screens/s_home.dart';
 
-
 class HomeFeature {
-  static HomeScreen createHomeScreen() {
+  /// Override providers for Home feature with actual implementations
+  // ignore: strict_top_level_inference
+  static get overrides {
     // Data source
     final dataSource = HomeDataSource();
 
@@ -19,13 +20,14 @@ class HomeFeature {
     final getMoviesList = GetMoviesListImpl(repository);
     final getTVShowsList = GetTVShowsListImpl(repository);
 
-    // Controller
-    final controller = HomeController(
-      getMoviesList: getMoviesList,
-      getTVShowsList: getTVShowsList,
-    );
+    return [
+      getMoviesListProvider.overrideWith((ref) => getMoviesList),
+      getTVShowsListProvider.overrideWith((ref) => getTVShowsList),
+    ];
+  }
 
-    // Screen
-    return HomeScreen(controller: controller);
+  static HomeScreen createHomeScreen() {
+    // Screen uses providers directly via ConsumerWidget
+    return const HomeScreen();
   }
 }
