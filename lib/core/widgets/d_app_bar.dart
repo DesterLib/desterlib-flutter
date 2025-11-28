@@ -1,13 +1,14 @@
 // External packages
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_scaffold.dart';
 import 'package:dester/core/widgets/d_sidebar.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 /// Custom AppBar widget that implements a SliverPersistentHeader for precise animation control
 ///
@@ -99,7 +100,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   // Constants matching the Figma design
   static const double _expandedAppBarHeight = 80.0;
-  static const double _collapsedAppBarHeight = 44.0;
+  static const double _collapsedAppBarHeight = 48.0;
   static const double _expandedFontSize = 32.0;
   static const double _collapsedFontSize = 14.0;
 
@@ -153,22 +154,36 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     Widget? effectiveLeading = leading;
     if (effectiveLeading == null && automaticallyImplyLeading) {
       if (Navigator.of(context).canPop()) {
-        effectiveLeading = IconButton(
-          icon: Icon(LucideIcons.chevronLeft300, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+        effectiveLeading = ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kToolbarHeight,
+            maxWidth: kToolbarHeight,
+            minHeight: kToolbarHeight,
+            maxHeight: kToolbarHeight,
+          ),
+          child: Center(
+            child: DIconButton(
+              icon: DIconName.chevronLeft,
+              variant: DIconButtonVariant.plain,
+              size: DIconButtonSize.sm,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
         );
       }
     }
 
     // Determine if title should be centered or left-aligned
-    final bool effectiveCenterTitle = leftAligned != null
+    // When a back button (effectiveLeading) is present, we generally want the title centered
+    // to avoid overlapping with the back button, unless leftAligned is explicitly requested.
+    final bool shouldCenterTitle = leftAligned != null
         ? !leftAligned!
-        : true;
+        : effectiveLeading != null; // Auto-center if we have a back button
 
     // Build title widget based on alignment
     Widget titleWidget;
-    if (!effectiveCenterTitle && !isCompact) {
-      // Use fade transition for left-aligned titles
+    if (!shouldCenterTitle && !isCompact) {
+      // Use fade transition for left-aligned titles (Expanded state)
       titleWidget = _buildFadingTitle(theme, appBarTheme, progress);
     } else {
       // Use scaling transition for centered titles or compact mode
@@ -180,10 +195,11 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
         title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+        textAlign: shouldCenterTitle ? TextAlign.center : TextAlign.start,
         style: AppTypography.inter(
           fontSize: currentFontSize,
           fontWeight: AppTypography.weightSemiBold,
-          color: appBarTheme.foregroundColor ?? theme.colorScheme.onSurface,
+          color: Colors.white,
         ),
       );
     }
@@ -208,19 +224,15 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
           filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
           child: Container(
             color: currentBackgroundColor,
-            padding: EdgeInsets.only(top: topPadding),
+            padding: EdgeInsets.only(
+              top: topPadding,
+              left: AppConstants.spacing4,
+              right: AppConstants.spacing4,
+            ),
             child: SizedBox(
               height: currentHeight,
               child: NavigationToolbar(
-                leading: effectiveLeading != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: IconTheme(
-                          data: appBarTheme.iconTheme ?? theme.iconTheme,
-                          child: effectiveLeading,
-                        ),
-                      )
-                    : null,
+                leading: effectiveLeading,
                 middle: titleWidget,
                 trailing: actions != null
                     ? Row(
@@ -228,7 +240,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
                         children: [...actions!, const SizedBox(width: 8.0)],
                       )
                     : null,
-                centerMiddle: effectiveCenterTitle,
+                centerMiddle: shouldCenterTitle,
                 middleSpacing: NavigationToolbar.kMiddleSpacing,
               ),
             ),

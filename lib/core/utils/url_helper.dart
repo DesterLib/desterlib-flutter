@@ -11,12 +11,21 @@ class UrlHelper {
   /// Validate and normalize a URL
   /// Returns the normalized URL if valid, null otherwise
   static String? validateAndNormalize(String url) {
+    if (url.trim().isEmpty) {
+      return null;
+    }
+
     try {
-      final uri = Uri.parse(url);
-      if (!uri.hasScheme || (!uri.hasAuthority && uri.host.isEmpty)) {
+      final uri = Uri.parse(url.trim());
+      // Check if URL has a valid scheme (http, https, etc.)
+      if (!uri.hasScheme) {
         return null;
       }
-      return normalizeUrl(url);
+      // Check if URL has a valid host or authority
+      if (uri.host.isEmpty && !uri.hasAuthority) {
+        return null;
+      }
+      return normalizeUrl(url.trim());
     } catch (e) {
       return null;
     }

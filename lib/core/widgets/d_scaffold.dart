@@ -38,13 +38,77 @@ class DScaffold extends StatelessWidget {
 
       if (useDesktopLayout) {
         // Desktop layout with floating sidebar
-        return Scaffold(
-          key: scaffold.key,
-          appBar: scaffold.appBar,
+        return GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: Scaffold(
+            key: scaffold.key,
+            appBar: scaffold.appBar,
+            body: Stack(
+              children: [
+                // Original scaffold body
+                scaffold.body ?? const SizedBox.shrink(),
+                // Floating sidebar
+                Positioned(
+                  left: AppConstants.spacing8,
+                  top: AppConstants.spacing8,
+                  bottom: AppConstants.spacing8,
+                  child: DSidebar(currentRoute: currentRoute),
+                ),
+              ],
+            ),
+            backgroundColor: scaffold.backgroundColor,
+            resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
+            floatingActionButton: scaffold.floatingActionButton,
+            floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
+            drawer: scaffold.drawer,
+            endDrawer: scaffold.endDrawer,
+            bottomSheet: scaffold.bottomSheet,
+            persistentFooterButtons: scaffold.persistentFooterButtons,
+          ),
+        );
+      } else {
+        // Mobile layout with bottom navigation
+        return GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: Scaffold(
+            key: scaffold.key,
+            appBar: scaffold.appBar,
+            body: Stack(
+              children: [
+                // Original scaffold body
+                scaffold.body ?? const SizedBox.shrink(),
+                // Floating bottom navigation bar
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: DBottomNavigationBar(currentRoute: currentRoute),
+                ),
+              ],
+            ),
+            backgroundColor: scaffold.backgroundColor,
+            resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
+            floatingActionButton: scaffold.floatingActionButton,
+            floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
+            drawer: scaffold.drawer,
+            endDrawer: scaffold.endDrawer,
+            bottomSheet: scaffold.bottomSheet,
+            persistentFooterButtons: scaffold.persistentFooterButtons,
+          ),
+        );
+      }
+    }
+
+    // If child is not a Scaffold, wrap it in one
+    if (useDesktopLayout) {
+      // Desktop layout with floating sidebar
+      return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
           body: Stack(
             children: [
-              // Original scaffold body
-              scaffold.body ?? const SizedBox.shrink(),
+              // Original child content
+              child,
               // Floating sidebar
               Positioned(
                 left: AppConstants.spacing8,
@@ -54,24 +118,17 @@ class DScaffold extends StatelessWidget {
               ),
             ],
           ),
-          backgroundColor: scaffold.backgroundColor,
-          resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
-          floatingActionButton: scaffold.floatingActionButton,
-          floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
-          drawer: scaffold.drawer,
-          endDrawer: scaffold.endDrawer,
-          bottomSheet: scaffold.bottomSheet,
-          persistentFooterButtons: scaffold.persistentFooterButtons,
-        );
-      } else {
-        // Mobile layout with bottom navigation
-        return Scaffold(
-          key: scaffold.key,
-          appBar: scaffold.appBar,
+        ),
+      );
+    } else {
+      // Mobile layout with bottom navigation
+      return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
           body: Stack(
             children: [
-              // Original scaffold body
-              scaffold.body ?? const SizedBox.shrink(),
+              // Original child content
+              child,
               // Floating bottom navigation bar
               Positioned(
                 left: 0,
@@ -81,51 +138,6 @@ class DScaffold extends StatelessWidget {
               ),
             ],
           ),
-          backgroundColor: scaffold.backgroundColor,
-          resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
-          floatingActionButton: scaffold.floatingActionButton,
-          floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
-          drawer: scaffold.drawer,
-          endDrawer: scaffold.endDrawer,
-          bottomSheet: scaffold.bottomSheet,
-          persistentFooterButtons: scaffold.persistentFooterButtons,
-        );
-      }
-    }
-
-    // If child is not a Scaffold, wrap it in one
-    if (useDesktopLayout) {
-      // Desktop layout with floating sidebar
-      return Scaffold(
-        body: Stack(
-          children: [
-            // Original child content
-            child,
-            // Floating sidebar
-            Positioned(
-              left: AppConstants.spacing8,
-              top: AppConstants.spacing8,
-              bottom: AppConstants.spacing8,
-              child: DSidebar(currentRoute: currentRoute),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Mobile layout with bottom navigation
-      return Scaffold(
-        body: Stack(
-          children: [
-            // Original child content
-            child,
-            // Floating bottom navigation bar
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: DBottomNavigationBar(currentRoute: currentRoute),
-            ),
-          ],
         ),
       );
     }

@@ -103,6 +103,7 @@ class BaseModal extends StatelessWidget {
       return await showModalBottomSheet<T>(
         context: AppRouter.rootNavigatorKey.currentContext!,
         isScrollControlled: true,
+        useSafeArea: true,
         builder: (context) => modal,
       );
     }
@@ -119,24 +120,28 @@ class BaseModal extends StatelessWidget {
 
   Widget _buildDesktopDialog(BuildContext context) {
     return Dialog(
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: maxWidth ?? AppConstants.baseModalMaxWidth,
-          maxHeight: maxHeight ?? AppConstants.baseModalMaxHeight,
-        ),
-        padding: AppConstants.padding(AppConstants.spacingLg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            AppConstants.spacingY(AppConstants.spacingMd),
-            Flexible(child: SingleChildScrollView(child: content)),
-            if (actions != null) ...[
-              AppConstants.spacingY(AppConstants.spacingLg),
-              actions!,
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: maxWidth ?? AppConstants.baseModalMaxWidth,
+            maxHeight: maxHeight ?? AppConstants.baseModalMaxHeight,
+          ),
+          padding: AppConstants.padding(AppConstants.spacingLg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              AppConstants.spacingY(AppConstants.spacingMd),
+              Flexible(child: SingleChildScrollView(child: content)),
+              if (actions != null) ...[
+                AppConstants.spacingY(AppConstants.spacingLg),
+                actions!,
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -149,52 +154,66 @@ class BaseModal extends StatelessWidget {
         minChildSize: minChildSize,
         maxChildSize: maxChildSize,
         builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color:
-                  Theme.of(context).bottomSheetTheme.backgroundColor ??
-                  Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(AppConstants.baseModalBorderRadius),
-              ),
-            ),
-            child: Column(
-              children: [
-                _buildDragHandle(context),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    padding: AppConstants.padding(AppConstants.spacingLg),
-                    children: [
-                      _buildHeader(context),
-                      AppConstants.spacingY(AppConstants.spacingMd),
-                      content,
-                      if (actions != null) ...[
-                        AppConstants.spacingY(AppConstants.spacingLg),
-                        actions!,
-                      ],
-                    ],
-                  ),
+          return GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              decoration: BoxDecoration(
+                color:
+                    Theme.of(context).bottomSheetTheme.backgroundColor ??
+                    Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppConstants.baseModalBorderRadius),
                 ),
-              ],
+              ),
+              child: Column(
+                children: [
+                  _buildDragHandle(context),
+                  Padding(
+                    padding: AppConstants.paddingOnly(
+                      left: AppConstants.spacingLg,
+                      right: AppConstants.spacingLg,
+                    ),
+                    child: _buildHeader(context),
+                  ),
+                  AppConstants.spacingY(AppConstants.spacingMd),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: AppConstants.padding(
+                        AppConstants.spacingLg,
+                      ).copyWith(top: 0),
+                      children: [
+                        content,
+                        if (actions != null) ...[
+                          AppConstants.spacingY(AppConstants.spacingLg),
+                          actions!,
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
       );
     } else {
-      return Container(
-        decoration: BoxDecoration(
-          color:
-              Theme.of(context).bottomSheetTheme.backgroundColor ??
-              Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppConstants.radiusBottomSheet),
+      return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Container(
+          decoration: BoxDecoration(
+            color:
+                Theme.of(context).bottomSheetTheme.backgroundColor ??
+                Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppConstants.radiusBottomSheet),
+            ),
           ),
-        ),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -215,19 +234,22 @@ class BaseModal extends StatelessWidget {
                   ],
                 ),
               ),
-
-              Padding(
-                padding: AppConstants.padding(AppConstants.spacingLg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    content,
-                    if (actions != null) ...[
-                      AppConstants.spacingY(AppConstants.spacingLg),
-                      actions!,
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: AppConstants.padding(
+                    AppConstants.spacingLg,
+                  ).copyWith(top: 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      content,
+                      if (actions != null) ...[
+                        AppConstants.spacingY(AppConstants.spacingLg),
+                        actions!,
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ],

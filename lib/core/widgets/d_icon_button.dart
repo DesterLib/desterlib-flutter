@@ -15,7 +15,6 @@ enum DIconButtonVariant { primary, secondary, plain }
 enum DIconButtonSize { sm, md }
 
 /// A customizable icon button widget with variants, sizes, and blur support
-/// Always uses fully rounded corners (50px border radius)
 class DIconButton extends StatefulWidget {
   /// The icon to display
   final DIconName icon;
@@ -133,7 +132,7 @@ class _DIconButtonState extends State<DIconButton> {
   double _getIconSize() {
     switch (widget.size) {
       case DIconButtonSize.sm:
-        return AppConstants.iconButtonIconSizeSm;
+        return AppConstants.iconButtonIconSizeMd;
       case DIconButtonSize.md:
         return AppConstants.iconButtonIconSizeMd;
     }
@@ -171,7 +170,7 @@ class _DIconButtonState extends State<DIconButton> {
     }
   }
 
-  /// Get border radius - always fully rounded (50px) for icon buttons
+  /// Get border radius - always fully rounded (50px) for all icon button variants
   BorderRadius _getBorderRadius() {
     return BorderRadius.circular(AppConstants.iconButtonBorderRadius);
   }
@@ -187,18 +186,22 @@ class _DIconButtonState extends State<DIconButton> {
     final isDisabled = widget.isDisabled;
 
     // Build static content that doesn't change with _buttonHeldDown
-    final buttonContent = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: baseBackgroundColor,
-        borderRadius: borderRadius,
-      ),
-      child: DIcon(
-        icon: widget.icon,
-        size: iconSize,
-        color: iconColor,
-        filled: widget.filled,
+    // ClipRRect ensures rounded corners are visible even with transparent backgrounds
+    final buttonContent = ClipRRect(
+      borderRadius: borderRadius,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: baseBackgroundColor,
+          borderRadius: borderRadius,
+        ),
+        child: DIcon(
+          icon: widget.icon,
+          size: iconSize,
+          color: iconColor,
+          filled: widget.filled,
+        ),
       ),
     );
 
@@ -213,20 +216,28 @@ class _DIconButtonState extends State<DIconButton> {
           )
         : buttonContent;
 
+    // Match DButton structure: Opacity (disabled) > GestureDetector > AnimatedOpacity (pressed)
+    // When onPressed is null, don't wrap in GestureDetector to allow parent widgets to handle taps
     return Opacity(
       opacity: isDisabled ? 0.5 : 1.0,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: _enabled ? _handleTapDown : null,
-        onTapUp: _enabled ? _handleTapUp : null,
-        onTapCancel: _enabled ? _handleTapCancel : null,
-        onTap: _handleTap,
-        child: AnimatedOpacity(
-          duration: AppConstants.iconButtonAnimationDuration,
-          opacity: _buttonHeldDown ? 0.6 : 1.0,
-          child: finalButtonContent,
-        ),
-      ),
+      child: widget.onPressed != null && !isDisabled
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: _handleTapDown,
+              onTapUp: _handleTapUp,
+              onTapCancel: _handleTapCancel,
+              onTap: _handleTap,
+              child: AnimatedOpacity(
+                duration: AppConstants.iconButtonAnimationDuration,
+                opacity: _buttonHeldDown ? 0.6 : 1.0,
+                child: finalButtonContent,
+              ),
+            )
+          : AnimatedOpacity(
+              duration: AppConstants.iconButtonAnimationDuration,
+              opacity: _buttonHeldDown ? 0.6 : 1.0,
+              child: finalButtonContent,
+            ),
     );
   }
 }

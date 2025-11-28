@@ -46,6 +46,9 @@ enum DIconName {
   key,
   tag,
   cloudCheck,
+  database,
+  scan,
+  folderCog,
 }
 
 /// Stroke width mapping to Lucide icon suffixes (100-600)
@@ -177,6 +180,12 @@ class LucideIconMap {
         return _getLucideIconWithSuffix('tag', suffix);
       case DIconName.cloudCheck:
         return _getLucideIconWithSuffix('cloudCheck', suffix);
+      case DIconName.database:
+        return _getLucideIconWithSuffix('database', suffix);
+      case DIconName.scan:
+        return _getLucideIconWithSuffix('scan', suffix);
+      case DIconName.folderCog:
+        return _getLucideIconWithSuffix('folderCog', suffix);
     }
   }
 
@@ -651,6 +660,20 @@ class LucideIconMap {
       case 'server600':
         return LucideIcons.server600;
 
+      // Database icons
+      case 'database100':
+        return LucideIcons.database100;
+      case 'database200':
+        return LucideIcons.database200;
+      case 'database300':
+        return LucideIcons.database300;
+      case 'database400':
+        return LucideIcons.database400;
+      case 'database500':
+        return LucideIcons.database500;
+      case 'database600':
+        return LucideIcons.database600;
+
       // Key icons
       case 'key100':
         return LucideIcons.key100;
@@ -692,6 +715,20 @@ class LucideIconMap {
         return LucideIcons.cloudCheck500;
       case 'cloudCheck600':
         return LucideIcons.cloudCheck600;
+
+      // FolderCog icons
+      case 'folderCog100':
+        return LucideIcons.folderCog100;
+      case 'folderCog200':
+        return LucideIcons.folderCog200;
+      case 'folderCog300':
+        return LucideIcons.folderCog300;
+      case 'folderCog400':
+        return LucideIcons.folderCog400;
+      case 'folderCog500':
+        return LucideIcons.folderCog500;
+      case 'folderCog600':
+        return LucideIcons.folderCog600;
 
       // Fallback to default icon
       default:
