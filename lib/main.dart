@@ -10,6 +10,10 @@ import 'package:window_manager/window_manager.dart';
 
 // Core
 import 'app/router/app_router.dart';
+import 'core/storage/preferences_service.dart';
+
+// Features
+import 'features/home/home_feature.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +25,12 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
 
+  // Initialize preferences service before router (needed for redirect logic)
+  await PreferencesService.init();
+
   runApp(
     ProviderScope(
+      overrides: HomeFeature.overrides,
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('es')],
         path: 'assets/translations',

@@ -605,3 +605,22 @@ final settingsProvider = FutureProvider<Settings>((ref) async {
 });
 ```
 
+## Auto-Generated Code Rules
+
+### ⚠️ CRITICAL: Do NOT Modify Auto-Generated Files
+
+**NEVER modify files in the `lib/core/network/api_client/` directory** - These files are auto-generated from OpenAPI specifications and will be overwritten when the API client is regenerated.
+
+**Auto-generated directories:**
+- `lib/core/network/api_client/lib/src/api/` - API client classes
+- `lib/core/network/api_client/lib/src/model/` - API model classes
+- `lib/core/network/api_client/lib/openapi.dart` - Main export file
+
+**What to do instead:**
+- If you need to fix linter errors in auto-generated files, regenerate the API client using the generation script
+- If you need custom functionality, create wrapper classes or extensions outside the `api_client` directory
+- If you need to modify API client behavior, update the OpenAPI specification and regenerate
+
+**Files marked as auto-generated:**
+- All files in `lib/core/network/api_client/lib/src/` contain the header: `// AUTO-GENERATED FILE, DO NOT MODIFY!`
+
