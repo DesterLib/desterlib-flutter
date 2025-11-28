@@ -16,8 +16,10 @@ import 'package:dester/features/connection/presentation/widgets/m_api_configurat
 import 'package:dester/core/widgets/d_app_bar.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 
-class ApiManagementScreen extends ConsumerWidget {
-  const ApiManagementScreen({super.key});
+/// Connection setup screen shown on initial app load when no API is configured
+/// This screen has no back button and no bottom navigation
+class ConnectionSetupScreen extends ConsumerWidget {
+  const ConnectionSetupScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,30 +28,30 @@ class ApiManagementScreen extends ConsumerWidget {
         .getApiConfigurations();
     final connectionState = ref.watch(connectionGuardProvider);
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          DAppBar(
-            title: AppLocalization.settingsServersApisTab.tr(),
-            isCompact: true,
-          ),
-          configurations.isEmpty
-              ? SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: DSidebarSpace(child: _buildEmptyState(context, ref)),
-                )
-              : _buildApiList(
-                  context,
-                  ref,
-                  configurations,
-                  connectionState.apiUrl,
-                ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddApiModal(context, ref),
-        icon: const Icon(LucideIcons.plus300),
-        label: Text(AppLocalization.settingsServersAddApi.tr()),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            DAppBar(title: AppLocalization.settingsServersTitle.tr()),
+            configurations.isEmpty
+                ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: DSidebarSpace(child: _buildEmptyState(context, ref)),
+                  )
+                : _buildApiList(
+                    context,
+                    ref,
+                    configurations,
+                    connectionState.apiUrl,
+                  ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showAddApiModal(context, ref),
+          icon: const Icon(LucideIcons.plus300),
+          label: Text(AppLocalization.settingsServersAddApi.tr()),
+        ),
       ),
     );
   }
@@ -72,12 +74,6 @@ class ApiManagementScreen extends ConsumerWidget {
               AppLocalization.settingsServersAddFirstApi.tr(),
               style: AppTypography.bodyMedium(color: Colors.grey[500]),
               textAlign: TextAlign.center,
-            ),
-            AppConstants.spacingY(AppConstants.spacing24),
-            ElevatedButton.icon(
-              onPressed: () => _showAddApiModal(context, ref),
-              icon: const Icon(LucideIcons.plus300),
-              label: Text(AppLocalization.settingsServersAddApi.tr()),
             ),
           ],
         ),
@@ -188,9 +184,7 @@ class ApiManagementScreen extends ConsumerWidget {
                     children: [
                       if (!isActive)
                         IconButton(
-                          icon: const Icon(
-                            Icons.check_circle_outline,
-                          ), // Using Material icon as Lucide circleCheck not available
+                          icon: const Icon(Icons.check_circle_outline),
                           tooltip: AppLocalization.settingsServersSetActive
                               .tr(),
                           onPressed: () => _handleSetActive(ref, config.id),
@@ -221,15 +215,13 @@ class ApiManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddApiModal(BuildContext context, WidgetRef? ref) {
+  void _showAddApiModal(BuildContext context, WidgetRef ref) {
     ApiConfigurationModal.show(
       context,
       onSave: (url, label) {
-        if (ref != null) {
-          ref
-              .read(connectionGuardProvider.notifier)
-              .addApiConfiguration(url, label, setAsActive: true);
-        }
+        ref
+            .read(connectionGuardProvider.notifier)
+            .addApiConfiguration(url, label, setAsActive: true);
       },
     );
   }

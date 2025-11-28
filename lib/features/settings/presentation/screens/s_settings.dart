@@ -10,8 +10,8 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
-import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/presentation/widgets/m_connection_status.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
@@ -19,8 +19,8 @@ import 'package:dester/core/widgets/d_sidebar_space.dart';
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
 import 'package:dester/features/settings/domain/usecases/get_settings.dart';
+import 'package:dester/features/settings/domain/usecases/reset_settings.dart';
 import 'package:dester/features/settings/domain/usecases/update_settings.dart';
-import 'package:dester/features/settings/presentation/widgets/m_tmdb_api_key.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_group.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_item.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_section.dart';
@@ -28,18 +28,27 @@ import 'package:dester/features/settings/settings_feature.dart';
 
 /// Provider for GetSettings use case
 final getSettingsProvider = Provider<GetSettings>((ref) {
-  return SettingsFeature.createGetSettings();
+  return SettingsFeature.createGetSettingsLegacy();
 });
 
 /// Provider for UpdateSettings use case
 final updateSettingsProvider = Provider<UpdateSettings>((ref) {
-  return SettingsFeature.createUpdateSettings();
+  return SettingsFeature.createUpdateSettingsLegacy();
+});
+
+/// Provider for ResetAllSettings use case
+final resetAllSettingsProvider = Provider<ResetAllSettings>((ref) {
+  return SettingsFeature.createResetAllSettingsLegacy();
 });
 
 /// Provider for current settings
 final settingsProvider = FutureProvider<Settings>((ref) async {
   final getSettings = ref.watch(getSettingsProvider);
-  return await getSettings();
+  final result = await getSettings();
+  return result.fold(
+    onSuccess: (settings) => settings,
+    onFailure: (failure) => throw failure,
+  );
 });
 
 class SettingsScreen extends ConsumerWidget {
@@ -100,9 +109,9 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                     AppConstants.spacingY(AppConstants.spacing24),
-                    // TMDB Settings Section
+                    // Metadata Settings Section
                     SettingsSection(
-                      title: AppLocalization.settingsTmdbTitle.tr(),
+                      title: AppLocalization.settingsMetadataTitle.tr(),
                       group: ref
                           .watch(settingsProvider)
                           .when(
@@ -110,30 +119,78 @@ class SettingsScreen extends ConsumerWidget {
                               children: [
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
-                                    DIconName.key,
+                                    DIconName.database,
                                     strokeWidth: 2.0,
                                   ),
-                                  title: AppLocalization.settingsTmdbApiKey
+                                  leadingIconColor: settings.hasMetadataProvider
+                                      ? AppConstants.successColor
+                                      : AppConstants.warningColor,
+                                  title: AppLocalization
+                                      .settingsMetadataManageProviders
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
                                     strokeWidth: 2.0,
                                   ),
-                                  onTap: () => _showTmdbApiKeyModal(
-                                    context,
-                                    ref,
-                                    settings,
-                                  ),
+                                  onTap: () {
+                                    context.pushNamed('metadata-providers');
+                                  },
                                   isFirst: true,
+                                ),
+                                SettingsItem(
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.folderCog,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  title: AppLocalization
+                                      .settingsScanSettingsTitle
+                                      .tr(),
+                                  trailingIcon: getIconDataFromDIconName(
+                                    DIconName.chevronRight,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  onTap: () {
+                                    context.pushNamed('scan-settings');
+                                  },
                                 ),
                               ],
                             ),
                             loading: () => SettingsGroup(
                               children: [
                                 SettingsItem(
-                                  title: AppLocalization.settingsTmdbApiKey
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.database,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  leadingIconColor: Theme.of(
+                                    context,
+                                  ).iconTheme.color?.withValues(alpha: 0.3),
+                                  title: AppLocalization
+                                      .settingsMetadataManageProviders
                                       .tr(),
+                                  isLoading: true,
                                   isFirst: true,
+                                ),
+                                SettingsItem(
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.folderCog,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  title: AppLocalization
+                                      .settingsScanSettingsTitle
+                                      .tr(),
+                                  trailing: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).iconTheme.color
+                                                ?.withValues(alpha: 0.6) ??
+                                            Colors.grey,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -144,18 +201,33 @@ class SettingsScreen extends ConsumerWidget {
                                     DIconName.error,
                                     strokeWidth: 2.0,
                                   ),
-                                  title: AppLocalization.settingsTmdbApiKey
+                                  title: AppLocalization
+                                      .settingsMetadataManageProviders
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
                                     strokeWidth: 2.0,
                                   ),
-                                  onTap: () => _showTmdbApiKeyModal(
-                                    context,
-                                    ref,
-                                    const Settings(firstRun: true),
-                                  ),
+                                  onTap: () {
+                                    context.pushNamed('metadata-providers');
+                                  },
                                   isFirst: true,
+                                ),
+                                SettingsItem(
+                                  leadingIcon: getIconDataFromDIconName(
+                                    DIconName.folderCog,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  title: AppLocalization
+                                      .settingsScanSettingsTitle
+                                      .tr(),
+                                  trailingIcon: getIconDataFromDIconName(
+                                    DIconName.chevronRight,
+                                    strokeWidth: 2.0,
+                                  ),
+                                  onTap: () {
+                                    context.pushNamed('scan-settings');
+                                  },
                                 ),
                               ],
                             ),
@@ -188,6 +260,31 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                     AppConstants.spacingY(AppConstants.spacing24),
+                    // Reset Settings Section
+                    SettingsSection(
+                      title: AppLocalization.settingsResetTitle.tr(),
+                      group: SettingsGroup(
+                        helperText: AppLocalization.settingsResetFullHelper
+                            .tr(),
+                        children: [
+                          SettingsItem(
+                            leadingIcon: getIconDataFromDIconName(
+                              DIconName.refreshCw,
+                              strokeWidth: 2.0,
+                            ),
+                            title: AppLocalization.settingsResetAllSettings
+                                .tr(),
+                            trailingIcon: getIconDataFromDIconName(
+                              DIconName.error,
+                              strokeWidth: 2.0,
+                            ),
+                            onTap: () => _showResetAllDialog(context, ref),
+                            isFirst: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppConstants.spacingY(AppConstants.spacing24),
                   ],
                 ),
               ),
@@ -196,6 +293,80 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Show confirmation dialog and reset all settings
+  Future<void> _showResetAllDialog(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalization.settingsResetConfirmTitle.tr()),
+        content: Text(AppLocalization.settingsResetAllConfirmMessage.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppLocalization.cancel.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppConstants.dangerColor,
+            ),
+            child: Text(AppLocalization.reset.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final resetAllSettings = ref.read(resetAllSettingsProvider);
+      final result = await resetAllSettings();
+
+      if (!context.mounted) return;
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      result.fold(
+        onSuccess: (_) {
+          ref.invalidate(settingsProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalization.settingsResetAllSuccess.tr()),
+              backgroundColor: AppConstants.successColor,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+        onFailure: (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: AppConstants.dangerColor,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalization.settingsResetAllError.tr()),
+          backgroundColor: AppConstants.dangerColor,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   IconData _getStatusIcon(ConnectionStatus status) {
@@ -222,40 +393,5 @@ class SettingsScreen extends ConsumerWidget {
       case ConnectionStatus.error:
         return AppConstants.dangerColor;
     }
-  }
-
-  void _showTmdbApiKeyModal(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    TmdbApiKeyModal.show(
-      context,
-      initialApiKey: settings.tmdbApiKey,
-      onSave: (apiKey) async {
-        try {
-          final updateSettings = ref.read(updateSettingsProvider);
-          await updateSettings(tmdbApiKey: apiKey);
-          if (context.mounted) {
-            ref.invalidate(settingsProvider);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalization.settingsTmdbApiKeySaved.tr()),
-                backgroundColor: AppConstants.successColor,
-              ),
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${e.toString()}'),
-                backgroundColor: AppConstants.dangerColor,
-              ),
-            );
-          }
-        }
-      },
-    );
   }
 }

@@ -1,9 +1,11 @@
+// Core
+import 'package:dester/core/errors/errors.dart';
+
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
 import 'package:dester/features/settings/domain/repository/settings_repository.dart';
 
 import 'get_settings.dart';
-
 
 /// Implementation of GetSettings use case
 class GetSettingsImpl implements GetSettings {
@@ -12,7 +14,7 @@ class GetSettingsImpl implements GetSettings {
   GetSettingsImpl(this.repository);
 
   @override
-  Future<Settings> call() async {
+  Future<Result<Settings>> call() async {
     return await repository.getSettings();
   }
 }

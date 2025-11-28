@@ -27,10 +27,8 @@ class AddLibraryFAB extends ConsumerWidget {
 
     return settingsAsync.when(
       data: (settings) {
-        final hasTmdbApiKey =
-            settings.tmdbApiKey != null && settings.tmdbApiKey!.isNotEmpty;
-
-        if (!hasTmdbApiKey) {
+        // Check if metadata provider is configured (currently TMDB)
+        if (!settings.hasMetadataProvider) {
           return FloatingActionButton.extended(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(

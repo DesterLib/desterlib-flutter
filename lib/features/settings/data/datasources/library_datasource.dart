@@ -9,7 +9,6 @@ import 'package:dester/core/utils/app_logger.dart';
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
 
-
 /// Data source for library operations
 class LibraryDataSource {
   /// Get all libraries from the API
@@ -135,7 +134,6 @@ class LibraryDataSource {
 
       final options = ApiV1ScanPathPostRequestOptions(
         (b) => b
-          ..libraryName = libraryName
           ..mediaType = mediaType != null
               ? (mediaType == 'movie'
                     ? ApiV1ScanPathPostRequestOptionsMediaTypeEnum.movie
@@ -169,17 +167,8 @@ class LibraryDataSource {
 
       if (response.data?.success == true) {
         // The scan is a continuous background process that returns 202 Accepted
-        // The response may contain libraryId if the library was created immediately
-        // or it may not be available yet since the scan runs asynchronously
-        final libraryId = response.data?.data?.libraryId;
-        if (libraryId != null) {
-          AppLogger.i(
-            'Library scan started successfully: libraryId=$libraryId',
-          );
-          return libraryId;
-        }
-        // If no libraryId yet, that's fine - the scan is running in the background
-        // Return a placeholder ID since the scan is async and the library will be created during scanning
+        // The response contains path, mediaType, queued, and queuePosition
+        // The library will be created during the scanning process
         AppLogger.i(
           'Scan started successfully. Library will be created during the scan process.',
         );

@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dester/core/widgets/d_icon.dart';
+import 'package:dester/core/widgets/d_loading_wrapper.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
@@ -13,6 +14,9 @@ import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/widgets/empty_state_widget.dart';
 import 'package:dester/core/widgets/error_state_widget.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_bottom_nav_space.dart';
+import 'package:dester/core/widgets/d_button.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 // Features
@@ -20,10 +24,11 @@ import 'package:dester/features/settings/domain/entities/library.dart';
 import 'package:dester/features/settings/presentation/controllers/manage_libraries_controller.dart';
 import 'package:dester/features/settings/presentation/providers/manage_libraries_providers.dart';
 import 'package:dester/features/settings/presentation/screens/s_settings.dart';
-import 'package:dester/features/settings/presentation/widgets/add_library_fab.dart';
 import 'package:dester/features/settings/presentation/widgets/library_card.dart';
 import 'package:dester/features/settings/presentation/widgets/m_delete_library.dart';
 import 'package:dester/features/settings/presentation/widgets/m_library.dart';
+import 'package:dester/features/settings/presentation/widgets/settings_section.dart';
+import 'package:dester/features/settings/presentation/widgets/settings_group.dart';
 
 class ManageLibrariesScreen extends ConsumerWidget {
   const ManageLibrariesScreen({super.key});
@@ -43,114 +48,141 @@ class ManageLibrariesScreen extends ConsumerWidget {
               title: AppLocalization.settingsLibrariesManageLibraries.tr(),
               isCompact: true,
               actions: [
-                IconButton(
-                  icon: state.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : DIcon(
-                          icon: DIconName.refreshCw,
-                          size: AppConstants.iconSizeLg,
-                        ),
-                  tooltip: 'Refresh',
-                  onPressed: state.isLoading
-                      ? null
-                      : () => controller.refresh(),
+                Tooltip(
+                  message: AppLocalization.settingsLibrariesAddLibrary.tr(),
+                  child: DIconButton(
+                    icon: DIconName.plus,
+                    variant: DIconButtonVariant.plain,
+                    onPressed: () => _showAddLibraryModal(context, ref),
+                  ),
+                ),
+                Tooltip(
+                  message: 'Refresh',
+                  child: _SpinningRefreshButton(
+                    isLoading: state.isLoading,
+                    onPressed: () => controller.refresh(),
+                  ),
                 ),
               ],
             ),
-            state.isLoading && libraries.isEmpty
-                ? SliverFillRemaining(
-                    child: DSidebarSpace(
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                  )
-                : state.error != null && libraries.isEmpty
-                ? SliverFillRemaining(
-                    child: DSidebarSpace(
-                      child: ErrorStateWidget(
-                        error: state.error!,
-                        onRetry: () => controller.refresh(),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: DLoadingWrapper(
+                isLoading: state.isLoading && libraries.isEmpty,
+                loader: const DSidebarSpace(
+                  child: DBottomNavSpace(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+                child: state.error != null && libraries.isEmpty
+                    ? DSidebarSpace(
+                        child: DBottomNavSpace(
+                          child: ErrorStateWidget(
+                            error: state.error!,
+                            onRetry: () => controller.refresh(),
+                          ),
+                        ),
+                      )
+                    : libraries.isEmpty
+                    ? DSidebarSpace(
+                        child: DBottomNavSpace(
+                          child: EmptyStateWidget(
+                            title: AppLocalization
+                                .settingsLibrariesNoLibrariesAvailable
+                                .tr(),
+                            subtitle: AppLocalization
+                                .settingsLibrariesAddFirstLibrary
+                                .tr(),
+                            icon: DIconName.library,
+                            action: DButton(
+                              onPressed: () =>
+                                  _showAddLibraryModal(context, ref),
+                              leadingIcon: DIconName.plus,
+                              label: AppLocalization.settingsLibrariesAddLibrary
+                                  .tr(),
+                              variant: DButtonVariant.primary,
+                            ),
+                          ),
+                        ),
+                      )
+                    : _buildLibraryListWidget(
+                        context,
+                        ref,
+                        libraries,
+                        controller,
+                        state,
                       ),
-                    ),
-                  )
-                : libraries.isEmpty
-                ? SliverFillRemaining(
-                    child: DSidebarSpace(
-                      child: EmptyStateWidget(
-                        title: AppLocalization
-                            .settingsLibrariesNoLibrariesAvailable
-                            .tr(),
-                        subtitle: AppLocalization
-                            .settingsLibrariesAddFirstLibrary
-                            .tr(),
-                        icon: DIconName.library,
-                      ),
-                    ),
-                  )
-                : _buildLibraryList(context, ref, libraries, controller, state),
+              ),
+            ),
           ],
         ),
-      ),
-      floatingActionButton: AddLibraryFAB(
-        onPressed: () => _showAddLibraryModal(context, ref),
       ),
     );
   }
 
-  Widget _buildLibraryList(
+  Widget _buildLibraryListWidget(
     BuildContext context,
     WidgetRef ref,
     List<Library> libraries,
     ManageLibrariesController controller,
     ManageLibrariesState state,
   ) {
-    return SliverPadding(
+    return Padding(
       padding: AppConstants.padding(AppConstants.spacing16),
-      sliver: SliverList.builder(
-        itemCount: libraries.length,
-        itemBuilder: (context, index) {
-          final library = libraries[index];
+      child: DSidebarSpace(
+        child: Column(
+          children: [
+            SettingsSection(
+              title: AppLocalization.settingsLibrariesTitle.tr(),
+              group: SettingsGroup(
+                children: libraries.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final library = entry.value;
 
-          // Watch scanProgressProvider directly for real-time updates
-          final scanProgressState = ref.watch(scanProgressProvider);
-          final scanProgress =
-              scanProgressState.libraryId != null &&
-                  scanProgressState.libraryId!.isNotEmpty &&
-                  scanProgressState.libraryId == library.id &&
-                  scanProgressState.isScanning
-              ? scanProgressState
-              : null;
-          final isScanning = scanProgress != null;
+                  // Watch scanProgressProvider directly for real-time updates
+                  final scanProgressState = ref.watch(scanProgressProvider);
+                  final scanProgress =
+                      scanProgressState.libraryId != null &&
+                          scanProgressState.libraryId!.isNotEmpty &&
+                          scanProgressState.libraryId == library.id &&
+                          scanProgressState.isScanning
+                      ? scanProgressState
+                      : null;
+                  final isScanning = scanProgress != null;
 
-          return DSidebarSpace(
-            child: LibraryCard(
-              library: library,
-              isScanning: isScanning,
-              scanProgress: scanProgress,
-              onEdit: () =>
-                  _showEditLibraryModal(context, ref, library, controller),
-              onDelete: () => _handleDelete(context, ref, library, controller),
+                  return LibraryCard(
+                    library: library,
+                    isScanning: isScanning,
+                    scanProgress: scanProgress,
+                    onEdit: () => _showEditLibraryModal(
+                      context,
+                      ref,
+                      library,
+                      controller,
+                    ),
+                    onDelete: () =>
+                        _handleDelete(context, ref, library, controller),
+                    inGroup: true,
+                    isFirst: index == 0,
+                  );
+                }).toList(),
+              ),
             ),
-          );
-        },
+            SizedBox(height: AppConstants.spacing16),
+            const DBottomNavSpace(child: SizedBox.shrink()),
+          ],
+        ),
       ),
     );
   }
 
   void _showAddLibraryModal(BuildContext context, WidgetRef ref) async {
-    // Check if TMDB API key exists before showing modal
+    // Check if metadata provider is configured before showing modal
     final currentSettings = await ref.read(settingsProvider.future);
 
     if (!context.mounted) return;
 
-    final hasTmdbApiKey =
-        currentSettings.tmdbApiKey != null &&
-        currentSettings.tmdbApiKey!.isNotEmpty;
-
-    if (!hasTmdbApiKey) {
+    if (!currentSettings.hasMetadataProvider) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -167,12 +199,10 @@ class ManageLibrariesScreen extends ConsumerWidget {
       context,
       isEditMode: false,
       onSave: (name, description, libraryPath, libraryType) async {
-        // Double-check TMDB API key before creating library
+        // Double-check metadata provider is configured before creating library
         final settings = await ref.read(settingsProvider.future);
-        final hasKey =
-            settings.tmdbApiKey != null && settings.tmdbApiKey!.isNotEmpty;
 
-        if (!hasKey) {
+        if (!settings.hasMetadataProvider) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -307,5 +337,58 @@ class ManageLibrariesScreen extends ConsumerWidget {
         }
       }
     }
+  }
+}
+
+class _SpinningRefreshButton extends StatefulWidget {
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _SpinningRefreshButton({
+    super.key,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  State<_SpinningRefreshButton> createState() => _SpinningRefreshButtonState();
+}
+
+class _SpinningRefreshButtonState extends State<_SpinningRefreshButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+      upperBound: double.infinity,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTap() {
+    widget.onPressed();
+    _controller.animateTo(_controller.value + 0.5, curve: Curves.easeInOut);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _controller,
+      child: DIconButton(
+        icon: DIconName.refreshCw,
+        variant: DIconButtonVariant.plain,
+        onPressed: widget.isLoading ? null : _onTap,
+        isDisabled: widget.isLoading,
+      ),
+    );
   }
 }

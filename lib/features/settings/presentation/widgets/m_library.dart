@@ -1,12 +1,16 @@
 // External packages
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
-import 'package:dester/core/widgets/form_builder.dart';
+import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/widgets/d_button.dart';
+import 'package:dester/core/widgets/d_input.dart';
+import 'package:dester/core/widgets/d_select.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
 
 // Features
@@ -74,66 +78,89 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
       children: [
         FormBuilder(
           key: _formKey,
-          fields: [
-            FormFieldConfig(
-              key: 'name',
-              labelText: AppLocalization.settingsLibrariesLibraryName.tr(),
-              hintText: AppLocalization.settingsLibrariesEnterLibraryName.tr(),
-              initialValue: widget.library?.name,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return '${AppLocalization.settingsLibrariesLibraryName.tr()} is required';
-                }
-                return null;
-              },
-            ),
-            FormFieldConfig(
-              key: 'description',
-              labelText: AppLocalization.settingsLibrariesLibraryDescription
-                  .tr(),
-              hintText: AppLocalization.settingsLibrariesEnterLibraryDescription
-                  .tr(),
-              initialValue: widget.library?.description,
-              maxLines: 3,
-            ),
-            FormFieldConfig(
-              key: 'path',
-              labelText: AppLocalization.settingsLibrariesLibraryPath.tr(),
-              hintText: AppLocalization.settingsLibrariesEnterLibraryPath.tr(),
-              initialValue: widget.library?.libraryPath,
-              enabled: !widget.isEditMode,
-              helperText: widget.isEditMode
-                  ? 'Path cannot be changed after library creation'
-                  : null,
-            ),
-          ],
-          dropdownFields: [
-            DropdownFieldConfig<LibraryType>(
-              key: 'type',
-              labelText: AppLocalization.settingsLibrariesLibraryType.tr(),
-              initialValue: widget.library?.libraryType,
-              enabled: !widget.isEditMode,
-              helperText: widget.isEditMode
-                  ? 'Type cannot be changed after library creation'
-                  : null,
-              items: LibraryType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type.displayName),
-                );
-              }).toList(),
-            ),
-          ],
-          isSaving: _isSaving,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DInput(
+                name: 'name',
+                initialValue: widget.library?.name,
+                label: AppLocalization.settingsLibrariesLibraryName.tr(),
+                hintText: AppLocalization.settingsLibrariesEnterLibraryName
+                    .tr(),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '${AppLocalization.settingsLibrariesLibraryName.tr()} is required';
+                  }
+                  return null;
+                },
+              ),
+              AppConstants.spacingY(AppConstants.spacingMd),
+              DInput(
+                name: 'description',
+                initialValue: widget.library?.description,
+                label: AppLocalization.settingsLibrariesLibraryDescription.tr(),
+                hintText: AppLocalization
+                    .settingsLibrariesEnterLibraryDescription
+                    .tr(),
+                maxLines: 3,
+              ),
+              AppConstants.spacingY(AppConstants.spacingMd),
+              DInput(
+                name: 'path',
+                initialValue: widget.library?.libraryPath,
+                enabled: !widget.isEditMode,
+                label: AppLocalization.settingsLibrariesLibraryPath.tr(),
+                hintText: AppLocalization.settingsLibrariesEnterLibraryPath
+                    .tr(),
+                helperText: widget.isEditMode
+                    ? 'Path cannot be changed after library creation'
+                    : null,
+              ),
+              AppConstants.spacingY(AppConstants.spacingMd),
+              DSelect<LibraryType>(
+                name: 'type',
+                initialValue: widget.library?.libraryType,
+                enabled: !widget.isEditMode,
+                label: AppLocalization.settingsLibrariesLibraryType.tr(),
+                hintText: 'Select Library Type',
+                helperText: widget.isEditMode
+                    ? 'Type cannot be changed after library creation'
+                    : null,
+                items: LibraryType.values.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type.displayName),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
-        FormActions(isSaving: _isSaving, onSave: () => _handleSave(context)),
+        AppConstants.spacingY(AppConstants.spacingMd),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            DButton(
+              label: AppLocalization.settingsServersClose.tr(),
+              variant: DButtonVariant.secondary,
+              isDisabled: _isSaving,
+              onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+            ),
+            AppConstants.spacingX(AppConstants.spacingSm),
+            DButton(
+              label: AppLocalization.settingsServersSave.tr(),
+              variant: DButtonVariant.primary,
+              isDisabled: _isSaving,
+              onPressed: () => _handleSave(context),
+            ),
+          ],
+        ),
       ],
     );
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    final formState = _formKey.currentState;
-    if (formState == null || !formState.validateAndSubmit()) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -141,8 +168,8 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
       _isSaving = true;
     });
 
-    final values = formState.getFormValues();
-    final name = (values['name'] as String).trim();
+    final values = _formKey.currentState!.value;
+    final name = (values['name'] as String?)?.trim() ?? '';
     final description = (values['description'] as String?)?.trim();
     final path = (values['path'] as String?)?.trim();
     final libraryPath = path?.isEmpty ?? true ? null : path;

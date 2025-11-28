@@ -1,16 +1,22 @@
 // External packages
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
-import 'package:dester/core/widgets/form_builder.dart';
+import 'package:dester/core/widgets/form_actions.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
 
+// Features
+import 'package:dester/features/settings/presentation/widgets/settings_form_field.dart';
+
 /// Modal for editing TMDB API key
+/// Note: This is the default metadata provider. The API uses a plugin system
+/// that supports multiple providers, but currently TMDB is the only one available.
 class TmdbApiKeyModal extends StatefulWidget {
   final String? initialApiKey;
   final Function(String apiKey) onSave;
@@ -43,38 +49,56 @@ class _TmdbApiKeyModalState extends State<TmdbApiKeyModal> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Use flutter_form_builder - clean and composable!
         FormBuilder(
           key: _formKey,
-          fields: [
-            FormFieldConfig(
-              key: 'apiKey',
-              labelText: AppLocalization.settingsTmdbApiKey.tr(),
-              hintText: AppLocalization.settingsTmdbEnterApiKey.tr(),
-              initialValue: widget.initialApiKey,
-              prefixIcon: LucideIcons.key300,
-              obscureText: _obscureText,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.done,
-              helperText: AppLocalization.settingsTmdbApiKeyHelper.tr(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureText ? LucideIcons.eye300 : LucideIcons.eyeOff300,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Use SettingsFormField wrapped in FormBuilderField
+              // FormBuilderField handles state management, SettingsFormField handles UI
+              FormBuilderField<String>(
+                name: 'apiKey',
+                initialValue: widget.initialApiKey,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return AppLocalization.settingsTmdbApiKeyRequired.tr();
+                  }
+                  return null;
+                },
+                builder: (field) {
+                  return SettingsFormField(
+                    initialValue: field.value,
+                    labelText: AppLocalization.settingsTmdbApiKey.tr(),
+                    hintText: AppLocalization.settingsTmdbEnterApiKey.tr(),
+                    helperText: AppLocalization.settingsTmdbApiKeyHelper.tr(),
+                    leadingIcon: LucideIcons.key300,
+                    obscureText: _obscureText,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText
+                            ? LucideIcons.eye300
+                            : LucideIcons.eyeOff300,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                    validator: (_) => field.errorText,
+                    errorText: field.errorText,
+                    onChanged: (value) {
+                      field.didChange(value);
+                    },
+                    onFieldSubmitted: (_) => _handleSave(context),
+                  );
                 },
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return AppLocalization.settingsTmdbApiKeyRequired.tr();
-                }
-                return null;
-              },
-            ),
-          ],
-          isSaving: _isSaving,
+            ],
+          ),
         ),
         FormActions(isSaving: _isSaving, onSave: () => _handleSave(context)),
       ],
@@ -82,8 +106,7 @@ class _TmdbApiKeyModalState extends State<TmdbApiKeyModal> {
   }
 
   void _handleSave(BuildContext context) {
-    final formState = _formKey.currentState;
-    if (formState == null || !formState.validateAndSubmit()) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -91,7 +114,7 @@ class _TmdbApiKeyModalState extends State<TmdbApiKeyModal> {
       _isSaving = true;
     });
 
-    final values = formState.getFormValues();
+    final values = _formKey.currentState!.value;
     final apiKey = values['apiKey'] as String;
 
     widget.onSave(apiKey);

@@ -11,6 +11,8 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
+import 'package:dester/core/widgets/d_popup_menu.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
@@ -22,6 +24,8 @@ class LibraryCard extends ConsumerWidget {
   final VoidCallback onDelete;
   final bool isScanning;
   final ScanProgressState? scanProgress;
+  final bool inGroup;
+  final bool isFirst;
 
   const LibraryCard({
     super.key,
@@ -30,130 +34,148 @@ class LibraryCard extends ConsumerWidget {
     required this.onDelete,
     this.isScanning = false,
     this.scanProgress,
+    this.inGroup = false,
+    this.isFirst = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Build trailing menu button with ellipsis using DIconButton sm size
+    final trailingWidget = isScanning
+        ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : DPopupMenu<String>(
+            icon: DIconName.ellipsis,
+            size: DIconButtonSize.sm,
+            variant: DIconButtonVariant.secondary,
+            onSelected: (value) {
+              if (value == 'edit') {
+                onEdit();
+              } else if (value == 'delete') {
+                onDelete();
+              }
+            },
+            items: [
+              DPopupMenuItem<String>(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(
+                      getIconDataFromDIconName(
+                        DIconName.edit,
+                        strokeWidth: 2.0,
+                      ),
+                      size: 16,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    const SizedBox(width: AppConstants.spacing8),
+                    Text(AppLocalization.settingsLibrariesEditLibrary.tr()),
+                  ],
+                ),
+              ),
+              DPopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(
+                      getIconDataFromDIconName(
+                        DIconName.trash,
+                        strokeWidth: 2.0,
+                      ),
+                      size: 16,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(width: AppConstants.spacing8),
+                    Text(
+                      AppLocalization.settingsLibrariesDeleteLibrary.tr(),
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+
+    // Build leading icon matching SettingsItem exactly (size 24, simple Icon)
+    final leadingIcon = isScanning
+        ? SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).iconTheme.color?.withValues(alpha: 0.6) ??
+                    Colors.grey,
+              ),
+            ),
+          )
+        : Icon(
+            getIconDataFromDIconName(
+              _getLibraryIcon(library.libraryType),
+              strokeWidth: 2.0,
+            ),
+            size: 24,
+            color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.6),
+          );
+
+    // Build content matching SettingsItem structure exactly
+    final content = Container(
+      padding: AppConstants.paddingX(AppConstants.spacing16),
+      child: SizedBox(
+        child: Row(
+          children: [
+            leadingIcon,
+            SizedBox(width: AppConstants.spacing8),
+            Expanded(
+              child: Container(
+                height: 48,
+                alignment: Alignment.centerLeft,
+                decoration: isFirst
+                    ? null
+                    : BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        library.name,
+                        style: AppTypography.titleSmall(),
+                      ),
+                    ),
+                    trailingWidget,
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (inGroup) {
+      // When in a group, return content directly - SettingsGroup provides the container
+      return content;
+    }
+
+    // When standalone, use Card wrapper
     return Card(
       margin: AppConstants.paddingOnly(bottom: AppConstants.spacing12),
       elevation: 1,
       shape: RoundedSuperellipseBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusLg),
       ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: isScanning
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : DIcon(
-                  icon: _getLibraryIcon(library.libraryType),
-                  size: 24.0,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-        ),
-        title: Text(library.name, style: AppTypography.titleMedium()),
-        subtitle: _buildSubtitle(context),
-        trailing: isScanning
-            ? null
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: DIcon(
-                      icon: DIconName.edit,
-                      size: AppConstants.iconSizeLg,
-                    ),
-                    tooltip: AppLocalization.settingsLibrariesEditLibrary.tr(),
-                    onPressed: onEdit,
-                  ),
-                  IconButton(
-                    icon: const DIcon(
-                      icon: DIconName.trash,
-                      size: 24.0,
-                      color: Colors.red,
-                    ),
-                    tooltip: AppLocalization.settingsLibrariesDeleteLibrary
-                        .tr(),
-                    onPressed: onDelete,
-                  ),
-                ],
-              ),
-        isThreeLine: true,
-      ),
-    );
-  }
-
-  Widget _buildSubtitle(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppConstants.spacingY(AppConstants.spacing4),
-        if (scanProgress != null) ...[
-          // Show scan progress
-          Text(
-            scanProgress!.message,
-            style: AppTypography.bodySmall(
-              color: Theme.of(context).colorScheme.primary,
-            ).copyWith(fontWeight: AppTypography.weightMedium),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          AppConstants.spacingY(AppConstants.spacing4),
-          LinearProgressIndicator(
-            value: scanProgress!.progress / 100,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          AppConstants.spacingY(AppConstants.spacing2),
-          if (scanProgress!.total > 0)
-            Text(
-              '${scanProgress!.current} / ${scanProgress!.total}',
-              style: AppTypography.bodySmall(color: Colors.grey[600]),
-            ),
-          AppConstants.spacingY(AppConstants.spacing2),
-        ],
-        if (library.description != null && library.description!.isNotEmpty)
-          Text(
-            library.description!,
-            maxLines: isScanning ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.bodySmall(color: Colors.grey[600]),
-          ),
-        if (library.description != null &&
-            library.description!.isNotEmpty &&
-            !isScanning)
-          AppConstants.spacingY(AppConstants.spacing4),
-        if (library.description != null &&
-            library.description!.isNotEmpty &&
-            isScanning)
-          AppConstants.spacingY(AppConstants.spacing2),
-        if (library.libraryType != null)
-          Chip(
-            label: Text(
-              library.libraryType!.displayName,
-              style: AppTypography.labelSmall(),
-            ),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-          ),
-        if (library.mediaCount != null)
-          Padding(
-            padding: AppConstants.paddingOnly(
-              top: isScanning ? AppConstants.spacing2 : AppConstants.spacing4,
-            ),
-            child: Text(
-              '${AppLocalization.settingsLibrariesMediaCount.tr()}: ${library.mediaCount}',
-              style: AppTypography.bodySmall(color: Colors.grey[500]),
-            ),
-          ),
-      ],
+      child: content,
     );
   }
 

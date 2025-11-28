@@ -12,8 +12,10 @@ class SettingsItem extends StatefulWidget {
   final String? trailingText;
   final TextStyle? trailingTextStyle;
   final IconData? trailingIcon;
+  final Widget? trailing;
   final VoidCallback? onTap;
   final bool isFirst;
+  final bool isLoading;
 
   const SettingsItem({
     super.key,
@@ -23,8 +25,10 @@ class SettingsItem extends StatefulWidget {
     this.trailingText,
     this.trailingTextStyle,
     this.trailingIcon,
+    this.trailing,
     this.onTap,
     this.isFirst = false,
+    this.isLoading = false,
   });
 
   @override
@@ -49,13 +53,24 @@ class _SettingsItemState extends State<SettingsItem> {
         child: Row(
           children: [
             if (widget.leadingIcon != null) ...[
-              Icon(
-                widget.leadingIcon,
-                size: 24,
-                color:
-                    widget.leadingIconColor ??
-                    Theme.of(context).iconTheme.color?.withValues(alpha: 0.6),
-              ),
+              widget.isLoading
+                  ? _PulsingIcon(
+                      icon: widget.leadingIcon!,
+                      color:
+                          widget.leadingIconColor ??
+                          Theme.of(
+                            context,
+                          ).iconTheme.color?.withValues(alpha: 0.3),
+                    )
+                  : Icon(
+                      widget.leadingIcon!,
+                      size: 24,
+                      color:
+                          widget.leadingIconColor ??
+                          Theme.of(
+                            context,
+                          ).iconTheme.color?.withValues(alpha: 0.6),
+                    ),
               SizedBox(width: AppConstants.spacing8),
             ],
             Expanded(
@@ -82,7 +97,9 @@ class _SettingsItemState extends State<SettingsItem> {
                         style: AppTypography.titleSmall(),
                       ),
                     ),
-                    if (widget.trailingText != null) ...[
+                    if (widget.trailing != null) ...[
+                      widget.trailing!,
+                    ] else if (widget.trailingText != null) ...[
                       Text(
                         widget.trailingText!,
                         style:
@@ -90,8 +107,7 @@ class _SettingsItemState extends State<SettingsItem> {
                             AppTypography.bodySmall(),
                       ),
                       SizedBox(width: AppConstants.spacing8),
-                    ],
-                    if (widget.trailingIcon != null) ...[
+                    ] else if (widget.trailingIcon != null) ...[
                       Icon(
                         widget.trailingIcon,
                         size: 20,
@@ -125,5 +141,56 @@ class _SettingsItemState extends State<SettingsItem> {
     }
 
     return content;
+  }
+}
+
+/// Widget that displays a pulsing icon to indicate loading state
+class _PulsingIcon extends StatefulWidget {
+  final IconData icon;
+  final Color? color;
+
+  const _PulsingIcon({required this.icon, this.color});
+
+  @override
+  State<_PulsingIcon> createState() => _PulsingIconState();
+}
+
+class _PulsingIconState extends State<_PulsingIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 0.6,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Icon(
+          widget.icon,
+          size: 24,
+          color: (widget.color ?? Theme.of(context).iconTheme.color)
+              ?.withValues(alpha: _animation.value),
+        );
+      },
+    );
   }
 }
