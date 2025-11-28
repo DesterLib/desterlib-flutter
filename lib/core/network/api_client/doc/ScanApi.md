@@ -11,7 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**apiV1ScanCleanupPost**](ScanApi.md#apiv1scancleanuppost) | **POST** /api/v1/scan/cleanup | Cleanup stale scan jobs
 [**apiV1ScanJobScanJobIdGet**](ScanApi.md#apiv1scanjobscanjobidget) | **GET** /api/v1/scan/job/{scanJobId} | Get scan job status
-[**apiV1ScanPathPost**](ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch TMDB metadata
+[**apiV1ScanPathPost**](ScanApi.md#apiv1scanpathpost) | **POST** /api/v1/scan/path | Scan a local file path and fetch metadata
 [**apiV1ScanResumeScanJobIdPost**](ScanApi.md#apiv1scanresumescanjobidpost) | **POST** /api/v1/scan/resume/{scanJobId} | Resume a failed or paused scan job
 
 
@@ -97,11 +97,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiV1ScanPathPost**
-> ApiV1ScanPathPost200Response apiV1ScanPathPost(apiV1ScanPathPostRequest)
+> ApiV1ScanPathPost202Response apiV1ScanPathPost(apiV1ScanPathPostRequest)
 
-Scan a local file path and fetch TMDB metadata
+Scan a local file path and fetch metadata
 
-Scans a local directory path and returns discovered media files with TMDB metadata. - Automatically fetches metadata from TMDB using the API key from environment variables - Extracts IDs from filenames and folder names (supports {tmdb-XXX}, {imdb-ttXXX}, {tvdb-XXX} formats) - Stores media information in the database with proper relationships - Supports both movies and TV shows 
+Scans a local directory path and returns discovered media files with metadata from configured providers (e.g., TMDB). - Automatically fetches metadata using the configured metadata provider - Extracts IDs from filenames and folder names (supports {tmdb-XXX}, {imdb-ttXXX}, {tvdb-XXX} formats) - Stores media information in the database with proper relationships - Supports both movies and TV shows - Uses database scan settings as defaults, which can be overridden by request parameters - Customizable with regex patterns for filenames and directories 
 
 ### Example
 ```dart
@@ -126,7 +126,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiV1ScanPathPost200Response**](ApiV1ScanPathPost200Response.md)
+[**ApiV1ScanPathPost202Response**](ApiV1ScanPathPost202Response.md)
 
 ### Authorization
 

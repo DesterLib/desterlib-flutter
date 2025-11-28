@@ -1,4 +1,4 @@
-# openapi.model.ApiV1ScanPathPostRequest
+# openapi.model.ApiV1ScanPathPostRequestOptionsMediaTypeDepth
 
 ## Load the model package
 ```dart
@@ -8,8 +8,8 @@ import 'package:openapi/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**path** | **String** | Local file system path to scan | 
-**options** | [**ApiV1ScanPathPostRequestOptions**](ApiV1ScanPathPostRequestOptions.md) |  | [optional] 
+**movie** | **num** | Maximum directory depth for movie scans (0-10) | [optional] 
+**tv** | **num** | Maximum directory depth for TV show scans (0-10) | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:openapi/src/model/update_settings_request_scan_settings.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -15,6 +16,7 @@ part 'update_settings_request.g.dart';
 /// * [port] - Server port number
 /// * [enableRouteGuards] - Enable/disable authentication route guards
 /// * [firstRun] - Whether this is the first run (usually managed via /first-run-complete)
+/// * [scanSettings] 
 @BuiltValue()
 abstract class UpdateSettingsRequest implements Built<UpdateSettingsRequest, UpdateSettingsRequestBuilder> {
   /// The Movie Database (TMDB) API key
@@ -32,6 +34,9 @@ abstract class UpdateSettingsRequest implements Built<UpdateSettingsRequest, Upd
   /// Whether this is the first run (usually managed via /first-run-complete)
   @BuiltValueField(wireName: r'firstRun')
   bool? get firstRun;
+
+  @BuiltValueField(wireName: r'scanSettings')
+  UpdateSettingsRequestScanSettings? get scanSettings;
 
   UpdateSettingsRequest._();
 
@@ -84,6 +89,13 @@ class _$UpdateSettingsRequestSerializer implements PrimitiveSerializer<UpdateSet
         specifiedType: const FullType(bool),
       );
     }
+    if (object.scanSettings != null) {
+      yield r'scanSettings';
+      yield serializers.serialize(
+        object.scanSettings,
+        specifiedType: const FullType(UpdateSettingsRequestScanSettings),
+      );
+    }
   }
 
   @override
@@ -134,6 +146,13 @@ class _$UpdateSettingsRequestSerializer implements PrimitiveSerializer<UpdateSet
             specifiedType: const FullType(bool),
           ) as bool;
           result.firstRun = valueDes;
+          break;
+        case r'scanSettings':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UpdateSettingsRequestScanSettings),
+          ) as UpdateSettingsRequestScanSettings;
+          result.scanSettings.replace(valueDes);
           break;
         default:
           unhandled.add(key);

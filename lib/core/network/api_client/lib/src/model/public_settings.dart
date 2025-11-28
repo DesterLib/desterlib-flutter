@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:openapi/src/model/public_settings_scan_settings.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -15,6 +16,7 @@ part 'public_settings.g.dart';
 /// * [port] - Server port number
 /// * [enableRouteGuards] - Whether to enable authentication route guards
 /// * [firstRun] - Indicates if this is the first run of the application
+/// * [scanSettings] 
 @BuiltValue()
 abstract class PublicSettings implements Built<PublicSettings, PublicSettingsBuilder> {
   /// The Movie Database (TMDB) API key for fetching metadata
@@ -32,6 +34,9 @@ abstract class PublicSettings implements Built<PublicSettings, PublicSettingsBui
   /// Indicates if this is the first run of the application
   @BuiltValueField(wireName: r'firstRun')
   bool? get firstRun;
+
+  @BuiltValueField(wireName: r'scanSettings')
+  PublicSettingsScanSettings? get scanSettings;
 
   PublicSettings._();
 
@@ -84,6 +89,13 @@ class _$PublicSettingsSerializer implements PrimitiveSerializer<PublicSettings> 
         specifiedType: const FullType(bool),
       );
     }
+    if (object.scanSettings != null) {
+      yield r'scanSettings';
+      yield serializers.serialize(
+        object.scanSettings,
+        specifiedType: const FullType(PublicSettingsScanSettings),
+      );
+    }
   }
 
   @override
@@ -134,6 +146,13 @@ class _$PublicSettingsSerializer implements PrimitiveSerializer<PublicSettings> 
             specifiedType: const FullType(bool),
           ) as bool;
           result.firstRun = valueDes;
+          break;
+        case r'scanSettings':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(PublicSettingsScanSettings),
+          ) as PublicSettingsScanSettings;
+          result.scanSettings.replace(valueDes);
           break;
         default:
           unhandled.add(key);

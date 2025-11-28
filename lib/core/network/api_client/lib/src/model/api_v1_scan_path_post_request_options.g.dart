@@ -77,26 +77,32 @@ class _$ApiV1ScanPathPostRequestOptionsMediaTypeEnumSerializer
 class _$ApiV1ScanPathPostRequestOptions
     extends ApiV1ScanPathPostRequestOptions {
   @override
-  final num? maxDepth;
-  @override
   final ApiV1ScanPathPostRequestOptionsMediaTypeEnum? mediaType;
   @override
-  final BuiltList<String>? fileExtensions;
+  final ApiV1ScanPathPostRequestOptionsMediaTypeDepth? mediaTypeDepth;
   @override
-  final String? libraryName;
+  final String? filenamePattern;
+  @override
+  final String? directoryPattern;
   @override
   final bool? rescan;
+  @override
+  final bool? batchScan;
+  @override
+  final bool? followSymlinks;
 
   factory _$ApiV1ScanPathPostRequestOptions([
     void Function(ApiV1ScanPathPostRequestOptionsBuilder)? updates,
   ]) => (ApiV1ScanPathPostRequestOptionsBuilder()..update(updates))._build();
 
   _$ApiV1ScanPathPostRequestOptions._({
-    this.maxDepth,
     this.mediaType,
-    this.fileExtensions,
-    this.libraryName,
+    this.mediaTypeDepth,
+    this.filenamePattern,
+    this.directoryPattern,
     this.rescan,
+    this.batchScan,
+    this.followSymlinks,
   }) : super._();
   @override
   ApiV1ScanPathPostRequestOptions rebuild(
@@ -111,21 +117,25 @@ class _$ApiV1ScanPathPostRequestOptions
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is ApiV1ScanPathPostRequestOptions &&
-        maxDepth == other.maxDepth &&
         mediaType == other.mediaType &&
-        fileExtensions == other.fileExtensions &&
-        libraryName == other.libraryName &&
-        rescan == other.rescan;
+        mediaTypeDepth == other.mediaTypeDepth &&
+        filenamePattern == other.filenamePattern &&
+        directoryPattern == other.directoryPattern &&
+        rescan == other.rescan &&
+        batchScan == other.batchScan &&
+        followSymlinks == other.followSymlinks;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
-    _$hash = $jc(_$hash, maxDepth.hashCode);
     _$hash = $jc(_$hash, mediaType.hashCode);
-    _$hash = $jc(_$hash, fileExtensions.hashCode);
-    _$hash = $jc(_$hash, libraryName.hashCode);
+    _$hash = $jc(_$hash, mediaTypeDepth.hashCode);
+    _$hash = $jc(_$hash, filenamePattern.hashCode);
+    _$hash = $jc(_$hash, directoryPattern.hashCode);
     _$hash = $jc(_$hash, rescan.hashCode);
+    _$hash = $jc(_$hash, batchScan.hashCode);
+    _$hash = $jc(_$hash, followSymlinks.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -133,11 +143,13 @@ class _$ApiV1ScanPathPostRequestOptions
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'ApiV1ScanPathPostRequestOptions')
-          ..add('maxDepth', maxDepth)
           ..add('mediaType', mediaType)
-          ..add('fileExtensions', fileExtensions)
-          ..add('libraryName', libraryName)
-          ..add('rescan', rescan))
+          ..add('mediaTypeDepth', mediaTypeDepth)
+          ..add('filenamePattern', filenamePattern)
+          ..add('directoryPattern', directoryPattern)
+          ..add('rescan', rescan)
+          ..add('batchScan', batchScan)
+          ..add('followSymlinks', followSymlinks))
         .toString();
   }
 }
@@ -150,29 +162,42 @@ class ApiV1ScanPathPostRequestOptionsBuilder
         > {
   _$ApiV1ScanPathPostRequestOptions? _$v;
 
-  num? _maxDepth;
-  num? get maxDepth => _$this._maxDepth;
-  set maxDepth(num? maxDepth) => _$this._maxDepth = maxDepth;
-
   ApiV1ScanPathPostRequestOptionsMediaTypeEnum? _mediaType;
   ApiV1ScanPathPostRequestOptionsMediaTypeEnum? get mediaType =>
       _$this._mediaType;
   set mediaType(ApiV1ScanPathPostRequestOptionsMediaTypeEnum? mediaType) =>
       _$this._mediaType = mediaType;
 
-  ListBuilder<String>? _fileExtensions;
-  ListBuilder<String> get fileExtensions =>
-      _$this._fileExtensions ??= ListBuilder<String>();
-  set fileExtensions(ListBuilder<String>? fileExtensions) =>
-      _$this._fileExtensions = fileExtensions;
+  ApiV1ScanPathPostRequestOptionsMediaTypeDepthBuilder? _mediaTypeDepth;
+  ApiV1ScanPathPostRequestOptionsMediaTypeDepthBuilder get mediaTypeDepth =>
+      _$this._mediaTypeDepth ??=
+          ApiV1ScanPathPostRequestOptionsMediaTypeDepthBuilder();
+  set mediaTypeDepth(
+    ApiV1ScanPathPostRequestOptionsMediaTypeDepthBuilder? mediaTypeDepth,
+  ) => _$this._mediaTypeDepth = mediaTypeDepth;
 
-  String? _libraryName;
-  String? get libraryName => _$this._libraryName;
-  set libraryName(String? libraryName) => _$this._libraryName = libraryName;
+  String? _filenamePattern;
+  String? get filenamePattern => _$this._filenamePattern;
+  set filenamePattern(String? filenamePattern) =>
+      _$this._filenamePattern = filenamePattern;
+
+  String? _directoryPattern;
+  String? get directoryPattern => _$this._directoryPattern;
+  set directoryPattern(String? directoryPattern) =>
+      _$this._directoryPattern = directoryPattern;
 
   bool? _rescan;
   bool? get rescan => _$this._rescan;
   set rescan(bool? rescan) => _$this._rescan = rescan;
+
+  bool? _batchScan;
+  bool? get batchScan => _$this._batchScan;
+  set batchScan(bool? batchScan) => _$this._batchScan = batchScan;
+
+  bool? _followSymlinks;
+  bool? get followSymlinks => _$this._followSymlinks;
+  set followSymlinks(bool? followSymlinks) =>
+      _$this._followSymlinks = followSymlinks;
 
   ApiV1ScanPathPostRequestOptionsBuilder() {
     ApiV1ScanPathPostRequestOptions._defaults(this);
@@ -181,11 +206,13 @@ class ApiV1ScanPathPostRequestOptionsBuilder
   ApiV1ScanPathPostRequestOptionsBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _maxDepth = $v.maxDepth;
       _mediaType = $v.mediaType;
-      _fileExtensions = $v.fileExtensions?.toBuilder();
-      _libraryName = $v.libraryName;
+      _mediaTypeDepth = $v.mediaTypeDepth?.toBuilder();
+      _filenamePattern = $v.filenamePattern;
+      _directoryPattern = $v.directoryPattern;
       _rescan = $v.rescan;
+      _batchScan = $v.batchScan;
+      _followSymlinks = $v.followSymlinks;
       _$v = null;
     }
     return this;
@@ -210,17 +237,19 @@ class ApiV1ScanPathPostRequestOptionsBuilder
       _$result =
           _$v ??
           _$ApiV1ScanPathPostRequestOptions._(
-            maxDepth: maxDepth,
             mediaType: mediaType,
-            fileExtensions: _fileExtensions?.build(),
-            libraryName: libraryName,
+            mediaTypeDepth: _mediaTypeDepth?.build(),
+            filenamePattern: filenamePattern,
+            directoryPattern: directoryPattern,
             rescan: rescan,
+            batchScan: batchScan,
+            followSymlinks: followSymlinks,
           );
     } catch (_) {
       late String _$failedField;
       try {
-        _$failedField = 'fileExtensions';
-        _fileExtensions?.build();
+        _$failedField = 'mediaTypeDepth';
+        _mediaTypeDepth?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
           r'ApiV1ScanPathPostRequestOptions',

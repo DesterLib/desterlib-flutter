@@ -38,13 +38,13 @@ Serializers _$serializers =
           ..add(ApiV1MoviesIdGet500Response.serializer)
           ..add(ApiV1ScanCleanupPost200Response.serializer)
           ..add(ApiV1ScanCleanupPost200ResponseData.serializer)
-          ..add(ApiV1ScanPathPost200Response.serializer)
-          ..add(ApiV1ScanPathPost200ResponseData.serializer)
-          ..add(ApiV1ScanPathPost200ResponseDataCacheStats.serializer)
+          ..add(ApiV1ScanPathPost202Response.serializer)
+          ..add(ApiV1ScanPathPost202ResponseData.serializer)
           ..add(ApiV1ScanPathPost400Response.serializer)
           ..add(ApiV1ScanPathPost500Response.serializer)
           ..add(ApiV1ScanPathPostRequest.serializer)
           ..add(ApiV1ScanPathPostRequestOptions.serializer)
+          ..add(ApiV1ScanPathPostRequestOptionsMediaTypeDepth.serializer)
           ..add(ApiV1ScanPathPostRequestOptionsMediaTypeEnum.serializer)
           ..add(ApiV1ScanResumeScanJobIdPost202Response.serializer)
           ..add(ApiV1ScanResumeScanJobIdPost202ResponseData.serializer)
@@ -64,6 +64,8 @@ Serializers _$serializers =
           ..add(ApiV1SettingsGet500Response.serializer)
           ..add(ApiV1SettingsPut200Response.serializer)
           ..add(ApiV1SettingsPut500Response.serializer)
+          ..add(ApiV1SettingsResetPost200Response.serializer)
+          ..add(ApiV1SettingsResetScanPost200Response.serializer)
           ..add(ApiV1StreamIdGet400Response.serializer)
           ..add(ApiV1StreamIdGet404Response.serializer)
           ..add(ApiV1StreamIdGet416Response.serializer)
@@ -87,7 +89,12 @@ Serializers _$serializers =
           ..add(ModelLibrary.serializer)
           ..add(ModelLibraryLibraryTypeEnum.serializer)
           ..add(PublicSettings.serializer)
+          ..add(PublicSettingsScanSettings.serializer)
+          ..add(PublicSettingsScanSettingsMediaTypeDepth.serializer)
+          ..add(PublicSettingsScanSettingsMediaTypeEnum.serializer)
           ..add(UpdateSettingsRequest.serializer)
+          ..add(UpdateSettingsRequestScanSettings.serializer)
+          ..add(UpdateSettingsRequestScanSettingsMediaTypeEnum.serializer)
           ..addBuilderFactory(
             const FullType(BuiltList, const [
               const FullType(ApiV1LogsGet200ResponseDataInner),
@@ -138,6 +145,26 @@ Serializers _$serializers =
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(ModelLibrary)]),
             () => ListBuilder<ModelLibrary>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
+          )
+          ..addBuilderFactory(
+            const FullType(BuiltList, const [const FullType(String)]),
+            () => ListBuilder<String>(),
           )
           ..addBuilderFactory(
             const FullType(BuiltList, const [const FullType(String)]),

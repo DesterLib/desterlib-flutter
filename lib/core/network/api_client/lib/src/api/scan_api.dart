@@ -10,7 +10,7 @@ import 'package:dio/dio.dart';
 
 import 'package:openapi/src/api_util.dart';
 import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post202_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
@@ -144,8 +144,8 @@ class ScanApi {
     return _response;
   }
 
-  /// Scan a local file path and fetch TMDB metadata
-  /// Scans a local directory path and returns discovered media files with TMDB metadata. - Automatically fetches metadata from TMDB using the API key from environment variables - Extracts IDs from filenames and folder names (supports {tmdb-XXX}, {imdb-ttXXX}, {tvdb-XXX} formats) - Stores media information in the database with proper relationships - Supports both movies and TV shows 
+  /// Scan a local file path and fetch metadata
+  /// Scans a local directory path and returns discovered media files with metadata from configured providers (e.g., TMDB). - Automatically fetches metadata using the configured metadata provider - Extracts IDs from filenames and folder names (supports {tmdb-XXX}, {imdb-ttXXX}, {tvdb-XXX} formats) - Stores media information in the database with proper relationships - Supports both movies and TV shows - Uses database scan settings as defaults, which can be overridden by request parameters - Customizable with regex patterns for filenames and directories 
   ///
   /// Parameters:
   /// * [apiV1ScanPathPostRequest] 
@@ -156,9 +156,9 @@ class ScanApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiV1ScanPathPost200Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiV1ScanPathPost202Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiV1ScanPathPost200Response>> apiV1ScanPathPost({ 
+  Future<Response<ApiV1ScanPathPost202Response>> apiV1ScanPathPost({ 
     required ApiV1ScanPathPostRequest apiV1ScanPathPostRequest,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -208,14 +208,14 @@ class ScanApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiV1ScanPathPost200Response? _responseData;
+    ApiV1ScanPathPost202Response? _responseData;
 
     try {
       final rawResponse = _response.data;
       _responseData = rawResponse == null ? null : _serializers.deserialize(
         rawResponse,
-        specifiedType: const FullType(ApiV1ScanPathPost200Response),
-      ) as ApiV1ScanPathPost200Response;
+        specifiedType: const FullType(ApiV1ScanPathPost202Response),
+      ) as ApiV1ScanPathPost202Response;
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -227,7 +227,7 @@ class ScanApi {
       );
     }
 
-    return Response<ApiV1ScanPathPost200Response>(
+    return Response<ApiV1ScanPathPost202Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

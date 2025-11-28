@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **port** | **num** | Server port number | [optional] 
 **enableRouteGuards** | **bool** | Whether to enable authentication route guards | [optional] 
 **firstRun** | **bool** | Indicates if this is the first run of the application | [optional] 
+**scanSettings** | [**PublicSettingsScanSettings**](PublicSettingsScanSettings.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

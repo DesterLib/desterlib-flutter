@@ -1,4 +1,4 @@
-# openapi.model.ApiV1ScanPathPostRequest
+# openapi.model.ApiV1ScanPathPost202Response
 
 ## Load the model package
 ```dart
@@ -8,8 +8,9 @@ import 'package:openapi/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**path** | **String** | Local file system path to scan | 
-**options** | [**ApiV1ScanPathPostRequestOptions**](ApiV1ScanPathPostRequestOptions.md) |  | [optional] 
+**success** | **bool** |  | [optional] 
+**data** | [**ApiV1ScanPathPost202ResponseData**](ApiV1ScanPathPost202ResponseData.md) |  | [optional] 
+**message** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

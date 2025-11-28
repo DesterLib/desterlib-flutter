@@ -15,6 +15,8 @@ class _$PublicSettings extends PublicSettings {
   final bool? enableRouteGuards;
   @override
   final bool? firstRun;
+  @override
+  final PublicSettingsScanSettings? scanSettings;
 
   factory _$PublicSettings([void Function(PublicSettingsBuilder)? updates]) =>
       (PublicSettingsBuilder()..update(updates))._build();
@@ -24,6 +26,7 @@ class _$PublicSettings extends PublicSettings {
     this.port,
     this.enableRouteGuards,
     this.firstRun,
+    this.scanSettings,
   }) : super._();
   @override
   PublicSettings rebuild(void Function(PublicSettingsBuilder) updates) =>
@@ -39,7 +42,8 @@ class _$PublicSettings extends PublicSettings {
         tmdbApiKey == other.tmdbApiKey &&
         port == other.port &&
         enableRouteGuards == other.enableRouteGuards &&
-        firstRun == other.firstRun;
+        firstRun == other.firstRun &&
+        scanSettings == other.scanSettings;
   }
 
   @override
@@ -49,6 +53,7 @@ class _$PublicSettings extends PublicSettings {
     _$hash = $jc(_$hash, port.hashCode);
     _$hash = $jc(_$hash, enableRouteGuards.hashCode);
     _$hash = $jc(_$hash, firstRun.hashCode);
+    _$hash = $jc(_$hash, scanSettings.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -59,7 +64,8 @@ class _$PublicSettings extends PublicSettings {
           ..add('tmdbApiKey', tmdbApiKey)
           ..add('port', port)
           ..add('enableRouteGuards', enableRouteGuards)
-          ..add('firstRun', firstRun))
+          ..add('firstRun', firstRun)
+          ..add('scanSettings', scanSettings))
         .toString();
   }
 }
@@ -85,6 +91,12 @@ class PublicSettingsBuilder
   bool? get firstRun => _$this._firstRun;
   set firstRun(bool? firstRun) => _$this._firstRun = firstRun;
 
+  PublicSettingsScanSettingsBuilder? _scanSettings;
+  PublicSettingsScanSettingsBuilder get scanSettings =>
+      _$this._scanSettings ??= PublicSettingsScanSettingsBuilder();
+  set scanSettings(PublicSettingsScanSettingsBuilder? scanSettings) =>
+      _$this._scanSettings = scanSettings;
+
   PublicSettingsBuilder() {
     PublicSettings._defaults(this);
   }
@@ -96,6 +108,7 @@ class PublicSettingsBuilder
       _port = $v.port;
       _enableRouteGuards = $v.enableRouteGuards;
       _firstRun = $v.firstRun;
+      _scanSettings = $v.scanSettings?.toBuilder();
       _$v = null;
     }
     return this;
@@ -115,14 +128,31 @@ class PublicSettingsBuilder
   PublicSettings build() => _build();
 
   _$PublicSettings _build() {
-    final _$result =
-        _$v ??
-        _$PublicSettings._(
-          tmdbApiKey: tmdbApiKey,
-          port: port,
-          enableRouteGuards: enableRouteGuards,
-          firstRun: firstRun,
+    _$PublicSettings _$result;
+    try {
+      _$result =
+          _$v ??
+          _$PublicSettings._(
+            tmdbApiKey: tmdbApiKey,
+            port: port,
+            enableRouteGuards: enableRouteGuards,
+            firstRun: firstRun,
+            scanSettings: _scanSettings?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'scanSettings';
+        _scanSettings?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'PublicSettings',
+          _$failedField,
+          e.toString(),
         );
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

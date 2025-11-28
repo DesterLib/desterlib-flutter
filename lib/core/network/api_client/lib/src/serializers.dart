@@ -41,13 +41,13 @@ import 'package:openapi/src/model/api_v1_movies_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_movies_id_get500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response.dart';
 import 'package:openapi/src/model/api_v1_scan_cleanup_post200_response_data.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post200_response.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post200_response_data.dart';
-import 'package:openapi/src/model/api_v1_scan_path_post200_response_data_cache_stats.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post202_response.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post202_response_data.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post400_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post500_response.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request.dart';
 import 'package:openapi/src/model/api_v1_scan_path_post_request_options.dart';
+import 'package:openapi/src/model/api_v1_scan_path_post_request_options_media_type_depth.dart';
 import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response.dart';
 import 'package:openapi/src/model/api_v1_scan_resume_scan_job_id_post202_response_data.dart';
 import 'package:openapi/src/model/api_v1_search_get200_response.dart';
@@ -63,6 +63,8 @@ import 'package:openapi/src/model/api_v1_settings_get200_response.dart';
 import 'package:openapi/src/model/api_v1_settings_get500_response.dart';
 import 'package:openapi/src/model/api_v1_settings_put200_response.dart';
 import 'package:openapi/src/model/api_v1_settings_put500_response.dart';
+import 'package:openapi/src/model/api_v1_settings_reset_post200_response.dart';
+import 'package:openapi/src/model/api_v1_settings_reset_scan_post200_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get400_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get404_response.dart';
 import 'package:openapi/src/model/api_v1_stream_id_get416_response.dart';
@@ -81,7 +83,10 @@ import 'package:openapi/src/model/api_v1_tvshows_id_get500_response.dart';
 import 'package:openapi/src/model/health_response.dart';
 import 'package:openapi/src/model/model_library.dart';
 import 'package:openapi/src/model/public_settings.dart';
+import 'package:openapi/src/model/public_settings_scan_settings.dart';
+import 'package:openapi/src/model/public_settings_scan_settings_media_type_depth.dart';
 import 'package:openapi/src/model/update_settings_request.dart';
+import 'package:openapi/src/model/update_settings_request_scan_settings.dart';
 
 part 'serializers.g.dart';
 
@@ -113,13 +118,13 @@ part 'serializers.g.dart';
   ApiV1MoviesIdGet500Response,
   ApiV1ScanCleanupPost200Response,
   ApiV1ScanCleanupPost200ResponseData,
-  ApiV1ScanPathPost200Response,
-  ApiV1ScanPathPost200ResponseData,
-  ApiV1ScanPathPost200ResponseDataCacheStats,
+  ApiV1ScanPathPost202Response,
+  ApiV1ScanPathPost202ResponseData,
   ApiV1ScanPathPost400Response,
   ApiV1ScanPathPost500Response,
   ApiV1ScanPathPostRequest,
   ApiV1ScanPathPostRequestOptions,
+  ApiV1ScanPathPostRequestOptionsMediaTypeDepth,
   ApiV1ScanResumeScanJobIdPost202Response,
   ApiV1ScanResumeScanJobIdPost202ResponseData,
   ApiV1SearchGet200Response,
@@ -135,6 +140,8 @@ part 'serializers.g.dart';
   ApiV1SettingsGet500Response,
   ApiV1SettingsPut200Response,
   ApiV1SettingsPut500Response,
+  ApiV1SettingsResetPost200Response,
+  ApiV1SettingsResetScanPost200Response,
   ApiV1StreamIdGet400Response,
   ApiV1StreamIdGet404Response,
   ApiV1StreamIdGet416Response,
@@ -153,7 +160,10 @@ part 'serializers.g.dart';
   HealthResponse,
   ModelLibrary,
   PublicSettings,
+  PublicSettingsScanSettings,
+  PublicSettingsScanSettingsMediaTypeDepth,
   UpdateSettingsRequest,
+  UpdateSettingsRequestScanSettings,
 ])
 Serializers serializers = (_$serializers.toBuilder()
       ..add(const OneOfSerializer())

@@ -15,6 +15,8 @@ class _$UpdateSettingsRequest extends UpdateSettingsRequest {
   final bool? enableRouteGuards;
   @override
   final bool? firstRun;
+  @override
+  final UpdateSettingsRequestScanSettings? scanSettings;
 
   factory _$UpdateSettingsRequest([
     void Function(UpdateSettingsRequestBuilder)? updates,
@@ -25,6 +27,7 @@ class _$UpdateSettingsRequest extends UpdateSettingsRequest {
     this.port,
     this.enableRouteGuards,
     this.firstRun,
+    this.scanSettings,
   }) : super._();
   @override
   UpdateSettingsRequest rebuild(
@@ -42,7 +45,8 @@ class _$UpdateSettingsRequest extends UpdateSettingsRequest {
         tmdbApiKey == other.tmdbApiKey &&
         port == other.port &&
         enableRouteGuards == other.enableRouteGuards &&
-        firstRun == other.firstRun;
+        firstRun == other.firstRun &&
+        scanSettings == other.scanSettings;
   }
 
   @override
@@ -52,6 +56,7 @@ class _$UpdateSettingsRequest extends UpdateSettingsRequest {
     _$hash = $jc(_$hash, port.hashCode);
     _$hash = $jc(_$hash, enableRouteGuards.hashCode);
     _$hash = $jc(_$hash, firstRun.hashCode);
+    _$hash = $jc(_$hash, scanSettings.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -62,7 +67,8 @@ class _$UpdateSettingsRequest extends UpdateSettingsRequest {
           ..add('tmdbApiKey', tmdbApiKey)
           ..add('port', port)
           ..add('enableRouteGuards', enableRouteGuards)
-          ..add('firstRun', firstRun))
+          ..add('firstRun', firstRun)
+          ..add('scanSettings', scanSettings))
         .toString();
   }
 }
@@ -88,6 +94,12 @@ class UpdateSettingsRequestBuilder
   bool? get firstRun => _$this._firstRun;
   set firstRun(bool? firstRun) => _$this._firstRun = firstRun;
 
+  UpdateSettingsRequestScanSettingsBuilder? _scanSettings;
+  UpdateSettingsRequestScanSettingsBuilder get scanSettings =>
+      _$this._scanSettings ??= UpdateSettingsRequestScanSettingsBuilder();
+  set scanSettings(UpdateSettingsRequestScanSettingsBuilder? scanSettings) =>
+      _$this._scanSettings = scanSettings;
+
   UpdateSettingsRequestBuilder() {
     UpdateSettingsRequest._defaults(this);
   }
@@ -99,6 +111,7 @@ class UpdateSettingsRequestBuilder
       _port = $v.port;
       _enableRouteGuards = $v.enableRouteGuards;
       _firstRun = $v.firstRun;
+      _scanSettings = $v.scanSettings?.toBuilder();
       _$v = null;
     }
     return this;
@@ -118,14 +131,31 @@ class UpdateSettingsRequestBuilder
   UpdateSettingsRequest build() => _build();
 
   _$UpdateSettingsRequest _build() {
-    final _$result =
-        _$v ??
-        _$UpdateSettingsRequest._(
-          tmdbApiKey: tmdbApiKey,
-          port: port,
-          enableRouteGuards: enableRouteGuards,
-          firstRun: firstRun,
+    _$UpdateSettingsRequest _$result;
+    try {
+      _$result =
+          _$v ??
+          _$UpdateSettingsRequest._(
+            tmdbApiKey: tmdbApiKey,
+            port: port,
+            enableRouteGuards: enableRouteGuards,
+            firstRun: firstRun,
+            scanSettings: _scanSettings?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'scanSettings';
+        _scanSettings?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+          r'UpdateSettingsRequest',
+          _$failedField,
+          e.toString(),
         );
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

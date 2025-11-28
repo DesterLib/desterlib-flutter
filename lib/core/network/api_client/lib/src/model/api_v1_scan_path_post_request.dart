@@ -28,8 +28,7 @@ abstract class ApiV1ScanPathPostRequest implements Built<ApiV1ScanPathPostReques
   factory ApiV1ScanPathPostRequest([void updates(ApiV1ScanPathPostRequestBuilder b)]) = _$ApiV1ScanPathPostRequest;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(ApiV1ScanPathPostRequestBuilder b) => b
-      ..path = '/Volumes/External/Library/Media/Shows/Anime';
+  static void _defaults(ApiV1ScanPathPostRequestBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
   static Serializer<ApiV1ScanPathPostRequest> get serializer => _$ApiV1ScanPathPostRequestSerializer();
