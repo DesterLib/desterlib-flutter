@@ -1,12 +1,11 @@
 // Core
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
-import 'package:dester/core/connection/domain/repository/connection_repository.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/repository/connection_repository.dart';
 import 'package:dester/core/utils/app_logger.dart';
 import 'package:dester/core/utils/url_helper.dart';
 
 import 'add_api_configuration.dart';
-
 
 /// Implementation of add API configuration use case
 class AddApiConfigurationImpl implements AddApiConfiguration {
@@ -23,13 +22,31 @@ class AddApiConfigurationImpl implements AddApiConfiguration {
     AppLogger.d('Adding API configuration: $label - $url');
 
     // Validate URL format
+    if (url.trim().isEmpty) {
+      AppLogger.w('URL cannot be empty');
+      return ConnectionGuardState(
+        status: ConnectionStatus.error,
+        errorMessage: 'URL cannot be empty',
+      );
+    }
+
     try {
-      final uri = Uri.parse(url);
-      if (!uri.hasScheme || (!uri.hasAuthority && uri.host.isEmpty)) {
-        AppLogger.w('Invalid URL format: $url');
+      final uri = Uri.parse(url.trim());
+      // Check if URL has a valid scheme (http, https, etc.)
+      if (!uri.hasScheme) {
+        AppLogger.w('Invalid URL format: missing scheme - $url');
         return ConnectionGuardState(
           status: ConnectionStatus.error,
-          errorMessage: 'Invalid URL format',
+          errorMessage:
+              'Invalid URL format: missing scheme (http:// or https://)',
+        );
+      }
+      // Check if URL has a valid host or authority
+      if (uri.host.isEmpty && !uri.hasAuthority) {
+        AppLogger.w('Invalid URL format: missing host - $url');
+        return ConnectionGuardState(
+          status: ConnectionStatus.error,
+          errorMessage: 'Invalid URL format: missing host',
         );
       }
     } catch (e, stackTrace) {

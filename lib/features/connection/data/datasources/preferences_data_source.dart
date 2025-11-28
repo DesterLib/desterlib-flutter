@@ -1,5 +1,5 @@
 // Core
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/storage/preferences_service.dart';
 
 

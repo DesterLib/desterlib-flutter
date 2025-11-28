@@ -6,11 +6,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Core
-import 'package:dester/core/connection/connection_service.dart';
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/storage/preferences_service.dart';
 
+// Features
+import 'package:dester/features/connection/connection_feature.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 
 /// Provider for PreferencesService initialization
 final preferencesServiceProvider = FutureProvider<void>((ref) async {
@@ -32,16 +33,16 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
   bool _isCheckingConnection = false;
   Future<void>? _currentCheck;
 
-  // Use cases (injected via service factory)
-  late final _checkConnection = ConnectionService.createCheckConnection();
+  // Use cases (injected via feature factory)
+  late final _checkConnection = ConnectionFeature.createCheckConnection();
   late final _addApiConfiguration =
-      ConnectionService.createAddApiConfiguration();
+      ConnectionFeature.createAddApiConfiguration();
   late final _setActiveApiConfiguration =
-      ConnectionService.createSetActiveApiConfiguration();
+      ConnectionFeature.createSetActiveApiConfiguration();
   late final _deleteApiConfiguration =
-      ConnectionService.createDeleteApiConfiguration();
+      ConnectionFeature.createDeleteApiConfiguration();
   late final _getApiConfigurations =
-      ConnectionService.createGetApiConfigurations();
+      ConnectionFeature.createGetApiConfigurations();
 
   @override
   ConnectionGuardState build() {
@@ -109,7 +110,7 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
   /// Internal method to perform the actual connection check
   Future<void> _performCheck() async {
     _isCheckingConnection = true;
-    
+
     state = state.copyWith(
       status: ConnectionStatus.checking,
       clearErrorMessage: true,

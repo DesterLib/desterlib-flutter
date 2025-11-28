@@ -8,6 +8,7 @@ import 'package:dester/core/storage/preferences_service.dart';
 import 'package:dester/core/utils/url_helper.dart';
 
 import 'interceptors/api_logging_interceptor.dart';
+import 'interceptors/api_guard_interceptor.dart';
 import 'interceptors/client_version_interceptor.dart';
 
 /// Service for managing the OpenAPI client instance
@@ -28,8 +29,9 @@ class ApiClientService {
         PreferencesService.getActiveApiUrl() ?? 'http://localhost:3001';
     final normalizedUrl = UrlHelper.normalizeUrl(baseUrl);
 
-    // Create interceptors list with logging first, then client version, then default auth interceptors
+    // Create interceptors list with guard first (to block early), then logging, then client version, then default auth interceptors
     final interceptors = <Interceptor>[
+      ApiGuardInterceptor(),
       ApiLoggingInterceptor(),
       ClientVersionInterceptor(),
       OAuthInterceptor(),
@@ -62,8 +64,9 @@ class ApiClientService {
   static void updateBaseUrl(String baseUrl) {
     final normalizedUrl = UrlHelper.normalizeUrl(baseUrl);
 
-    // Create interceptors list with logging first, then client version, then default auth interceptors
+    // Create interceptors list with guard first (to block early), then logging, then client version, then default auth interceptors
     final interceptors = <Interceptor>[
+      ApiGuardInterceptor(),
       ApiLoggingInterceptor(),
       ClientVersionInterceptor(),
       OAuthInterceptor(),

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
-import 'package:dester/core/connection/presentation/widgets/m_connection_status.dart';
+import 'package:dester/features/connection/presentation/widgets/m_connection_status.dart';
 
 import 'app_logger.dart';
 

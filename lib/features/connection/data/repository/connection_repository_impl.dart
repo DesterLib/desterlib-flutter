@@ -1,9 +1,9 @@
 // Core
-import 'package:dester/core/connection/data/datasources/network_data_source.dart';
-import 'package:dester/core/connection/data/datasources/preferences_data_source.dart';
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
-import 'package:dester/core/connection/domain/repository/connection_repository.dart';
+import 'package:dester/features/connection/data/datasources/network_data_source.dart';
+import 'package:dester/features/connection/data/datasources/preferences_data_source.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/repository/connection_repository.dart';
 
 
 /// Repository implementation for connection management (data layer)

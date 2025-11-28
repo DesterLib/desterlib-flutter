@@ -5,11 +5,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Core
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
 import 'package:dester/core/network/api_client_service.dart';
 
 import 'storage_keys.dart';
-
 
 /// Service for managing local preferences
 class PreferencesService {

@@ -3,7 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 
 // Core
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/constants/app_version.dart';
 import 'package:dester/core/utils/app_logger.dart';
 import 'package:dester/core/utils/url_helper.dart';

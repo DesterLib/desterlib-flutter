@@ -1,6 +1,6 @@
 // Core
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 
 
 /// Repository interface for connection management (domain layer)

@@ -1,4 +1,4 @@
-// Dependency injection setup for Connection service
+// Dependency injection setup for Connection feature
 import 'data/datasources/network_data_source.dart';
 import 'data/datasources/preferences_data_source.dart';
 import 'data/repository/connection_repository_impl.dart';
@@ -13,8 +13,7 @@ import 'domain/usecases/get_api_configurations_impl.dart';
 import 'domain/usecases/set_active_api_configuration.dart';
 import 'domain/usecases/set_active_api_configuration_impl.dart';
 
-
-class ConnectionService {
+class ConnectionFeature {
   /// Create check connection use case
   static CheckConnection createCheckConnection() {
     final preferencesDataSource = PreferencesDataSourceImpl();

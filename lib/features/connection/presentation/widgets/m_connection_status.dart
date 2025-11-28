@@ -9,7 +9,7 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';

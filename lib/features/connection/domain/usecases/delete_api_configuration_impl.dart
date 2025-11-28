@@ -1,7 +1,7 @@
 // Core
-import 'package:dester/core/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
-import 'package:dester/core/connection/domain/repository/connection_repository.dart';
+import 'package:dester/features/connection/domain/entities/api_configuration.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/repository/connection_repository.dart';
 import 'package:dester/core/utils/app_logger.dart';
 
 import 'delete_api_configuration.dart';

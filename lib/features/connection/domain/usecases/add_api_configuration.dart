@@ -1,5 +1,5 @@
 // Core
-import 'package:dester/core/connection/domain/entities/connection_status.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 
 
 /// Use case interface for adding a new API configuration
