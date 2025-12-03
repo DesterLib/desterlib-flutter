@@ -47,31 +47,21 @@ class HeroWidget extends StatelessWidget {
   static String? _getImagePath(MediaItem item, BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     if (isMobile) {
-      // On mobile, prefer poster
-      return item.plainPosterUrl ?? item.backdropPath;
+      // On mobile, prefer null poster, fallback to poster, then backdrop
+      return item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
     } else {
-      // On desktop, prefer backdrop
-      return item.backdropPath ?? item.plainPosterUrl;
+      // On desktop, prefer backdrop, fallback to null poster, then poster
+      return item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
     }
-  }
-
-  static double _getHeroHeight(MediaItem item, BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 768;
-    if (isMobile && item.plainPosterUrl != null) {
-      return 720;
-    }
-    return 600;
   }
 
   @override
   Widget build(BuildContext context) {
-    final heroHeight = height ?? _getHeroHeight(item, context);
-
     return SizedBox(
       width: double.infinity,
-      height: heroHeight,
+      height: height, // Use the passed height (can be null for flexible sizing)
       child: Stack(
-        fit: StackFit.expand,
+        fit: height == null ? StackFit.loose : StackFit.expand,
         clipBehavior: Clip.none,
         children: [
           // Mesh Gradient
@@ -105,7 +95,11 @@ class _HeroImage extends StatelessWidget {
   }
 
   List<String>? _getGenres() {
-    // TODO: Add genres to Movie and TVShow entities
+    if (item is MovieMediaItem) {
+      return (item as MovieMediaItem).movie.genres;
+    } else if (item is TVShowMediaItem) {
+      return (item as TVShowMediaItem).tvShow.genres;
+    }
     return null;
   }
 
@@ -115,6 +109,7 @@ class _HeroImage extends StatelessWidget {
     required ThemeData theme,
     String? overview,
   }) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     final children = <Widget>[];
 
     // Logo
@@ -122,7 +117,7 @@ class _HeroImage extends StatelessWidget {
       children.add(
         CachedNetworkImage(
           imageUrl: item.logoUrl!,
-          height: 80,
+          height: 60,
           fit: BoxFit.contain,
           placeholder: (context, url) => const SizedBox(
             height: 80,
@@ -173,7 +168,9 @@ class _HeroImage extends StatelessWidget {
     // Action Buttons
     children.add(
       Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: isMobile
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: [
           DButton(
             label: 'Watch Now',
@@ -210,14 +207,17 @@ class _HeroImage extends StatelessWidget {
     // Overview
     if (overview != null) {
       children.add(
-        Text(
-          overview,
-          style: AppTypography.bodyMedium(
-            color: Colors.white,
-          ).copyWith(height: 1.4),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 540),
+          child: Text(
+            overview,
+            style: AppTypography.bodyMedium(
+              color: Colors.white,
+            ).copyWith(height: 1.4),
+            textAlign: isMobile ? TextAlign.center : TextAlign.start,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       );
     }
@@ -241,89 +241,141 @@ class _HeroImage extends StatelessWidget {
     final overview = _getOverview();
     final theme = Theme.of(context);
 
-    return SizedBox.expand(
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: isMobile
-                ? (isIos
-                      ? BorderRadius.circular(AppConstants.spacing32)
-                      : BorderRadius.circular(AppConstants.radiusXl))
-                : BorderRadius.zero,
-            child: ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return ui.Gradient.linear(
-                  const Offset(0, 0),
-                  Offset(0, bounds.height),
-                  [
-                    Colors.white, // Fully visible at top
-                    Colors.white.withValues(alpha: 0.8),
-                    Colors.white.withValues(alpha: 0.4),
-                    Colors.transparent, // Fully transparent at bottom
-                  ],
-                  [0.0, 0.3, 0.7, 1.0],
-                );
-              },
-              blendMode: BlendMode.dstIn,
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                placeholder: (context, url) => Container(
-                  color: Colors.black26,
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.black12,
-                  child: const Center(
-                    child: Icon(Icons.error, color: Colors.white54),
-                  ),
+    final stackContent = Stack(
+      children: [
+        // Image container with width constraint on desktop
+        Align(
+          alignment: Alignment.topRight,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isMobile
+                  ? double.infinity
+                  : MediaQuery.of(context).size.width * 0.6,
+            ),
+            child: ClipRRect(
+              borderRadius: isMobile
+                  ? (isIos
+                        ? BorderRadius.circular(AppConstants.spacing32)
+                        : BorderRadius.circular(AppConstants.radiusXl))
+                  : BorderRadius.zero,
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return ui.Gradient.linear(
+                    const Offset(0, 0),
+                    Offset(0, bounds.height),
+                    [
+                      Colors.white, // Fully visible at top
+                      Colors.white.withValues(alpha: 0.8),
+                      Colors.white.withValues(alpha: 0.4),
+                      Colors.transparent, // Fully transparent at bottom
+                    ],
+                    [0.0, 0.3, 0.7, 1.0],
+                  );
+                },
+                blendMode: BlendMode.dstIn,
+                child: isMobile
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        placeholder: (context, url) => Container(
+                          color: Colors.black26,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.black12,
+                          child: const Center(
+                            child: Icon(Icons.error, color: Colors.white54),
+                          ),
+                        ),
+                      )
+                    : ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return ui.Gradient.linear(
+                            const Offset(0, 0),
+                            Offset(bounds.width, 0),
+                            [
+                              Colors.transparent, // Transparent at left
+                              Colors.white.withValues(alpha: 0.4),
+                              Colors.white, // Fully visible at right
+                            ],
+                            [0.0, 0.2, 0.4],
+                          );
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.contain,
+                            width: double.infinity,
+                            placeholder: (context, url) => Container(
+                              color: Colors.black26,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.black12,
+                              child: const Center(
+                                child: Icon(Icons.error, color: Colors.white54),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+          ),
+        ),
+        Container(
+          height: 180,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.8),
+                Colors.black.withValues(alpha: 0.4),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+        // Bottom overlay with title and buttons
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: DSidebarSpace(
+            child: Container(
+              padding: AppConstants.paddingOnly(
+                left: AppConstants.spacingLg,
+                right: AppConstants.spacingLg,
+                bottom: AppConstants.spacingXl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: isMobile
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
+                children: _buildSpacedChildren(
+                  context: context,
+                  theme: theme,
+                  overview: overview,
                 ),
               ),
             ),
           ),
-          Container(
-            height: 180,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.8),
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          // Bottom overlay with title and buttons
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: DSidebarSpace(
-              child: Container(
-                padding: AppConstants.paddingOnly(
-                  left: AppConstants.spacingLg,
-                  right: AppConstants.spacingLg,
-                  bottom: AppConstants.spacingXl,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: _buildSpacedChildren(
-                    context: context,
-                    theme: theme,
-                    overview: overview,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
+
+    // On mobile, expand to fill parent; on desktop, let content size naturally
+    return isMobile ? SizedBox.expand(child: stackContent) : stackContent;
   }
 }
 

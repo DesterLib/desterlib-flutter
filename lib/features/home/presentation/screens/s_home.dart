@@ -81,9 +81,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Prefetch backdrop/poster
       String? imageUrl;
       if (isMobile) {
-        imageUrl = item.plainPosterUrl ?? item.backdropPath;
+        imageUrl = item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
       } else {
-        imageUrl = item.backdropPath ?? item.plainPosterUrl;
+        imageUrl = item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
       }
       if (imageUrl != null) {
         precacheImage(CachedNetworkImageProvider(imageUrl), context).catchError(

@@ -1,90 +1,79 @@
-// External packages
-import 'package:dio/dio.dart';
-
 // Core
 import 'package:dester/core/errors/errors.dart';
-import 'package:dester/core/network/api_client_service.dart';
+import 'package:dester/core/network/dester_api.dart';
+import 'package:dester/core/network/api_exception.dart';
+import 'package:dester/core/utils/app_logger.dart';
 
-/// API client for fetching data from the server
+/// API client for fetching data from the server using the new clean API
 class HomeDataSource {
-  // Get movies list from API
+  final DesterApi _api;
+
+  HomeDataSource(this._api);
+
+  /// Get movies list from API
   Future<Result<List<Map<String, dynamic>>>> getMoviesList() async {
     try {
-      final client = ApiClientService.getClient();
-      final moviesApi = client.getMoviesApi();
-      final response = await moviesApi.apiV1MoviesGet();
+      final movies = await _api.movies.getMovies();
 
-      if (response.data?.success == true && response.data?.data != null) {
-        final movies = response.data!.data!;
-        final moviesList = movies.map((movie) {
-          final media = movie.media;
-          return {
-            'id': movie.id ?? '',
-            'title': media?.title ?? '',
-            'posterPath': media?.posterUrl,
-            'plainPosterUrl': media?.plainPosterUrl,
-            'backdropPath': media?.backdropUrl,
-            'logoUrl': media?.logoUrl,
-            'overview': media?.description,
-            'releaseDate': media?.releaseDate
-                ?.toIso8601String()
-                .split('T')
-                .first,
-            'rating': media?.rating?.toDouble(),
-            'meshGradientColors': media?.meshGradientColors != null
-                ? media!.meshGradientColors!.toList()
-                : null,
-            'createdAt': media?.createdAt,
-          };
-        }).toList();
-        return Success(moviesList);
+      final moviesList = movies.map((movie) {
+        return {
+          'id': movie.id,
+          'title': movie.title,
+          'posterPath': movie.posterUrl,
+          'backdropPath': movie.backdropUrl,
+          'nullPosterUrl': movie.nullPosterUrl,
+          'logoUrl': movie.logoUrl,
+          'overview': movie.overview,
+          'releaseDate': movie.releaseDate?.toIso8601String().split('T').first,
+          'rating': movie.rating,
+          'genres': movie.genres?.map((g) => g.name).toList(),
+          'createdAt': movie.createdAt?.toIso8601String(),
+        };
+      }).toList();
+
+      if (moviesList.isNotEmpty) {
+        AppLogger.d(
+          'First movie extracted: id=${moviesList[0]['id']}, title=${moviesList[0]['title']}',
+        );
       }
 
-      return Success([]);
-    } on DioException catch (e) {
-      return ResultFailure(dioExceptionToFailure(e));
-    } catch (e) {
+      return Success(moviesList);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to fetch movies: ${e.message}', e);
+      return ResultFailure(e.toFailure());
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to fetch movies: $e', e, stackTrace);
       return ResultFailure(exceptionToFailure(e, 'Failed to fetch movies'));
     }
   }
 
-  // Get TV shows list from API
+  /// Get TV shows list from API
   Future<Result<List<Map<String, dynamic>>>> getTVShowsList() async {
     try {
-      final client = ApiClientService.getClient();
-      final tvShowsApi = client.getTVShowsApi();
-      final response = await tvShowsApi.apiV1TvshowsGet();
+      final tvShows = await _api.tvShows.getTvShows();
 
-      if (response.data?.success == true && response.data?.data != null) {
-        final tvShows = response.data!.data!;
-        final tvShowsList = tvShows.map((tvShow) {
-          final media = tvShow.media;
-          return {
-            'id': tvShow.id ?? '',
-            'title': media?.title ?? '',
-            'posterPath': media?.posterUrl,
-            'plainPosterUrl': media?.plainPosterUrl,
-            'backdropPath': media?.backdropUrl,
-            'logoUrl': media?.logoUrl,
-            'overview': media?.description,
-            'firstAirDate': media?.releaseDate
-                ?.toIso8601String()
-                .split('T')
-                .first,
-            'rating': media?.rating?.toDouble(),
-            'meshGradientColors': media?.meshGradientColors != null
-                ? media!.meshGradientColors!.toList()
-                : null,
-            'createdAt': media?.createdAt,
-          };
-        }).toList();
-        return Success(tvShowsList);
-      }
+      final tvShowsList = tvShows.map((show) {
+        return {
+          'id': show.id,
+          'title': show.title,
+          'posterPath': show.posterUrl,
+          'backdropPath': show.backdropUrl,
+          'nullPosterUrl': show.nullPosterUrl,
+          'logoUrl': show.logoUrl,
+          'overview': show.overview,
+          'firstAirDate': show.firstAirDate?.toIso8601String().split('T').first,
+          'rating': show.rating,
+          'genres': show.genres?.map((g) => g.name).toList(),
+          'createdAt': show.createdAt?.toIso8601String(),
+        };
+      }).toList();
 
-      return Success([]);
-    } on DioException catch (e) {
-      return ResultFailure(dioExceptionToFailure(e));
-    } catch (e) {
+      return Success(tvShowsList);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to fetch TV shows: ${e.message}', e);
+      return ResultFailure(e.toFailure());
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to fetch TV shows: $e', e, stackTrace);
       return ResultFailure(exceptionToFailure(e, 'Failed to fetch TV shows'));
     }
   }

@@ -3,11 +3,12 @@ class TVShow {
   final String title;
   final String? posterPath;
   final String? backdropPath;
-  final String? plainPosterUrl;
+  final String? nullPosterUrl;
   final String? logoUrl;
   final String? overview;
   final String? firstAirDate;
   final double? rating;
+  final List<String>? genres;
   final List<String>? meshGradientColors;
   final DateTime? createdAt;
 
@@ -16,11 +17,12 @@ class TVShow {
     required this.title,
     this.posterPath,
     this.backdropPath,
-    this.plainPosterUrl,
+    this.nullPosterUrl,
     this.logoUrl,
     this.overview,
     this.firstAirDate,
     this.rating,
+    this.genres,
     this.meshGradientColors,
     this.createdAt,
   });

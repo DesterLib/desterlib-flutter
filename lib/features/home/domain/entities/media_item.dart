@@ -8,7 +8,7 @@ sealed class MediaItem {
   final String title;
   final String? posterPath;
   final String? backdropPath;
-  final String? plainPosterUrl;
+  final String? nullPosterUrl;
   final String? logoUrl;
   final DateTime? createdAt;
 
@@ -17,7 +17,7 @@ sealed class MediaItem {
     required this.title,
     this.posterPath,
     this.backdropPath,
-    this.plainPosterUrl,
+    this.nullPosterUrl,
     this.logoUrl,
     this.createdAt,
   });
@@ -35,7 +35,7 @@ class MovieMediaItem extends MediaItem {
         title: movie.title,
         posterPath: movie.posterPath,
         backdropPath: movie.backdropPath,
-        plainPosterUrl: movie.plainPosterUrl,
+        nullPosterUrl: movie.nullPosterUrl,
         logoUrl: movie.logoUrl,
         createdAt: movie.createdAt,
       );
@@ -53,7 +53,7 @@ class TVShowMediaItem extends MediaItem {
         title: tvShow.title,
         posterPath: tvShow.posterPath,
         backdropPath: tvShow.backdropPath,
-        plainPosterUrl: tvShow.plainPosterUrl,
+        nullPosterUrl: tvShow.nullPosterUrl,
         logoUrl: tvShow.logoUrl,
         createdAt: tvShow.createdAt,
       );

@@ -78,11 +78,11 @@ class _HeroCarouselState extends State<HeroCarousel> {
   String? _getImagePath(MediaItem item, BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     if (isMobile) {
-      // On mobile, prefer poster
-      return item.plainPosterUrl ?? item.backdropPath;
+      // On mobile, prefer null poster, fallback to poster, then backdrop
+      return item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
     } else {
-      // On desktop, prefer backdrop
-      return item.backdropPath ?? item.plainPosterUrl;
+      // On desktop, prefer backdrop, fallback to null poster, then poster
+      return item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
     }
   }
 
@@ -108,6 +108,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
     return DLoadingWrapper(
       isLoading: widget.mediaItems.isEmpty,
       loader: const SizedBox(
@@ -146,6 +148,9 @@ class _HeroCarouselState extends State<HeroCarousel> {
                         _getImagePath(currentItem, context) ?? _currentIndex,
                       ),
                       item: currentItem,
+                      height: isMobile
+                          ? 600
+                          : null, // Fixed on mobile, flexible on desktop
                     ),
                   ),
                 );
