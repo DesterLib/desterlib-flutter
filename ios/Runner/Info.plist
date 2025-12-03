@@ -61,5 +61,11 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Dester needs to access your local network to discover and connect to your media server.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+	</array>
 </dict>
 </plist>

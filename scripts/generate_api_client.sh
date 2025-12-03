@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # API configuration
 API_URL="${API_URL:-http://localhost:3001}"
-SWAGGER_JSON_URL="${API_URL}/api/docs/swagger.json"
+SWAGGER_JSON_URL="${API_URL}/api/docs.json"
 OUTPUT_DIR="lib/core/network/api_client"
 SDK_VERSION="3.10.0"
 
@@ -37,8 +37,9 @@ echo ""
 
 # Check Swagger endpoint
 echo -e "${BLUE}📚 Checking Swagger documentation...${NC}"
-if ! curl -s "${SWAGGER_JSON_URL}" > /dev/null 2>&1; then
+if ! curl -s "${SWAGGER_JSON_URL}" | grep -q '"openapi"\|"swagger"'; then
     echo -e "${RED}❌ Swagger JSON not available at ${SWAGGER_JSON_URL}${NC}"
+    echo -e "${YELLOW}💡 Make sure the API server is running and the endpoint is correct${NC}"
     exit 1
 fi
 echo -e "${GREEN}✅ Swagger documentation found${NC}"
@@ -73,6 +74,16 @@ if [ -f "${OUTPUT_DIR}/pubspec.yaml" ]; then
     echo -e "${GREEN}✅ SDK version updated to ${SDK_VERSION}${NC}"
 else
     echo -e "${YELLOW}⚠️  pubspec.yaml not found, skipping SDK version update${NC}"
+fi
+echo ""
+
+# Fix built_value deserialization issues
+echo -e "${BLUE}🔧 Fixing built_value deserialization issues...${NC}"
+FIX_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"${FIX_SCRIPT_DIR}/fix_built_value_deserialization.sh" "${OUTPUT_DIR}"
+
+if [ $? -ne 0 ]; then
+    echo -e "${YELLOW}⚠️  Failed to apply built_value fixes (continuing anyway)${NC}"
 fi
 echo ""
 

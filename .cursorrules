@@ -28,8 +28,9 @@ Before committing any code, verify:
 - **State Management**: flutter_riverpod ^3.0.3
 - **Navigation**: go_router ^17.0.0
 - **Localization**: easy_localization ^3.0.8
-- **Network**: http ^1.2.2, connectivity_plus ^6.1.0
+- **Network**: dio ^5.9.0, connectivity_plus ^6.1.0
 - **Storage**: shared_preferences ^2.3.3
+- **API Client**: Custom lightweight client (no code generation)
 
 ## Project Structure
 
@@ -46,33 +47,31 @@ lib/
 ├── core/                             # Shared/core functionality
 │   ├── constants/
 │   │   └── app_constants.dart
-│   ├── connection/                   # Connection management (infrastructure)
-│   │   ├── connection_service.dart   # Dependency injection factory
-│   │   ├── data/                     # Data layer
-│   │   │   ├── datasources/
-│   │   │   │   ├── network_data_source.dart
-│   │   │   │   └── preferences_data_source.dart
-│   │   │   └── repository/
-│   │   │       └── connection_repository_impl.dart
-│   │   ├── domain/                   # Domain layer (business logic)
-│   │   │   ├── entities/
-│   │   │   │   └── connection_status.dart
-│   │   │   ├── repository/
-│   │   │   │   └── connection_repository.dart  # Repository interface
-│   │   │   └── usecases/
-│   │   │       ├── check_connection.dart       # Interface
-│   │   │       ├── check_connection_impl.dart  # Implementation
-│   │   │       ├── set_api_url.dart
-│   │   │       ├── set_api_url_impl.dart
-│   │   │       ├── clear_api_url.dart
-│   │   │       └── clear_api_url_impl.dart
-│   │   └── presentation/             # Presentation layer (UI)
-│   │       └── widgets/
-│   │           ├── connection_status_modal.dart
-│   │           └── connection_guard_wrapper.dart
 │   ├── errors/                       # Error handling
-│   ├── network/
-│   │   └── api_client/               # API client utilities
+│   │   ├── errors.dart
+│   │   ├── failures.dart
+│   │   └── result.dart
+│   ├── network/                      # Custom API client (no code generation!)
+│   │   ├── dester_api.dart           # Main API facade
+│   │   ├── api_client.dart           # Dio HTTP client wrapper
+│   │   ├── api_exception.dart        # Exception handling
+│   │   ├── api_provider.dart         # Global singleton
+│   │   ├── api/                      # API endpoint implementations
+│   │   │   ├── settings_api.dart
+│   │   │   ├── library_api.dart
+│   │   │   ├── scan_api.dart
+│   │   │   ├── movies_api.dart
+│   │   │   ├── tvshows_api.dart
+│   │   │   ├── search_api.dart
+│   │   │   └── health_api.dart
+│   │   ├── models/                   # Simple DTOs (plain Dart, no codegen)
+│   │   │   ├── api_response.dart
+│   │   │   ├── settings_models.dart
+│   │   │   ├── library_models.dart
+│   │   │   ├── scan_models.dart
+│   │   │   └── media_models.dart
+│   │   └── mappers/                  # DTO to domain entity converters
+│   │       └── settings_mapper.dart
 │   ├── storage/
 │   │   ├── preferences_service.dart  # SharedPreferences wrapper
 │   │   └── storage_keys.dart         # Storage key constants
@@ -428,9 +427,10 @@ test/
    - Implementation MUST implement domain interface
 
 4. **Mapper Pattern**
-   - Always map API models to domain entities
-   - Mappers in data layer only
-   - Domain entities never contain API model types
+   - Always map API DTOs to domain entities
+   - Core mappers in `core/network/mappers/` (for DTOs → domain)
+   - Feature mappers in data layer (for domain-specific conversions)
+   - Domain entities never contain DTO types
 
 ## Adding a New Feature
 
@@ -447,7 +447,9 @@ test/
 
 3. **Set up data layer** (CAN import from domain, NEVER from presentation):
    - Create data sources: `data/datasources/{source}_datasource.dart`
-   - Create mappers: `data/mappers/{entity}_mapper.dart` (API model → Domain entity)
+     - Inject `DesterApi` via constructor: `MyDataSource(this._api)`
+     - Use `ApiProvider.instance` in feature factories
+   - Create mappers if needed: `data/mappers/{entity}_mapper.dart`
    - Create repository implementation: `data/repository/{feature}_repository_impl.dart`
    - ✅ VERIFY: Data files never import from presentation layer
 
@@ -461,8 +463,10 @@ test/
 5. **Create feature factory**: `{feature}_feature.dart`
    - ✅ ALL methods MUST be static
    - Create static factories for screens: `static ScreenName createScreenName()`
+   - Create static factories for data sources: `static DataSource createDataSource()`
+     - **MUST inject API**: `return MyDataSource(ApiProvider.instance)`
    - Create static factories for use cases: `static UseCaseName createUseCaseName()`
-   - Wire dependencies: DataSource → Repository → UseCase
+   - Wire dependencies: API → DataSource → Repository → UseCase
 
 6. **Create providers** (if using Riverpod):
    - ✅ Use static factory methods: `SettingsFeature.createGetSettings()`
@@ -558,16 +562,29 @@ class GetSettingsImpl implements GetSettings {
 
 // 5. Data Source (data/datasources/settings_datasource.dart)
 class SettingsDataSource {
-  Future<PublicSettings?> getSettings() async { ... }
-  Future<PublicSettings?> updateSettings({String? tmdbApiKey}) async { ... }
+  final DesterApi _api;
+  
+  SettingsDataSource(this._api);
+  
+  Future<Result<Settings>> getSettings() async {
+    try {
+      final dto = await _api.settings.getSettings();
+      final settings = SettingsApiMapper.toDomain(dto);
+      return Success(settings);
+    } on ApiException catch (e) {
+      return ResultFailure(_apiExceptionToFailure(e));
+    }
+  }
 }
 
-// 6. Mapper (data/mappers/settings_mapper.dart)
-class SettingsMapper {
-  static Settings fromApiModel(PublicSettings? apiSettings) {
+// 6. Mapper (core/network/mappers/settings_mapper.dart)
+class SettingsApiMapper {
+  static Settings toDomain(SettingsDto dto) {
     return Settings(
-      tmdbApiKey: apiSettings?.tmdbApiKey,
-      firstRun: apiSettings?.firstRun ?? true,
+      firstRun: dto.firstRun,
+      scanSettings: dto.scanSettings != null
+          ? _scanSettingsToDomain(dto.scanSettings!)
+          : null,
     );
   }
 }
@@ -578,16 +595,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
   SettingsRepositoryImpl({required this.dataSource});
   
   @override
-  Future<Settings> getSettings() async {
-    final apiSettings = await dataSource.getSettings();
-    return SettingsMapper.fromApiModel(apiSettings);
+  Future<Result<Settings>> getSettings() async {
+    // DataSource already returns domain entities
+    return await dataSource.getSettings();
   }
 }
 
 // 8. Feature Factory (settings_feature.dart)
 class SettingsFeature {
+  static SettingsDataSource createSettingsDataSource() {
+    return SettingsDataSource(ApiProvider.instance);
+  }
+  
   static GetSettings createGetSettings() {
-    final dataSource = SettingsDataSource();
+    final dataSource = createSettingsDataSource();
     final repository = SettingsRepositoryImpl(dataSource: dataSource);
     return GetSettingsImpl(repository);
   }
@@ -605,22 +626,142 @@ final settingsProvider = FutureProvider<Settings>((ref) async {
 });
 ```
 
-## Auto-Generated Code Rules
+## API Client Architecture
 
-### ⚠️ CRITICAL: Do NOT Modify Auto-Generated Files
+### Custom Lightweight API Client (No Code Generation!)
 
-**NEVER modify files in the `lib/core/network/api_client/` directory** - These files are auto-generated from OpenAPI specifications and will be overwritten when the API client is regenerated.
+**We use a simple, custom API client** - NOT auto-generated code. This provides better maintainability, smaller codebase, and easier debugging.
 
-**Auto-generated directories:**
-- `lib/core/network/api_client/lib/src/api/` - API client classes
-- `lib/core/network/api_client/lib/src/model/` - API model classes
-- `lib/core/network/api_client/lib/openapi.dart` - Main export file
+### Architecture Overview
+```
+lib/core/network/
+├── dester_api.dart          # Main API facade - single entry point
+├── api_client.dart          # Dio HTTP client wrapper
+├── api_exception.dart       # Structured exception handling
+├── api_provider.dart        # Global singleton for API instance
+├── api/                     # Endpoint implementations (one per domain)
+│   ├── settings_api.dart
+│   ├── library_api.dart
+│   ├── scan_api.dart
+│   ├── movies_api.dart
+│   ├── tvshows_api.dart
+│   ├── search_api.dart
+│   └── health_api.dart
+├── models/                  # Simple DTOs (plain Dart classes)
+│   ├── api_response.dart    # Generic response wrapper
+│   ├── settings_models.dart
+│   ├── library_models.dart
+│   ├── scan_models.dart
+│   └── media_models.dart
+└── mappers/                 # Convert DTOs to domain entities
+    └── settings_mapper.dart
+```
 
-**What to do instead:**
-- If you need to fix linter errors in auto-generated files, regenerate the API client using the generation script
-- If you need custom functionality, create wrapper classes or extensions outside the `api_client` directory
-- If you need to modify API client behavior, update the OpenAPI specification and regenerate
+### Usage Pattern
 
-**Files marked as auto-generated:**
-- All files in `lib/core/network/api_client/lib/src/` contain the header: `// AUTO-GENERATED FILE, DO NOT MODIFY!`
+#### 1. Initialize API (happens automatically)
+```dart
+// Automatically initialized from saved URL
+final api = ApiProvider.instance;
+
+// Or manually initialize
+ApiProvider.initialize('http://localhost:3000');
+
+// Switch servers
+ApiProvider.updateBaseUrl('http://new-server:3000');
+```
+
+#### 2. Use API in DataSources
+```dart
+class MyDataSource {
+  final DesterApi _api;
+  
+  MyDataSource(this._api);
+  
+  Future<Result<MyEntity>> getData() async {
+    try {
+      final dto = await _api.movies.getMovies();
+      final entity = MyMapper.toDomain(dto);
+      return Success(entity);
+    } on ApiException catch (e) {
+      return ResultFailure(_apiExceptionToFailure(e));
+    }
+  }
+}
+```
+
+#### 3. Wire in Feature Factories
+```dart
+class MyFeature {
+  static MyDataSource createDataSource() {
+    return MyDataSource(ApiProvider.instance);
+  }
+}
+```
+
+### API Client Models (DTOs)
+
+**Simple plain Dart classes** - no code generation needed!
+
+```dart
+// Example DTO
+class SettingsDto {
+  final int port;
+  final bool firstRun;
+  
+  const SettingsDto({required this.port, required this.firstRun});
+  
+  factory SettingsDto.fromJson(Map<String, dynamic> json) {
+    return SettingsDto(
+      port: json['port'] as int,
+      firstRun: json['firstRun'] as bool,
+    );
+  }
+  
+  Map<String, dynamic> toJson() => {
+    'port': port,
+    'firstRun': firstRun,
+  };
+}
+```
+
+### Exception Handling
+
+The API client provides structured exceptions:
+
+```dart
+try {
+  final data = await api.settings.getSettings();
+} on NetworkException catch (e) {
+  // No internet connection
+} on BadRequestException catch (e) {
+  // Validation error (400)
+} on UnauthorizedException catch (e) {
+  // Auth error (401)
+} on NotFoundException catch (e) {
+  // Not found (404)
+} on ServerException catch (e) {
+  // Server error (500)
+} on ApiException catch (e) {
+  // Other API errors
+}
+```
+
+### Adding New API Endpoints
+
+**Simple 3-step process:**
+
+1. **Create DTO models** in `models/`
+2. **Create API class** in `api/`
+3. **Add to DesterApi** class
+
+No code generation, no build_runner, no complexity!
+
+### Benefits of Custom Client
+- ✅ **Simple**: Plain Dart classes, easy to understand
+- ✅ **Fast**: No build step required
+- ✅ **Maintainable**: ~2,000 lines vs 67MB generated
+- ✅ **Debuggable**: No generated code to wade through
+- ✅ **Type-safe**: Full compile-time checking
+- ✅ **Flexible**: Easy to customize and extend
 
