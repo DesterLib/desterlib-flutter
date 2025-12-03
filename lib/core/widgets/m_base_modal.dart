@@ -1,9 +1,11 @@
 // Dart
 import 'dart:io';
+import 'dart:ui';
 
 // External packages
+import 'package:dester/core/widgets/d_icon.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
@@ -120,27 +122,47 @@ class BaseModal extends StatelessWidget {
 
   Widget _buildDesktopDialog(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.transparent,
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: maxWidth ?? AppConstants.baseModalMaxWidth,
-            maxHeight: maxHeight ?? AppConstants.baseModalMaxHeight,
-          ),
-          padding: AppConstants.padding(AppConstants.spacingLg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              AppConstants.spacingY(AppConstants.spacingMd),
-              Flexible(child: SingleChildScrollView(child: content)),
-              if (actions != null) ...[
-                AppConstants.spacingY(AppConstants.spacingLg),
-                actions!,
-              ],
-            ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppConstants.radius2xl),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxWidth ?? AppConstants.baseModalMaxWidth,
+                maxHeight: maxHeight ?? AppConstants.baseModalMaxHeight,
+              ),
+              padding: AppConstants.padding(AppConstants.spacingSm),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppConstants.radius2xl),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.07),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context, isDesktopStyle: true),
+                  AppConstants.spacingY(AppConstants.spacingMd),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: AppConstants.padding(AppConstants.spacingSm),
+                      child: content,
+                    ),
+                  ),
+                  if (actions != null) ...[
+                    AppConstants.spacingY(AppConstants.spacingLg),
+                    actions!,
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -259,7 +281,12 @@ class BaseModal extends StatelessWidget {
     }
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, {bool isDesktopStyle = false}) {
+    final textColor = isDesktopStyle ? Colors.white : null;
+    final iconColor = isDesktopStyle
+        ? Colors.white.withValues(alpha: 0.6)
+        : null;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -269,22 +296,18 @@ class BaseModal extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: AppTypography.titleSmall(),
+            style: AppTypography.titleSmall(color: textColor),
           ),
         ),
         if (showCloseButton)
-          InkWell(
-            onTap:
+          DIconButton(
+            icon: DIconName.close,
+            size: DIconButtonSize.sm,
+            variant: DIconButtonVariant.plain,
+            color: iconColor,
+            onPressed:
                 onClose ??
                 () => Navigator.of(context, rootNavigator: true).pop(),
-            borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-            child: Padding(
-              padding: AppConstants.padding(AppConstants.spacing8),
-              child: Icon(
-                LucideIcons.x,
-                size: AppConstants.baseModalCloseIconSize,
-              ),
-            ),
           ),
       ],
     );

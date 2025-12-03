@@ -31,6 +31,9 @@ class DAppBar extends StatefulWidget {
   /// Optional leading widget (e.g., back button)
   final Widget? leading;
 
+  /// Whether to remove the sidebar spacing
+  final bool withoutSidebarSpacing;
+
   /// Optional action widgets
   final List<Widget>? actions;
 
@@ -53,6 +56,7 @@ class DAppBar extends StatefulWidget {
     required this.title,
     this.isCompact = false,
     this.leading,
+    this.withoutSidebarSpacing = false,
     this.actions,
     this.backgroundColor,
     this.automaticallyImplyLeading = true,
@@ -82,6 +86,7 @@ class _DAppBarState extends State<DAppBar> {
         topPadding: topPadding,
         animateBlur: widget.animateBlur,
         leftAligned: widget.leftAligned,
+        withoutSidebarSpacing: widget.withoutSidebarSpacing,
       ),
     );
   }
@@ -97,7 +102,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double topPadding;
   final bool animateBlur;
   final bool? leftAligned;
-
+  final bool withoutSidebarSpacing;
   // Constants matching the Figma design
   static const double _expandedAppBarHeight = 80.0;
   static const double _collapsedAppBarHeight = 48.0;
@@ -114,6 +119,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.topPadding,
     required this.animateBlur,
     this.leftAligned,
+    this.withoutSidebarSpacing = false,
   });
 
   @override
@@ -250,7 +256,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     );
 
     // Wrap the entire AppBar with sidebar spacing
-    if (sidebarTotalWidth > 0.0) {
+    if (sidebarTotalWidth > 0.0 && !withoutSidebarSpacing) {
       return Padding(
         padding: EdgeInsets.only(left: sidebarTotalWidth),
         child: content,

@@ -37,6 +37,9 @@ class DIconButton extends StatefulWidget {
   /// Whether the button is disabled
   final bool isDisabled;
 
+  /// Custom icon color (overrides variant-based color)
+  final Color? color;
+
   const DIconButton({
     super.key,
     required this.icon,
@@ -46,6 +49,7 @@ class DIconButton extends StatefulWidget {
     this.blur = false,
     this.filled = false,
     this.isDisabled = false,
+    this.color,
   });
 
   @override
@@ -154,10 +158,16 @@ class _DIconButtonState extends State<DIconButton> {
     }
   }
 
-  /// Get icon color based on variant
+  /// Get icon color based on variant or custom color
   Color _getIconColor() {
     if (widget.isDisabled) {
-      return Colors.white.withValues(alpha: 0.3);
+      final baseColor = widget.color ?? Colors.white;
+      return baseColor.withValues(alpha: 0.3);
+    }
+
+    // Use custom color if provided
+    if (widget.color != null) {
+      return widget.color!;
     }
 
     switch (widget.variant) {

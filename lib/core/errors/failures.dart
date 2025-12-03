@@ -65,3 +65,19 @@ class UnknownFailure extends Failure {
   @override
   String toString() => 'UnknownError: $message';
 }
+
+/// Failure indicating authentication/authorization error
+class AuthFailure extends Failure {
+  const AuthFailure(super.message, {super.code});
+
+  @override
+  String toString() => 'AuthError: $message';
+}
+
+/// Failure indicating resource not found
+class NotFoundFailure extends Failure {
+  const NotFoundFailure(super.message, {super.code});
+
+  @override
+  String toString() => 'NotFoundError: $message';
+}

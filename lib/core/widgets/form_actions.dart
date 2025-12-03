@@ -1,13 +1,14 @@
 // External packages
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // App
 import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/widgets/d_button.dart';
+import 'package:dester/core/widgets/d_icon.dart';
 
 /// Standard form action buttons helper
 /// Can be used with any form (flutter_form_builder, DForm, etc.)
@@ -32,24 +33,32 @@ class FormActions extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TextButton(
-          onPressed: isSaving
-              ? null
-              : (onClose ??
-                    () => Navigator.of(context, rootNavigator: true).pop()),
-          child: Text(closeLabel ?? AppLocalization.settingsServersClose.tr()),
+        DButton(
+          label: closeLabel ?? AppLocalization.settingsServersClose.tr(),
+          variant: DButtonVariant.secondary,
+          size: DButtonSize.sm,
+          isDisabled: isSaving,
+          onPressed:
+              onClose ?? () => Navigator.of(context, rootNavigator: true).pop(),
         ),
         AppConstants.spacingX(AppConstants.spacingSm),
-        ElevatedButton.icon(
-          onPressed: isSaving ? null : onSave,
-          icon: isSaving
+        DButton(
+          label: saveLabel ?? AppLocalization.settingsServersSave.tr(),
+          variant: DButtonVariant.primary,
+          size: DButtonSize.sm,
+          leadingIcon: isSaving ? null : DIconName.check,
+          isDisabled: isSaving,
+          onPressed: onSave,
+          child: isSaving
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.black,
+                  ),
                 )
-              : const Icon(LucideIcons.save),
-          label: Text(saveLabel ?? AppLocalization.settingsServersSave.tr()),
+              : null,
         ),
       ],
     );

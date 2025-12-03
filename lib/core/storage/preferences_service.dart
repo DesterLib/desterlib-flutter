@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Core
 import 'package:dester/features/connection/domain/entities/api_configuration.dart';
-import 'package:dester/core/network/api_client_service.dart';
+import 'package:dester/core/network/api_provider.dart';
 
 import 'storage_keys.dart';
 
@@ -60,7 +60,7 @@ class PreferencesService {
               : null;
         }
         if (activeConfig != null) {
-          ApiClientService.updateBaseUrl(activeConfig.url);
+          ApiProvider.updateBaseUrl(activeConfig.url);
         }
       }
 

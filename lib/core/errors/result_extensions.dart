@@ -45,3 +45,14 @@ extension ResultNullableExtension<T> on Result<T> {
     };
   }
 }
+
+/// Extension to add async map functionality to Result
+extension ResultAsyncExtension<T> on Result<T> {
+  /// Map success value asynchronously, preserving failure
+  Future<Result<R>> mapAsync<R>(Future<R> Function(T data) transform) async {
+    return switch (this) {
+      Success<T>(:final data) => Success(await transform(data)),
+      ResultFailure<T>(:final failure) => ResultFailure(failure),
+    };
+  }
+}

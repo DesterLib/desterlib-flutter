@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'websocket_service.dart';
 
+// Export health data models for use in other files
+export 'websocket_service.dart' show HealthHeartbeatData, HealthStatusData;
 
 /// Scan progress state
 class ScanProgressState {
@@ -196,3 +198,114 @@ final activeScanProgressProvider = Provider<ScanProgressState?>((ref) {
   }
   return null;
 });
+
+/// Health status state from WebSocket
+class HealthStatusState {
+  final String status; // 'healthy', 'degraded', 'unhealthy', 'unknown'
+  final double uptime;
+  final Map<String, String> services;
+  final DateTime? lastUpdate;
+
+  const HealthStatusState({
+    this.status = 'unknown',
+    this.uptime = 0.0,
+    this.services = const {},
+    this.lastUpdate,
+  });
+
+  HealthStatusState copyWith({
+    String? status,
+    double? uptime,
+    Map<String, String>? services,
+    DateTime? lastUpdate,
+  }) {
+    return HealthStatusState(
+      status: status ?? this.status,
+      uptime: uptime ?? this.uptime,
+      services: services ?? this.services,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+    );
+  }
+
+  bool get isHealthy => status == 'healthy';
+  bool get isDegraded => status == 'degraded';
+  bool get isUnhealthy => status == 'unhealthy';
+  bool get isUnknown => status == 'unknown';
+}
+
+/// Health status provider that listens to WebSocket health events
+final healthStatusProvider =
+    NotifierProvider<HealthStatusNotifier, HealthStatusState>(() {
+      return HealthStatusNotifier();
+    });
+
+/// Health status notifier
+class HealthStatusNotifier extends Notifier<HealthStatusState> {
+  StreamSubscription<WebSocketMessage>? _subscription;
+
+  @override
+  HealthStatusState build() {
+    final service = ref.watch(webSocketServiceProvider);
+
+    // Watch WebSocket connection state to reset health when disconnected
+    ref.listen<AsyncValue<bool>>(webSocketConnectionProvider, (previous, next) {
+      next.whenData((isConnected) {
+        if (!isConnected) {
+          // WebSocket disconnected - reset to unknown status
+          state = const HealthStatusState(status: 'unknown');
+        }
+      });
+    });
+
+    // Ensure WebSocket is connected
+    if (!service.isConnected) {
+      service.connect().catchError((error) {
+        // Connection will be handled by the service
+      });
+    }
+
+    // Listen to WebSocket messages for health updates
+    _subscription?.cancel();
+    _subscription = service.messageStream.listen(
+      _handleMessage,
+      onError: (error) {
+        // Reset to unknown on error
+        state = const HealthStatusState(status: 'unknown');
+      },
+    );
+
+    // Clean up subscription when notifier is disposed
+    ref.onDispose(() {
+      _subscription?.cancel();
+    });
+
+    return const HealthStatusState();
+  }
+
+  void _handleMessage(WebSocketMessage message) {
+    switch (message.type) {
+      case WebSocketMessageType.healthHeartbeat:
+        final heartbeat = HealthHeartbeatData.fromJson(message.data);
+        state = state.copyWith(
+          status: heartbeat.status,
+          uptime: heartbeat.uptime,
+          services: heartbeat.services,
+          lastUpdate: DateTime.now(),
+        );
+        break;
+
+      case WebSocketMessageType.healthStatus:
+        final healthStatus = HealthStatusData.fromJson(message.data);
+        state = state.copyWith(
+          status: healthStatus.status,
+          services: healthStatus.services,
+          lastUpdate: DateTime.now(),
+        );
+        break;
+
+      default:
+        // Ignore other message types
+        break;
+    }
+  }
+}

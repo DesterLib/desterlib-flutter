@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import 'failures.dart';
+import '../network/api_exception.dart';
 
 /// Convert DioException to appropriate Failure
 Failure dioExceptionToFailure(DioException exception) {
@@ -97,4 +98,22 @@ Failure exceptionToFailure(Object exception, [String? context]) {
   final contextMessage = context != null ? '$context: $message' : message;
 
   return UnknownFailure(contextMessage);
+}
+
+/// Extension to convert ApiException to Failure
+/// This eliminates duplication across data sources
+extension ApiExceptionToFailure on ApiException {
+  /// Convert this ApiException to appropriate Failure type
+  Failure toFailure() {
+    return switch (this) {
+      NetworkException() => NetworkFailure(message),
+      BadRequestException() => ValidationFailure(message),
+      UnauthorizedException() => AuthFailure(message),
+      ForbiddenException() => AuthFailure(message),
+      NotFoundException() => NotFoundFailure(message),
+      ServerException() => ServerFailure(message),
+      CancelledException() => NetworkFailure(message),
+      UnknownException() => ServerFailure(message),
+    };
+  }
 }

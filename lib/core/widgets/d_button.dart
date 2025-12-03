@@ -18,7 +18,10 @@ enum DButtonSize { sm, md }
 /// A customizable button widget with variants, sizes, and blur support
 class DButton extends StatefulWidget {
   /// The button label
-  final String label;
+  final String? label;
+
+  /// Custom child widget (overrides label and icons)
+  final Widget? child;
 
   /// Callback when button is pressed
   final VoidCallback? onPressed;
@@ -46,7 +49,8 @@ class DButton extends StatefulWidget {
 
   const DButton({
     super.key,
-    required this.label,
+    this.label,
+    this.child,
     this.onPressed,
     this.variant = DButtonVariant.primary,
     this.size = DButtonSize.md,
@@ -55,7 +59,10 @@ class DButton extends StatefulWidget {
     this.trailingIcon,
     this.leadingIconFilled = false,
     this.isDisabled = false,
-  });
+  }) : assert(
+         label != null || child != null,
+         'Either label or child must be provided',
+       );
 
   @override
   State<DButton> createState() => _DButtonState();
@@ -188,11 +195,22 @@ class _DButtonState extends State<DButton> {
     return BorderRadius.circular(AppConstants.buttonBorderRadiusPill);
   }
 
+  /// Get text style based on size
+  TextStyle _getTextStyle(Color color) {
+    switch (widget.size) {
+      case DButtonSize.sm:
+        return AppTypography.buttonSmall(color: color);
+      case DButtonSize.md:
+        return AppTypography.buttonMedium(color: color);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Cache computed values to avoid recalculating on every build
     final baseBackgroundColor = _getBackgroundColor();
     final textColor = _getTextColor();
+    final textStyle = _getTextStyle(textColor);
     final horizontalPadding = _getHorizontalPadding();
     final borderRadius = _getBorderRadius();
     final height = _getHeight();
@@ -206,33 +224,32 @@ class _DButtonState extends State<DButton> {
         color: baseBackgroundColor,
         borderRadius: borderRadius,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (widget.leadingIcon != null) ...[
-            DIcon(
-              icon: widget.leadingIcon!,
-              size: AppConstants.buttonIconSizeLeading,
-              color: textColor,
-              filled: widget.leadingIconFilled,
-            ),
-            const SizedBox(width: AppConstants.buttonIconSpacing),
-          ],
-          Text(
-            widget.label,
-            style: AppTypography.buttonMedium(color: textColor),
+      child:
+          widget.child ??
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.leadingIcon != null) ...[
+                DIcon(
+                  icon: widget.leadingIcon!,
+                  size: AppConstants.buttonIconSizeLeading,
+                  color: textColor,
+                  filled: widget.leadingIconFilled,
+                ),
+                const SizedBox(width: AppConstants.buttonIconSpacing),
+              ],
+              Text(widget.label!, style: textStyle),
+              if (widget.trailingIcon != null) ...[
+                const SizedBox(width: AppConstants.buttonIconSpacing),
+                DIcon(
+                  icon: widget.trailingIcon!,
+                  size: AppConstants.buttonIconSizeTrailing,
+                  color: textColor,
+                ),
+              ],
+            ],
           ),
-          if (widget.trailingIcon != null) ...[
-            const SizedBox(width: AppConstants.buttonIconSpacing),
-            DIcon(
-              icon: widget.trailingIcon!,
-              size: AppConstants.buttonIconSizeTrailing,
-              color: textColor,
-            ),
-          ],
-        ],
-      ),
     );
 
     // Apply blur if enabled

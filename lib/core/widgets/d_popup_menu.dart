@@ -122,48 +122,51 @@ class _DPopupMenuState<T> extends State<DPopupMenu<T>> {
           Positioned(
             right: adjustedRight,
             top: adjustedTop,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppConstants.radiusLg),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.07),
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.radiusLg,
+            child: Material(
+              type: MaterialType.transparency,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusLg),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.07),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusLg,
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.13),
+                          width: 1,
+                        ),
                       ),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.13),
-                        width: 1,
-                      ),
-                    ),
-                    child: IntrinsicWidth(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: widget.items
-                            .where((item) => item.isEnabled)
-                            .toList()
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                              final index = entry.key;
-                              final item = entry.value;
+                      child: IntrinsicWidth(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: widget.items
+                              .where((item) => item.isEnabled)
+                              .toList()
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
 
-                              return _DPopupMenuItemWidget<T>(
-                                value: item.value,
-                                isFirst: index == 0,
-                                onTap: () {
-                                  _overlayEntry?.remove();
-                                  _overlayEntry = null;
-                                  widget.onSelected?.call(item.value);
-                                },
-                                child: item.child,
-                              );
-                            })
-                            .toList(),
+                                return _DPopupMenuItemWidget<T>(
+                                  value: item.value,
+                                  isFirst: index == 0,
+                                  onItemTap: () {
+                                    _overlayEntry?.remove();
+                                    _overlayEntry = null;
+                                    widget.onSelected?.call(item.value);
+                                  },
+                                  child: item.child,
+                                );
+                              })
+                              .toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -201,19 +204,17 @@ class _DPopupMenuState<T> extends State<DPopupMenu<T>> {
 
 /// Custom popup menu item widget that matches sidebar item styling
 class _DPopupMenuItemWidget<T> extends PopupMenuItem<T> {
-  final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback onItemTap;
   final bool isFirst;
 
   const _DPopupMenuItemWidget({
     required super.value,
-    required this.child,
-    required this.onTap,
+    required super.child,
+    required this.onItemTap,
     this.isFirst = false,
   }) : super(
          height: 0, // Remove default height/padding
          padding: EdgeInsets.zero, // Remove default padding
-         child: const SizedBox.shrink(), // Placeholder, we override build
        );
 
   @override
@@ -276,8 +277,9 @@ class _DPopupMenuItemWidgetState<T>
     }
   }
 
-  void _handleTap() {
-    widget.onTap();
+  @override
+  void handleTap() {
+    widget.onItemTap();
   }
 
   @override
@@ -287,7 +289,7 @@ class _DPopupMenuItemWidgetState<T>
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
-      onTap: _handleTap,
+      onTap: handleTap,
       child: AnimatedOpacity(
         duration: AppConstants.buttonAnimationDuration,
         opacity: _isPressed ? 0.6 : 1.0,
@@ -312,11 +314,20 @@ class _DPopupMenuItemWidgetState<T>
                     ),
                   ),
           ),
-          child: DefaultTextStyle(
-            style: DefaultTextStyle.of(
-              context,
-            ).style.copyWith(color: Colors.white.withValues(alpha: 0.6)),
-            child: widget.child,
+          child: IconTheme(
+            data: IconThemeData(
+              color: Colors.white.withValues(alpha: 0.6),
+              size: 16,
+            ),
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+                decoration: TextDecoration.none,
+              ),
+              child: widget.child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),

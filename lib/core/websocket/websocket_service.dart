@@ -11,10 +11,12 @@ import 'package:dester/core/storage/preferences_service.dart';
 import 'package:dester/core/utils/app_logger.dart';
 import 'package:dester/core/utils/url_helper.dart';
 
-
 /// WebSocket message types from backend
 enum WebSocketMessageType {
   connectionEstablished,
+  healthHeartbeat,
+  healthStatus,
+  healthDegraded,
   scanProgress,
   scanComplete,
   scanError,
@@ -49,6 +51,15 @@ class WebSocketMessage {
       case 'connection:established':
         type = WebSocketMessageType.connectionEstablished;
         break;
+      case 'health:heartbeat':
+        type = WebSocketMessageType.healthHeartbeat;
+        break;
+      case 'health:status':
+        type = WebSocketMessageType.healthStatus;
+        break;
+      case 'health:degraded':
+        type = WebSocketMessageType.healthDegraded;
+        break;
       case 'scan:progress':
         type = WebSocketMessageType.scanProgress;
         break;
@@ -65,6 +76,60 @@ class WebSocketMessage {
 
     return WebSocketMessage(type: type, data: json);
   }
+}
+
+/// Health heartbeat data from WebSocket
+class HealthHeartbeatData {
+  final double uptime;
+  final String status; // 'healthy', 'degraded', 'unhealthy'
+  final Map<String, String> services;
+
+  HealthHeartbeatData({
+    required this.uptime,
+    required this.status,
+    required this.services,
+  });
+
+  factory HealthHeartbeatData.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>? ?? {};
+    return HealthHeartbeatData(
+      uptime: (data['uptime'] as num?)?.toDouble() ?? 0.0,
+      status: data['status'] as String? ?? 'unknown',
+      services: Map<String, String>.from(data['services'] as Map? ?? {}),
+    );
+  }
+
+  bool get isHealthy => status == 'healthy';
+  bool get isDegraded => status == 'degraded';
+  bool get isUnhealthy => status == 'unhealthy';
+}
+
+/// Health status change data from WebSocket
+class HealthStatusData {
+  final String status; // 'healthy', 'degraded', 'unhealthy'
+  final String message;
+  final Map<String, String>? services;
+
+  HealthStatusData({
+    required this.status,
+    required this.message,
+    this.services,
+  });
+
+  factory HealthStatusData.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>? ?? {};
+    return HealthStatusData(
+      status: data['status'] as String? ?? 'unknown',
+      message: data['message'] as String? ?? '',
+      services: data['services'] != null
+          ? Map<String, String>.from(data['services'] as Map)
+          : null,
+    );
+  }
+
+  bool get isHealthy => status == 'healthy';
+  bool get isDegraded => status == 'degraded';
+  bool get isUnhealthy => status == 'unhealthy';
 }
 
 class ScanProgressData {
@@ -244,14 +309,17 @@ class WebSocketService {
               final json = jsonDecode(message) as Map<String, dynamic>;
               final wsMessage = WebSocketMessage.fromJson(json);
 
-              AppLogger.d('WebSocket message received: ${wsMessage.type}');
-
               // Handle connection established
               if (wsMessage.type ==
                   WebSocketMessageType.connectionEstablished) {
                 AppLogger.i('WebSocket connection established');
                 _isConnected = true;
                 _connectionController.add(true);
+              }
+
+              // Only log non-heartbeat messages to reduce noise
+              if (wsMessage.type != WebSocketMessageType.healthHeartbeat) {
+                AppLogger.d('WebSocket message received: ${wsMessage.type}');
               }
 
               _messageController.add(wsMessage);
