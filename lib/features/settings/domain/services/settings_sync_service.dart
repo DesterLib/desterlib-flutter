@@ -201,28 +201,36 @@ class SettingsSyncServiceImpl implements SettingsSyncService {
   /// Convert map to ScanSettings (helper)
   ScanSettings? _scanSettingsFromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
+
+    // Parse mediaTypePatterns if present
+    MediaTypePatterns? mediaTypePatterns;
+    if (map['mediaTypePatterns'] != null) {
+      final patternsMap = map['mediaTypePatterns'] as Map<String, dynamic>;
+      mediaTypePatterns = MediaTypePatterns(
+        movie: patternsMap['movie'] != null
+            ? MoviePatterns(
+                filenamePattern:
+                    patternsMap['movie']['filenamePattern'] as String?,
+                directoryPattern:
+                    patternsMap['movie']['directoryPattern'] as String?,
+              )
+            : null,
+        tv: patternsMap['tv'] != null
+            ? TvPatterns(
+                filenamePattern:
+                    patternsMap['tv']['filenamePattern'] as String?,
+                directoryPattern:
+                    patternsMap['tv']['directoryPattern'] as String?,
+              )
+            : null,
+      );
+    }
+
     return ScanSettings(
-      mediaType: map['mediaType'] as String?,
-      maxDepth: map['maxDepth'] as int?,
       movieDepth: map['movieDepth'] as int?,
       tvDepth: map['tvDepth'] as int?,
-      fileExtensions: map['fileExtensions'] != null
-          ? List<String>.from(map['fileExtensions'] as List)
-          : null,
-      filenamePattern: map['filenamePattern'] as String?,
-      excludePattern: map['excludePattern'] as String?,
-      includePattern: map['includePattern'] as String?,
-      directoryPattern: map['directoryPattern'] as String?,
-      excludeDirectories: map['excludeDirectories'] != null
-          ? List<String>.from(map['excludeDirectories'] as List)
-          : null,
-      includeDirectories: map['includeDirectories'] != null
-          ? List<String>.from(map['includeDirectories'] as List)
-          : null,
+      mediaTypePatterns: mediaTypePatterns,
       rescan: map['rescan'] as bool?,
-      batchScan: map['batchScan'] as bool?,
-      minFileSize: map['minFileSize'] as int?,
-      maxFileSize: map['maxFileSize'] as int?,
       followSymlinks: map['followSymlinks'] as bool?,
     );
   }

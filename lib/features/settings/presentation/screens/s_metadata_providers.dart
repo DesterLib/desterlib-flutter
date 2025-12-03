@@ -14,49 +14,18 @@ import 'package:dester/core/widgets/d_icon.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
-import 'package:dester/features/settings/domain/usecases/get_settings.dart';
-import 'package:dester/features/settings/domain/usecases/update_settings.dart';
-import 'package:dester/features/settings/presentation/mixins/settings_update_mixin.dart';
+import 'package:dester/features/settings/presentation/providers/settings_providers.dart';
 import 'package:dester/features/settings/presentation/widgets/m_tmdb_api_key.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_group.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_item.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_section.dart';
-import 'package:dester/features/settings/settings_feature.dart';
-
-/// Provider for GetSettings use case
-final getSettingsProvider = Provider<GetSettings>((ref) {
-  return SettingsFeature.createGetSettingsLegacy();
-});
-
-/// Provider for UpdateSettings use case
-final updateSettingsProvider = Provider<UpdateSettings>((ref) {
-  return SettingsFeature.createUpdateSettingsLegacy();
-});
-
-/// Provider for current settings
-final settingsProvider = FutureProvider<Settings>((ref) async {
-  final getSettings = ref.watch(getSettingsProvider);
-  final result = await getSettings();
-  return result.fold(
-    onSuccess: (settings) => settings,
-    onFailure: (failure) => throw failure,
-  );
-});
 
 /// Screen for managing metadata providers
-class MetadataProvidersScreen extends ConsumerStatefulWidget {
+class MetadataProvidersScreen extends ConsumerWidget {
   const MetadataProvidersScreen({super.key});
 
   @override
-  ConsumerState<MetadataProvidersScreen> createState() =>
-      _MetadataProvidersScreenState();
-}
-
-class _MetadataProvidersScreenState
-    extends ConsumerState<MetadataProvidersScreen>
-    with SettingsUpdateMixin {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -91,6 +60,7 @@ class _MetadataProvidersScreenState
                       group: ref
                           .watch(settingsProvider)
                           .when(
+                            skipLoadingOnRefresh: false,
                             data: (settings) => SettingsGroup(
                               children: [
                                 // TMDB Provider
@@ -109,8 +79,11 @@ class _MetadataProvidersScreenState
                                     DIconName.chevronRight,
                                     strokeWidth: 2.0,
                                   ),
-                                  onTap: () =>
-                                      _showTmdbApiKeyModal(context, settings),
+                                  onTap: () => _showTmdbApiKeyModal(
+                                    context,
+                                    settings,
+                                    ref,
+                                  ),
                                   isFirst: true,
                                 ),
                                 // Future providers can be added here
@@ -158,6 +131,7 @@ class _MetadataProvidersScreenState
                                   onTap: () => _showTmdbApiKeyModal(
                                     context,
                                     const Settings(firstRun: true),
+                                    ref,
                                   ),
                                   isFirst: true,
                                 ),
@@ -175,41 +149,41 @@ class _MetadataProvidersScreenState
     );
   }
 
-  void _showTmdbApiKeyModal(BuildContext context, Settings settings) {
+  void _showTmdbApiKeyModal(
+    BuildContext context,
+    Settings settings,
+    WidgetRef ref,
+  ) {
     TmdbApiKeyModal.show(
       context,
       initialApiKey: settings.tmdbApiKey,
       onSave: (apiKey) async {
-        immediateUpdateSettings(
-          fieldName: 'tmdbApiKey',
-          updateFn: () async {
-            final updateSettings = ref.read(updateSettingsProvider);
-            return await updateSettings(tmdbApiKey: apiKey);
-          },
-          onSuccess: () {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalization.settingsMetadataProviderSaved.tr(),
-                  ),
-                  backgroundColor: AppConstants.successColor,
+        // Use the notifier's updateField method for proper state management
+        try {
+          await ref
+              .read(settingsNotifierProvider.notifier)
+              .updateField(tmdbApiKey: apiKey);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalization.settingsMetadataProviderSaved.tr(),
                 ),
-              );
-            }
-          },
-          onFailure: (message) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: AppConstants.dangerColor,
-                ),
-              );
-            }
-          },
-          providerToInvalidate: settingsProvider,
-        );
+                backgroundColor: AppConstants.successColor,
+              ),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save API key: ${e.toString()}'),
+                backgroundColor: AppConstants.dangerColor,
+              ),
+            );
+          }
+        }
       },
     );
   }

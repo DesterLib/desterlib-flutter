@@ -4,7 +4,6 @@ import 'package:dester/features/settings/data/mappers/library_mapper.dart';
 import 'package:dester/features/settings/domain/entities/library.dart';
 import 'package:dester/features/settings/domain/repository/library_repository.dart';
 
-
 /// Implementation of LibraryRepository
 class LibraryRepositoryImpl implements LibraryRepository {
   final LibraryDataSource dataSource;
@@ -16,11 +15,16 @@ class LibraryRepositoryImpl implements LibraryRepository {
     bool? isLibrary,
     LibraryType? libraryType,
   }) async {
-    final models = await dataSource.getLibraries(
+    final result = await dataSource.getLibraries(
       isLibrary: isLibrary,
       libraryType: libraryType,
     );
-    return models.map((model) => LibraryMapper.fromApiModel(model)).toList();
+
+    return result.fold(
+      onSuccess: (models) =>
+          models.map((model) => LibraryMapper.fromApiModel(model)).toList(),
+      onFailure: (failure) => throw Exception(failure.message),
+    );
   }
 
   @override
@@ -33,21 +37,22 @@ class LibraryRepositoryImpl implements LibraryRepository {
     String? libraryPath,
     LibraryType? libraryType,
   }) async {
-    final model = await dataSource.updateLibrary(
-      id: id,
-      name: name,
-      description: description,
-      posterUrl: posterUrl,
-      backdropUrl: backdropUrl,
-      libraryPath: libraryPath,
-      libraryType: libraryType,
+    // API only supports name and path updates
+    final result = await dataSource.updateLibrary(id, name ?? '', libraryPath);
+
+    return result.fold(
+      onSuccess: (model) => LibraryMapper.fromApiModel(model),
+      onFailure: (failure) => throw Exception(failure.message),
     );
-    return LibraryMapper.fromApiModel(model);
   }
 
   @override
   Future<void> deleteLibrary(String id) async {
-    await dataSource.deleteLibrary(id);
+    final result = await dataSource.deleteLibrary(id, false);
+    return result.fold(
+      onSuccess: (_) => null,
+      onFailure: (failure) => throw Exception(failure.message),
+    );
   }
 
   @override
@@ -56,10 +61,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
     String? libraryName,
     String? mediaType,
   }) async {
-    return await dataSource.scanLibrary(
+    final result = await dataSource.scanLibrary(
       path: path,
-      libraryName: libraryName,
-      mediaType: mediaType,
+      name: libraryName,
+      mediaType: mediaType ?? 'movie',
+    );
+
+    return result.fold(
+      onSuccess: (response) => response.jobId,
+      onFailure: (failure) => throw Exception(failure.message),
     );
   }
 }

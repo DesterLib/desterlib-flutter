@@ -1,219 +1,172 @@
-// External packages
-import 'package:dio/dio.dart';
-import 'package:openapi/openapi.dart';
-
 // Core
-import 'package:dester/core/network/api_client_service.dart';
+import 'package:dester/core/errors/errors.dart';
+import 'package:dester/core/network/dester_api.dart';
+import 'package:dester/core/network/models/library_models.dart';
+import 'package:dester/core/network/models/scan_models.dart';
+import 'package:dester/core/network/models/settings_models.dart';
+import 'package:dester/core/network/api_exception.dart';
 import 'package:dester/core/utils/app_logger.dart';
 
 // Features
+import 'package:dester/features/settings/data/models/local_library_model.dart';
 import 'package:dester/features/settings/domain/entities/library.dart';
 
-/// Data source for library operations
+/// Data source for library operations using the new clean API
 class LibraryDataSource {
+  final DesterApi _api;
+
+  LibraryDataSource(this._api);
+
   /// Get all libraries from the API
-  Future<List<ModelLibrary>> getLibraries({
+  Future<Result<List<ModelLibrary>>> getLibraries({
     bool? isLibrary,
     LibraryType? libraryType,
+    bool? includeMedia,
   }) async {
     try {
-      final client = ApiClientService.getClient();
-      final libraryApi = client.getLibraryApi();
-
-      final apiLibraryType = libraryType != null
-          ? _mapLibraryTypeToApi(libraryType)
-          : null;
-
-      final response = await libraryApi.apiV1LibraryGet(
-        isLibrary: isLibrary,
-        libraryType: apiLibraryType,
+      final libraries = await _api.library.getLibraries(
+        includeMedia: includeMedia,
       );
 
-      if (response.data?.success == true && response.data?.data != null) {
-        return response.data!.data!.toList();
+      // Convert DTOs to ModelLibrary
+      var modelLibraries = libraries.map((dto) {
+        // Parse library type enum
+        ModelLibraryLibraryTypeEnum? typeEnum;
+        if (dto.libraryType == 'MOVIE') {
+          typeEnum = ModelLibraryLibraryTypeEnum.MOVIE;
+        } else if (dto.libraryType == 'TV_SHOW') {
+          typeEnum = ModelLibraryLibraryTypeEnum.TV_SHOW;
+        }
+
+        return ModelLibrary(
+          id: dto.id,
+          name: dto.name,
+          libraryPath: dto.libraryPath,
+          isLibrary: dto.isLibrary,
+          libraryType: typeEnum,
+          createdAt: dto.createdAt,
+          updatedAt: dto.updatedAt,
+        );
+      }).toList();
+
+      // Client-side filtering if needed
+      if (isLibrary != null) {
+        modelLibraries = modelLibraries
+            .where((lib) => lib.isLibrary == isLibrary)
+            .toList();
       }
 
-      return [];
-    } on DioException catch (e) {
-      throw Exception('Failed to fetch libraries: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch libraries: $e');
+      if (libraryType != null) {
+        final typeString = libraryType == LibraryType.movie
+            ? 'MOVIE'
+            : 'TV_SHOW';
+        modelLibraries = modelLibraries
+            .where((lib) => lib.libraryType == typeString)
+            .toList();
+      }
+
+      return Success(modelLibraries);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to fetch libraries: ${e.message}', e);
+      return ResultFailure(e.toFailure());
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to fetch libraries: $e', e, stackTrace);
+      return ResultFailure(exceptionToFailure(e, 'Failed to fetch libraries'));
     }
   }
 
   /// Update a library
-  Future<ModelLibrary> updateLibrary({
-    required String id,
-    String? name,
-    String? description,
-    String? posterUrl,
-    String? backdropUrl,
-    String? libraryPath,
-    LibraryType? libraryType,
-  }) async {
+  Future<Result<ModelLibrary>> updateLibrary(
+    String id,
+    String name,
+    String? path,
+  ) async {
     try {
-      final client = ApiClientService.getClient();
-      final libraryApi = client.getLibraryApi();
+      final request = UpdateLibraryRequestDto(name: name, path: path);
+      final dto = await _api.library.updateLibrary(id, request);
 
-      final apiLibraryType = libraryType != null
-          ? _mapLibraryTypeToApiEnum(libraryType)
-          : null;
-
-      final request = ApiV1LibraryPutRequest(
-        (b) => b
-          ..id = id
-          ..name = name
-          ..description = description
-          ..posterUrl = posterUrl
-          ..backdropUrl = backdropUrl
-          ..libraryPath = libraryPath
-          ..libraryType = apiLibraryType,
-      );
-
-      final response = await libraryApi.apiV1LibraryPut(
-        apiV1LibraryPutRequest: request,
-      );
-
-      if (response.data?.success == true &&
-          response.data?.data?.library_ != null) {
-        return response.data!.data!.library_!;
+      // Parse library type enum
+      ModelLibraryLibraryTypeEnum? typeEnum;
+      if (dto.libraryType == 'MOVIE') {
+        typeEnum = ModelLibraryLibraryTypeEnum.MOVIE;
+      } else if (dto.libraryType == 'TV_SHOW') {
+        typeEnum = ModelLibraryLibraryTypeEnum.TV_SHOW;
       }
 
-      throw Exception('Failed to update library: Invalid response');
-    } on DioException catch (e) {
-      throw Exception('Failed to update library: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update library: $e');
+      final library = ModelLibrary(
+        id: dto.id,
+        name: dto.name,
+        libraryPath: dto.libraryPath,
+        isLibrary: dto.isLibrary,
+        libraryType: typeEnum,
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt,
+      );
+
+      return Success(library);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to update library: ${e.message}', e);
+      return ResultFailure(e.toFailure());
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to update library: $e', e, stackTrace);
+      return ResultFailure(exceptionToFailure(e, 'Failed to update library'));
     }
   }
 
   /// Delete a library
-  Future<void> deleteLibrary(String id) async {
+  Future<Result<void>> deleteLibrary(String id, bool deleteMedia) async {
     try {
-      final client = ApiClientService.getClient();
-      final libraryApi = client.getLibraryApi();
-
-      final request = ApiV1LibraryDeleteRequest((b) => b..id = id);
-
-      await libraryApi.apiV1LibraryDelete(apiV1LibraryDeleteRequest: request);
-    } on DioException catch (e) {
-      throw Exception('Failed to delete library: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to delete library: $e');
-    }
-  }
-
-  /// Map domain LibraryType to API string
-  String? _mapLibraryTypeToApi(LibraryType type) {
-    switch (type) {
-      case LibraryType.movie:
-        return 'MOVIE';
-      case LibraryType.tvShow:
-        return 'TV_SHOW';
-      case LibraryType.music:
-        return 'MUSIC';
-      case LibraryType.comic:
-        return 'COMIC';
-    }
-  }
-
-  /// Scan a path to create a library
-  Future<String> scanLibrary({
-    required String path,
-    String? libraryName,
-    String? mediaType,
-  }) async {
-    final stopwatch = Stopwatch()..start();
-    try {
-      AppLogger.d(
-        'Starting library scan: path=$path, name=$libraryName, type=$mediaType',
-      );
-
-      final client = ApiClientService.getClient();
-      final scanApi = client.getScanApi();
-
-      final options = ApiV1ScanPathPostRequestOptions(
-        (b) => b
-          ..mediaType = mediaType != null
-              ? (mediaType == 'movie'
-                    ? ApiV1ScanPathPostRequestOptionsMediaTypeEnum.movie
-                    : ApiV1ScanPathPostRequestOptionsMediaTypeEnum.tv)
-              : null,
-      );
-
-      final request = ApiV1ScanPathPostRequest(
-        (b) => b
-          ..path = path
-          ..options = options.toBuilder(),
-      );
-
-      // Scan operations return 202 immediately, so we only wait for the acknowledgment
-      final response = await scanApi.apiV1ScanPathPost(
-        apiV1ScanPathPostRequest: request,
-      );
-
-      stopwatch.stop();
-      final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
-
-      if (durationSeconds > 3) {
-        AppLogger.w(
-          'Library scan request took ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): path=$path, name=$libraryName',
-        );
-      } else {
-        AppLogger.d(
-          'Library scan request completed in ${durationSeconds.toStringAsFixed(2)}s',
-        );
-      }
-
-      if (response.data?.success == true) {
-        // The scan is a continuous background process that returns 202 Accepted
-        // The response contains path, mediaType, queued, and queuePosition
-        // The library will be created during the scanning process
-        AppLogger.i(
-          'Scan started successfully. Library will be created during the scan process.',
-        );
-        // Return a placeholder - the actual library will appear once scanning begins
-        return 'scan-in-progress';
-      }
-
-      AppLogger.e('Failed to start library scan: Invalid response');
-      throw Exception('Failed to start library scan: Invalid response');
-    } on DioException catch (e) {
-      stopwatch.stop();
-      final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
-      if (durationSeconds > 3) {
-        AppLogger.w(
-          'Library scan request failed after ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): ${e.message}',
-        );
-      }
-      AppLogger.e('Failed to scan library: ${e.message}', e);
-      throw Exception('Failed to scan library: ${e.message}');
+      final request = DeleteLibraryRequestDto(deleteMedia: deleteMedia);
+      await _api.library.deleteLibrary(id, request);
+      return const Success(null);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to delete library: ${e.message}', e);
+      return ResultFailure(e.toFailure());
     } catch (e, stackTrace) {
-      stopwatch.stop();
-      final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
-      if (durationSeconds > 3) {
-        AppLogger.w(
-          'Library scan request failed after ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): $e',
-        );
-      }
-      AppLogger.e('Failed to scan library: $e', e, stackTrace);
-      throw Exception('Failed to scan library: $e');
+      AppLogger.e('Failed to delete library: $e', e, stackTrace);
+      return ResultFailure(exceptionToFailure(e, 'Failed to delete library'));
     }
   }
 
-  /// Map domain LibraryType to API enum
-  ApiV1LibraryPutRequestLibraryTypeEnum? _mapLibraryTypeToApiEnum(
-    LibraryType type,
-  ) {
-    switch (type) {
-      case LibraryType.movie:
-        return ApiV1LibraryPutRequestLibraryTypeEnum.MOVIE;
-      case LibraryType.tvShow:
-        return ApiV1LibraryPutRequestLibraryTypeEnum.TV_SHOW;
-      case LibraryType.music:
-        return ApiV1LibraryPutRequestLibraryTypeEnum.MUSIC;
-      case LibraryType.comic:
-        return ApiV1LibraryPutRequestLibraryTypeEnum.COMIC;
+  /// Scan a library path
+  Future<Result<ScanResponseDto>> scanLibrary({
+    required String path,
+    String? name,
+    String? description,
+    required String mediaType,
+    int? movieDepth,
+    int? tvDepth,
+    bool? rescan,
+    bool? followSymlinks,
+  }) async {
+    try {
+      final request = ScanPathRequestDto(
+        path: path,
+        name: name,
+        description: description,
+        options: ScanOptionsDto(
+          mediaType: mediaType,
+          mediaTypeDepth: (movieDepth != null || tvDepth != null)
+              ? _createMediaTypeDepthDto(movieDepth, tvDepth)
+              : null,
+          rescan: rescan,
+          followSymlinks: followSymlinks,
+        ),
+      );
+
+      final response = await _api.scan.scanPath(request);
+      return Success(response);
+    } on ApiException catch (e) {
+      AppLogger.e('Failed to scan library: ${e.message}', e);
+      return ResultFailure(e.toFailure());
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to scan library: $e', e, stackTrace);
+      return ResultFailure(exceptionToFailure(e, 'Failed to scan library'));
     }
+  }
+
+  /// Helper to create MediaTypeDepthDto
+  MediaTypeDepthDto _createMediaTypeDepthDto(int? movie, int? tv) {
+    return MediaTypeDepthDto(movie: movie, tv: tv);
   }
 }

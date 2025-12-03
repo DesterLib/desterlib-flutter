@@ -10,45 +10,23 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/features/connection/domain/entities/connection_status.dart';
 import 'package:dester/features/connection/presentation/widgets/m_connection_status.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 
 // Features
-import 'package:dester/features/settings/domain/entities/settings.dart';
-import 'package:dester/features/settings/domain/usecases/get_settings.dart';
 import 'package:dester/features/settings/domain/usecases/reset_settings.dart';
-import 'package:dester/features/settings/domain/usecases/update_settings.dart';
+import 'package:dester/features/settings/presentation/providers/settings_providers.dart';
+import 'package:dester/features/settings/presentation/widgets/api_list_widget.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_group.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_item.dart';
 import 'package:dester/features/settings/presentation/widgets/settings_section.dart';
 import 'package:dester/features/settings/settings_feature.dart';
 
-/// Provider for GetSettings use case
-final getSettingsProvider = Provider<GetSettings>((ref) {
-  return SettingsFeature.createGetSettingsLegacy();
-});
-
-/// Provider for UpdateSettings use case
-final updateSettingsProvider = Provider<UpdateSettings>((ref) {
-  return SettingsFeature.createUpdateSettingsLegacy();
-});
-
 /// Provider for ResetAllSettings use case
 final resetAllSettingsProvider = Provider<ResetAllSettings>((ref) {
   return SettingsFeature.createResetAllSettingsLegacy();
-});
-
-/// Provider for current settings
-final settingsProvider = FutureProvider<Settings>((ref) async {
-  final getSettings = ref.watch(getSettingsProvider);
-  final result = await getSettings();
-  return result.fold(
-    onSuccess: (settings) => settings,
-    onFailure: (failure) => throw failure,
-  );
 });
 
 class SettingsScreen extends ConsumerWidget {
@@ -76,8 +54,11 @@ class SettingsScreen extends ConsumerWidget {
                       group: SettingsGroup(
                         children: [
                           SettingsItem(
-                            leadingIcon: _getStatusIcon(status),
-                            leadingIconColor: _getStatusColor(status),
+                            leadingIcon: ConnectionStatusHelper.getStatusIcon(
+                              status,
+                            ),
+                            leadingIconColor:
+                                ConnectionStatusHelper.getStatusColor(status),
                             title: AppLocalization
                                 .settingsServersConnectionStatus
                                 .tr(),
@@ -115,6 +96,7 @@ class SettingsScreen extends ConsumerWidget {
                       group: ref
                           .watch(settingsProvider)
                           .when(
+                            skipLoadingOnRefresh: false,
                             data: (settings) => SettingsGroup(
                               children: [
                                 SettingsItem(
@@ -366,32 +348,6 @@ class SettingsScreen extends ConsumerWidget {
           duration: const Duration(seconds: 2),
         ),
       );
-    }
-  }
-
-  IconData _getStatusIcon(ConnectionStatus status) {
-    switch (status) {
-      case ConnectionStatus.connected:
-        return getIconDataFromDIconName(DIconName.link2, strokeWidth: 2.0);
-      case ConnectionStatus.disconnected:
-        return getIconDataFromDIconName(DIconName.link2Off, strokeWidth: 2.0);
-      case ConnectionStatus.checking:
-        return getIconDataFromDIconName(DIconName.refreshCw, strokeWidth: 2.0);
-      case ConnectionStatus.error:
-        return getIconDataFromDIconName(DIconName.error, strokeWidth: 2.0);
-    }
-  }
-
-  Color _getStatusColor(ConnectionStatus status) {
-    switch (status) {
-      case ConnectionStatus.connected:
-        return AppConstants.successColor;
-      case ConnectionStatus.disconnected:
-        return AppConstants.warningColor;
-      case ConnectionStatus.checking:
-        return AppConstants.infoColor;
-      case ConnectionStatus.error:
-        return AppConstants.dangerColor;
     }
   }
 }

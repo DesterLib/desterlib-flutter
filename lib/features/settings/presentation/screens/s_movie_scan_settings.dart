@@ -204,9 +204,9 @@ class _MovieScanSettingsScreenState
                               .tr(),
                           children: [
                             FormBuilderField<String>(
-                              name: 'directoryPattern',
+                              name: 'movieDirectoryPattern',
                               initialValue:
-                                  _scanSettings.directoryPattern ?? '',
+                                  _scanSettings.movieDirectoryPattern ?? '',
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   try {
@@ -233,10 +233,22 @@ class _MovieScanSettingsScreenState
                                   if (field.errorText == null ||
                                       value.isEmpty) {
                                     _debouncedUpdateSetting<String?>(
-                                      fieldName: 'directoryPattern',
+                                      fieldName: 'movieDirectoryPattern',
                                       value: value.isEmpty ? null : value,
-                                      updateFn: (settings, val) => settings
-                                          .copyWith(directoryPattern: val),
+                                      updateFn: (settings, val) =>
+                                          settings.copyWith(
+                                            mediaTypePatterns:
+                                                MediaTypePatterns(
+                                                  movie: MoviePatterns(
+                                                    filenamePattern: settings
+                                                        .movieFilenamePattern,
+                                                    directoryPattern: val,
+                                                  ),
+                                                  tv: settings
+                                                      .mediaTypePatterns
+                                                      ?.tv,
+                                                ),
+                                          ),
                                     );
                                   }
                                 },
@@ -258,8 +270,9 @@ class _MovieScanSettingsScreenState
                               .tr(),
                           children: [
                             FormBuilderField<String>(
-                              name: 'filenamePattern',
-                              initialValue: _scanSettings.filenamePattern ?? '',
+                              name: 'movieFilenamePattern',
+                              initialValue:
+                                  _scanSettings.movieFilenamePattern ?? '',
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   try {
@@ -286,10 +299,22 @@ class _MovieScanSettingsScreenState
                                   if (field.errorText == null ||
                                       value.isEmpty) {
                                     _debouncedUpdateSetting<String?>(
-                                      fieldName: 'filenamePattern',
+                                      fieldName: 'movieFilenamePattern',
                                       value: value.isEmpty ? null : value,
-                                      updateFn: (settings, val) => settings
-                                          .copyWith(filenamePattern: val),
+                                      updateFn: (settings, val) =>
+                                          settings.copyWith(
+                                            mediaTypePatterns:
+                                                MediaTypePatterns(
+                                                  movie: MoviePatterns(
+                                                    filenamePattern: val,
+                                                    directoryPattern: settings
+                                                        .movieDirectoryPattern,
+                                                  ),
+                                                  tv: settings
+                                                      .mediaTypePatterns
+                                                      ?.tv,
+                                                ),
+                                          ),
                                     );
                                   }
                                 },

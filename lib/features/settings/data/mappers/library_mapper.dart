@@ -1,9 +1,8 @@
 // External packages
-import 'package:openapi/openapi.dart';
+import 'package:dester/features/settings/data/models/local_library_model.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
-
 
 /// Mapper for converting between API models and domain entities
 class LibraryMapper {
@@ -12,15 +11,15 @@ class LibraryMapper {
     return Library(
       id: model.id,
       name: model.name,
-      slug: model.slug,
+      slug: model.slug ?? '',
       description: model.description,
       posterUrl: model.posterUrl,
       backdropUrl: model.backdropUrl,
-      isLibrary: model.isLibrary,
+      isLibrary: model.isLibrary ?? false,
       libraryPath: model.libraryPath,
       libraryType: _mapLibraryType(model.libraryType),
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
+      createdAt: model.createdAt ?? DateTime.now(),
+      updatedAt: model.updatedAt ?? DateTime.now(),
       parentId: model.parentId,
       mediaCount: model.mediaCount?.toInt(),
     );

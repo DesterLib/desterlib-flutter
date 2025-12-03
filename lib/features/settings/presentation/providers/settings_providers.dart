@@ -5,17 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Core
 import 'package:dester/core/utils/app_logger.dart';
 
-// Features
-import 'package:dester/features/settings/data/datasources/settings_datasource.dart';
-import 'package:dester/features/settings/data/datasources/settings_local_datasource.dart';
-import 'package:dester/features/settings/data/repository/settings_repository_impl.dart';
-import 'package:dester/features/settings/data/repository/settings_repository_local_first_impl.dart';
+// Features - Domain layer only (Clean Architecture)
 import 'package:dester/features/settings/domain/entities/settings.dart';
-import 'package:dester/features/settings/domain/repository/settings_local_data_source_interface.dart';
 import 'package:dester/features/settings/domain/repository/settings_repository.dart';
 import 'package:dester/features/settings/domain/services/settings_background_sync_service.dart';
 import 'package:dester/features/settings/domain/services/settings_sync_service.dart';
 import 'package:dester/features/settings/presentation/providers/settings_state_notifier.dart';
+import 'package:dester/features/settings/settings_feature.dart';
+
+// Note: We import the concrete type from data layer here only for provider typing
+// The actual instantiation happens in the feature factory (dependency injection)
+import 'package:dester/features/settings/data/datasources/settings_local_datasource.dart';
 
 /// Provider for SharedPreferences instance
 final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
@@ -30,11 +30,12 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
 });
 
 /// Provider for local data source
+/// Returns concrete implementation but consumers should treat as interface
 final settingsLocalDataSourceProvider =
-    FutureProvider<SettingsLocalDataSourceInterface>((ref) async {
+    FutureProvider<SettingsLocalDataSourceImpl>((ref) async {
       try {
         final prefs = await ref.watch(sharedPreferencesProvider.future);
-        return SettingsLocalDataSourceImpl(prefs);
+        return await SettingsFeature.getOrCreateLocalDataSource(prefs);
       } catch (e) {
         AppLogger.e('Failed to create local data source: $e');
         rethrow;
@@ -42,8 +43,8 @@ final settingsLocalDataSourceProvider =
     });
 
 /// Provider for remote data source
-final settingsRemoteDataSourceProvider = Provider<SettingsDataSource>((ref) {
-  return SettingsDataSource();
+final settingsRemoteDataSourceProvider = Provider((ref) {
+  return SettingsFeature.createSettingsDataSource();
 });
 
 /// Provider for sync service
@@ -56,13 +57,9 @@ final settingsSyncServiceProvider = FutureProvider<SettingsSyncService>((
     );
     final remoteDataSource = ref.watch(settingsRemoteDataSourceProvider);
 
-    // Create a temporary repository for sync service
-    // This is used only for sync operations, not for regular settings access
-    final tempRepository = SettingsRepositoryImpl(dataSource: remoteDataSource);
-
-    return SettingsSyncServiceImpl(
-      repository: tempRepository,
+    return await SettingsFeature.getOrCreateSyncService(
       localDataSource: localDataSource,
+      remoteDataSource: remoteDataSource,
     );
   } catch (e) {
     AppLogger.e('Failed to create sync service: $e');
@@ -79,7 +76,7 @@ final settingsBackgroundSyncServiceProvider =
           settingsLocalDataSourceProvider.future,
         );
 
-        return SettingsBackgroundSyncServiceImpl(
+        return await SettingsFeature.getOrCreateBackgroundSyncService(
           syncService: syncService,
           localDataSource: localDataSource,
         );
@@ -102,7 +99,7 @@ final settingsRepositoryProvider = FutureProvider<SettingsRepository>((
       settingsBackgroundSyncServiceProvider.future,
     );
 
-    final repository = SettingsRepositoryLocalFirstImpl(
+    final repository = await SettingsFeature.getOrCreateRepository(
       remoteDataSource: remoteDataSource,
       localDataSource: localDataSource,
       backgroundSyncService: backgroundSyncService,

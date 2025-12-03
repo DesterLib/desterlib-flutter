@@ -203,9 +203,9 @@ class _TvScanSettingsScreenState extends ConsumerState<TvScanSettingsScreen>
                               .tr(),
                           children: [
                             FormBuilderField<String>(
-                              name: 'directoryPattern',
+                              name: 'tvDirectoryPattern',
                               initialValue:
-                                  _scanSettings.directoryPattern ?? '',
+                                  _scanSettings.tvDirectoryPattern ?? '',
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   try {
@@ -232,10 +232,22 @@ class _TvScanSettingsScreenState extends ConsumerState<TvScanSettingsScreen>
                                   if (field.errorText == null ||
                                       value.isEmpty) {
                                     _debouncedUpdateSetting<String?>(
-                                      fieldName: 'directoryPattern',
+                                      fieldName: 'tvDirectoryPattern',
                                       value: value.isEmpty ? null : value,
-                                      updateFn: (settings, val) => settings
-                                          .copyWith(directoryPattern: val),
+                                      updateFn: (settings, val) =>
+                                          settings.copyWith(
+                                            mediaTypePatterns:
+                                                MediaTypePatterns(
+                                                  movie: settings
+                                                      .mediaTypePatterns
+                                                      ?.movie,
+                                                  tv: TvPatterns(
+                                                    filenamePattern: settings
+                                                        .tvFilenamePattern,
+                                                    directoryPattern: val,
+                                                  ),
+                                                ),
+                                          ),
                                     );
                                   }
                                 },
@@ -257,8 +269,9 @@ class _TvScanSettingsScreenState extends ConsumerState<TvScanSettingsScreen>
                               .tr(),
                           children: [
                             FormBuilderField<String>(
-                              name: 'filenamePattern',
-                              initialValue: _scanSettings.filenamePattern ?? '',
+                              name: 'tvFilenamePattern',
+                              initialValue:
+                                  _scanSettings.tvFilenamePattern ?? '',
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   try {
@@ -285,10 +298,22 @@ class _TvScanSettingsScreenState extends ConsumerState<TvScanSettingsScreen>
                                   if (field.errorText == null ||
                                       value.isEmpty) {
                                     _debouncedUpdateSetting<String?>(
-                                      fieldName: 'filenamePattern',
+                                      fieldName: 'tvFilenamePattern',
                                       value: value.isEmpty ? null : value,
-                                      updateFn: (settings, val) => settings
-                                          .copyWith(filenamePattern: val),
+                                      updateFn: (settings, val) =>
+                                          settings.copyWith(
+                                            mediaTypePatterns:
+                                                MediaTypePatterns(
+                                                  movie: settings
+                                                      .mediaTypePatterns
+                                                      ?.movie,
+                                                  tv: TvPatterns(
+                                                    filenamePattern: val,
+                                                    directoryPattern: settings
+                                                        .tvDirectoryPattern,
+                                                  ),
+                                                ),
+                                          ),
                                     );
                                   }
                                 },

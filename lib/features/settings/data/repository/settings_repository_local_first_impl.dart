@@ -7,15 +7,36 @@ import 'package:dester/core/utils/app_logger.dart';
 
 // Features
 import 'package:dester/features/settings/data/datasources/settings_datasource.dart';
-import 'package:dester/features/settings/data/mappers/settings_mapper.dart';
 import 'package:dester/features/settings/domain/entities/scan_settings.dart';
 import 'package:dester/features/settings/domain/entities/settings.dart';
 import 'package:dester/features/settings/domain/repository/settings_local_data_source_interface.dart';
 import 'package:dester/features/settings/domain/repository/settings_repository.dart';
 import 'package:dester/features/settings/domain/services/settings_background_sync_service.dart';
 
-/// Local-first implementation of SettingsRepository
-/// Loads from cache immediately, syncs in background
+/// Local-first settings repository with caching and background sync
+///
+/// **Use this for production (DEFAULT):**
+/// This is the recommended implementation for production use.
+///
+/// **Features:**
+/// - Instant reads from local cache
+/// - Optimistic updates (write to cache immediately)
+/// - Background sync with retry logic
+/// - Offline-first capabilities
+/// - Conflict resolution
+/// - Better user experience (no waiting for API)
+///
+/// **How it works:**
+/// 1. **Read**: Returns cached data immediately, syncs in background
+/// 2. **Write**: Updates cache immediately, syncs to server in background
+/// 3. **Sync**: Automatic background synchronization with exponential backoff
+///
+/// **When NOT to use:**
+/// - Legacy code requiring simple behavior (use [SettingsRepositoryImpl])
+/// - Inside sync services (would create circular dependencies)
+/// - Testing scenarios needing predictable behavior
+///
+/// See also: [SettingsRepositoryImpl] for simple implementation
 class SettingsRepositoryLocalFirstImpl implements SettingsRepository {
   final SettingsDataSource _remoteDataSource;
   final SettingsLocalDataSourceInterface _localDataSource;
@@ -63,8 +84,7 @@ class SettingsRepositoryLocalFirstImpl implements SettingsRepository {
     // No cache, fetch from server
     final remoteResult = await _remoteDataSource.getSettings();
     return remoteResult.fold(
-      onSuccess: (apiSettings) async {
-        final settings = SettingsMapper.fromApiModel(apiSettings);
+      onSuccess: (settings) async {
         // Cache the settings
         await _localDataSource.cacheSettings(settings);
         await _localDataSource.setLastSynced(DateTime.now());
@@ -127,11 +147,10 @@ class SettingsRepositoryLocalFirstImpl implements SettingsRepository {
 
   @override
   Future<Result<Settings>> resetAllSettings() async {
-    // Reset on server first
-    final remoteResult = await _remoteDataSource.resetAllSettings();
+    // Reset on server first (use resetScanSettings for now)
+    final remoteResult = await _remoteDataSource.resetScanSettings();
     return remoteResult.fold(
-      onSuccess: (apiSettings) async {
-        final settings = SettingsMapper.fromApiModel(apiSettings);
+      onSuccess: (settings) async {
         // Update local cache
         await _localDataSource.cacheSettings(settings);
         await _localDataSource.setLastSynced(DateTime.now());
@@ -147,8 +166,7 @@ class SettingsRepositoryLocalFirstImpl implements SettingsRepository {
     // Reset on server first
     final remoteResult = await _remoteDataSource.resetScanSettings();
     return remoteResult.fold(
-      onSuccess: (apiSettings) async {
-        final settings = SettingsMapper.fromApiModel(apiSettings);
+      onSuccess: (settings) async {
         // Update local cache
         await _localDataSource.cacheSettings(settings);
         await _localDataSource.setLastSynced(DateTime.now());

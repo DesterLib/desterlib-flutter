@@ -23,7 +23,7 @@ import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/features/settings/domain/entities/library.dart';
 import 'package:dester/features/settings/presentation/controllers/manage_libraries_controller.dart';
 import 'package:dester/features/settings/presentation/providers/manage_libraries_providers.dart';
-import 'package:dester/features/settings/presentation/screens/s_settings.dart';
+import 'package:dester/features/settings/presentation/providers/settings_providers.dart';
 import 'package:dester/features/settings/presentation/widgets/library_card.dart';
 import 'package:dester/features/settings/presentation/widgets/m_delete_library.dart';
 import 'package:dester/features/settings/presentation/widgets/m_library.dart';
@@ -178,11 +178,18 @@ class ManageLibrariesScreen extends ConsumerWidget {
 
   void _showAddLibraryModal(BuildContext context, WidgetRef ref) async {
     // Check if metadata provider is configured before showing modal
-    final currentSettings = await ref.read(settingsProvider.future);
+    final settingsAsync = ref.read(settingsProvider);
 
     if (!context.mounted) return;
 
-    if (!currentSettings.hasMetadataProvider) {
+    // Check if settings are loaded and has metadata provider
+    final hasMetadataProvider = settingsAsync.when(
+      data: (settings) => settings.hasMetadataProvider,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    if (!hasMetadataProvider) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -200,9 +207,15 @@ class ManageLibrariesScreen extends ConsumerWidget {
       isEditMode: false,
       onSave: (name, description, libraryPath, libraryType) async {
         // Double-check metadata provider is configured before creating library
-        final settings = await ref.read(settingsProvider.future);
+        final settingsAsync = ref.read(settingsProvider);
 
-        if (!settings.hasMetadataProvider) {
+        final hasMetadataProvider = settingsAsync.when(
+          data: (settings) => settings.hasMetadataProvider,
+          loading: () => false,
+          error: (_, __) => false,
+        );
+
+        if (!hasMetadataProvider) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -345,7 +358,6 @@ class _SpinningRefreshButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   const _SpinningRefreshButton({
-    super.key,
     required this.isLoading,
     required this.onPressed,
   });

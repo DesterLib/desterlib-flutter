@@ -81,6 +81,31 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              DSelect<LibraryType>(
+                name: 'type',
+                initialValue: widget.library?.libraryType,
+                enabled: !widget.isEditMode,
+                label: AppLocalization.settingsLibrariesLibraryType.tr(),
+                hintText: 'Select Library Type',
+                helperText: widget.isEditMode
+                    ? 'Type cannot be changed after library creation'
+                    : null,
+                validator: widget.isEditMode
+                    ? null
+                    : (value) {
+                        if (value == null) {
+                          return '${AppLocalization.settingsLibrariesLibraryType.tr()} is required';
+                        }
+                        return null;
+                      },
+                items: LibraryType.values.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type.displayName),
+                  );
+                }).toList(),
+              ),
+              AppConstants.spacingY(AppConstants.spacingMd),
               DInput(
                 name: 'name',
                 initialValue: widget.library?.name,
@@ -115,23 +140,14 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
                 helperText: widget.isEditMode
                     ? 'Path cannot be changed after library creation'
                     : null,
-              ),
-              AppConstants.spacingY(AppConstants.spacingMd),
-              DSelect<LibraryType>(
-                name: 'type',
-                initialValue: widget.library?.libraryType,
-                enabled: !widget.isEditMode,
-                label: AppLocalization.settingsLibrariesLibraryType.tr(),
-                hintText: 'Select Library Type',
-                helperText: widget.isEditMode
-                    ? 'Type cannot be changed after library creation'
-                    : null,
-                items: LibraryType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type.displayName),
-                  );
-                }).toList(),
+                validator: widget.isEditMode
+                    ? null
+                    : (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '${AppLocalization.settingsLibrariesLibraryPath.tr()} is required';
+                        }
+                        return null;
+                      },
               ),
             ],
           ),
@@ -160,7 +176,7 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
   }
 
   Future<void> _handleSave(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.saveAndValidate()) {
       return;
     }
 
@@ -172,7 +188,7 @@ class _LibraryModalWidgetState extends State<_LibraryModalWidget> {
     final name = (values['name'] as String?)?.trim() ?? '';
     final description = (values['description'] as String?)?.trim();
     final path = (values['path'] as String?)?.trim();
-    final libraryPath = path?.isEmpty ?? true ? null : path;
+    final libraryPath = (path == null || path.isEmpty) ? null : path;
     final libraryDescription = description?.isEmpty ?? true
         ? null
         : description;

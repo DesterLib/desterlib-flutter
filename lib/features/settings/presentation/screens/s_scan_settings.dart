@@ -84,32 +84,13 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
   /// Compare two ScanSettings objects for equality
   bool _areScanSettingsEqual(ScanSettings a, ScanSettings b) {
     return a.rescan == b.rescan &&
-        a.batchScan == b.batchScan &&
         a.followSymlinks == b.followSymlinks &&
-        a.mediaType == b.mediaType &&
-        a.maxDepth == b.maxDepth &&
         a.movieDepth == b.movieDepth &&
         a.tvDepth == b.tvDepth &&
-        a.filenamePattern == b.filenamePattern &&
-        a.excludePattern == b.excludePattern &&
-        a.includePattern == b.includePattern &&
-        a.directoryPattern == b.directoryPattern &&
-        a.minFileSize == b.minFileSize &&
-        a.maxFileSize == b.maxFileSize &&
-        _areListsEqual(a.fileExtensions, b.fileExtensions) &&
-        _areListsEqual(a.excludeDirectories, b.excludeDirectories) &&
-        _areListsEqual(a.includeDirectories, b.includeDirectories);
-  }
-
-  /// Compare two lists for equality
-  bool _areListsEqual<T>(List<T>? a, List<T>? b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
+        a.movieFilenamePattern == b.movieFilenamePattern &&
+        a.movieDirectoryPattern == b.movieDirectoryPattern &&
+        a.tvFilenamePattern == b.tvFilenamePattern &&
+        a.tvDirectoryPattern == b.tvDirectoryPattern;
   }
 
   @override
@@ -218,22 +199,6 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                                 value: value,
                                 updateFn: (settings, val) =>
                                     settings.copyWith(rescan: val),
-                              );
-                            },
-                          ),
-                          IsolatedSettingField.switch_(
-                            fieldName: 'batchScan',
-                            initialValue: _scanSettings.batchScan ?? false,
-                            title: AppLocalization.settingsScanBatchScan.tr(),
-                            isFirst: false,
-                            enabled:
-                                !isFieldSaving('batchScan') && !_isResetting,
-                            onChanged: (value) {
-                              _updateSetting<bool>(
-                                fieldName: 'batchScan',
-                                value: value,
-                                updateFn: (settings, val) =>
-                                    settings.copyWith(batchScan: val),
                               );
                             },
                           ),

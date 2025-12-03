@@ -6,6 +6,7 @@ import 'package:dester/core/errors/errors.dart';
 import 'package:dester/core/utils/app_logger.dart';
 
 // Features
+import 'package:dester/features/settings/data/mappers/scan_settings_json_mapper.dart';
 import 'package:dester/features/settings/domain/entities/scan_settings.dart';
 import 'package:dester/features/settings/domain/entities/settings.dart';
 import 'package:dester/features/settings/domain/repository/settings_local_data_source_interface.dart';
@@ -191,52 +192,11 @@ class SettingsBackgroundSyncServiceImpl
 
   /// Convert ScanSettings to map
   Map<String, dynamic> _scanSettingsToMap(ScanSettings settings) {
-    return {
-      'mediaType': settings.mediaType,
-      'maxDepth': settings.maxDepth,
-      'movieDepth': settings.movieDepth,
-      'tvDepth': settings.tvDepth,
-      'fileExtensions': settings.fileExtensions,
-      'filenamePattern': settings.filenamePattern,
-      'excludePattern': settings.excludePattern,
-      'includePattern': settings.includePattern,
-      'directoryPattern': settings.directoryPattern,
-      'excludeDirectories': settings.excludeDirectories,
-      'includeDirectories': settings.includeDirectories,
-      'rescan': settings.rescan,
-      'batchScan': settings.batchScan,
-      'minFileSize': settings.minFileSize,
-      'maxFileSize': settings.maxFileSize,
-      'followSymlinks': settings.followSymlinks,
-    };
+    return ScanSettingsJsonMapper.toJson(settings);
   }
 
   /// Convert map to ScanSettings
   ScanSettings? _scanSettingsFromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-    return ScanSettings(
-      mediaType: map['mediaType'] as String?,
-      maxDepth: map['maxDepth'] as int?,
-      movieDepth: map['movieDepth'] as int?,
-      tvDepth: map['tvDepth'] as int?,
-      fileExtensions: map['fileExtensions'] != null
-          ? List<String>.from(map['fileExtensions'] as List)
-          : null,
-      filenamePattern: map['filenamePattern'] as String?,
-      excludePattern: map['excludePattern'] as String?,
-      includePattern: map['includePattern'] as String?,
-      directoryPattern: map['directoryPattern'] as String?,
-      excludeDirectories: map['excludeDirectories'] != null
-          ? List<String>.from(map['excludeDirectories'] as List)
-          : null,
-      includeDirectories: map['includeDirectories'] != null
-          ? List<String>.from(map['includeDirectories'] as List)
-          : null,
-      rescan: map['rescan'] as bool?,
-      batchScan: map['batchScan'] as bool?,
-      minFileSize: map['minFileSize'] as int?,
-      maxFileSize: map['maxFileSize'] as int?,
-      followSymlinks: map['followSymlinks'] as bool?,
-    );
+    return ScanSettingsJsonMapper.fromJson(map);
   }
 }

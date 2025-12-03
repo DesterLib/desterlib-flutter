@@ -1,86 +1,90 @@
+/// Media type pattern configuration for movies
+class MoviePatterns {
+  final String? filenamePattern;
+  final String? directoryPattern;
+
+  const MoviePatterns({this.filenamePattern, this.directoryPattern});
+
+  MoviePatterns copyWith({String? filenamePattern, String? directoryPattern}) {
+    return MoviePatterns(
+      filenamePattern: filenamePattern ?? this.filenamePattern,
+      directoryPattern: directoryPattern ?? this.directoryPattern,
+    );
+  }
+}
+
+/// Media type pattern configuration for TV shows
+class TvPatterns {
+  final String? filenamePattern;
+  final String? directoryPattern;
+
+  const TvPatterns({this.filenamePattern, this.directoryPattern});
+
+  TvPatterns copyWith({String? filenamePattern, String? directoryPattern}) {
+    return TvPatterns(
+      filenamePattern: filenamePattern ?? this.filenamePattern,
+      directoryPattern: directoryPattern ?? this.directoryPattern,
+    );
+  }
+}
+
+/// Media-type-specific patterns
+class MediaTypePatterns {
+  final MoviePatterns? movie;
+  final TvPatterns? tv;
+
+  const MediaTypePatterns({this.movie, this.tv});
+
+  MediaTypePatterns copyWith({MoviePatterns? movie, TvPatterns? tv}) {
+    return MediaTypePatterns(movie: movie ?? this.movie, tv: tv ?? this.tv);
+  }
+}
+
 /// Scan settings entity representing default scan configuration
 class ScanSettings {
-  final String? mediaType;
-  final int? maxDepth;
   final int? movieDepth;
   final int? tvDepth;
-  final List<String>? fileExtensions;
-  final String? filenamePattern;
-  final String? excludePattern;
-  final String? includePattern;
-  final String? directoryPattern;
-  final List<String>? excludeDirectories;
-  final List<String>? includeDirectories;
+  final MediaTypePatterns? mediaTypePatterns;
   final bool? rescan;
-  final bool? batchScan;
-  final int? minFileSize;
-  final int? maxFileSize;
   final bool? followSymlinks;
 
   /// Default scan settings
   static const ScanSettings defaults = ScanSettings(
     rescan: false,
-    batchScan: false,
     followSymlinks: true,
     movieDepth: 2,
     tvDepth: 4,
   );
 
   const ScanSettings({
-    this.mediaType,
-    this.maxDepth,
     this.movieDepth,
     this.tvDepth,
-    this.fileExtensions,
-    this.filenamePattern,
-    this.excludePattern,
-    this.includePattern,
-    this.directoryPattern,
-    this.excludeDirectories,
-    this.includeDirectories,
+    this.mediaTypePatterns,
     this.rescan,
-    this.batchScan,
-    this.minFileSize,
-    this.maxFileSize,
     this.followSymlinks,
   });
 
   /// Create a copy with updated values
   ScanSettings copyWith({
-    String? mediaType,
-    int? maxDepth,
     int? movieDepth,
     int? tvDepth,
-    List<String>? fileExtensions,
-    String? filenamePattern,
-    String? excludePattern,
-    String? includePattern,
-    String? directoryPattern,
-    List<String>? excludeDirectories,
-    List<String>? includeDirectories,
+    MediaTypePatterns? mediaTypePatterns,
     bool? rescan,
-    bool? batchScan,
-    int? minFileSize,
-    int? maxFileSize,
     bool? followSymlinks,
   }) {
     return ScanSettings(
-      mediaType: mediaType ?? this.mediaType,
-      maxDepth: maxDepth ?? this.maxDepth,
       movieDepth: movieDepth ?? this.movieDepth,
       tvDepth: tvDepth ?? this.tvDepth,
-      fileExtensions: fileExtensions ?? this.fileExtensions,
-      filenamePattern: filenamePattern ?? this.filenamePattern,
-      excludePattern: excludePattern ?? this.excludePattern,
-      includePattern: includePattern ?? this.includePattern,
-      directoryPattern: directoryPattern ?? this.directoryPattern,
-      excludeDirectories: excludeDirectories ?? this.excludeDirectories,
-      includeDirectories: includeDirectories ?? this.includeDirectories,
+      mediaTypePatterns: mediaTypePatterns ?? this.mediaTypePatterns,
       rescan: rescan ?? this.rescan,
-      batchScan: batchScan ?? this.batchScan,
-      minFileSize: minFileSize ?? this.minFileSize,
-      maxFileSize: maxFileSize ?? this.maxFileSize,
       followSymlinks: followSymlinks ?? this.followSymlinks,
     );
   }
+
+  /// Helper getters for media-type-specific patterns
+  String? get movieFilenamePattern => mediaTypePatterns?.movie?.filenamePattern;
+  String? get movieDirectoryPattern =>
+      mediaTypePatterns?.movie?.directoryPattern;
+  String? get tvFilenamePattern => mediaTypePatterns?.tv?.filenamePattern;
+  String? get tvDirectoryPattern => mediaTypePatterns?.tv?.directoryPattern;
 }

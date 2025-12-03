@@ -1,6 +1,9 @@
 // External packages
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Core
+import 'package:dester/core/network/api_provider.dart';
+
 // Dependency injection setup for Settings feature
 import 'data/datasources/library_datasource.dart';
 import 'data/datasources/settings_datasource.dart';
@@ -8,6 +11,7 @@ import 'data/datasources/settings_local_datasource.dart';
 import 'data/repository/library_repository_impl.dart';
 import 'data/repository/settings_repository_impl.dart';
 import 'data/repository/settings_repository_local_first_impl.dart';
+import 'domain/repository/settings_local_data_source_interface.dart';
 import 'domain/repository/settings_repository.dart';
 import 'domain/services/settings_background_sync_service.dart';
 import 'domain/services/settings_sync_service.dart';
@@ -67,45 +71,73 @@ class SettingsFeature {
     return const TvScanSettingsScreen();
   }
 
+  // Singleton instances for library data sources and repositories
+  static LibraryDataSource? _libraryDataSource;
+  static LibraryRepositoryImpl? _libraryRepository;
+
+  // Private helper to get or create library data source
+  static LibraryDataSource _getLibraryDataSource() {
+    _libraryDataSource ??= LibraryDataSource(ApiProvider.instance);
+    return _libraryDataSource!;
+  }
+
+  // Private helper to get or create library repository
+  static LibraryRepositoryImpl _getLibraryRepository() {
+    _libraryRepository ??= LibraryRepositoryImpl(
+      dataSource: _getLibraryDataSource(),
+    );
+    return _libraryRepository!;
+  }
+
   // Library use case factories
   static GetLibraries createGetLibraries() {
-    final dataSource = LibraryDataSource();
-    final repository = LibraryRepositoryImpl(dataSource: dataSource);
-    return GetLibrariesImpl(repository);
+    return GetLibrariesImpl(_getLibraryRepository());
   }
 
   static UpdateLibrary createUpdateLibrary() {
-    final dataSource = LibraryDataSource();
-    final repository = LibraryRepositoryImpl(dataSource: dataSource);
-    return UpdateLibraryImpl(repository);
+    return UpdateLibraryImpl(_getLibraryRepository());
   }
 
   static DeleteLibrary createDeleteLibrary() {
-    final dataSource = LibraryDataSource();
-    final repository = LibraryRepositoryImpl(dataSource: dataSource);
-    return DeleteLibraryImpl(repository);
+    return DeleteLibraryImpl(_getLibraryRepository());
   }
 
   static ScanLibrary createScanLibrary() {
-    final dataSource = LibraryDataSource();
-    final repository = LibraryRepositoryImpl(dataSource: dataSource);
-    return ScanLibraryImpl(repository);
+    return ScanLibraryImpl(_getLibraryRepository());
   }
+
+  // Singleton instances for data sources and repositories
+  static SettingsDataSource? _settingsDataSource;
+  static SettingsLocalDataSourceImpl? _settingsLocalDataSource;
+  static SettingsRepository? _settingsRepository;
 
   // Settings data source factories
   static SettingsDataSource createSettingsDataSource() {
-    return SettingsDataSource();
+    _settingsDataSource ??= SettingsDataSource(ApiProvider.instance);
+    return _settingsDataSource!;
   }
 
-  static Future<SettingsLocalDataSource> createSettingsLocalDataSource() async {
-    final prefs = await SharedPreferences.getInstance();
-    return SettingsLocalDataSourceImpl(prefs);
+  static Future<SettingsLocalDataSourceImpl>
+  createSettingsLocalDataSource() async {
+    if (_settingsLocalDataSource == null) {
+      final prefs = await SharedPreferences.getInstance();
+      _settingsLocalDataSource = SettingsLocalDataSourceImpl(prefs);
+    }
+    return _settingsLocalDataSource!;
+  }
+
+  // Provider-compatible factory that returns local data source implementation
+  static Future<SettingsLocalDataSourceImpl> getOrCreateLocalDataSource(
+    SharedPreferences prefs,
+  ) async {
+    _settingsLocalDataSource ??= SettingsLocalDataSourceImpl(prefs);
+    return _settingsLocalDataSource!;
   }
 
   // Settings sync service factories
   static Future<SettingsSyncService> createSettingsSyncService({
     required SettingsRepository repository,
-    required SettingsLocalDataSource localDataSource,
+    required SettingsLocalDataSourceInterface localDataSource,
   }) async {
     return SettingsSyncServiceImpl(
       repository: repository,
@@ -116,7 +148,7 @@ class SettingsFeature {
   static Future<SettingsBackgroundSyncService>
   createSettingsBackgroundSyncService({
     required SettingsSyncService syncService,
-    required SettingsLocalDataSource localDataSource,
+    required SettingsLocalDataSourceInterface localDataSource,
   }) async {
     return SettingsBackgroundSyncServiceImpl(
       syncService: syncService,
@@ -126,6 +158,10 @@ class SettingsFeature {
 
   // Settings repository factories (local-first)
   static Future<SettingsRepository> createSettingsRepositoryLocalFirst() async {
+    if (_settingsRepository != null) {
+      return _settingsRepository!;
+    }
+
     final remoteDataSource = createSettingsDataSource();
     final localDataSource = await createSettingsLocalDataSource();
 
@@ -140,10 +176,48 @@ class SettingsFeature {
       localDataSource: localDataSource,
     );
 
-    return SettingsRepositoryLocalFirstImpl(
+    _settingsRepository = SettingsRepositoryLocalFirstImpl(
       remoteDataSource: remoteDataSource,
       localDataSource: localDataSource,
       backgroundSyncService: backgroundSyncService,
+    );
+
+    return _settingsRepository!;
+  }
+
+  // Provider-compatible factory methods
+  static Future<SettingsRepository> getOrCreateRepository({
+    required SettingsDataSource remoteDataSource,
+    required SettingsLocalDataSourceImpl localDataSource,
+    required SettingsBackgroundSyncService backgroundSyncService,
+  }) async {
+    _settingsRepository ??= SettingsRepositoryLocalFirstImpl(
+      remoteDataSource: remoteDataSource,
+      localDataSource: localDataSource,
+      backgroundSyncService: backgroundSyncService,
+    );
+    return _settingsRepository!;
+  }
+
+  static Future<SettingsSyncService> getOrCreateSyncService({
+    required SettingsLocalDataSourceImpl localDataSource,
+    required SettingsDataSource remoteDataSource,
+  }) async {
+    final tempRepository = SettingsRepositoryImpl(dataSource: remoteDataSource);
+    return SettingsSyncServiceImpl(
+      repository: tempRepository,
+      localDataSource: localDataSource,
+    );
+  }
+
+  static Future<SettingsBackgroundSyncService>
+  getOrCreateBackgroundSyncService({
+    required SettingsSyncService syncService,
+    required SettingsLocalDataSourceImpl localDataSource,
+  }) async {
+    return SettingsBackgroundSyncServiceImpl(
+      syncService: syncService,
+      localDataSource: localDataSource,
     );
   }
 
@@ -170,25 +244,25 @@ class SettingsFeature {
 
   // Legacy factories (for backward compatibility during migration)
   static GetSettings createGetSettingsLegacy() {
-    final dataSource = SettingsDataSource();
+    final dataSource = SettingsDataSource(ApiProvider.instance);
     final repository = SettingsRepositoryImpl(dataSource: dataSource);
     return GetSettingsImpl(repository);
   }
 
   static UpdateSettings createUpdateSettingsLegacy() {
-    final dataSource = SettingsDataSource();
+    final dataSource = SettingsDataSource(ApiProvider.instance);
     final repository = SettingsRepositoryImpl(dataSource: dataSource);
     return UpdateSettingsImpl(repository);
   }
 
   static ResetAllSettings createResetAllSettingsLegacy() {
-    final dataSource = SettingsDataSource();
+    final dataSource = SettingsDataSource(ApiProvider.instance);
     final repository = SettingsRepositoryImpl(dataSource: dataSource);
     return ResetAllSettingsImpl(repository);
   }
 
   static ResetScanSettings createResetScanSettingsLegacy() {
-    final dataSource = SettingsDataSource();
+    final dataSource = SettingsDataSource(ApiProvider.instance);
     final repository = SettingsRepositoryImpl(dataSource: dataSource);
     return ResetScanSettingsImpl(repository);
   }

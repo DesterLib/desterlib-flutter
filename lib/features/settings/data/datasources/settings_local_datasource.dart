@@ -9,49 +9,13 @@ import 'package:dester/core/errors/errors.dart';
 import 'package:dester/core/storage/storage_keys.dart';
 
 // Features
+import 'package:dester/features/settings/data/mappers/scan_settings_json_mapper.dart';
 import 'package:dester/features/settings/domain/entities/scan_settings.dart';
 import 'package:dester/features/settings/domain/entities/settings.dart';
-
-// Features
 import 'package:dester/features/settings/domain/repository/settings_local_data_source_interface.dart';
 
-/// Local data source interface for settings persistence
-/// Implements domain interface to maintain clean architecture
-abstract class SettingsLocalDataSource
-    implements SettingsLocalDataSourceInterface {
-  /// Get cached settings from local storage
-  Future<Result<Settings?>> getCachedSettings();
-
-  /// Cache settings to local storage
-  Future<Result<void>> cacheSettings(Settings settings);
-
-  /// Get last sync timestamp
-  Future<Result<DateTime?>> getLastSynced();
-
-  /// Set last sync timestamp
-  Future<Result<void>> setLastSynced(DateTime timestamp);
-
-  /// Get local version (increments on each local change)
-  Future<Result<int>> getLocalVersion();
-
-  /// Increment local version
-  Future<Result<int>> incrementLocalVersion();
-
-  /// Get pending sync data (local changes not yet synced)
-  Future<Result<Map<String, dynamic>?>> getPendingSync();
-
-  /// Set pending sync data
-  Future<Result<void>> setPendingSync(Map<String, dynamic>? data);
-
-  /// Clear pending sync data
-  Future<Result<void>> clearPendingSync();
-
-  /// Clear all cached settings
-  Future<Result<void>> clearCache();
-}
-
 /// Implementation of local settings data source using SharedPreferences
-class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
+class SettingsLocalDataSourceImpl implements SettingsLocalDataSourceInterface {
   final SharedPreferences _prefs;
 
   SettingsLocalDataSourceImpl(this._prefs);
@@ -212,51 +176,11 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
 
   /// Convert ScanSettings to JSON
   Map<String, dynamic> _scanSettingsToJson(ScanSettings settings) {
-    return {
-      'mediaType': settings.mediaType,
-      'maxDepth': settings.maxDepth,
-      'movieDepth': settings.movieDepth,
-      'tvDepth': settings.tvDepth,
-      'fileExtensions': settings.fileExtensions,
-      'filenamePattern': settings.filenamePattern,
-      'excludePattern': settings.excludePattern,
-      'includePattern': settings.includePattern,
-      'directoryPattern': settings.directoryPattern,
-      'excludeDirectories': settings.excludeDirectories,
-      'includeDirectories': settings.includeDirectories,
-      'rescan': settings.rescan,
-      'batchScan': settings.batchScan,
-      'minFileSize': settings.minFileSize,
-      'maxFileSize': settings.maxFileSize,
-      'followSymlinks': settings.followSymlinks,
-    };
+    return ScanSettingsJsonMapper.toJson(settings);
   }
 
   /// Convert JSON to ScanSettings
   ScanSettings _scanSettingsFromJson(Map<String, dynamic> json) {
-    return ScanSettings(
-      mediaType: json['mediaType'] as String?,
-      maxDepth: json['maxDepth'] as int?,
-      movieDepth: json['movieDepth'] as int?,
-      tvDepth: json['tvDepth'] as int?,
-      fileExtensions: json['fileExtensions'] != null
-          ? List<String>.from(json['fileExtensions'] as List)
-          : null,
-      filenamePattern: json['filenamePattern'] as String?,
-      excludePattern: json['excludePattern'] as String?,
-      includePattern: json['includePattern'] as String?,
-      directoryPattern: json['directoryPattern'] as String?,
-      excludeDirectories: json['excludeDirectories'] != null
-          ? List<String>.from(json['excludeDirectories'] as List)
-          : null,
-      includeDirectories: json['includeDirectories'] != null
-          ? List<String>.from(json['includeDirectories'] as List)
-          : null,
-      rescan: json['rescan'] as bool?,
-      batchScan: json['batchScan'] as bool?,
-      minFileSize: json['minFileSize'] as int?,
-      maxFileSize: json['maxFileSize'] as int?,
-      followSymlinks: json['followSymlinks'] as bool?,
-    );
+    return ScanSettingsJsonMapper.fromJson(json)!;
   }
 }
