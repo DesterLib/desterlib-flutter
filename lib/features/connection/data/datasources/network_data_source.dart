@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 
 // Core
 import 'package:dester/features/connection/domain/entities/connection_status.dart';
-import 'package:dester/core/constants/app_version.dart';
 import 'package:dester/core/utils/app_logger.dart';
 import 'package:dester/core/utils/url_helper.dart';
+import 'package:dester/core/network/dester_api.dart';
 
 /// Data source for network connectivity
 abstract class NetworkDataSource {
@@ -14,7 +14,7 @@ abstract class NetworkDataSource {
   Future<ConnectionStatus> checkApiConnection(String apiUrl);
 }
 
-/// Implementation of network data source
+/// Implementation of network data source using the new clean API
 class NetworkDataSourceImpl implements NetworkDataSource {
   final Connectivity _connectivity = Connectivity();
 
@@ -22,12 +22,10 @@ class NetworkDataSourceImpl implements NetworkDataSource {
   Future<bool> hasInternetConnectivity() async {
     try {
       final connectivityResults = await _connectivity.checkConnectivity();
-      AppLogger.d('Connectivity check results: $connectivityResults');
 
       // Explicitly check for none first
       if (connectivityResults.contains(ConnectivityResult.none) &&
           connectivityResults.length == 1) {
-        AppLogger.d('No internet connectivity detected');
         return false;
       }
 
@@ -39,7 +37,6 @@ class NetworkDataSourceImpl implements NetworkDataSource {
             result == ConnectivityResult.ethernet ||
             result == ConnectivityResult.vpn,
       );
-      AppLogger.d('Internet connectivity: $hasConnectivity');
       return hasConnectivity;
     } catch (e, stackTrace) {
       AppLogger.e('Error checking internet connectivity', e, stackTrace);
@@ -51,88 +48,67 @@ class NetworkDataSourceImpl implements NetworkDataSource {
   Future<ConnectionStatus> checkApiConnection(String apiUrl) async {
     final stopwatch = Stopwatch()..start();
     try {
-      // Normalize URL (replace localhost with 127.0.0.1 for better compatibility)
+      // Normalize URL
       final normalizedUrl = UrlHelper.normalizeUrl(apiUrl);
 
-      // Use the /health endpoint for connection checking
-      final healthUri = Uri.parse(normalizedUrl).resolve('/health');
-      AppLogger.d('Checking API connection to: $healthUri');
-
-      // Use Dio with reasonable timeout for health check
-      // Increased timeout to handle slow networks and API startup delays
-      // Retry logic will handle transient failures
-      final dio = Dio(
-        BaseOptions(
-          baseUrl: normalizedUrl,
-          connectTimeout: const Duration(
-            seconds: 10,
-          ), // Increased from 5s to 10s
-          receiveTimeout: const Duration(
-            seconds: 10,
-          ), // Increased from 5s to 10s
-          headers: {
-            'X-Client-Version':
-                AppVersion.version, // Include client version header
-          },
-        ),
+      // Create temporary isolated API client for this check
+      final tempApi = DesterApi(
+        baseUrl: normalizedUrl,
+        timeout: const Duration(seconds: 10),
       );
 
-      // Retry logic: try up to 4 times with exponential backoff
-      // Router issues may need more attempts and longer delays
-      // Connection errors that fail immediately (like "Connection refused") need longer delays
-      // to allow router/network to recover
-      Response? response;
+      // Retry logic: try up to 2 times with 3s delay
+      // WebSocket handles ongoing monitoring once connected
       int attempts = 0;
-      const maxAttempts = 4; // Increased from 3 to 4 for router issues
-      DioException? lastError;
+      const maxAttempts = 2;
+      Exception? lastError;
+      Map<String, dynamic>? response;
 
       while (attempts < maxAttempts) {
         try {
-          response = await dio.get('/health');
+          response = await tempApi.health.check();
           if (attempts > 0) {
             AppLogger.i('API connection succeeded on attempt ${attempts + 1}');
           }
-          break; // Success, exit retry loop
+          break; // Success
         } on DioException catch (e) {
           attempts++;
           lastError = e;
 
-          // Log the specific error type for debugging
-          final errorType = e.type.toString().split('.').last;
-          final errorMessage = e.message ?? 'Unknown error';
-          AppLogger.d(
-            'Connection attempt $attempts/$maxAttempts failed: $errorType - $errorMessage',
-          );
-
-          // Only retry on connection/timeout errors, not on HTTP errors
+          // Only retry on connection/timeout errors
           final isRetryable =
               e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.receiveTimeout ||
               e.type == DioExceptionType.connectionError;
 
           if (isRetryable && attempts < maxAttempts) {
-            // For connection errors that fail immediately (like "Connection refused"),
-            // use longer delays to allow router/network to recover
-            // Router issues often need more time: 3s, 6s, 9s
-            final baseDelayMs = 3000; // Start with 3 seconds for router issues
+            final baseDelayMs = 3000;
             final delayMs = baseDelayMs * attempts;
-
-            AppLogger.d(
-              'Retrying connection in ${delayMs}ms (attempt ${attempts + 1}/$maxAttempts)...',
-            );
             await Future.delayed(Duration(milliseconds: delayMs));
             continue;
           }
 
-          // If not retryable or exhausted retries, break to handle error
+          break;
+        } catch (e) {
+          attempts++;
+          lastError = Exception(e.toString());
+
+          if (attempts < maxAttempts) {
+            final delayMs = 3000 * attempts;
+            await Future.delayed(Duration(milliseconds: delayMs));
+            continue;
+          }
+
           break;
         }
       }
 
+      // Clean up temporary client
+      tempApi.dispose();
+
       if (response == null) {
-        // Provide more detailed error message
         final errorDetails = lastError != null
-            ? '${lastError.type.toString().split('.').last}: ${lastError.message ?? "Unknown error"}'
+            ? lastError.toString()
             : 'Unknown error';
         throw Exception(
           'Failed to connect after $maxAttempts attempts. Last error: $errorDetails',
@@ -142,30 +118,21 @@ class NetworkDataSourceImpl implements NetworkDataSource {
       stopwatch.stop();
       final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
 
+      // Only log slow connections
       if (durationSeconds > 3) {
         AppLogger.w(
-          'API connection check took ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): $healthUri',
-        );
-      } else {
-        AppLogger.d(
-          'API connection check completed in ${durationSeconds.toStringAsFixed(2)}s',
+          'API connection check took ${durationSeconds.toStringAsFixed(2)}s',
         );
       }
 
-      final statusCode = response.statusCode;
-      if (statusCode != null && statusCode >= 200 && statusCode < 400) {
-        AppLogger.i('API connection successful: ${response.statusCode}');
-        return ConnectionStatus.connected;
-      } else {
-        AppLogger.w('API connection failed with status: $statusCode');
-        return ConnectionStatus.error;
-      }
+      AppLogger.i('API connection successful');
+      return ConnectionStatus.connected;
     } catch (e, stackTrace) {
       stopwatch.stop();
       final durationSeconds = stopwatch.elapsedMilliseconds / 1000;
       if (durationSeconds > 3) {
         AppLogger.w(
-          'API connection check failed after ${durationSeconds.toStringAsFixed(2)}s (exceeds 3s threshold): $apiUrl',
+          'API connection check failed after ${durationSeconds.toStringAsFixed(2)}s',
         );
       }
       AppLogger.e('Error checking API connection to $apiUrl', e, stackTrace);

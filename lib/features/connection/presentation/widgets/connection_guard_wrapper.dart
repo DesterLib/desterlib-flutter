@@ -8,6 +8,7 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
 import '../../domain/entities/connection_status.dart' as connection;
+import 'connection_loading_pill.dart';
 import 'm_connection_status.dart';
 
 /// Wrapper widget that monitors connection status and shows modal/drawer when needed
@@ -31,100 +32,126 @@ class ConnectionGuardWrapper extends ConsumerStatefulWidget {
 class _ConnectionGuardWrapperState
     extends ConsumerState<ConnectionGuardWrapper> {
   bool _hasShownError = false;
-  bool _hasAutoNavigatedToApiManagement = false;
-  bool _hasCompletedInitialCheck = false;
+  bool _isConnectionSuccess = false;
+  bool _shouldHideLoadingScreen = false;
 
   @override
   Widget build(BuildContext context) {
+    // Watch current state
+    final connectionState = ref.watch(connectionGuardProvider);
+    final status = connectionState.status;
+
+    // Use a listener for navigation effects to avoid build-phase navigation
     if (widget.autoCheck) {
-      // Listen to connection status changes
       ref.listen<connection.ConnectionGuardState>(connectionGuardProvider, (
         previous,
         next,
       ) {
-        // Check if this is the initial check (previous is null or was checking)
-        final isInitialCheck =
-            previous == null ||
-            previous.status == connection.ConnectionStatus.checking;
+        if (!mounted) return;
+
         final isApiConnected =
             next.status == connection.ConnectionStatus.connected;
         final hasApiError = next.status == connection.ConnectionStatus.error;
         final hasNoApi = next.apiUrl == null || next.apiUrl!.isEmpty;
 
-        // Mark initial check as completed when status changes from checking
-        if (isInitialCheck &&
-            previous?.status == connection.ConnectionStatus.checking &&
-            next.status != connection.ConnectionStatus.checking) {
-          _hasCompletedInitialCheck = true;
-        }
-
-        // Navigate to connection setup screen if no API is configured (only after initial check completes)
-        if ((hasNoApi || hasApiError) &&
-            !_hasAutoNavigatedToApiManagement &&
-            _hasCompletedInitialCheck &&
-            mounted &&
-            context.mounted) {
-          _hasAutoNavigatedToApiManagement = true;
+        // Trigger success animation when connection succeeds
+        if (isApiConnected && !_isConnectionSuccess) {
+          // Use post frame callback to ensure widget is built
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              final currentLocation = GoRouterState.of(context).uri.path;
-              // Only navigate if we're not already on the connection setup page
-              if (currentLocation != '/connection-setup') {
-                context.go('/connection-setup');
-              }
+            if (mounted) {
+              setState(() {
+                _isConnectionSuccess = true;
+              });
             }
           });
         }
 
-        // Navigate back to home when API connection is successful
-        // Navigate if we're on the connection setup screen and API just connected
-        if (isApiConnected &&
-            _hasCompletedInitialCheck &&
-            mounted &&
-            context.mounted) {
+        // Navigation logic handled in post frame callback
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
           final currentLocation = GoRouterState.of(context).uri.path;
-          // If we're on connection setup and API just became connected, navigate to home
-          if (currentLocation == '/connection-setup' &&
-              previous?.status != connection.ConnectionStatus.connected) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
-                context.go('/');
-                _hasAutoNavigatedToApiManagement = false;
-              }
-            });
-          }
-        }
 
-        // Show modal for later API errors (not initial load)
-        if (widget.showOnError &&
-            hasApiError &&
-            !_hasShownError &&
-            !isInitialCheck &&
-            !isApiConnected &&
-            !_hasAutoNavigatedToApiManagement &&
-            mounted) {
-          _hasShownError = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Case 1: No API or API Error -> Go to Setup (if not already there)
+          if ((hasNoApi || hasApiError) &&
+              currentLocation != '/connection-setup') {
+            context.go('/connection-setup');
+            return;
+          }
+
+          // Case 2: Connected -> Go to Home (if on Setup)
+          if (isApiConnected && currentLocation == '/connection-setup') {
+            context.go('/');
+            return;
+          }
+
+          // Case 3: Connected -> Clear error flag
+          if (isApiConnected) {
+            _hasShownError = false;
+          }
+
+          // Case 4: Error -> Show modal (if not on setup and hasn't shown yet)
+          // We don't show modal on setup screen as it handles its own errors visually
+          if (widget.showOnError &&
+              hasApiError &&
+              !_hasShownError &&
+              currentLocation != '/connection-setup') {
+            _hasShownError = true;
             _showConnectionModal();
-          });
-        } else if (isApiConnected) {
-          _hasShownError = false;
-        }
+          }
+        });
       });
     }
 
-    // Always show child (navigation is handled via router)
+    // While checking initial connection state, show loading
+    // Show loading screen until animation completes
+    if (widget.autoCheck &&
+        (status == connection.ConnectionStatus.checking ||
+            !_shouldHideLoadingScreen)) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ConnectionLoadingPill(
+                isSuccess: _isConnectionSuccess,
+                onAnimationComplete: () {
+                  if (mounted) {
+                    setState(() {
+                      _shouldHideLoadingScreen = true;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Connecting to Dester...',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Otherwise render the app
     return widget.child;
   }
 
   void _showConnectionModal() {
-    if (mounted && context.mounted) {
-      ConnectionStatusModal.show(
-        context,
-        onRetry: () {
-          ref.read(connectionGuardProvider.notifier).checkConnection();
-        },
-      );
-    }
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const ConnectionStatusModal(),
+    );
   }
 }
