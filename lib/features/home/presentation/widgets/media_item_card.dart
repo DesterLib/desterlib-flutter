@@ -1,9 +1,9 @@
 // External packages
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 // Core
+import 'package:dester/core/widgets/d_cached_image.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
@@ -49,29 +49,11 @@ abstract class MediaItemCard extends StatelessWidget {
       child: ClipRSuperellipse(
         borderRadius: BorderRadius.circular(16),
         child: imageUrl != null
-            ? CachedNetworkImage(
+            ? DCachedImage.card(
                 imageUrl: imageUrl!,
+                fallbackIcon: icon,
                 width: 278,
                 height: 160,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  width: 278,
-                  height: 160,
-                  color: Colors.grey[800],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                errorWidget: (context, url, error) {
-                  return Container(
-                    width: 278,
-                    height: 160,
-                    color: Colors.grey[800],
-                    child: Center(
-                      child: Icon(icon, size: 48, color: Colors.grey),
-                    ),
-                  );
-                },
               )
             : Container(
                 width: 278,
@@ -127,7 +109,7 @@ class MediaItemCardVertical extends MediaItemCard {
                       child: Text(
                         number.toString(),
                         style: AppTypography.inter(
-                          fontSize: 36,
+                          fontSize: AppTypography.fontSizeNumberLarge,
                           fontWeight: AppTypography.weightBold,
                           color: Colors.white,
                           height: 1.0,

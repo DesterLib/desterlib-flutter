@@ -1,7 +1,6 @@
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
 
-
 /// Repository interface for library operations
 abstract class LibraryRepository {
   /// Get all libraries
@@ -29,5 +28,6 @@ abstract class LibraryRepository {
     required String path,
     String? libraryName,
     String? mediaType,
+    bool? rescan,
   });
 }

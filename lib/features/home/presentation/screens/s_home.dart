@@ -10,7 +10,7 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/constants/app_typography.dart';
+import 'package:dester/core/utils/color_extractor.dart';
 import 'package:dester/core/widgets/d_app_bar.dart';
 import 'package:dester/core/widgets/d_bottom_nav_space.dart';
 
@@ -54,8 +54,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  /// Prefetch hero images (backdrop/poster + logo) for the top items
-  void _prefetchHeroImages() {
+  /// Prefetch hero images (backdrop/poster + logo) and colors for the top items
+  void _prefetchHeroImages() async {
     final state = ref.read(homeControllerProvider);
     final isMobile = MediaQuery.of(context).size.width < 768;
 
@@ -76,21 +76,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Take top 5 items
     final topItems = allMediaItems.take(5).toList();
 
-    // Prefetch images for each item
+    // Prefetch images and colors for each item
     for (final item in topItems) {
-      // Prefetch backdrop/poster
+      // Determine which image to use for both caching and color extraction
+      // Only use null images (without text overlays)
       String? imageUrl;
       if (isMobile) {
-        imageUrl = item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
+        imageUrl = item.nullPosterUrl;
       } else {
-        imageUrl = item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
+        imageUrl = item.nullBackdropUrl ?? item.nullPosterUrl;
       }
+
       if (imageUrl != null) {
+        // Prefetch image
         precacheImage(CachedNetworkImageProvider(imageUrl), context).catchError(
           (_) {
             // Ignore prefetch errors
           },
         );
+
+        // Prefetch color extraction (async, fire and forget)
+        // This ensures colors are ready when the hero loads
+        ColorExtractor.extractColorsFromUrl(imageUrl).catchError((_) {
+          // Ignore color extraction errors
+          return null;
+        });
       }
 
       // Prefetch logo
@@ -149,25 +159,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Hero Carousel
-                        if (recentMediaItems.isNotEmpty ||
-                            state.isLoadingMovies ||
-                            state.isLoadingTVShows)
-                          HeroCarousel(mediaItems: recentMediaItems)
-                        else
-                          Container(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            height: 600,
-                            width: double.infinity,
-                            child: Center(
-                              child: Text(
-                                'No media found',
-                                style: AppTypography.headlineMedium(
-                                  color: Colors.white.withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ),
-                          ),
+                        // Hero Carousel (always shown, handles empty state internally)
+                        HeroCarousel(mediaItems: recentMediaItems),
                         // Movies Section
                         _buildMoviesSection(),
                         AppConstants.spacingY(AppConstants.spacing24),

@@ -22,6 +22,7 @@ class LibraryCard extends ConsumerWidget {
   final Library library;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onRescan;
   final bool isScanning;
   final ScanProgressState? scanProgress;
   final bool inGroup;
@@ -32,6 +33,7 @@ class LibraryCard extends ConsumerWidget {
     required this.library,
     required this.onEdit,
     required this.onDelete,
+    this.onRescan,
     this.isScanning = false,
     this.scanProgress,
     this.inGroup = false,
@@ -50,10 +52,12 @@ class LibraryCard extends ConsumerWidget {
         : DPopupMenu<String>(
             icon: DIconName.ellipsis,
             size: DIconButtonSize.sm,
-            variant: DIconButtonVariant.secondary,
+            variant: DIconButtonVariant.plain,
             onSelected: (value) {
               if (value == 'edit') {
                 onEdit();
+              } else if (value == 'rescan') {
+                onRescan?.call();
               } else if (value == 'delete') {
                 onDelete();
               }
@@ -74,6 +78,22 @@ class LibraryCard extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (onRescan != null)
+                DPopupMenuItem<String>(
+                  value: 'rescan',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getIconDataFromDIconName(
+                          DIconName.refreshCw,
+                          strokeWidth: 2.0,
+                        ),
+                      ),
+                      const SizedBox(width: AppConstants.spacing8),
+                      const Text('Rescan Library'),
+                    ],
+                  ),
+                ),
               DPopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
@@ -88,7 +108,7 @@ class LibraryCard extends ConsumerWidget {
                     const SizedBox(width: AppConstants.spacing8),
                     Text(
                       AppLocalization.settingsLibrariesDeleteLibrary.tr(),
-                      style: const TextStyle(color: Colors.red),
+                      style: AppTypography.bodyMedium(color: Colors.red),
                     ),
                   ],
                 ),

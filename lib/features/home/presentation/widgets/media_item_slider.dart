@@ -11,6 +11,7 @@ import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/d_sidebar.dart';
 import 'package:dester/core/widgets/d_scaffold.dart';
+import 'package:dester/core/widgets/d_icon_button.dart';
 
 /// A reusable slider widget for displaying media items horizontally
 class MediaItemSlider<T> extends StatefulWidget {
@@ -171,16 +172,22 @@ class _MediaItemSliderState<T> extends State<MediaItemSlider<T>> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _NavigationButton(
+                      DIconButton(
                         icon: DIconName.chevronLeft,
-                        onTap: _scrollLeft,
-                        enabled: _showLeftButton,
+                        size: DIconButtonSize.sm,
+                        onPressed: _scrollLeft,
+                        isDisabled: !_showLeftButton,
+                        variant: DIconButtonVariant.secondary,
+                        blur: true,
                       ),
-                      const SizedBox(width: AppConstants.spacing8),
-                      _NavigationButton(
+                      AppConstants.spacingX(AppConstants.spacing8),
+                      DIconButton(
                         icon: DIconName.chevronRight,
-                        onTap: _scrollRight,
-                        enabled: _showRightButton,
+                        size: DIconButtonSize.sm,
+                        onPressed: _scrollRight,
+                        isDisabled: !_showRightButton,
+                        variant: DIconButtonVariant.secondary,
+                        blur: true,
                       ),
                     ],
                   ),

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 
@@ -320,12 +321,9 @@ class _DPopupMenuItemWidgetState<T>
               size: 16,
             ),
             child: DefaultTextStyle(
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+              style: AppTypography.bodyMedium(
                 color: Colors.white,
-                decoration: TextDecoration.none,
-              ),
+              ).copyWith(decoration: TextDecoration.none),
               child: widget.child ?? const SizedBox.shrink(),
             ),
           ),

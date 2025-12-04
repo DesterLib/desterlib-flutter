@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
 import 'package:dester/core/constants/app_constants.dart';
+import 'package:dester/core/widgets/d_skeleton.dart';
 import 'package:dester/features/home/presentation/widgets/hero.dart';
-import 'package:dester/core/widgets/d_loading_wrapper.dart';
 
 /// A carousel widget that displays multiple hero items with auto-advance
 /// and swipe gestures. Uses [HeroWidget] for each item.
@@ -82,7 +82,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
       return item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
     } else {
       // On desktop, prefer backdrop, fallback to null poster, then poster
-      return item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
+      return item.nullBackdropUrl ?? item.nullBackdropUrl ?? item.backdropPath;
     }
   }
 
@@ -109,17 +109,30 @@ class _HeroCarouselState extends State<HeroCarousel> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    return DLoadingWrapper(
-      isLoading: widget.mediaItems.isEmpty,
-      loader: const SizedBox(
-        width: double.infinity,
-        height: 600,
-        child: Center(child: CircularProgressIndicator()),
-      ),
+    // Calculate height based on TMDB aspect ratios
+    // Mobile: Poster aspect ratio (2:3)
+    // Desktop: Backdrop aspect ratio (16:9) at 60% width
+    final placeholderHeight = isMobile
+        ? 600.0 // Fixed mobile height
+        : (screenWidth * 0.6) / (16 / 9); // Desktop: 60% width with 16:9 ratio
+
+    return AnimatedSwitcher(
+      duration: widget.transitionDuration,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
       child: widget.mediaItems.isEmpty
-          ? const SizedBox.shrink()
+          ? DSkeleton(
+              key: const ValueKey('placeholder'),
+              width: double.infinity,
+              height: placeholderHeight,
+              enableShaderMask: true,
+              isMobile: isMobile,
+            )
           : Builder(
+              key: ValueKey('content-${widget.mediaItems.length}'),
               builder: (context) {
                 final currentItem = widget.mediaItems[_currentIndex];
                 return GestureDetector(
@@ -148,9 +161,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
                         _getImagePath(currentItem, context) ?? _currentIndex,
                       ),
                       item: currentItem,
-                      height: isMobile
-                          ? 600
-                          : null, // Fixed on mobile, flexible on desktop
+                      height: isMobile ? 600 : placeholderHeight,
                     ),
                   ),
                 );

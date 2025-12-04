@@ -60,11 +60,13 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required String path,
     String? libraryName,
     String? mediaType,
+    bool? rescan,
   }) async {
     final result = await dataSource.scanLibrary(
       path: path,
       name: libraryName,
       mediaType: mediaType ?? 'movie',
+      rescan: rescan,
     );
 
     return result.fold(

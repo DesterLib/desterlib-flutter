@@ -5,5 +5,6 @@ abstract class ScanLibrary {
     required String path,
     String? libraryName,
     String? mediaType,
+    bool? rescan,
   });
 }

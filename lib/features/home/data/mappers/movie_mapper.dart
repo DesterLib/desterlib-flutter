@@ -11,6 +11,7 @@ class MovieMapper {
       nullPosterUrl: MediaMapperUtils.parseString(json['nullPosterUrl']),
       logoUrl: MediaMapperUtils.parseString(json['logoUrl']),
       backdropPath: MediaMapperUtils.parseString(json['backdropPath']),
+      nullBackdropUrl: MediaMapperUtils.parseString(json['nullBackdropUrl']),
       overview: MediaMapperUtils.parseString(json['overview']),
       releaseDate: MediaMapperUtils.parseString(json['releaseDate']),
       rating: MediaMapperUtils.parseRating(json['rating']),

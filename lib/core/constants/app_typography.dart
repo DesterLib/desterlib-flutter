@@ -19,6 +19,9 @@ class AppTypography {
   static const double fontSize4xl = 40;
   static const double fontSize5xl = 48;
 
+  // Special font sizes for specific use cases
+  static const double fontSizeNumberLarge = 36; // For large ranking numbers
+
   // Font weights
   static const FontWeight weightRegular = FontWeight.w400;
   static const FontWeight weightMedium = FontWeight.w500;

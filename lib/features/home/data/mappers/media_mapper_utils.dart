@@ -4,10 +4,10 @@
 /// by providing common JSON parsing logic.
 class MediaMapperUtils {
   /// Parse mesh gradient colors from JSON
-  /// Returns list of exactly 4 colors, or null if invalid
+  /// Returns list of exactly 6 colors, or null if invalid
   ///
-  /// The mesh gradient requires exactly 4 color values to work properly.
-  /// If the data doesn't contain exactly 4 valid colors, we return null
+  /// The mesh gradient requires exactly 6 color values (2x3 grid) to work properly.
+  /// If the data doesn't contain exactly 6 valid colors, we return null
   /// rather than partially valid data.
   static List<String>? parseMeshGradientColors(dynamic json) {
     if (json == null) return null;
@@ -20,8 +20,8 @@ class MediaMapperUtils {
         .where((color) => color.isNotEmpty)
         .toList();
 
-    // Only use if we have exactly 4 colors
-    return parsedColors.length == 4 ? parsedColors : null;
+    // Only use if we have exactly 6 colors
+    return parsedColors.length == 6 ? parsedColors : null;
   }
 
   /// Parse createdAt date from JSON

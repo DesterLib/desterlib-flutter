@@ -215,7 +215,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
               const SizedBox(width: AppConstants.spacing8),
               Text(
                 AppLocalization.settingsServersDelete.tr(),
-                style: const TextStyle(color: Colors.red),
+                style: AppTypography.bodyMedium(color: Colors.red),
               ),
             ],
           ),

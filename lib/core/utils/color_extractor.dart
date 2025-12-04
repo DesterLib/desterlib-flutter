@@ -9,14 +9,12 @@ class ColorExtractor {
   // Cache to store extracted colors by image URL
   static final Map<String, List<String>> _colorCache = {};
 
-  /// Extract 4 colors from an image URL for mesh gradient
-  /// Returns list of 4 hex color strings, or null if extraction fails
+  /// Extract 6 colors from an image URL for mesh gradient (2x3 grid)
+  /// Returns list of 6 hex color strings, or null if extraction fails
   ///
-  /// The colors are selected to match the server's previous behavior:
-  /// - Vibrant
-  /// - Light Vibrant
-  /// - Dark Vibrant
-  /// - Muted
+  /// The colors represent a 2x3 grid:
+  /// - Top-left, Top-center, Top-right
+  /// - Bottom-left, Bottom-center, Bottom-right
   static Future<List<String>?> extractColorsFromUrl(String? imageUrl) async {
     if (imageUrl == null || imageUrl.isEmpty) {
       return null;
@@ -49,11 +47,11 @@ class ColorExtractor {
         return null;
       }
 
-      // Ensure we have exactly 4 colors
+      // Ensure we have exactly 6 colors for the 2x3 mesh gradient
       final colors = <String>[];
 
-      // Take up to 4 colors, or pad with the first color if needed
-      for (int i = 0; i < 4; i++) {
+      // Take up to 6 colors, or pad with the first color if needed
+      for (int i = 0; i < 6; i++) {
         if (i < paletteColors.length) {
           colors.add(paletteColors[i]);
         } else {
@@ -90,6 +88,13 @@ class ColorExtractor {
   /// Check if a color is cached
   static bool isCached(String imageUrl) {
     return _colorCache.containsKey(imageUrl);
+  }
+
+  /// Get cached colors synchronously (returns null if not cached)
+  /// Use this when you need colors immediately without triggering extraction
+  static List<String>? getCachedColors(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return null;
+    return _colorCache[imageUrl];
   }
 
   /// Get cache size

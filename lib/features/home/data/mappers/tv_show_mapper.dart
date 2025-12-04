@@ -11,6 +11,7 @@ class TVShowMapper {
       nullPosterUrl: MediaMapperUtils.parseString(json['nullPosterUrl']),
       logoUrl: MediaMapperUtils.parseString(json['logoUrl']),
       backdropPath: MediaMapperUtils.parseString(json['backdropPath']),
+      nullBackdropUrl: MediaMapperUtils.parseString(json['nullBackdropUrl']),
       overview: MediaMapperUtils.parseString(json['overview']),
       firstAirDate: MediaMapperUtils.parseString(json['firstAirDate']),
       rating: MediaMapperUtils.parseRating(json['rating']),

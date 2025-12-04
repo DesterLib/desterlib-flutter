@@ -158,6 +158,17 @@ class _DIconButtonState extends State<DIconButton> {
     }
   }
 
+  Color _getBorderColor() {
+    switch (widget.variant) {
+      case DIconButtonVariant.primary:
+        return Colors.white;
+      case DIconButtonVariant.secondary:
+        return Colors.white.withValues(alpha: 0.07);
+      case DIconButtonVariant.plain:
+        return Colors.transparent;
+    }
+  }
+
   /// Get icon color based on variant or custom color
   Color _getIconColor() {
     if (widget.isDisabled) {
@@ -205,6 +216,7 @@ class _DIconButtonState extends State<DIconButton> {
         decoration: BoxDecoration(
           color: baseBackgroundColor,
           borderRadius: borderRadius,
+          border: Border.all(color: _getBorderColor(), width: 1),
         ),
         child: DIcon(
           icon: widget.icon,

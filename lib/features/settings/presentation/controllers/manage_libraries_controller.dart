@@ -171,6 +171,44 @@ class ManageLibrariesController extends Notifier<ManageLibrariesState> {
     }
   }
 
+  /// Rescan an existing library
+  /// Uses the library's existing path and type settings
+  Future<void> rescanLibrary({
+    required Library library,
+    required BuildContext context,
+  }) async {
+    if (library.libraryPath == null || library.libraryPath!.isEmpty) {
+      throw Exception('Library path is not set for this library');
+    }
+
+    final scanLibrary = ref.read(scanLibraryProvider);
+    try {
+      // Convert LibraryType to mediaType string
+      final mediaType = library.libraryType != null
+          ? (library.libraryType == LibraryType.movie
+                ? 'movie'
+                : library.libraryType == LibraryType.tvShow
+                ? 'tv'
+                : null)
+          : null;
+
+      // Start rescan with rescan=true
+      await scanLibrary(
+        path: library.libraryPath!,
+        libraryName: library.name,
+        mediaType: mediaType,
+        rescan: true,
+      );
+
+      // Refresh libraries to update scan status
+      await refresh();
+      // Note: Scan completion is handled by the persistent listener in build()
+    } catch (e) {
+      // Error is already handled by the caller
+      rethrow;
+    }
+  }
+
   /// Update a library
   Future<void> updateLibrary({
     required String id,

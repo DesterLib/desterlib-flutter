@@ -3,7 +3,6 @@ import 'package:dester/features/settings/domain/repository/library_repository.da
 
 import 'scan_library.dart';
 
-
 /// Implementation of ScanLibrary use case
 class ScanLibraryImpl implements ScanLibrary {
   final LibraryRepository repository;
@@ -15,11 +14,13 @@ class ScanLibraryImpl implements ScanLibrary {
     required String path,
     String? libraryName,
     String? mediaType,
+    bool? rescan,
   }) async {
     return await repository.scanLibrary(
       path: path,
       libraryName: libraryName,
       mediaType: mediaType,
+      rescan: rescan,
     );
   }
 }

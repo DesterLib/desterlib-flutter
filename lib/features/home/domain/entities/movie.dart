@@ -4,6 +4,7 @@ class Movie {
   final String? posterPath;
   final String? backdropPath;
   final String? nullPosterUrl;
+  final String? nullBackdropUrl;
   final String? logoUrl;
   final String? overview;
   final String? releaseDate;
@@ -18,6 +19,7 @@ class Movie {
     this.posterPath,
     this.backdropPath,
     this.nullPosterUrl,
+    this.nullBackdropUrl,
     this.logoUrl,
     this.overview,
     this.releaseDate,

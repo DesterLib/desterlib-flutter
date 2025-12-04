@@ -7,6 +7,7 @@ class MovieDto {
   final String? posterUrl;
   final String? backdropUrl;
   final String? nullPosterUrl;
+  final String? nullBackdropUrl;
   final String? logoUrl;
   final DateTime? releaseDate;
   final double? rating;
@@ -22,6 +23,7 @@ class MovieDto {
     this.posterUrl,
     this.backdropUrl,
     this.nullPosterUrl,
+    this.nullBackdropUrl,
     this.logoUrl,
     this.releaseDate,
     this.rating,
@@ -39,6 +41,7 @@ class MovieDto {
       posterUrl: json['posterUrl'] as String?,
       backdropUrl: json['backdropUrl'] as String?,
       nullPosterUrl: json['nullPosterUrl'] as String?,
+      nullBackdropUrl: json['nullBackdropUrl'] as String?,
       logoUrl: json['logoUrl'] as String?,
       releaseDate: json['releaseDate'] != null
           ? DateTime.parse(json['releaseDate'])
@@ -70,6 +73,7 @@ class TvShowDto {
   final String? posterUrl;
   final String? backdropUrl;
   final String? nullPosterUrl;
+  final String? nullBackdropUrl;
   final String? logoUrl;
   final DateTime? firstAirDate;
   final double? rating;
@@ -85,6 +89,7 @@ class TvShowDto {
     this.posterUrl,
     this.backdropUrl,
     this.nullPosterUrl,
+    this.nullBackdropUrl,
     this.logoUrl,
     this.firstAirDate,
     this.rating,
@@ -102,6 +107,7 @@ class TvShowDto {
       posterUrl: json['posterUrl'] as String?,
       backdropUrl: json['backdropUrl'] as String?,
       nullPosterUrl: json['nullPosterUrl'] as String?,
+      nullBackdropUrl: json['nullBackdropUrl'] as String?,
       logoUrl: json['logoUrl'] as String?,
       firstAirDate: json['firstAirDate'] != null
           ? DateTime.parse(json['firstAirDate'])

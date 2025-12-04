@@ -1,15 +1,17 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mesh_gradient/mesh_gradient.dart' as mesh_gradient;
 import 'package:dester/core/widgets/d_icon.dart';
-import 'dart:io';
 
 // Core
 import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
+import 'package:dester/core/widgets/d_cached_image.dart';
+import 'package:dester/core/utils/color_extractor.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
@@ -21,37 +23,57 @@ class HeroWidget extends StatelessWidget {
   final MediaItem item;
   final double? height;
 
-  // Default mesh gradient colors
+  // Default mesh gradient colors (2x3 grid)
   static const List<String> _defaultMeshColors = [
     "#000000", // Top-left
+    "#000000", // Top-center
     "#000000", // Top-right
     "#000000", // Bottom-left
+    "#000000", // Bottom-center
     "#000000", // Bottom-right
   ];
 
   static List<String> _getMeshColorsForItem(MediaItem? item) {
+    if (item == null) return _defaultMeshColors;
+
+    List<String>? colors;
+
+    // First, check if item has colors
     if (item is TVShowMediaItem) {
-      final colors = item.meshGradientColors;
-      if (colors != null && colors.length == 4) {
-        return colors;
-      }
+      colors = item.meshGradientColors;
     } else if (item is MovieMediaItem) {
-      final colors = item.meshGradientColors;
-      if (colors != null && colors.length == 4) {
-        return colors;
+      colors = item.meshGradientColors;
+    }
+
+    // If item has valid colors, use them
+    if (colors != null && colors.length == 6) {
+      return colors;
+    }
+
+    // Otherwise, check ColorExtractor cache for null backdrop and null poster only
+    // Only use images without text overlays
+    final imageUrls = [item.nullBackdropUrl, item.nullPosterUrl];
+
+    for (final imageUrl in imageUrls) {
+      if (imageUrl != null) {
+        final cachedColors = ColorExtractor.getCachedColors(imageUrl);
+        if (cachedColors != null && cachedColors.length == 6) {
+          return cachedColors;
+        }
       }
     }
+
     return _defaultMeshColors;
   }
 
   static String? _getImagePath(MediaItem item, BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     if (isMobile) {
-      // On mobile, prefer null poster, fallback to poster, then backdrop
-      return item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
+      // On mobile, only use null poster (no text overlay)
+      return item.nullPosterUrl;
     } else {
-      // On desktop, prefer backdrop, fallback to null poster, then poster
-      return item.backdropPath ?? item.nullPosterUrl ?? item.posterPath;
+      // On desktop, prefer null backdrop, fallback to null poster
+      return item.nullBackdropUrl;
     }
   }
 
@@ -114,21 +136,7 @@ class _HeroImage extends StatelessWidget {
 
     // Logo
     if (item.logoUrl != null) {
-      children.add(
-        CachedNetworkImage(
-          imageUrl: item.logoUrl!,
-          height: 60,
-          fit: BoxFit.contain,
-          placeholder: (context, url) => const SizedBox(
-            height: 80,
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          errorWidget: (context, url, error) => const SizedBox(
-            height: 80,
-            child: Icon(Icons.error, color: Colors.white54),
-          ),
-        ),
-      );
+      children.add(DCachedImage.logo(imageUrl: item.logoUrl!, height: 60));
     }
 
     // Genres
@@ -136,7 +144,7 @@ class _HeroImage extends StatelessWidget {
     if (genres != null && genres.isNotEmpty) {
       children.add(
         Wrap(
-          alignment: WrapAlignment.center,
+          alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
           spacing: AppConstants.spacingSm,
           runSpacing: AppConstants.spacingSm,
           children: genres.map((genre) {
@@ -274,23 +282,11 @@ class _HeroImage extends StatelessWidget {
                 },
                 blendMode: BlendMode.dstIn,
                 child: isMobile
-                    ? CachedNetworkImage(
+                    ? DCachedImage.backdrop(
                         imageUrl: imageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
-                        placeholder: (context, url) => Container(
-                          color: Colors.black26,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.black12,
-                          child: const Center(
-                            child: Icon(Icons.error, color: Colors.white54),
-                          ),
-                        ),
                       )
                     : ShaderMask(
                         shaderCallback: (Rect bounds) {
@@ -308,40 +304,14 @@ class _HeroImage extends StatelessWidget {
                         blendMode: BlendMode.dstIn,
                         child: AspectRatio(
                           aspectRatio: 16 / 9,
-                          child: CachedNetworkImage(
+                          child: DCachedImage.backdrop(
                             imageUrl: imageUrl,
                             fit: BoxFit.contain,
                             width: double.infinity,
-                            placeholder: (context, url) => Container(
-                              color: Colors.black26,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.black12,
-                              child: const Center(
-                                child: Icon(Icons.error, color: Colors.white54),
-                              ),
-                            ),
                           ),
                         ),
                       ),
               ),
-            ),
-          ),
-        ),
-        Container(
-          height: 180,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.8),
-                Colors.black.withValues(alpha: 0.4),
-                Colors.transparent,
-              ],
             ),
           ),
         ),
@@ -402,6 +372,7 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
   late List<Animation<Color?>> _colorAnimations;
   late List<Color> _previousColors;
   late List<Color> _currentColors;
+  Timer? _colorCheckTimer;
 
   Color _parseColor(String hex) {
     try {
@@ -414,12 +385,41 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
 
   void _setupTweens() {
     _colorAnimations = List.generate(
-      4,
+      6,
       (i) => ColorTween(
         begin: _previousColors[i],
         end: _currentColors[i],
       ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
     );
+  }
+
+  void _checkForColorUpdates() {
+    final newColorStrings = widget.getMeshColors(widget.currentItem);
+    final newColors = newColorStrings.map(_parseColor).toList();
+
+    // Check if colors have actually changed
+    bool colorsChanged = false;
+    for (int i = 0; i < 6; i++) {
+      if (_currentColors[i] != newColors[i]) {
+        colorsChanged = true;
+        break;
+      }
+    }
+
+    if (colorsChanged) {
+      setState(() {
+        _previousColors = _currentColors;
+        _currentColors = newColors;
+        _setupTweens();
+        _controller.forward(from: 0);
+      });
+
+      // Stop checking once we have non-default colors
+      if (newColorStrings.any((color) => color != '#000000')) {
+        _colorCheckTimer?.cancel();
+        _colorCheckTimer = null;
+      }
+    }
   }
 
   @override
@@ -434,22 +434,50 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
     );
     _setupTweens();
     _controller.forward();
+
+    // Start periodic check for color updates (every 100ms for first 2 seconds)
+    // This allows colors to smoothly animate in when they become available
+    _colorCheckTimer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (_) => _checkForColorUpdates(),
+    );
+
+    // Cancel timer after 3 seconds to avoid unnecessary checks
+    Future.delayed(const Duration(seconds: 3), () {
+      _colorCheckTimer?.cancel();
+      _colorCheckTimer = null;
+    });
   }
 
   @override
   void didUpdateWidget(_AnimatedMeshGradient oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentItem != widget.currentItem) {
+      // Cancel existing timer
+      _colorCheckTimer?.cancel();
+
       _previousColors = _currentColors;
       final newColorStrings = widget.getMeshColors(widget.currentItem);
       _currentColors = newColorStrings.map(_parseColor).toList();
       _setupTweens();
       _controller.forward(from: 0);
+
+      // Start new timer for new item
+      _colorCheckTimer = Timer.periodic(
+        const Duration(milliseconds: 100),
+        (_) => _checkForColorUpdates(),
+      );
+
+      Future.delayed(const Duration(seconds: 3), () {
+        _colorCheckTimer?.cancel();
+        _colorCheckTimer = null;
+      });
     }
   }
 
   @override
   void dispose() {
+    _colorCheckTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -457,7 +485,7 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
   @override
   Widget build(BuildContext context) {
     final colorStrings = widget.getMeshColors(widget.currentItem);
-    if (colorStrings.length != 4) {
+    if (colorStrings.length != 6) {
       return const SizedBox.shrink();
     }
 
@@ -485,25 +513,33 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Animated mesh gradient with interpolated colors
+                // Animated mesh gradient with interpolated colors (2x3 grid)
                 Positioned.fill(
                   child: mesh_gradient.MeshGradient(
                     points: [
                       mesh_gradient.MeshGradientPoint(
                         position: const Offset(0.0, 0.0), // Top-left
-                        color: animatedColors[0],
+                        color: Colors.black, // Always black for better contrast
                       ),
                       mesh_gradient.MeshGradientPoint(
-                        position: const Offset(1.0, 0.0), // Top-right
+                        position: const Offset(0.5, 0.0), // Top-center
                         color: animatedColors[1],
                       ),
                       mesh_gradient.MeshGradientPoint(
-                        position: const Offset(0.0, 1.0), // Bottom-left
+                        position: const Offset(1.0, 0.0), // Top-right
                         color: animatedColors[2],
                       ),
                       mesh_gradient.MeshGradientPoint(
-                        position: const Offset(1.0, 1.0), // Bottom-right
+                        position: const Offset(0.0, 1.0), // Bottom-left
                         color: animatedColors[3],
+                      ),
+                      mesh_gradient.MeshGradientPoint(
+                        position: const Offset(0.5, 1.0), // Bottom-center
+                        color: animatedColors[4],
+                      ),
+                      mesh_gradient.MeshGradientPoint(
+                        position: const Offset(1.0, 1.0), // Bottom-right
+                        color: animatedColors[5],
                       ),
                     ],
                     options: mesh_gradient.MeshGradientOptions(),

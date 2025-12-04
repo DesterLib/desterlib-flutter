@@ -160,6 +160,11 @@ class ManageLibrariesScreen extends ConsumerWidget {
                       library,
                       controller,
                     ),
+                    onRescan:
+                        library.libraryPath != null &&
+                            library.libraryPath!.isNotEmpty
+                        ? () => _handleRescan(context, ref, library, controller)
+                        : null,
                     onDelete: () =>
                         _handleDelete(context, ref, library, controller),
                     inGroup: true,
@@ -317,6 +322,58 @@ class ManageLibrariesScreen extends ConsumerWidget {
         }
       },
     );
+  }
+
+  Future<void> _handleRescan(
+    BuildContext context,
+    WidgetRef ref,
+    Library library,
+    ManageLibrariesController controller,
+  ) async {
+    // Check if metadata provider is configured before rescanning
+    final settingsAsync = ref.read(settingsProvider);
+
+    if (!context.mounted) return;
+
+    final hasMetadataProvider = settingsAsync.when(
+      data: (settings) => settings.hasMetadataProvider,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    if (!hasMetadataProvider) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalization.settingsTmdbApiKeyRequiredForLibrary.tr(),
+          ),
+          backgroundColor: Colors.red,
+          duration: AppConstants.duration4s,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await controller.rescanLibrary(library: library, context: context);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Rescanning ${library.name}...'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error starting rescan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleDelete(
