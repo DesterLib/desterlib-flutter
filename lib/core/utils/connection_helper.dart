@@ -1,15 +1,13 @@
 // External packages
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // App
 import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
-import 'package:dester/features/connection/presentation/widgets/m_connection_status.dart';
-
 import 'app_logger.dart';
-
 
 /// Helper class for connection-related operations
 class ConnectionHelper {
@@ -39,9 +37,9 @@ class ConnectionHelper {
     return ref.read(connectionGuardProvider).apiUrl;
   }
 
-  /// Show connection status modal/drawer
+  /// Navigate to manage APIs page (connection status is shown via icon)
   static void showConnectionStatus(BuildContext context) {
-    ConnectionStatusModal.show(context);
+    context.go('/settings/manage-apis');
   }
 
   /// Delete an API configuration

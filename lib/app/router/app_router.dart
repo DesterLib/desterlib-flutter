@@ -12,6 +12,9 @@ import 'package:dester/core/storage/preferences_service.dart';
 // Features
 import 'package:dester/features/home/home_feature.dart';
 import 'package:dester/features/settings/settings_feature.dart';
+import 'package:dester/features/media_details/media_details_feature.dart';
+import 'package:dester/features/media_details/presentation/controllers/media_details_controller.dart';
+import 'package:dester/features/video_player/presentation/widgets/example_player_screen.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -54,6 +57,15 @@ class AppRouter {
               key: state.pageKey,
             ),
           ),
+          // Video player route (outside DScaffold - full screen experience)
+          GoRoute(
+            path: '/video-player',
+            name: 'video-player',
+            pageBuilder: (context, state) => CupertinoPage(
+              child: const ExamplePlayerScreen(),
+              key: state.pageKey,
+            ),
+          ),
           ShellRoute(
             builder: (context, state, child) {
               return DScaffold(child: child);
@@ -67,6 +79,30 @@ class AppRouter {
                   state,
                   pageKey: _homeScreenKey,
                 ),
+              ),
+              GoRoute(
+                path: '/media/:mediaId',
+                name: 'media-details',
+                pageBuilder: (context, state) {
+                  final mediaId = state.pathParameters['mediaId']!;
+                  final mediaTypeStr = state.uri.queryParameters['type'];
+                  final mediaType = mediaTypeStr == 'tv'
+                      ? MediaType.tvShow
+                      : MediaType.movie;
+                  final initialTitle = state.uri.queryParameters['title'];
+
+                  // Use a unique key based on mediaId to ensure each media details page
+                  // is treated as a separate route, preventing old content from showing
+                  return fadeTransitionPage(
+                    MediaDetailsFeature.createMediaDetailsScreen(
+                      mediaId: mediaId,
+                      mediaType: mediaType,
+                      initialTitle: initialTitle,
+                    ),
+                    state,
+                    pageKey: ValueKey('media-details-$mediaId-$mediaTypeStr'),
+                  );
+                },
               ),
               GoRoute(
                 path: '/settings',

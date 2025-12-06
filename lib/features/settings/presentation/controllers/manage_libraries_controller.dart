@@ -171,7 +171,7 @@ class ManageLibrariesController extends Notifier<ManageLibrariesState> {
     }
   }
 
-  /// Rescan an existing library
+  /// Soft rescan: Only checks for new/removed files, doesn't refetch metadata
   /// Uses the library's existing path and type settings
   Future<void> rescanLibrary({
     required Library library,
@@ -192,12 +192,52 @@ class ManageLibrariesController extends Notifier<ManageLibrariesState> {
                 : null)
           : null;
 
-      // Start rescan with rescan=true
+      // Start soft rescan: rescan=true, refetchMetadata=false
       await scanLibrary(
         path: library.libraryPath!,
         libraryName: library.name,
         mediaType: mediaType,
         rescan: true,
+        refetchMetadata: false,
+      );
+
+      // Refresh libraries to update scan status
+      await refresh();
+      // Note: Scan completion is handled by the persistent listener in build()
+    } catch (e) {
+      // Error is already handled by the caller
+      rethrow;
+    }
+  }
+
+  /// Hard rescan: Refetches ALL metadata with force
+  /// Uses the library's existing path and type settings
+  Future<void> hardRescanLibrary({
+    required Library library,
+    required BuildContext context,
+  }) async {
+    if (library.libraryPath == null || library.libraryPath!.isEmpty) {
+      throw Exception('Library path is not set for this library');
+    }
+
+    final scanLibrary = ref.read(scanLibraryProvider);
+    try {
+      // Convert LibraryType to mediaType string
+      final mediaType = library.libraryType != null
+          ? (library.libraryType == LibraryType.movie
+                ? 'movie'
+                : library.libraryType == LibraryType.tvShow
+                ? 'tv'
+                : null)
+          : null;
+
+      // Start hard rescan: rescan=true, refetchMetadata=true
+      await scanLibrary(
+        path: library.libraryPath!,
+        libraryName: library.name,
+        mediaType: mediaType,
+        rescan: true,
+        refetchMetadata: true,
       );
 
       // Refresh libraries to update scan status

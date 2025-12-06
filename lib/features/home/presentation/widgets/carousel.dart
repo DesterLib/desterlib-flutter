@@ -81,8 +81,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
       // On mobile, prefer null poster, fallback to poster, then backdrop
       return item.nullPosterUrl ?? item.posterPath ?? item.backdropPath;
     } else {
-      // On desktop, prefer backdrop, fallback to null poster, then poster
-      return item.nullBackdropUrl ?? item.nullBackdropUrl ?? item.backdropPath;
+      // On desktop, prefer null backdrop, fallback to null poster, then backdrop
+      return item.nullBackdropUrl ?? item.nullPosterUrl ?? item.backdropPath;
     }
   }
 
@@ -111,12 +111,15 @@ class _HeroCarouselState extends State<HeroCarousel> {
     final isMobile = MediaQuery.of(context).size.width < 768;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Calculate height based on TMDB aspect ratios
+    // Calculate height based on TMDB aspect ratios with max height
     // Mobile: Poster aspect ratio (2:3)
     // Desktop: Backdrop aspect ratio (16:9) at 60% width
-    final placeholderHeight = isMobile
+    final calculatedHeight = isMobile
         ? 600.0 // Fixed mobile height
         : (screenWidth * 0.6) / (16 / 9); // Desktop: 60% width with 16:9 ratio
+    final placeholderHeight = calculatedHeight
+        .clamp(0, 600.0)
+        .toDouble(); // Max height of 800px
 
     return AnimatedSwitcher(
       duration: widget.transitionDuration,
@@ -161,7 +164,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
                         _getImagePath(currentItem, context) ?? _currentIndex,
                       ),
                       item: currentItem,
-                      height: isMobile ? 600 : placeholderHeight,
+                      height: placeholderHeight,
                     ),
                   ),
                 );

@@ -12,6 +12,7 @@ import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_input.dart';
 import 'package:dester/core/widgets/m_base_modal.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 /// Modal for editing TMDB API key
 /// Note: This is the default metadata provider. The API uses a plugin system
@@ -92,14 +93,7 @@ class _TmdbApiKeyModalState extends State<TmdbApiKeyModal> {
               isDisabled: _isSaving,
               onPressed: () => _handleSave(context),
               child: _isSaving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.black,
-                      ),
-                    )
+                  ? const SizedBox(width: 16, height: 16, child: DSpinner())
                   : null,
             ),
           ],

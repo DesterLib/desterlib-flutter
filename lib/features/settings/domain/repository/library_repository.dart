@@ -29,5 +29,6 @@ abstract class LibraryRepository {
     String? libraryName,
     String? mediaType,
     bool? rescan,
+    bool? refetchMetadata,
   });
 }

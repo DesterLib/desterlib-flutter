@@ -9,9 +9,10 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_secondary_app_bar.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/d_icon.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
@@ -83,8 +84,7 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
 
   /// Compare two ScanSettings objects for equality
   bool _areScanSettingsEqual(ScanSettings a, ScanSettings b) {
-    return a.rescan == b.rescan &&
-        a.followSymlinks == b.followSymlinks &&
+    return a.followSymlinks == b.followSymlinks &&
         a.movieDepth == b.movieDepth &&
         a.tvDepth == b.tvDepth &&
         a.movieFilenamePattern == b.movieFilenamePattern &&
@@ -168,9 +168,8 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DAppBar(
+          DSecondaryAppBar(
             title: AppLocalization.settingsScanSettingsTitle.tr(),
-            isCompact: true,
           ),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),
@@ -188,26 +187,11 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                             .tr(),
                         children: [
                           IsolatedSettingField.switch_(
-                            fieldName: 'rescan',
-                            initialValue: _scanSettings.rescan ?? false,
-                            title: AppLocalization.settingsScanRescan.tr(),
-                            isFirst: true,
-                            enabled: !isFieldSaving('rescan') && !_isResetting,
-                            onChanged: (value) {
-                              _updateSetting<bool>(
-                                fieldName: 'rescan',
-                                value: value,
-                                updateFn: (settings, val) =>
-                                    settings.copyWith(rescan: val),
-                              );
-                            },
-                          ),
-                          IsolatedSettingField.switch_(
                             fieldName: 'followSymlinks',
                             initialValue: _scanSettings.followSymlinks ?? true,
                             title: AppLocalization.settingsScanFollowSymlinks
                                 .tr(),
-                            isFirst: false,
+                            isFirst: true,
                             enabled:
                                 !isFieldSaving('followSymlinks') &&
                                 !_isResetting,
@@ -237,14 +221,12 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                           SettingsItem(
                             leadingIcon: getIconDataFromDIconName(
                               DIconName.film,
-                              strokeWidth: 2.0,
                             ),
                             title: AppLocalization
                                 .settingsScanMovieSpecificSettings
                                 .tr(),
                             trailingIcon: getIconDataFromDIconName(
                               DIconName.chevronRight,
-                              strokeWidth: 2.0,
                             ),
                             onTap: () {
                               context.pushNamed('movie-scan-settings');
@@ -252,16 +234,12 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                             isFirst: true,
                           ),
                           SettingsItem(
-                            leadingIcon: getIconDataFromDIconName(
-                              DIconName.tv,
-                              strokeWidth: 2.0,
-                            ),
+                            leadingIcon: getIconDataFromDIconName(DIconName.tv),
                             title: AppLocalization
                                 .settingsScanTvShowSpecificSettings
                                 .tr(),
                             trailingIcon: getIconDataFromDIconName(
                               DIconName.chevronRight,
-                              strokeWidth: 2.0,
                             ),
                             onTap: () {
                               context.pushNamed('tv-scan-settings');
@@ -281,7 +259,6 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                           SettingsItem(
                             leadingIcon: getIconDataFromDIconName(
                               DIconName.refreshCw,
-                              strokeWidth: 2.0,
                             ),
                             title: AppLocalization.settingsResetScanSettings
                                 .tr(),
@@ -289,9 +266,7 @@ class _ScanSettingsScreenState extends ConsumerState<ScanSettingsScreen>
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: DSpinner(),
                                   )
                                 : null,
                             onTap: _isResetting || isAnyFieldSaving

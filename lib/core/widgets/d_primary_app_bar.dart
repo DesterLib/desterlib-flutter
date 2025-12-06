@@ -10,32 +10,27 @@ import 'package:dester/core/widgets/d_sidebar.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 
-/// Custom AppBar widget that implements a SliverPersistentHeader for precise animation control
+/// Primary AppBar with large title animation
 ///
 /// Features:
-/// - **Default**: Large title (32px) that collapses to small (14px) on scroll
-/// - **Compact**: Fixed small title (14px)
-/// - **Background**: Animates from transparent to surface color on scroll
-/// - **Height**: Animates from 64px to 44px (or fixed 44px in compact mode)
-/// - **Title**: Always centered (or left-aligned if specified)
+/// - Large title (32px) left-aligned that animates to small title (14px) center-aligned on scroll
+/// - Blur animation appears when small title becomes visible
+/// - Height animates from 80px to 48px on scroll
+/// - Supports right-aligned actions
 ///
 /// Note: This widget MUST be used inside [CustomScrollView.slivers]
-class DAppBar extends StatefulWidget {
+class DPrimaryAppBar extends StatefulWidget {
   /// The title text
   final String title;
-
-  /// Whether to use the compact variant (fixed 14px title)
-  /// If false (default), title scales from 32px to 14px on scroll
-  final bool isCompact;
 
   /// Optional leading widget (e.g., back button)
   final Widget? leading;
 
+  /// Optional action widgets (right-aligned)
+  final List<Widget>? actions;
+
   /// Whether to remove the sidebar spacing
   final bool withoutSidebarSpacing;
-
-  /// Optional action widgets
-  final List<Widget>? actions;
 
   /// Background color of the AppBar when scrolled
   final Color? backgroundColor;
@@ -43,32 +38,21 @@ class DAppBar extends StatefulWidget {
   /// Whether to automatically imply leading widget
   final bool automaticallyImplyLeading;
 
-  /// Whether to animate the blur and background opacity on scroll
-  /// If false (default), the blur and opacity are fixed at their maximum values
-  final bool animateBlur;
-
-  /// Whether to align the title to the left
-  /// If null (default), title is centered if there are no actions, and left-aligned otherwise
-  final bool? leftAligned;
-
-  const DAppBar({
+  const DPrimaryAppBar({
     super.key,
     required this.title,
-    this.isCompact = false,
     this.leading,
-    this.withoutSidebarSpacing = false,
     this.actions,
+    this.withoutSidebarSpacing = false,
     this.backgroundColor,
     this.automaticallyImplyLeading = true,
-    this.animateBlur = false,
-    this.leftAligned,
   });
 
   @override
-  State<DAppBar> createState() => _DAppBarState();
+  State<DPrimaryAppBar> createState() => _DPrimaryAppBarState();
 }
 
-class _DAppBarState extends State<DAppBar> {
+class _DPrimaryAppBarState extends State<DPrimaryAppBar> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -76,49 +60,41 @@ class _DAppBarState extends State<DAppBar> {
 
     return SliverPersistentHeader(
       pinned: true,
-      delegate: _DAppBarDelegate(
+      delegate: _DPrimaryAppBarDelegate(
         title: widget.title,
-        isCompact: widget.isCompact,
         leading: widget.leading,
         actions: widget.actions,
         scrolledBackgroundColor: widget.backgroundColor,
         automaticallyImplyLeading: widget.automaticallyImplyLeading,
         topPadding: topPadding,
-        animateBlur: widget.animateBlur,
-        leftAligned: widget.leftAligned,
         withoutSidebarSpacing: widget.withoutSidebarSpacing,
       ),
     );
   }
 }
 
-class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
+class _DPrimaryAppBarDelegate extends SliverPersistentHeaderDelegate {
   final String title;
-  final bool isCompact;
   final Widget? leading;
   final List<Widget>? actions;
   final Color? scrolledBackgroundColor;
   final bool automaticallyImplyLeading;
   final double topPadding;
-  final bool animateBlur;
-  final bool? leftAligned;
   final bool withoutSidebarSpacing;
+
   // Constants matching the Figma design
   static const double _expandedAppBarHeight = 80.0;
   static const double _collapsedAppBarHeight = 48.0;
   static const double _expandedFontSize = 32.0;
   static const double _collapsedFontSize = 14.0;
 
-  _DAppBarDelegate({
+  _DPrimaryAppBarDelegate({
     required this.title,
-    required this.isCompact,
     this.leading,
     this.actions,
     this.scrolledBackgroundColor,
     required this.automaticallyImplyLeading,
     required this.topPadding,
-    required this.animateBlur,
-    this.leftAligned,
     this.withoutSidebarSpacing = false,
   });
 
@@ -128,11 +104,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    final theme = Theme.of(context);
-    final appBarTheme = theme.appBarTheme;
-
     // Calculate the actual current extent (what the sliver expects)
-    // This must exactly match what the sliver calculates: maxExtent - shrinkOffset, clamped
     final double currentExtent = (maxExtent - shrinkOffset).clamp(
       minExtent,
       maxExtent,
@@ -144,22 +116,29 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
         ? ((maxExtent - currentExtent) / shrinkDistance).clamp(0.0, 1.0)
         : 0.0;
 
-    // Calculate current height based on mode
-    // Note: currentExtent includes topPadding, so we subtract it to get just the app bar height
-    final double currentHeight = isCompact
-        ? _collapsedAppBarHeight
-        : _lerpDouble(_expandedAppBarHeight, _collapsedAppBarHeight, progress);
+    // Calculate current height
+    final double currentHeight = _lerpDouble(
+      _expandedAppBarHeight,
+      _collapsedAppBarHeight,
+      progress,
+    );
 
-    // Blur and Background (matching sidebar style)
-    final double blurSigma = animateBlur ? progress * 40.0 : 40.0;
-    final Color currentBackgroundColor = animateBlur
-        ? Colors.black.withValues(alpha: 0.4 * progress)
-        : Colors.black.withValues(alpha: 0.4);
+    // Blur and background - animate based on progress
+    // Blur appears when small title becomes visible (progress > 0.5)
+    final double blurProgress = progress.clamp(0.5, 1.0);
+    final double normalizedBlurProgress = blurProgress > 0.5
+        ? ((blurProgress - 0.5) * 2.0)
+        : 0.0;
+    final double blurSigma = normalizedBlurProgress * 40.0;
+    final Color currentBackgroundColor = Colors.black.withValues(
+      alpha: 0.4 * normalizedBlurProgress,
+    );
 
     // Determine Leading Widget
     Widget? effectiveLeading = leading;
     if (effectiveLeading == null && automaticallyImplyLeading) {
-      if (Navigator.of(context).canPop()) {
+      final navigator = Navigator.maybeOf(context);
+      if (navigator != null && navigator.canPop()) {
         effectiveLeading = ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: kToolbarHeight,
@@ -172,56 +151,32 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
               icon: DIconName.chevronLeft,
               variant: DIconButtonVariant.plain,
               size: DIconButtonSize.sm,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                final nav = Navigator.maybeOf(context);
+                if (nav != null && nav.canPop()) {
+                  nav.pop();
+                }
+              },
             ),
           ),
         );
       }
     }
 
-    // Determine if title should be centered or left-aligned
-    // When a back button (effectiveLeading) is present, we generally want the title centered
-    // to avoid overlapping with the back button, unless leftAligned is explicitly requested.
-    final bool shouldCenterTitle = leftAligned != null
-        ? !leftAligned!
-        : effectiveLeading != null; // Auto-center if we have a back button
-
-    // Build title widget based on alignment
-    Widget titleWidget;
-    if (!shouldCenterTitle && !isCompact) {
-      // Use fade transition for left-aligned titles (Expanded state)
-      titleWidget = _buildFadingTitle(theme, appBarTheme, progress);
-    } else {
-      // Use scaling transition for centered titles or compact mode
-      final double currentFontSize = isCompact
-          ? _collapsedFontSize
-          : _lerpDouble(_expandedFontSize, _collapsedFontSize, progress);
-
-      titleWidget = Text(
-        title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: shouldCenterTitle ? TextAlign.center : TextAlign.start,
-        style: AppTypography.inter(
-          fontSize: currentFontSize,
-          fontWeight: AppTypography.weightSemiBold,
-          color: Colors.white,
-        ),
-      );
-    }
+    // Build title with fade animation
+    // Large title (left-aligned) fades out, small title (center-aligned) fades in
+    final Widget titleWidget = _buildAnimatedTitle(progress);
 
     // Check if we should apply sidebar spacing
     final useDesktopLayout =
         DScaffold.isDesktop && DScaffold.isDesktopLayout(context);
     final sidebarTotalWidth = useDesktopLayout ? DSidebar.getTotalWidth() : 0.0;
 
-    // Apply border radius only on desktop (round bottom left corner to match sidebar)
+    // Apply border radius only on desktop
     final borderRadius = useDesktopLayout
         ? BorderRadius.only(bottomLeft: Radius.circular(AppConstants.radius2xl))
         : null;
 
-    // The widget must have exactly the height that matches currentExtent
-    // currentExtent already includes topPadding, so we use it directly
     Widget content = SizedBox(
       height: currentExtent,
       child: ClipRRect(
@@ -246,7 +201,8 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
                         children: [...actions!, const SizedBox(width: 8.0)],
                       )
                     : null,
-                centerMiddle: shouldCenterTitle,
+                centerMiddle:
+                    false, // Large title is left-aligned, small title handles its own centering
                 middleSpacing: NavigationToolbar.kMiddleSpacing,
               ),
             ),
@@ -266,11 +222,7 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
     return content;
   }
 
-  Widget _buildFadingTitle(
-    ThemeData theme,
-    AppBarThemeData appBarTheme,
-    double progress,
-  ) {
+  Widget _buildAnimatedTitle(double progress) {
     // Sequential fade: large fades out in first half (0.0-0.5), small fades in second half (0.5-1.0)
     final double largeTitleOpacity = progress <= 0.5
         ? 1.0 - (progress * 2.0)
@@ -289,11 +241,20 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.inter(
-              fontSize: _expandedFontSize,
-              fontWeight: AppTypography.weightSemiBold,
-              color: Colors.white,
-            ),
+            style:
+                AppTypography.inter(
+                  fontSize: _expandedFontSize,
+                  fontWeight: AppTypography.weightSemiBold,
+                  color: Colors.white,
+                ).copyWith(
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 2),
+                      blurRadius: 24,
+                      color: Colors.black.withValues(alpha: 0.4),
+                    ),
+                  ],
+                ),
           ),
         ),
         // Small title (14px) - fades in after large fades out, centered
@@ -322,22 +283,19 @@ class _DAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent =>
-      (isCompact ? _collapsedAppBarHeight : _expandedAppBarHeight) + topPadding;
+  double get maxExtent => _expandedAppBarHeight + topPadding;
 
   @override
   double get minExtent => _collapsedAppBarHeight + topPadding;
 
   @override
-  bool shouldRebuild(covariant _DAppBarDelegate oldDelegate) {
+  bool shouldRebuild(covariant _DPrimaryAppBarDelegate oldDelegate) {
     return title != oldDelegate.title ||
-        isCompact != oldDelegate.isCompact ||
         leading != oldDelegate.leading ||
         actions != oldDelegate.actions ||
         scrolledBackgroundColor != oldDelegate.scrolledBackgroundColor ||
         automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading ||
         topPadding != oldDelegate.topPadding ||
-        animateBlur != oldDelegate.animateBlur ||
-        leftAligned != oldDelegate.leftAligned;
+        withoutSidebarSpacing != oldDelegate.withoutSidebarSpacing;
   }
 }

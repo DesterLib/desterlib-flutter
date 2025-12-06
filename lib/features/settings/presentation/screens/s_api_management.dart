@@ -8,7 +8,7 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_secondary_app_bar.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 
@@ -24,9 +24,8 @@ class ApiManagementScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DAppBar(
+          DSecondaryAppBar(
             title: AppLocalization.settingsServersApisTab.tr(),
-            isCompact: true,
             actions: [
               Tooltip(
                 message: AppLocalization.settingsServersAddApi.tr(),

@@ -13,11 +13,12 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/widgets/empty_state_widget.dart';
 import 'package:dester/core/widgets/error_state_widget.dart';
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_secondary_app_bar.dart';
 import 'package:dester/core/widgets/d_bottom_nav_space.dart';
 import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
@@ -44,9 +45,8 @@ class ManageLibrariesScreen extends ConsumerWidget {
         onRefresh: () => controller.refresh(),
         child: CustomScrollView(
           slivers: [
-            DAppBar(
+            DSecondaryAppBar(
               title: AppLocalization.settingsLibrariesManageLibraries.tr(),
-              isCompact: true,
               actions: [
                 Tooltip(
                   message: AppLocalization.settingsLibrariesAddLibrary.tr(),
@@ -70,9 +70,7 @@ class ManageLibrariesScreen extends ConsumerWidget {
               child: DLoadingWrapper(
                 isLoading: state.isLoading && libraries.isEmpty,
                 loader: const DSidebarSpace(
-                  child: DBottomNavSpace(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
+                  child: DBottomNavSpace(child: Center(child: DSpinner())),
                 ),
                 child: state.error != null && libraries.isEmpty
                     ? DSidebarSpace(
@@ -164,6 +162,16 @@ class ManageLibrariesScreen extends ConsumerWidget {
                         library.libraryPath != null &&
                             library.libraryPath!.isNotEmpty
                         ? () => _handleRescan(context, ref, library, controller)
+                        : null,
+                    onHardRescan:
+                        library.libraryPath != null &&
+                            library.libraryPath!.isNotEmpty
+                        ? () => _handleHardRescan(
+                            context,
+                            ref,
+                            library,
+                            controller,
+                          )
                         : null,
                     onDelete: () =>
                         _handleDelete(context, ref, library, controller),
@@ -359,7 +367,9 @@ class ManageLibrariesScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Rescanning ${library.name}...'),
+            content: Text(
+              'Soft rescanning ${library.name}... (checking for new/removed media)',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -369,6 +379,60 @@ class ManageLibrariesScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error starting rescan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleHardRescan(
+    BuildContext context,
+    WidgetRef ref,
+    Library library,
+    ManageLibrariesController controller,
+  ) async {
+    // Check if metadata provider is configured before rescanning
+    final settingsAsync = ref.read(settingsProvider);
+
+    if (!context.mounted) return;
+
+    final hasMetadataProvider = settingsAsync.when(
+      data: (settings) => settings.hasMetadataProvider,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    if (!hasMetadataProvider) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalization.settingsTmdbApiKeyRequiredForLibrary.tr(),
+          ),
+          backgroundColor: Colors.red,
+          duration: AppConstants.duration4s,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await controller.hardRescanLibrary(library: library, context: context);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Hard rescanning ${library.name}... (refetching all metadata)',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error starting hard rescan: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

@@ -15,12 +15,14 @@ class ScanLibraryImpl implements ScanLibrary {
     String? libraryName,
     String? mediaType,
     bool? rescan,
+    bool? refetchMetadata,
   }) async {
     return await repository.scanLibrary(
       path: path,
       libraryName: libraryName,
       mediaType: mediaType,
       rescan: rescan,
+      refetchMetadata: refetchMetadata,
     );
   }
 }

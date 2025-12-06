@@ -9,6 +9,7 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_icon.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 /// Standard form action buttons helper
 /// Can be used with any form (flutter_form_builder, DForm, etc.)
@@ -50,14 +51,7 @@ class FormActions extends StatelessWidget {
           isDisabled: isSaving,
           onPressed: onSave,
           child: isSaving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.black,
-                  ),
-                )
+              ? const SizedBox(width: 16, height: 16, child: DSpinner())
               : null,
         ),
       ],

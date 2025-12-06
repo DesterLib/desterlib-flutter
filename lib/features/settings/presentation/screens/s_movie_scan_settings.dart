@@ -9,7 +9,7 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_secondary_app_bar.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 // Features
 import 'package:dester/features/settings/domain/entities/settings.dart';
@@ -144,9 +144,8 @@ class _MovieScanSettingsScreenState
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DAppBar(
+          DSecondaryAppBar(
             title: AppLocalization.settingsScanMovieSpecificSettings.tr(),
-            isCompact: true,
           ),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),

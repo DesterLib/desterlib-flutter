@@ -27,10 +27,17 @@ class DScaffold extends StatelessWidget {
     return MediaQuery.of(context).size.width >= 768;
   }
 
+  /// Check if bottom navigation bar should be shown
+  /// Only show on home screen (/) and settings root screen (/settings)
+  static bool shouldShowBottomNav(String currentRoute) {
+    return currentRoute == '/' || currentRoute == '/settings';
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentRoute = GoRouterState.of(context).uri.path;
     final useDesktopLayout = isDesktop && isDesktopLayout(context);
+    final showBottomNav = shouldShowBottomNav(currentRoute);
 
     // If child is a Scaffold, extract its properties and add navigation
     if (child is Scaffold) {
@@ -77,13 +84,14 @@ class DScaffold extends StatelessWidget {
               children: [
                 // Original scaffold body
                 scaffold.body ?? const SizedBox.shrink(),
-                // Floating bottom navigation bar
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: DBottomNavigationBar(currentRoute: currentRoute),
-                ),
+                // Floating bottom navigation bar (only on home and settings root)
+                if (showBottomNav)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: DBottomNavigationBar(currentRoute: currentRoute),
+                  ),
               ],
             ),
             backgroundColor: scaffold.backgroundColor,
@@ -129,13 +137,14 @@ class DScaffold extends StatelessWidget {
             children: [
               // Original child content
               child,
-              // Floating bottom navigation bar
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: DBottomNavigationBar(currentRoute: currentRoute),
-              ),
+              // Floating bottom navigation bar (only on home and settings root)
+              if (showBottomNav)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: DBottomNavigationBar(currentRoute: currentRoute),
+                ),
             ],
           ),
         ),

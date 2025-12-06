@@ -10,6 +10,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:dester/core/storage/preferences_service.dart';
 import 'package:dester/core/utils/app_logger.dart';
 import 'package:dester/core/utils/url_helper.dart';
+import 'package:dester/core/network/dester_api.dart';
 
 /// WebSocket message types from backend
 enum WebSocketMessageType {
@@ -268,6 +269,7 @@ class WebSocketService {
   static const Duration _initialReconnectDelay = Duration(seconds: 1);
   final _connectionController = StreamController<bool>.broadcast();
   final _messageController = StreamController<WebSocketMessage>.broadcast();
+  bool _shouldAttemptConnection = true;
 
   /// Connection state stream
   Stream<bool> get connectionStream => _connectionController.stream;
@@ -278,11 +280,58 @@ class WebSocketService {
   /// Check if currently connected
   bool get isConnected => _isConnected;
 
+  /// Check if HTTP API is available before attempting WebSocket connection
+  Future<bool> _checkHttpApiAvailable() async {
+    try {
+      final baseUrl =
+          PreferencesService.getActiveApiUrl() ?? 'http://localhost:3001';
+      if (baseUrl.isEmpty) {
+        return false;
+      }
+
+      final normalizedUrl = UrlHelper.normalizeUrl(baseUrl);
+      final tempApi = DesterApi(
+        baseUrl: normalizedUrl,
+        timeout: const Duration(seconds: 3), // Quick check
+      );
+
+      try {
+        await tempApi.health.check();
+        tempApi.dispose();
+        return true;
+      } catch (e) {
+        tempApi.dispose();
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Connect to WebSocket server
-  Future<void> connect() async {
+  /// Only connects if HTTP API is available
+  Future<void> connect({bool force = false}) async {
     if (_isConnected && _channel != null) {
       AppLogger.d('WebSocket already connected');
       return;
+    }
+
+    // Check if we should attempt connection
+    if (!force && !_shouldAttemptConnection) {
+      AppLogger.d('WebSocket connection disabled (HTTP API unavailable)');
+      return;
+    }
+
+    // Quick check: verify HTTP API is available before attempting WebSocket
+    if (!force) {
+      final isApiAvailable = await _checkHttpApiAvailable();
+      if (!isApiAvailable) {
+        AppLogger.d('Skipping WebSocket connection - HTTP API unavailable');
+        _shouldAttemptConnection = false;
+        _reconnectAttempts = 0; // Reset attempts when API is unavailable
+        return;
+      }
+      _shouldAttemptConnection = true; // API is available, enable connection
     }
 
     try {
@@ -301,6 +350,9 @@ class WebSocketService {
 
       _channel = WebSocketChannel.connect(wsUri);
 
+      // Track if we actually received connection established message
+      bool connectionEstablished = false;
+
       // Listen to messages
       _subscription = _channel!.stream.listen(
         (message) {
@@ -312,9 +364,13 @@ class WebSocketService {
               // Handle connection established
               if (wsMessage.type ==
                   WebSocketMessageType.connectionEstablished) {
-                AppLogger.i('WebSocket connection established');
-                _isConnected = true;
-                _connectionController.add(true);
+                if (!connectionEstablished) {
+                  connectionEstablished = true;
+                  AppLogger.i('WebSocket connection established');
+                  _isConnected = true;
+                  _reconnectAttempts = 0; // Reset on successful connection
+                  _connectionController.add(true);
+                }
               }
 
               // Only log non-heartbeat messages to reduce noise
@@ -329,43 +385,88 @@ class WebSocketService {
           }
         },
         onError: (error) {
-          AppLogger.e('WebSocket error: $error', error);
+          // Check if this is a connection refused error (server unavailable)
+          final isConnectionRefused =
+              error.toString().contains('Connection refused') ||
+              error.toString().contains('errno = 61');
+
+          if (isConnectionRefused) {
+            // Server is clearly unavailable - stop attempting reconnection
+            AppLogger.d('WebSocket connection refused - server unavailable');
+            _shouldAttemptConnection = false;
+            _reconnectAttempts = 0; // Reset attempts
+          } else {
+            AppLogger.e('WebSocket error: $error', error);
+          }
+
           _isConnected = false;
           _connectionController.add(false);
-          _scheduleReconnect();
+
+          // Only schedule reconnect if server might be available
+          if (_shouldAttemptConnection) {
+            _scheduleReconnect();
+          }
         },
         onDone: () {
-          AppLogger.w('WebSocket connection closed');
+          // Connection closed - could be server restart or network issue
+          if (_isConnected) {
+            AppLogger.w('WebSocket connection closed');
+          }
           _isConnected = false;
           _connectionController.add(false);
-          _scheduleReconnect();
+
+          // Only schedule reconnect if we should attempt connection
+          if (_shouldAttemptConnection) {
+            _scheduleReconnect();
+          }
         },
         cancelOnError: false,
       );
 
-      _isConnected = true;
-      _reconnectAttempts = 0; // Reset on successful connection
-      _connectionController.add(true);
-      AppLogger.i('WebSocket connected successfully');
+      // Set initial state - will be updated when connectionEstablished message is received
+      // Don't log "connected successfully" until we actually receive the message
+      _isConnected = false;
     } catch (e, stackTrace) {
-      AppLogger.e('Failed to connect WebSocket: $e', e, stackTrace);
+      // Check if this is a connection refused error
+      final isConnectionRefused =
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('errno = 61');
+
+      if (isConnectionRefused) {
+        AppLogger.d('WebSocket connection refused - server unavailable');
+        _shouldAttemptConnection = false;
+        _reconnectAttempts = 0;
+      } else {
+        AppLogger.e('Failed to connect WebSocket: $e', e, stackTrace);
+      }
+
       _isConnected = false;
       _connectionController.add(false);
-      _scheduleReconnect();
-      rethrow;
+
+      // Only schedule reconnect if server might be available
+      if (_shouldAttemptConnection) {
+        _scheduleReconnect();
+      }
     }
   }
 
   /// Schedule automatic reconnection with exponential backoff
+  /// Only reconnects if HTTP API is available
   void _scheduleReconnect() {
     if (_reconnectTimer != null && _reconnectTimer!.isActive) {
       return; // Already scheduled
     }
 
+    // Don't reconnect if we've disabled connection attempts
+    if (!_shouldAttemptConnection) {
+      return;
+    }
+
     if (_reconnectAttempts >= _maxReconnectAttempts) {
-      AppLogger.w(
+      AppLogger.d(
         'Max reconnection attempts reached. Stopping auto-reconnect.',
       );
+      _shouldAttemptConnection = false; // Disable until HTTP API is available
       return;
     }
 
@@ -376,18 +477,53 @@ class WebSocketService {
     );
 
     _reconnectAttempts++;
-    AppLogger.i(
-      'Scheduling WebSocket reconnect attempt $_reconnectAttempts/$_maxReconnectAttempts in ${delay.inSeconds}s',
-    );
+    // Only log every 3rd attempt to reduce noise
+    if (_reconnectAttempts % 3 == 1 || _reconnectAttempts <= 3) {
+      AppLogger.d(
+        'Scheduling WebSocket reconnect attempt $_reconnectAttempts/$_maxReconnectAttempts in ${delay.inSeconds}s',
+      );
+    }
 
     _reconnectTimer = Timer(delay, () {
-      if (!_isConnected) {
-        AppLogger.i('Attempting WebSocket reconnection...');
+      if (!_isConnected && _shouldAttemptConnection) {
+        // Only log every 3rd attempt
+        if (_reconnectAttempts % 3 == 1 || _reconnectAttempts <= 3) {
+          AppLogger.d('Attempting WebSocket reconnection...');
+        }
         connect().catchError((error) {
-          AppLogger.e('Reconnection attempt failed: $error', error);
+          // Only log if it's not a connection refused error
+          if (!error.toString().contains('Connection refused') &&
+              !error.toString().contains('errno = 61')) {
+            AppLogger.e('Reconnection attempt failed: $error', error);
+          }
         });
       }
     });
+  }
+
+  /// Enable connection attempts (called when HTTP API becomes available)
+  void enableConnection() {
+    if (!_shouldAttemptConnection) {
+      AppLogger.d('Enabling WebSocket connection attempts');
+      _shouldAttemptConnection = true;
+      _reconnectAttempts = 0; // Reset attempts
+      // Try to connect if not already connected
+      if (!_isConnected) {
+        connect().catchError((error) {
+          // Connection will be handled by error handler
+        });
+      }
+    }
+  }
+
+  /// Disable connection attempts (called when HTTP API is unavailable)
+  void disableConnection() {
+    if (_shouldAttemptConnection) {
+      AppLogger.d('Disabling WebSocket connection attempts');
+      _shouldAttemptConnection = false;
+      _reconnectTimer?.cancel();
+      _reconnectAttempts = 0;
+    }
   }
 
   /// Disconnect from WebSocket server
@@ -408,9 +544,10 @@ class WebSocketService {
   Future<void> reconnect() async {
     _reconnectAttempts = 0; // Reset attempts for manual reconnect
     _reconnectTimer?.cancel();
+    _shouldAttemptConnection = true; // Enable for manual reconnect
     await disconnect();
     await Future.delayed(const Duration(seconds: 1));
-    await connect();
+    await connect(force: true);
   }
 
   /// Dispose resources

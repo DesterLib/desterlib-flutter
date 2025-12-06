@@ -3,83 +3,63 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Core
-import 'package:dester/core/widgets/d_cached_image.dart';
+import 'package:dester/core/widgets/d_media_image_card.dart';
 import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/constants/app_typography.dart';
 
 /// Media type enum for card display
-enum MediaType { movie, tvShow }
+enum DMediaType { movie, tvShow }
 
-/// Base class for MediaItemCard with common functionality
-abstract class MediaItemCard extends StatelessWidget {
+/// Base class for DMediaItemCard with common functionality
+abstract class DMediaItemCard extends StatelessWidget {
   final int? number;
   final String title;
   final String? year;
-  final MediaType mediaType;
+  final DMediaType mediaType;
   final String? imageUrl;
+  final VoidCallback? onTap;
 
-  const MediaItemCard({
+  const DMediaItemCard({
     super.key,
     this.number,
     required this.title,
     this.year,
     required this.mediaType,
     this.imageUrl,
+    this.onTap,
   });
 
   /// Builds the image widget with superellipse styling
   Widget _buildImage() {
     final icon = switch (mediaType) {
-      MediaType.movie => LucideIcons.film,
-      MediaType.tvShow => LucideIcons.tv,
+      DMediaType.movie => LucideIcons.film,
+      DMediaType.tvShow => LucideIcons.tv,
     };
 
-    return Container(
+    return DMediaImageCard(
+      imageUrl: imageUrl,
       width: 278,
       height: 160,
-      decoration: ShapeDecoration(
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(AppConstants.radiusXl),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.07),
-            width: 1,
-          ),
-        ),
-      ),
-      child: ClipRSuperellipse(
-        borderRadius: BorderRadius.circular(16),
-        child: imageUrl != null
-            ? DCachedImage.card(
-                imageUrl: imageUrl!,
-                fallbackIcon: icon,
-                width: 278,
-                height: 160,
-              )
-            : Container(
-                width: 278,
-                height: 160,
-                color: Colors.grey[800],
-                child: Center(child: Icon(icon, size: 48, color: Colors.grey)),
-              ),
-      ),
+      fallbackIcon: icon,
     );
   }
 }
 
-/// Vertical variant of MediaItemCard
-class MediaItemCardVertical extends MediaItemCard {
-  const MediaItemCardVertical({
+/// Vertical variant of DMediaItemCard
+class DMediaItemCardVertical extends DMediaItemCard {
+  const DMediaItemCardVertical({
     super.key,
     super.number,
     required super.title,
     super.year,
     required super.mediaType,
     super.imageUrl,
+    super.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final content = SizedBox(
       width: 278,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,23 +128,30 @@ class MediaItemCardVertical extends MediaItemCard {
         ],
       ),
     );
+
+    if (onTap != null) {
+      return GestureDetector(onTap: onTap, child: content);
+    }
+
+    return content;
   }
 }
 
-/// Horizontal variant of MediaItemCard
-class MediaItemCardHorizontal extends MediaItemCard {
-  const MediaItemCardHorizontal({
+/// Horizontal variant of DMediaItemCard
+class DMediaItemCardHorizontal extends DMediaItemCard {
+  const DMediaItemCardHorizontal({
     super.key,
     super.number,
     required super.title,
     super.year,
     required super.mediaType,
     super.imageUrl,
+    super.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildImage(),
@@ -196,5 +183,11 @@ class MediaItemCardHorizontal extends MediaItemCard {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return GestureDetector(onTap: onTap, child: content);
+    }
+
+    return content;
   }
 }

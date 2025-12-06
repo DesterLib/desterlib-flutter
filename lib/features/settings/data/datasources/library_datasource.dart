@@ -138,6 +138,7 @@ class LibraryDataSource {
     int? tvDepth,
     bool? rescan,
     bool? followSymlinks,
+    bool? refetchMetadata,
   }) async {
     try {
       final request = ScanPathRequestDto(
@@ -151,6 +152,7 @@ class LibraryDataSource {
               : null,
           rescan: rescan,
           followSymlinks: followSymlinks,
+          refetchMetadata: refetchMetadata,
         ),
       );
 

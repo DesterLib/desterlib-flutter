@@ -11,9 +11,11 @@ import 'package:window_manager/window_manager.dart';
 // Core
 import 'app/router/app_router.dart';
 import 'core/storage/preferences_service.dart';
+import 'core/network/api_provider.dart';
 
 // Features
 import 'features/home/home_feature.dart';
+import 'features/media_details/media_details_feature.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +30,21 @@ void main() async {
   // Initialize preferences service before router (needed for redirect logic)
   await PreferencesService.init();
 
+  // Initialize API provider - use saved URL if available, otherwise use placeholder
+  // The placeholder prevents crashes when features try to access ApiProvider.instance
+  // The router will redirect to connection-setup if no real API is configured
+  final savedApiUrl = PreferencesService.getActiveApiUrl();
+  if (savedApiUrl != null && savedApiUrl.isNotEmpty) {
+    ApiProvider.initialize(savedApiUrl);
+  } else {
+    // Initialize with placeholder URL to prevent crashes
+    // Router will redirect to connection-setup before any API calls are made
+    ApiProvider.initialize('http://placeholder.local');
+  }
+
   runApp(
     ProviderScope(
-      overrides: HomeFeature.overrides,
+      overrides: [...HomeFeature.overrides, ...MediaDetailsFeature.overrides],
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('es')],
         path: 'assets/translations',

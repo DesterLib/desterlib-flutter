@@ -1,8 +1,12 @@
 // External packages
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// App
+import 'package:dester/app/providers/connection_guard_provider.dart';
+
 // Core
 import 'package:dester/core/utils/api_config_helper.dart';
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
 
 // Features
 import 'package:dester/features/home/domain/entities/movie.dart';
@@ -59,8 +63,19 @@ class HomeState {
 class HomeController extends Notifier<HomeState> {
   @override
   HomeState build() {
-    // Load data after initialization
-    Future.microtask(() => loadAll());
+    // Check connection status (using read to avoid unnecessary rebuilds)
+    // The connection guard will invalidate this controller when connection is established
+    final connectionState = ref.read(connectionGuardProvider);
+
+    // Only load data if connection is established
+    // This controller is invalidated by connection guard when connection is established,
+    // so we can safely check and load here
+    if (connectionState.status == ConnectionStatus.connected) {
+      // Load data asynchronously after build completes
+      Future.microtask(() => loadAll());
+    }
+
+    // Return initial state (will be updated by loadAll when data is loaded)
     return const HomeState();
   }
 

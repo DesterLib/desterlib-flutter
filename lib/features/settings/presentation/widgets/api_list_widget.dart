@@ -18,6 +18,7 @@ import 'package:dester/core/widgets/d_button.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/widgets/d_popup_menu.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/empty_state_widget.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
@@ -39,13 +40,13 @@ class ConnectionStatusHelper {
   static IconData getStatusIcon(ConnectionStatus status) {
     switch (status) {
       case ConnectionStatus.connected:
-        return getIconDataFromDIconName(DIconName.cloudCheck, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.cloudCheck);
       case ConnectionStatus.disconnected:
-        return getIconDataFromDIconName(DIconName.cloudOff, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.cloudOff);
       case ConnectionStatus.checking:
-        return getIconDataFromDIconName(DIconName.refreshCw, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.refreshCw);
       case ConnectionStatus.error:
-        return getIconDataFromDIconName(DIconName.error, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.error);
     }
   }
 
@@ -70,15 +71,15 @@ class ConnectionStatusHelper {
   }) {
     switch (status) {
       case ApiHealthStatus.healthy:
-        return getIconDataFromDIconName(DIconName.cloudCheck, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.cloudCheck);
       case ApiHealthStatus.unhealthy:
-        return getIconDataFromDIconName(DIconName.cloudOff, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.cloudOff);
       case ApiHealthStatus.checking:
-        return getIconDataFromDIconName(DIconName.refreshCw, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.refreshCw);
       case ApiHealthStatus.idle:
         // Idle means no health data - always show grey cloud
         // Active status is separate from health status
-        return getIconDataFromDIconName(DIconName.cloud, strokeWidth: 2.0);
+        return getIconDataFromDIconName(DIconName.cloud);
     }
   }
 
@@ -186,9 +187,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
             value: 'set_active',
             child: Row(
               children: [
-                Icon(
-                  getIconDataFromDIconName(DIconName.check, strokeWidth: 2.0),
-                ),
+                Icon(getIconDataFromDIconName(DIconName.check)),
                 const SizedBox(width: AppConstants.spacing8),
                 Text(AppLocalization.settingsServersSetActive.tr()),
               ],
@@ -198,7 +197,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
           value: 'edit',
           child: Row(
             children: [
-              Icon(getIconDataFromDIconName(DIconName.edit, strokeWidth: 2.0)),
+              Icon(getIconDataFromDIconName(DIconName.edit)),
               const SizedBox(width: AppConstants.spacing8),
               const Text('Edit'),
             ],
@@ -209,7 +208,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
           child: Row(
             children: [
               Icon(
-                getIconDataFromDIconName(DIconName.trash, strokeWidth: 2.0),
+                getIconDataFromDIconName(DIconName.trash),
                 color: Colors.red,
               ),
               const SizedBox(width: AppConstants.spacing8),
@@ -322,17 +321,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
 
     // Show checking spinner
     if (currentStatus == ApiHealthStatus.checking) {
-      return SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).iconTheme.color?.withValues(alpha: 0.6) ??
-                Colors.grey,
-          ),
-        ),
-      );
+      return SizedBox(width: 24, height: 24, child: const DSpinner());
     }
 
     final iconColor = ConnectionStatusHelper.getHealthColor(
@@ -349,11 +338,10 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
   }
 
   /// Build quick connect button - shows active status with link icon
-  /// Green when active, grey when inactive (clickable to activate)
+  /// Green when active (clickable to reconnect), grey when inactive (clickable to activate)
   Widget _buildQuickConnectButton(BuildContext context, bool isActive) {
     final currentStatus = _getCurrentHealthStatus(isActive);
     if (isActive) {
-      // Active: show green link icon (not clickable, just indicator)
       return Tooltip(
         message: AppLocalization.settingsServersActive.tr(),
         child: DIconButton(
@@ -361,6 +349,7 @@ class _ApiConfigCardState extends ConsumerState<ApiConfigCard> {
           size: DIconButtonSize.sm,
           variant: DIconButtonVariant.secondary,
           color: AppConstants.successColor,
+          onPressed: widget.onSetActive,
         ),
       );
     }
@@ -406,9 +395,7 @@ class ApiListWidget extends ConsumerWidget {
           isFirst: index == 0,
           onEdit: () => _showEditApiModal(context, ref, config),
           onDelete: () => _handleDelete(context, ref, config),
-          onSetActive: config.isActive
-              ? null
-              : () => _handleSetActive(ref, config.id),
+          onSetActive: () => _handleSetActive(ref, config.id),
         );
       }).toList(),
     );

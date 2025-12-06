@@ -29,12 +29,14 @@ class ScanOptionsDto {
   final MediaTypeDepthDto? mediaTypeDepth;
   final bool? rescan;
   final bool? followSymlinks;
+  final bool? refetchMetadata;
 
   const ScanOptionsDto({
     this.mediaType,
     this.mediaTypeDepth,
     this.rescan,
     this.followSymlinks,
+    this.refetchMetadata,
   });
 
   Map<String, dynamic> toJson() {
@@ -44,6 +46,7 @@ class ScanOptionsDto {
       json['mediaTypeDepth'] = mediaTypeDepth!.toJson();
     if (rescan != null) json['rescan'] = rescan;
     if (followSymlinks != null) json['followSymlinks'] = followSymlinks;
+    if (refetchMetadata != null) json['refetchMetadata'] = refetchMetadata;
     return json;
   }
 }

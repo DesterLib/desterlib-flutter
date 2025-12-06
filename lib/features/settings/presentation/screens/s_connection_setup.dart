@@ -8,7 +8,7 @@ import 'package:dester/app/localization/app_localization.dart';
 import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_primary_app_bar.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 
@@ -28,9 +28,9 @@ class ConnectionSetupScreen extends ConsumerWidget {
       child: Scaffold(
         body: CustomScrollView(
           slivers: [
-            DAppBar(
-              title: AppLocalization.settingsServersTitle.tr(),
+            DPrimaryAppBar(
               withoutSidebarSpacing: true,
+              title: AppLocalization.settingsServersTitle.tr(),
               actions: [
                 Tooltip(
                   message: AppLocalization.settingsServersAddApi.tr(),

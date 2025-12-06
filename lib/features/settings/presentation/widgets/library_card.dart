@@ -13,6 +13,7 @@ import 'package:dester/core/constants/app_typography.dart';
 import 'package:dester/core/websocket/websocket_provider.dart';
 import 'package:dester/core/widgets/d_icon_button.dart';
 import 'package:dester/core/widgets/d_popup_menu.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 // Features
 import 'package:dester/features/settings/domain/entities/library.dart';
@@ -23,6 +24,7 @@ class LibraryCard extends ConsumerWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback? onRescan;
+  final VoidCallback? onHardRescan;
   final bool isScanning;
   final ScanProgressState? scanProgress;
   final bool inGroup;
@@ -34,6 +36,7 @@ class LibraryCard extends ConsumerWidget {
     required this.onEdit,
     required this.onDelete,
     this.onRescan,
+    this.onHardRescan,
     this.isScanning = false,
     this.scanProgress,
     this.inGroup = false,
@@ -44,11 +47,7 @@ class LibraryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Build trailing menu button with ellipsis using DIconButton sm size
     final trailingWidget = isScanning
-        ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+        ? const SizedBox(width: 20, height: 20, child: DSpinner())
         : DPopupMenu<String>(
             icon: DIconName.ellipsis,
             size: DIconButtonSize.sm,
@@ -56,8 +55,10 @@ class LibraryCard extends ConsumerWidget {
             onSelected: (value) {
               if (value == 'edit') {
                 onEdit();
-              } else if (value == 'rescan') {
+              } else if (value == 'soft-rescan') {
                 onRescan?.call();
+              } else if (value == 'hard-rescan') {
+                onHardRescan?.call();
               } else if (value == 'delete') {
                 onDelete();
               }
@@ -67,12 +68,7 @@ class LibraryCard extends ConsumerWidget {
                 value: 'edit',
                 child: Row(
                   children: [
-                    Icon(
-                      getIconDataFromDIconName(
-                        DIconName.edit,
-                        strokeWidth: 2.0,
-                      ),
-                    ),
+                    Icon(getIconDataFromDIconName(DIconName.edit)),
                     const SizedBox(width: AppConstants.spacing8),
                     Text(AppLocalization.settingsLibrariesEditLibrary.tr()),
                   ],
@@ -80,17 +76,23 @@ class LibraryCard extends ConsumerWidget {
               ),
               if (onRescan != null)
                 DPopupMenuItem<String>(
-                  value: 'rescan',
+                  value: 'soft-rescan',
                   child: Row(
                     children: [
-                      Icon(
-                        getIconDataFromDIconName(
-                          DIconName.refreshCw,
-                          strokeWidth: 2.0,
-                        ),
-                      ),
+                      Icon(getIconDataFromDIconName(DIconName.refreshCw)),
                       const SizedBox(width: AppConstants.spacing8),
-                      const Text('Rescan Library'),
+                      const Text('Soft Rescan'),
+                    ],
+                  ),
+                ),
+              if (onHardRescan != null)
+                DPopupMenuItem<String>(
+                  value: 'hard-rescan',
+                  child: Row(
+                    children: [
+                      Icon(getIconDataFromDIconName(DIconName.refreshCw)),
+                      const SizedBox(width: AppConstants.spacing8),
+                      const Text('Hard Rescan'),
                     ],
                   ),
                 ),
@@ -99,10 +101,7 @@ class LibraryCard extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(
-                      getIconDataFromDIconName(
-                        DIconName.trash,
-                        strokeWidth: 2.0,
-                      ),
+                      getIconDataFromDIconName(DIconName.trash),
                       color: Colors.red,
                     ),
                     const SizedBox(width: AppConstants.spacing8),
@@ -118,22 +117,9 @@ class LibraryCard extends ConsumerWidget {
 
     // Build leading icon matching SettingsItem exactly (size 24, simple Icon)
     final leadingIcon = isScanning
-        ? SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).iconTheme.color?.withValues(alpha: 0.6) ??
-                    Colors.grey,
-              ),
-            ),
-          )
+        ? const SizedBox(width: 24, height: 24, child: DSpinner())
         : Icon(
-            getIconDataFromDIconName(
-              _getLibraryIcon(library.libraryType),
-              strokeWidth: 2.0,
-            ),
+            getIconDataFromDIconName(_getLibraryIcon(library.libraryType)),
             size: 24,
             color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.6),
           );

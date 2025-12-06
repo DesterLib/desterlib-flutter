@@ -8,7 +8,7 @@ import 'package:dester/app/localization/app_localization.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_secondary_app_bar.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 
@@ -29,10 +29,7 @@ class MetadataProvidersScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DAppBar(
-            title: AppLocalization.settingsMetadataTitle.tr(),
-            isCompact: true,
-          ),
+          DSecondaryAppBar(title: AppLocalization.settingsMetadataTitle.tr()),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),
             sliver: SliverToBoxAdapter(
@@ -67,7 +64,6 @@ class MetadataProvidersScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.database,
-                                    strokeWidth: 2.0,
                                   ),
                                   leadingIconColor: settings.hasMetadataProvider
                                       ? AppConstants.successColor
@@ -77,7 +73,6 @@ class MetadataProvidersScreen extends ConsumerWidget {
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () => _showTmdbApiKeyModal(
                                     context,
@@ -90,7 +85,6 @@ class MetadataProvidersScreen extends ConsumerWidget {
                                 // SettingsItem(
                                 //   leadingIcon: getIconDataFromDIconName(
                                 //     DIconName.database,
-                                //     strokeWidth: 2.0,
                                 //   ),
                                 //   title: 'TVDB',
                                 //   trailingText: 'Not configured',
@@ -119,14 +113,12 @@ class MetadataProvidersScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.error,
-                                    strokeWidth: 2.0,
                                   ),
                                   title: AppLocalization
                                       .settingsMetadataProviderTmdb
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () => _showTmdbApiKeyModal(
                                     context,

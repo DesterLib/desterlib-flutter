@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:dester/features/home/domain/entities/media_item.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart' as mesh_gradient;
 import 'package:dester/core/widgets/d_icon.dart';
 
@@ -18,10 +19,16 @@ import 'package:dester/core/constants/app_typography.dart';
 /// A reusable hero widget that displays a single media item.
 /// Can be used standalone or within a carousel.
 class HeroWidget extends StatelessWidget {
-  const HeroWidget({super.key, required this.item, this.height});
+  const HeroWidget({
+    super.key,
+    required this.item,
+    this.height,
+    this.showMeshGradient = true,
+  });
 
   final MediaItem item;
   final double? height;
+  final bool showMeshGradient;
 
   // Default mesh gradient colors (2x3 grid)
   static const List<String> _defaultMeshColors = [
@@ -86,13 +93,14 @@ class HeroWidget extends StatelessWidget {
         fit: height == null ? StackFit.loose : StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-          // Mesh Gradient
-          _AnimatedMeshGradient(
-            currentItem: item,
-            getMeshColors: _getMeshColorsForItem,
-            height: 1200,
-            animationDuration: AppConstants.durationSlower,
-          ),
+          // Mesh Gradient (optional - can be provided at screen level)
+          if (showMeshGradient)
+            _AnimatedMeshGradient(
+              currentItem: item,
+              getMeshColors: _getMeshColorsForItem,
+              height: 1200,
+              animationDuration: AppConstants.durationSlower,
+            ),
           // Hero Image
           _HeroImage(imageUrl: _getImagePath(item, context) ?? '', item: item),
         ],
@@ -136,7 +144,9 @@ class _HeroImage extends StatelessWidget {
 
     // Logo
     if (item.logoUrl != null) {
-      children.add(DCachedImage.logo(imageUrl: item.logoUrl!, height: 60));
+      children.add(
+        DCachedImage.logo(imageUrl: item.logoUrl!, height: 70),
+      );
     }
 
     // Genres
@@ -187,7 +197,7 @@ class _HeroImage extends StatelessWidget {
             variant: DButtonVariant.primary,
             size: DButtonSize.md,
             onPressed: () {
-              // TODO: Implement play action
+              context.push('/video-player');
             },
           ),
           AppConstants.spacingX(AppConstants.spacingSm),
@@ -373,6 +383,7 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
   late List<Color> _previousColors;
   late List<Color> _currentColors;
   Timer? _colorCheckTimer;
+  bool _isExtractingColors = false;
 
   Color _parseColor(String hex) {
     try {
@@ -391,6 +402,51 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
         end: _currentColors[i],
       ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
     );
+  }
+
+  /// Trigger color extraction for the current item if colors aren't cached
+  void _triggerColorExtractionIfNeeded() {
+    if (!mounted) return;
+
+    // Only extract if we have default colors and aren't already extracting
+    final currentColorStrings = widget.getMeshColors(widget.currentItem);
+    final hasDefaultColors = currentColorStrings.every(
+      (color) => color == '#000000',
+    );
+
+    if (!hasDefaultColors || _isExtractingColors) {
+      return;
+    }
+
+    // Try both image URLs in order of preference (backdrop first, then poster)
+    // This matches the logic in _getImagePath but doesn't require MediaQuery
+    final imageUrls = [
+      widget.currentItem.nullBackdropUrl,
+      widget.currentItem.nullPosterUrl,
+    ];
+
+    // Try to extract colors from available images
+    for (final imageUrl in imageUrls) {
+      if (imageUrl != null && !ColorExtractor.isCached(imageUrl)) {
+        _isExtractingColors = true;
+        ColorExtractor.extractColorsFromUrl(imageUrl)
+            .then((colors) {
+              if (mounted && colors != null) {
+                // Colors have been extracted and cached, trigger update check
+                _checkForColorUpdates();
+              }
+              if (mounted) {
+                _isExtractingColors = false;
+              }
+            })
+            .catchError((error) {
+              if (mounted) {
+                _isExtractingColors = false;
+              }
+            });
+        break; // Only extract from one image at a time
+      }
+    }
   }
 
   void _checkForColorUpdates() {
@@ -435,15 +491,23 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
     _setupTweens();
     _controller.forward();
 
-    // Start periodic check for color updates (every 100ms for first 2 seconds)
-    // This allows colors to smoothly animate in when they become available
-    _colorCheckTimer = Timer.periodic(
-      const Duration(milliseconds: 100),
-      (_) => _checkForColorUpdates(),
-    );
+    // Trigger color extraction if needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _triggerColorExtractionIfNeeded();
+    });
 
-    // Cancel timer after 3 seconds to avoid unnecessary checks
-    Future.delayed(const Duration(seconds: 3), () {
+    // Start periodic check for color updates (every 100ms for first 5 seconds)
+    // This allows colors to smoothly animate in when they become available
+    _colorCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      _checkForColorUpdates();
+      // Also trigger extraction if we still have default colors
+      if (_currentColors.every((color) => color.value == 0xFF000000)) {
+        _triggerColorExtractionIfNeeded();
+      }
+    });
+
+    // Cancel timer after 5 seconds to avoid unnecessary checks
+    Future.delayed(const Duration(seconds: 5), () {
       _colorCheckTimer?.cancel();
       _colorCheckTimer = null;
     });
@@ -455,6 +519,7 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
     if (oldWidget.currentItem != widget.currentItem) {
       // Cancel existing timer
       _colorCheckTimer?.cancel();
+      _isExtractingColors = false;
 
       _previousColors = _currentColors;
       final newColorStrings = widget.getMeshColors(widget.currentItem);
@@ -462,13 +527,21 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
       _setupTweens();
       _controller.forward(from: 0);
 
-      // Start new timer for new item
-      _colorCheckTimer = Timer.periodic(
-        const Duration(milliseconds: 100),
-        (_) => _checkForColorUpdates(),
-      );
+      // Trigger color extraction if needed for new item
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _triggerColorExtractionIfNeeded();
+      });
 
-      Future.delayed(const Duration(seconds: 3), () {
+      // Start new timer for new item
+      _colorCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+        _checkForColorUpdates();
+        // Also trigger extraction if we still have default colors
+        if (_currentColors.every((color) => color.value == 0xFF000000)) {
+          _triggerColorExtractionIfNeeded();
+        }
+      });
+
+      Future.delayed(const Duration(seconds: 5), () {
         _colorCheckTimer?.cancel();
         _colorCheckTimer = null;
       });
@@ -523,11 +596,11 @@ class _AnimatedMeshGradientState extends State<_AnimatedMeshGradient>
                       ),
                       mesh_gradient.MeshGradientPoint(
                         position: const Offset(0.5, 0.0), // Top-center
-                        color: animatedColors[1],
+                        color: isMobile ? Colors.black : animatedColors[1],
                       ),
                       mesh_gradient.MeshGradientPoint(
                         position: const Offset(1.0, 0.0), // Top-right
-                        color: animatedColors[2],
+                        color: isMobile ? Colors.black : animatedColors[2],
                       ),
                       mesh_gradient.MeshGradientPoint(
                         position: const Offset(0.0, 1.0), // Bottom-left

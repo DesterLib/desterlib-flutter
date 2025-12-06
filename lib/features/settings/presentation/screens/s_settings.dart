@@ -10,10 +10,10 @@ import 'package:dester/app/providers/connection_guard_provider.dart';
 
 // Core
 import 'package:dester/core/constants/app_constants.dart';
-import 'package:dester/features/connection/presentation/widgets/m_connection_status.dart';
-import 'package:dester/core/widgets/d_app_bar.dart';
+import 'package:dester/core/widgets/d_primary_app_bar.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 import 'package:dester/core/widgets/d_sidebar_space.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 // Features
 import 'package:dester/features/settings/domain/usecases/reset_settings.dart';
@@ -40,7 +40,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DAppBar(title: AppLocalization.settingsTitle.tr(), leftAligned: true),
+          DPrimaryAppBar(title: AppLocalization.settingsTitle.tr()),
           SliverPadding(
             padding: AppConstants.padding(AppConstants.spacing16),
             sliver: SliverToBoxAdapter(
@@ -48,6 +48,30 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Library Settings Section
+                    SettingsSection(
+                      title: AppLocalization.settingsLibrariesTitle.tr(),
+                      group: SettingsGroup(
+                        children: [
+                          SettingsItem(
+                            leadingIcon: getIconDataFromDIconName(
+                              DIconName.library,
+                            ),
+                            title: AppLocalization
+                                .settingsLibrariesManageLibraries
+                                .tr(),
+                            trailingIcon: getIconDataFromDIconName(
+                              DIconName.chevronRight,
+                            ),
+                            onTap: () {
+                              context.pushNamed('manage-libraries');
+                            },
+                            isFirst: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppConstants.spacingY(AppConstants.spacing24),
                     // Servers Section
                     SettingsSection(
                       title: AppLocalization.settingsServersTitle.tr(),
@@ -59,32 +83,15 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                             leadingIconColor:
                                 ConnectionStatusHelper.getStatusColor(status),
-                            title: AppLocalization
-                                .settingsServersConnectionStatus
-                                .tr(),
-                            trailingIcon: getIconDataFromDIconName(
-                              DIconName.chevronRight,
-                              strokeWidth: 2.0,
-                            ),
-                            onTap: () {
-                              ConnectionStatusModal.show(context);
-                            },
-                            isFirst: true,
-                          ),
-                          SettingsItem(
-                            leadingIcon: getIconDataFromDIconName(
-                              DIconName.server,
-                              strokeWidth: 2.0,
-                            ),
                             title: AppLocalization.settingsServersManageServers
                                 .tr(),
                             trailingIcon: getIconDataFromDIconName(
                               DIconName.chevronRight,
-                              strokeWidth: 2.0,
                             ),
                             onTap: () {
                               context.pushNamed('manage-apis');
                             },
+                            isFirst: true,
                           ),
                         ],
                       ),
@@ -102,7 +109,6 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.database,
-                                    strokeWidth: 2.0,
                                   ),
                                   leadingIconColor: settings.hasMetadataProvider
                                       ? AppConstants.successColor
@@ -112,7 +118,6 @@ class SettingsScreen extends ConsumerWidget {
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () {
                                     context.pushNamed('metadata-providers');
@@ -122,14 +127,12 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.folderCog,
-                                    strokeWidth: 2.0,
                                   ),
                                   title: AppLocalization
                                       .settingsScanSettingsTitle
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () {
                                     context.pushNamed('scan-settings');
@@ -142,7 +145,6 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.database,
-                                    strokeWidth: 2.0,
                                   ),
                                   leadingIconColor: Theme.of(
                                     context,
@@ -156,22 +158,14 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.folderCog,
-                                    strokeWidth: 2.0,
                                   ),
                                   title: AppLocalization
                                       .settingsScanSettingsTitle
                                       .tr(),
-                                  trailing: SizedBox(
+                                  trailing: const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(context).iconTheme.color
-                                                ?.withValues(alpha: 0.6) ??
-                                            Colors.grey,
-                                      ),
-                                    ),
+                                    child: DSpinner(),
                                   ),
                                 ),
                               ],
@@ -181,14 +175,12 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.error,
-                                    strokeWidth: 2.0,
                                   ),
                                   title: AppLocalization
                                       .settingsMetadataManageProviders
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () {
                                     context.pushNamed('metadata-providers');
@@ -198,14 +190,12 @@ class SettingsScreen extends ConsumerWidget {
                                 SettingsItem(
                                   leadingIcon: getIconDataFromDIconName(
                                     DIconName.folderCog,
-                                    strokeWidth: 2.0,
                                   ),
                                   title: AppLocalization
                                       .settingsScanSettingsTitle
                                       .tr(),
                                   trailingIcon: getIconDataFromDIconName(
                                     DIconName.chevronRight,
-                                    strokeWidth: 2.0,
                                   ),
                                   onTap: () {
                                     context.pushNamed('scan-settings');
@@ -214,32 +204,6 @@ class SettingsScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                    ),
-                    AppConstants.spacingY(AppConstants.spacing24),
-                    // Library Settings Section
-                    SettingsSection(
-                      title: AppLocalization.settingsLibrariesTitle.tr(),
-                      group: SettingsGroup(
-                        children: [
-                          SettingsItem(
-                            leadingIcon: getIconDataFromDIconName(
-                              DIconName.library,
-                              strokeWidth: 2.0,
-                            ),
-                            title: AppLocalization
-                                .settingsLibrariesManageLibraries
-                                .tr(),
-                            trailingIcon: getIconDataFromDIconName(
-                              DIconName.chevronRight,
-                              strokeWidth: 2.0,
-                            ),
-                            onTap: () {
-                              context.pushNamed('manage-libraries');
-                            },
-                            isFirst: true,
-                          ),
-                        ],
-                      ),
                     ),
                     AppConstants.spacingY(AppConstants.spacing24),
                     // Reset Settings Section
@@ -252,13 +216,11 @@ class SettingsScreen extends ConsumerWidget {
                           SettingsItem(
                             leadingIcon: getIconDataFromDIconName(
                               DIconName.refreshCw,
-                              strokeWidth: 2.0,
                             ),
                             title: AppLocalization.settingsResetAllSettings
                                 .tr(),
                             trailingIcon: getIconDataFromDIconName(
                               DIconName.error,
-                              strokeWidth: 2.0,
                             ),
                             onTap: () => _showResetAllDialog(context, ref),
                             isFirst: true,
@@ -306,7 +268,7 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: DSpinner()),
     );
 
     try {

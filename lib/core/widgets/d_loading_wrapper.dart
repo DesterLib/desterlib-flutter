@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dester/core/widgets/d_spinner.dart';
 
 class DLoadingWrapper extends StatelessWidget {
   final bool isLoading;
@@ -28,11 +29,11 @@ class DLoadingWrapper extends StatelessWidget {
           ? (centerLoader
                 ? Center(
                     key: const ValueKey('loader'),
-                    child: loader ?? const CircularProgressIndicator(),
+                    child: loader ?? const DSpinner(),
                   )
                 : KeyedSubtree(
                     key: const ValueKey('loader'),
-                    child: loader ?? const CircularProgressIndicator(),
+                    child: loader ?? const DSpinner(),
                   ))
           : KeyedSubtree(key: const ValueKey('content'), child: child),
     );

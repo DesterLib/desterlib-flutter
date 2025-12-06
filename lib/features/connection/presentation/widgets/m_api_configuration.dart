@@ -126,6 +126,11 @@ class _ApiConfigurationModalState extends State<ApiConfigurationModal> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Health status at top (like connection status modal)
+        _buildHealthStatusWidget(context),
+        if (_healthStatus != ApiHealthStatus.idle)
+          AppConstants.spacingY(AppConstants.spacingMd),
+
         FormBuilder(
           key: _formKey,
           child: Column(
@@ -194,7 +199,7 @@ class _ApiConfigurationModalState extends State<ApiConfigurationModal> {
                       right: AppConstants.spacing8,
                     ),
                     child: DIcon(
-                      icon: DIconName.link2,
+                      icon: DIconName.server,
                       size: AppConstants.iconSizeMd,
                       color: Colors.white.withValues(alpha: 0.5),
                     ),
@@ -222,11 +227,10 @@ class _ApiConfigurationModalState extends State<ApiConfigurationModal> {
                   return null;
                 },
               ),
-              AppConstants.spacingY(AppConstants.spacingMd),
-              _buildHealthStatusWidget(context),
             ],
           ),
         ),
+        AppConstants.spacingY(AppConstants.spacingMd),
         FormActions(
           isSaving: _isSaving,
           onSave: () => _handleSave(context),
@@ -240,75 +244,72 @@ class _ApiConfigurationModalState extends State<ApiConfigurationModal> {
 
   Widget _buildHealthStatusWidget(BuildContext context) {
     final Color statusColor;
-    final IconData statusIcon;
+    final DIconName statusIcon;
     final String statusText;
+    final bool isAnimated;
 
     switch (_healthStatus) {
       case ApiHealthStatus.idle:
         return const SizedBox.shrink();
       case ApiHealthStatus.checking:
-        statusColor = Theme.of(context).colorScheme.primary;
-        statusIcon = getIconDataFromDIconName(
-          DIconName.refreshCw,
-          strokeWidth: 2.0,
-        );
-        statusText = 'Checking connection...';
+        statusColor = AppConstants.infoColor;
+        statusIcon = DIconName.refreshCw;
+        statusText = AppLocalization.settingsServersChecking.tr();
+        isAnimated = true;
         break;
       case ApiHealthStatus.healthy:
         statusColor = AppConstants.successColor;
-        statusIcon = getIconDataFromDIconName(
-          DIconName.cloudCheck,
-          strokeWidth: 2.0,
-        );
-        statusText = 'Server is reachable';
+        statusIcon = DIconName.link2;
+        statusText = AppLocalization.settingsServersConnected.tr();
+        isAnimated = false;
         break;
       case ApiHealthStatus.unhealthy:
         statusColor = AppConstants.dangerColor;
-        statusIcon = getIconDataFromDIconName(
-          DIconName.error,
-          strokeWidth: 2.0,
-        );
-        statusText = _healthError ?? 'Server is unreachable';
+        statusIcon = DIconName.link2Off;
+        statusText = _healthError ?? AppLocalization.settingsServersError.tr();
+        isAnimated = false;
         break;
     }
 
     return Container(
-      padding: AppConstants.padding(AppConstants.spacing12),
-      decoration: ShapeDecoration(
+      padding: AppConstants.padding(AppConstants.spacingMd),
+      decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.1),
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-        ),
+        borderRadius: BorderRadius.circular(AppConstants.radiusLg),
       ),
       child: Row(
         children: [
-          if (_healthStatus == ApiHealthStatus.checking)
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-              ),
-            )
-          else
-            Icon(statusIcon, size: 20, color: statusColor),
-          SizedBox(width: AppConstants.spacing8),
+          isAnimated
+              ? TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 1500),
+                  builder: (context, value, child) {
+                    return Transform.rotate(
+                      angle: value * 2 * 3.14159,
+                      child: DIcon(
+                        icon: statusIcon,
+                        size: 24,
+                        color: statusColor,
+                      ),
+                    );
+                  },
+                  onEnd: () {
+                    // Restart animation if still checking
+                    if (_healthStatus == ApiHealthStatus.checking) {
+                      // This will be handled by the rebuild
+                    }
+                  },
+                )
+              : DIcon(icon: statusIcon, size: 24, color: statusColor),
+          AppConstants.spacingX(AppConstants.spacing12),
           Expanded(
             child: Text(
               statusText,
-              style: AppTypography.bodySmall().copyWith(color: statusColor),
+              style: AppTypography.titleSmall(
+                color: statusColor,
+              ).copyWith(fontWeight: AppTypography.weightMedium),
             ),
           ),
-          if (_healthStatus != ApiHealthStatus.checking)
-            GestureDetector(
-              onTap: _checkHealth,
-              child: Icon(
-                getIconDataFromDIconName(DIconName.refreshCw, strokeWidth: 2.0),
-                size: 16,
-                color: statusColor,
-              ),
-            ),
         ],
       ),
     );

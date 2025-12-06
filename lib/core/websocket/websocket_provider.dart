@@ -4,6 +4,12 @@ import 'dart:async';
 // External packages
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// App
+import 'package:dester/app/providers/connection_guard_provider.dart';
+
+// Features
+import 'package:dester/features/connection/domain/entities/connection_status.dart';
+
 import 'websocket_service.dart';
 
 // Export health data models for use in other files
@@ -76,11 +82,28 @@ final webSocketServiceProvider = Provider<WebSocketService>((ref) {
 });
 
 /// WebSocket connection state provider
+/// Only connects when HTTP API is available
 final webSocketConnectionProvider = StreamProvider<bool>((ref) {
   final service = ref.watch(webSocketServiceProvider);
 
-  // Auto-connect when provider is created
-  service.connect();
+  // Watch connection guard to know when HTTP API is available
+  ref.listen<ConnectionGuardState>(connectionGuardProvider, (previous, next) {
+    if (next.status == ConnectionStatus.connected) {
+      // HTTP API is connected - enable WebSocket connection
+      service.enableConnection();
+    } else if (next.status == ConnectionStatus.error) {
+      // HTTP API is unavailable - disable WebSocket connection
+      service.disableConnection();
+    }
+  });
+
+  // Check initial connection state
+  final connectionState = ref.read(connectionGuardProvider);
+  if (connectionState.status == ConnectionStatus.connected) {
+    service.enableConnection();
+  } else {
+    service.disableConnection();
+  }
 
   return service.connectionStream;
 });
@@ -105,12 +128,9 @@ class ScanProgressNotifier extends Notifier<ScanProgressState> {
   ScanProgressState build() {
     final service = ref.watch(webSocketServiceProvider);
 
-    // Ensure WebSocket is connected
-    if (!service.isConnected) {
-      service.connect().catchError((error) {
-        // Connection will be handled by the service
-      });
-    }
+    // WebSocket connection is managed by webSocketConnectionProvider
+    // which coordinates with HTTP API connection status
+    // Don't force connection here
 
     // Listen to WebSocket messages
     _subscription?.cancel();
@@ -256,13 +276,6 @@ class HealthStatusNotifier extends Notifier<HealthStatusState> {
         }
       });
     });
-
-    // Ensure WebSocket is connected
-    if (!service.isConnected) {
-      service.connect().catchError((error) {
-        // Connection will be handled by the service
-      });
-    }
 
     // Listen to WebSocket messages for health updates
     _subscription?.cancel();

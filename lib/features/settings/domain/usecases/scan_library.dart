@@ -6,5 +6,6 @@ abstract class ScanLibrary {
     String? libraryName,
     String? mediaType,
     bool? rescan,
+    bool? refetchMetadata,
   });
 }

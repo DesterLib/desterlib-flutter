@@ -9,7 +9,7 @@ import 'package:dester/core/constants/app_constants.dart';
 import 'package:dester/core/widgets/d_icon.dart';
 
 /// Button variants
-enum DIconButtonVariant { primary, secondary, plain }
+enum DIconButtonVariant { primary, secondary, secondaryDark, plain }
 
 /// Button sizes
 enum DIconButtonSize { sm, md }
@@ -153,6 +153,8 @@ class _DIconButtonState extends State<DIconButton> {
         return Colors.white;
       case DIconButtonVariant.secondary:
         return Colors.white.withValues(alpha: 0.13);
+      case DIconButtonVariant.secondaryDark:
+        return Colors.black.withValues(alpha: 0.13);
       case DIconButtonVariant.plain:
         return Colors.transparent;
     }
@@ -163,6 +165,8 @@ class _DIconButtonState extends State<DIconButton> {
       case DIconButtonVariant.primary:
         return Colors.white;
       case DIconButtonVariant.secondary:
+        return Colors.white.withValues(alpha: 0.07);
+      case DIconButtonVariant.secondaryDark:
         return Colors.white.withValues(alpha: 0.07);
       case DIconButtonVariant.plain:
         return Colors.transparent;
@@ -185,6 +189,8 @@ class _DIconButtonState extends State<DIconButton> {
       case DIconButtonVariant.primary:
         return Colors.black;
       case DIconButtonVariant.secondary:
+        return Colors.white;
+      case DIconButtonVariant.secondaryDark:
         return Colors.white;
       case DIconButtonVariant.plain:
         return Colors.white;

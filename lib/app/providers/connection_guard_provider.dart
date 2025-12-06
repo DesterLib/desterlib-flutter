@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Core
 import 'package:dester/core/storage/preferences_service.dart';
-import 'package:dester/core/websocket/websocket_provider.dart';
 
 // Features
 import 'package:dester/features/connection/connection_feature.dart';
@@ -32,11 +31,9 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _debounceTimer;
-  Timer? _wsDisconnectTimer;
   bool _isInitialized = false;
   bool _isCheckingConnection = false;
   Future<void>? _currentCheck;
-  bool _wasWsConnected = false;
 
   // Use cases (injected via feature factory)
   late final _checkConnection = ConnectionFeature.createCheckConnection();
@@ -61,7 +58,6 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
     ref.onDispose(() {
       _connectivitySubscription?.cancel();
       _debounceTimer?.cancel();
-      _wsDisconnectTimer?.cancel();
       _currentCheck = null;
       _isCheckingConnection = false;
     });
@@ -91,47 +87,8 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
       });
     });
 
-    // Start listening to WebSocket connection state
-    _startWebSocketMonitoring();
-
-    // Initial check
+    // Initial check - must complete before allowing navigation
     await checkConnection();
-  }
-
-  /// Monitor WebSocket connection state for disconnections
-  void _startWebSocketMonitoring() {
-    // Use ref.listen to react to WebSocket connection changes
-    ref.listen<AsyncValue<bool>>(webSocketConnectionProvider, (previous, next) {
-      next.whenData((isConnected) {
-        // If WebSocket connects, mark it
-        if (isConnected) {
-          _wasWsConnected = true;
-          _wsDisconnectTimer?.cancel();
-          return;
-        }
-
-        // If WebSocket disconnects after being connected, wait a bit then check
-        // This handles temporary network issues vs. server being down
-        if (_wasWsConnected && !isConnected) {
-          _wsDisconnectTimer?.cancel();
-          _wsDisconnectTimer = Timer(const Duration(seconds: 5), () {
-            // If still disconnected after 5 seconds, verify connection
-            checkConnection();
-          });
-        }
-      });
-
-      // Handle WebSocket errors
-      next.whenOrNull(
-        error: (error, stackTrace) {
-          // WebSocket error - check connection status
-          _wsDisconnectTimer?.cancel();
-          _wsDisconnectTimer = Timer(const Duration(seconds: 2), () {
-            checkConnection();
-          });
-        },
-      );
-    });
   }
 
   /// Check the API connection using use case
@@ -156,6 +113,8 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
   Future<void> _performCheck() async {
     _isCheckingConnection = true;
 
+    final previousStatus = state.status;
+
     state = state.copyWith(
       status: ConnectionStatus.checking,
       clearErrorMessage: true,
@@ -163,6 +122,13 @@ class ConnectionGuardNotifier extends Notifier<ConnectionGuardState> {
 
     final result = await _checkConnection();
     state = result;
+
+    // If connection status changed from non-connected to connected,
+    // invalidate content providers to trigger data loading
+    if (previousStatus != ConnectionStatus.connected &&
+        result.status == ConnectionStatus.connected) {
+      _invalidateContentProviders();
+    }
   }
 
   /// Add a new API configuration

@@ -61,12 +61,14 @@ class LibraryRepositoryImpl implements LibraryRepository {
     String? libraryName,
     String? mediaType,
     bool? rescan,
+    bool? refetchMetadata,
   }) async {
     final result = await dataSource.scanLibrary(
       path: path,
       name: libraryName,
       mediaType: mediaType ?? 'movie',
       rescan: rescan,
+      refetchMetadata: refetchMetadata,
     );
 
     return result.fold(

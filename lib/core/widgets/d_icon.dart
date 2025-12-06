@@ -10,8 +10,19 @@ enum DIconName {
   stop,
   skipForward,
   skipBack,
+  skip10Forward,
+  skip10Backward,
+  autoForward1x,
+  autoForward2x,
+  autoForward3x,
+  autoBackward1x,
+  autoBackward2x,
+  autoBackward3x,
   volume,
   volumeMute,
+  volumeUp,
+  volumeDown,
+  volumeOff,
   settings,
   home,
   search,
@@ -26,6 +37,7 @@ enum DIconName {
   arrowRight,
   arrowUp,
   arrowDown,
+  arrowBack,
   heart,
   ellipsis,
   cloud,
@@ -33,6 +45,12 @@ enum DIconName {
   film,
   tv,
   music,
+  audiotrack,
+  subtitles,
+  fullscreen,
+  fullscreenExit,
+  forward,
+  replay,
   bookOpen,
   library,
   inbox,
@@ -72,7 +90,7 @@ class DIconStrokeWidth {
 /// Useful for widgets that require IconData instead of DIcon widget
 IconData getIconDataFromDIconName(
   DIconName iconName, {
-  double strokeWidth = 2.0,
+  double strokeWidth = 2.5,
 }) {
   final suffix = DIconStrokeWidth.getSuffix(strokeWidth);
   return LucideIconMap.getIcon(iconName, suffix);
@@ -93,6 +111,77 @@ class CustomIcons {
 <path d="M3 10C2.99993 9.70907 3.06333 9.42162 3.18579 9.15772C3.30824 8.89381 3.4868 8.6598 3.709 8.472L10.709 2.472C11.07 2.16691 11.5274 1.99952 12 1.99952C12.4726 1.99952 12.93 2.16691 13.291 2.472L20.291 8.472C20.5132 8.6598 20.6918 8.89381 20.8142 9.15772C20.9367 9.42162 21.0001 9.70907 21 10V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 ''';
+
+  static const String pause = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 3H15C14.4477 3 14 3.44772 14 4V20C14 20.5523 14.4477 21 15 21H18C18.5523 21 19 20.5523 19 20V4C19 3.44772 18.5523 3 18 3Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 3H6C5.44772 3 5 3.44772 5 4V20C5 20.5523 5.44772 21 6 21H9C9.55228 21 10 20.5523 10 20V4C10 3.44772 9.55228 3 9 3Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String skip10Backward = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 12C3 13.78 3.52784 15.5201 4.51677 17.0001C5.50571 18.4802 6.91131 19.6337 8.55585 20.3149C10.2004 20.9961 12.01 21.1743 13.7558 20.8271C15.5016 20.4798 17.1053 19.6226 18.364 18.364C19.6226 17.1053 20.4798 15.5016 20.8271 13.7558C21.1743 12.01 20.9961 10.2004 20.3149 8.55585C19.6337 6.91131 18.4802 5.50571 17.0001 4.51677C15.5201 3.52784 13.78 3 12 3C9.48395 3.00947 7.06897 3.99122 5.26 5.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3 3V8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.89915 8.72727V16H8.14489V10.3679H8.10227L6.47585 11.3622V9.84233L8.26918 8.72727H9.89915ZM14.5147 16.1776C13.8803 16.1776 13.3334 16.0272 12.8741 15.7266C12.4148 15.4235 12.0609 14.9891 11.8123 14.4233C11.5637 13.8551 11.4406 13.1721 11.443 12.3743C11.4454 11.5765 11.5697 10.8994 11.8159 10.343C12.0645 9.78433 12.4172 9.35937 12.8741 9.06818C13.3334 8.77462 13.8803 8.62784 14.5147 8.62784C15.1492 8.62784 15.6961 8.77462 16.1554 9.06818C16.617 9.35937 16.9721 9.78433 17.2207 10.343C17.4693 10.9018 17.5924 11.5788 17.59 12.3743C17.59 13.1745 17.4657 13.8587 17.2172 14.4268C16.9686 14.995 16.6146 15.4295 16.1554 15.7301C15.6984 16.0284 15.1516 16.1776 14.5147 16.1776ZM14.5147 14.7393C14.8935 14.7393 15.2001 14.5464 15.4345 14.1605C15.6689 13.7723 15.7849 13.1768 15.7825 12.3743C15.7825 11.8487 15.7292 11.4155 15.6227 11.0746C15.5162 10.7313 15.3682 10.4756 15.1788 10.3075C14.9894 10.1394 14.7681 10.0554 14.5147 10.0554C14.1383 10.0554 13.8341 10.246 13.6021 10.6271C13.3701 11.0059 13.2529 11.5883 13.2505 12.3743C13.2482 12.907 13.2991 13.3485 13.4032 13.6989C13.5098 14.0492 13.6589 14.3108 13.8507 14.4837C14.0424 14.6541 14.2638 14.7393 14.5147 14.7393Z" fill="currentColor"/>
+</svg>
+''';
+
+  static const String skip10Forward = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M21 12C21 13.78 20.4722 15.5201 19.4832 17.0001C18.4943 18.4802 17.0887 19.6337 15.4442 20.3149C13.7996 20.9961 11.99 21.1743 10.2442 20.8271C8.49836 20.4798 6.89472 19.6226 5.63605 18.364C4.37737 17.1053 3.5202 15.5016 3.17294 13.7558C2.82567 12.01 3.0039 10.2004 3.68509 8.55585C4.36628 6.91131 5.51983 5.50571 6.99987 4.51677C8.47992 3.52784 10.22 3 12 3C14.5161 3.00947 16.931 3.99122 18.74 5.74L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M21 3V8H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.89915 8.72727V16H8.14489V10.3679H8.10227L6.47585 11.3622V9.84233L8.26918 8.72727H9.89915ZM14.5147 16.1776C13.8803 16.1776 13.3334 16.0272 12.8741 15.7266C12.4148 15.4235 12.0609 14.9891 11.8123 14.4233C11.5637 13.8551 11.4406 13.1721 11.443 12.3743C11.4454 11.5765 11.5697 10.8994 11.8159 10.343C12.0645 9.78433 12.4172 9.35937 12.8741 9.06818C13.3334 8.77462 13.8803 8.62784 14.5147 8.62784C15.1492 8.62784 15.6961 8.77462 16.1554 9.06818C16.617 9.35937 16.9721 9.78433 17.2207 10.343C17.4693 10.9018 17.5924 11.5788 17.59 12.3743C17.59 13.1745 17.4657 13.8587 17.2172 14.4268C16.9686 14.995 16.6146 15.4295 16.1554 15.7301C15.6984 16.0284 15.1516 16.1776 14.5147 16.1776ZM14.5147 14.7393C14.8935 14.7393 15.2001 14.5464 15.4345 14.1605C15.6689 13.7723 15.7849 13.1768 15.7825 12.3743C15.7825 11.8487 15.7292 11.4155 15.6227 11.0746C15.5162 10.7313 15.3682 10.4756 15.1788 10.3075C14.9894 10.1394 14.7681 10.0554 14.5147 10.0554C14.1383 10.0554 13.8341 10.246 13.6021 10.6271C13.3701 11.0059 13.2529 11.5883 13.2505 12.3743C13.2482 12.907 13.2991 13.3485 13.4032 13.6989C13.5098 14.0492 13.6589 14.3108 13.8507 14.4837C14.0424 14.6541 14.2638 14.7393 14.5147 14.7393Z" fill="currentColor"/>
+</svg>
+''';
+
+  static const String autoForward1x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.7308 8.16287C15.5574 8.05881 15.3595 8.00264 15.1573 8.00009C14.955 7.99754 14.7558 8.0487 14.5798 8.14834C14.4038 8.24799 14.2574 8.39255 14.1555 8.56727C14.0537 8.74199 14 8.94061 14 9.14285V15.9999C14 16.2021 14.0537 16.4008 14.1555 16.5755C14.2574 16.7502 14.4038 16.8948 14.5798 16.9944C14.7558 17.094 14.955 17.1452 15.1573 17.1427C15.3595 17.1401 15.5574 17.0839 15.7308 16.9799L21.4433 13.5525C21.6129 13.4512 21.7533 13.3076 21.8509 13.1359C21.9485 12.9641 21.9998 12.77 22 12.5724C22.0002 12.3749 21.9491 12.1807 21.8519 12.0087C21.7546 11.8368 21.6144 11.693 21.445 11.5914L15.7308 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.73083 8.16287C9.55741 8.05881 9.35948 8.00264 9.15726 8.00009C8.95503 7.99754 8.75575 8.0487 8.57976 8.14834C8.40377 8.24799 8.25738 8.39255 8.15552 8.56727C8.05366 8.74199 8 8.94061 8 9.14285V15.9999C8 16.2021 8.05366 16.4008 8.15552 16.5755C8.25738 16.7502 8.40377 16.8948 8.57976 16.9944C8.75575 17.094 8.95503 17.1452 9.15726 17.1427C9.35948 17.1401 9.55741 17.0839 9.73083 16.9799L15.4433 13.5525C15.6129 13.4512 15.7533 13.3076 15.8509 13.1359C15.9485 12.9641 15.9998 12.77 16 12.5724C16.0002 12.3749 15.9491 12.1807 15.8519 12.0087C15.7546 11.8368 15.6144 11.693 15.445 11.5914L9.73083 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.73083 8.16287C3.55741 8.05881 3.35948 8.00264 3.15726 8.00009C2.95503 7.99754 2.75575 8.0487 2.57976 8.14834C2.40377 8.24799 2.25738 8.39255 2.15552 8.56727C2.05366 8.74199 2 8.94061 2 9.14285V15.9999C2 16.2021 2.05366 16.4008 2.15552 16.5755C2.25738 16.7502 2.40377 16.8948 2.57976 16.9944C2.75575 17.094 2.95503 17.1452 3.15726 17.1427C3.35948 17.1401 3.55741 17.0839 3.73083 16.9799L9.44332 13.5525C9.6129 13.4512 9.75332 13.3076 9.85089 13.1359C9.94845 12.9641 9.99983 12.77 10 12.5724C10.0002 12.3749 9.94914 12.1807 9.85187 12.0087C9.75461 11.8368 9.61444 11.693 9.44503 11.5914L3.73083 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String autoForward2x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.7308 8.16287C15.5574 8.05881 15.3595 8.00264 15.1573 8.00009C14.955 7.99754 14.7558 8.0487 14.5798 8.14834C14.4038 8.24799 14.2574 8.39255 14.1555 8.56727C14.0537 8.74199 14 8.94061 14 9.14285V15.9999C14 16.2021 14.0537 16.4008 14.1555 16.5755C14.2574 16.7502 14.4038 16.8948 14.5798 16.9944C14.7558 17.094 14.955 17.1452 15.1573 17.1427C15.3595 17.1401 15.5574 17.0839 15.7308 16.9799L21.4433 13.5525C21.6129 13.4512 21.7533 13.3076 21.8509 13.1359C21.9485 12.9641 21.9998 12.77 22 12.5724C22.0002 12.3749 21.9491 12.1807 21.8519 12.0087C21.7546 11.8368 21.6144 11.693 21.445 11.5914L15.7308 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.73083 8.16287C9.55741 8.05881 9.35948 8.00264 9.15726 8.00009C8.95503 7.99754 8.75575 8.0487 8.57976 8.14834C8.40377 8.24799 8.25738 8.39255 8.15552 8.56727C8.05366 8.74199 8 8.94061 8 9.14285V15.9999C8 16.2021 8.05366 16.4008 8.15552 16.5755C8.25738 16.7502 8.40377 16.8948 8.57976 16.9944C8.75575 17.094 8.95503 17.1452 9.15726 17.1427C9.35948 17.1401 9.55741 17.0839 9.73083 16.9799L15.4433 13.5525C15.6129 13.4512 15.7533 13.3076 15.8509 13.1359C15.9485 12.9641 15.9998 12.77 16 12.5724C16.0002 12.3749 15.9491 12.1807 15.8519 12.0087C15.7546 11.8368 15.6144 11.693 15.445 11.5914L9.73083 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.73083 8.16287C3.55741 8.05881 3.35948 8.00264 3.15726 8.00009C2.95503 7.99754 2.75575 8.0487 2.57976 8.14834C2.40377 8.24799 2.25738 8.39255 2.15552 8.56727C2.05366 8.74199 2 8.94061 2 9.14285V15.9999C2 16.2021 2.05366 16.4008 2.15552 16.5755C2.25738 16.7502 2.40377 16.8948 2.57976 16.9944C2.75575 17.094 2.95503 17.1452 3.15726 17.1427C3.35948 17.1401 3.55741 17.0839 3.73083 16.9799L9.44332 13.5525C9.6129 13.4512 9.75332 13.3076 9.85089 13.1359C9.94845 12.9641 9.99983 12.77 10 12.5724C10.0002 12.3749 9.94914 12.1807 9.85187 12.0087C9.75461 11.8368 9.61444 11.693 9.44503 11.5914L3.73083 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String autoForward3x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.7308 8.16287C15.5574 8.05881 15.3595 8.00264 15.1573 8.00009C14.955 7.99754 14.7558 8.0487 14.5798 8.14834C14.4038 8.24799 14.2574 8.39255 14.1555 8.56727C14.0537 8.74199 14 8.94061 14 9.14285V15.9999C14 16.2021 14.0537 16.4008 14.1555 16.5755C14.2574 16.7502 14.4038 16.8948 14.5798 16.9944C14.7558 17.094 14.955 17.1452 15.1573 17.1427C15.3595 17.1401 15.5574 17.0839 15.7308 16.9799L21.4433 13.5525C21.6129 13.4512 21.7533 13.3076 21.8509 13.1359C21.9485 12.9641 21.9998 12.77 22 12.5724C22.0002 12.3749 21.9491 12.1807 21.8519 12.0087C21.7546 11.8368 21.6144 11.693 21.445 11.5914L15.7308 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.73083 8.16287C9.55741 8.05881 9.35948 8.00264 9.15726 8.00009C8.95503 7.99754 8.75575 8.0487 8.57976 8.14834C8.40377 8.24799 8.25738 8.39255 8.15552 8.56727C8.05366 8.74199 8 8.94061 8 9.14285V15.9999C8 16.2021 8.05366 16.4008 8.15552 16.5755C8.25738 16.7502 8.40377 16.8948 8.57976 16.9944C8.75575 17.094 8.95503 17.1452 9.15726 17.1427C9.35948 17.1401 9.55741 17.0839 9.73083 16.9799L15.4433 13.5525C15.6129 13.4512 15.7533 13.3076 15.8509 13.1359C15.9485 12.9641 15.9998 12.77 16 12.5724C16.0002 12.3749 15.9491 12.1807 15.8519 12.0087C15.7546 11.8368 15.6144 11.693 15.445 11.5914L9.73083 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.73083 8.16287C3.55741 8.05881 3.35948 8.00264 3.15726 8.00009C2.95503 7.99754 2.75575 8.0487 2.57976 8.14834C2.40377 8.24799 2.25738 8.39255 2.15552 8.56727C2.05366 8.74199 2 8.94061 2 9.14285V15.9999C2 16.2021 2.05366 16.4008 2.15552 16.5755C2.25738 16.7502 2.40377 16.8948 2.57976 16.9944C2.75575 17.094 2.95503 17.1452 3.15726 17.1427C3.35948 17.1401 3.55741 17.0839 3.73083 16.9799L9.44332 13.5525C9.6129 13.4512 9.75332 13.3076 9.85089 13.1359C9.94845 12.9641 9.99983 12.77 10 12.5724C10.0002 12.3749 9.94914 12.1807 9.85187 12.0087C9.75461 11.8368 9.61444 11.693 9.44503 11.5914L3.73083 8.16287Z" fill="currentColor" stroke="currentColor" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String autoBackward1x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.26917 8.16287C8.44259 8.05881 8.64052 8.00264 8.84274 8.00009C9.04497 7.99754 9.24425 8.0487 9.42024 8.14834C9.59623 8.24799 9.74262 8.39255 9.84448 8.56727C9.94634 8.74199 10 8.94061 10 9.14285V15.9999C10 16.2021 9.94634 16.4008 9.84448 16.5755C9.74262 16.7502 9.59623 16.8948 9.42024 16.9944C9.24425 17.094 9.04497 17.1452 8.84274 17.1427C8.64052 17.1401 8.44259 17.0839 8.26917 16.9799L2.55668 13.5525C2.3871 13.4512 2.24668 13.3076 2.14911 13.1359C2.05155 12.9641 2.00017 12.77 2 12.5724C1.99983 12.3749 2.05086 12.1807 2.14813 12.0087C2.24539 11.8368 2.38556 11.693 2.55497 11.5914L8.26917 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.2692 8.16287C14.4426 8.05881 14.6405 8.00264 14.8427 8.00009C15.045 7.99754 15.2442 8.0487 15.4202 8.14834C15.5962 8.24799 15.7426 8.39255 15.8445 8.56727C15.9463 8.74199 16 8.94061 16 9.14285V15.9999C16 16.2021 15.9463 16.4008 15.8445 16.5755C15.7426 16.7502 15.5962 16.8948 15.4202 16.9944C15.2442 17.094 15.045 17.1452 14.8427 17.1427C14.6405 17.1401 14.4426 17.0839 14.2692 16.9799L8.55668 13.5525C8.3871 13.4512 8.24668 13.3076 8.14911 13.1359C8.05155 12.9641 8.00017 12.77 8 12.5724C7.99983 12.3749 8.05086 12.1807 8.14813 12.0087C8.24539 11.8368 8.38556 11.693 8.55497 11.5914L14.2692 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M20.2692 8.16287C20.4426 8.05881 20.6405 8.00264 20.8427 8.00009C21.045 7.99754 21.2442 8.0487 21.4202 8.14834C21.5962 8.24799 21.7426 8.39255 21.8445 8.56727C21.9463 8.74199 22 8.94061 22 9.14285V15.9999C22 16.2021 21.9463 16.4008 21.8445 16.5755C21.7426 16.7502 21.5962 16.8948 21.4202 16.9944C21.2442 17.094 21.045 17.1452 20.8427 17.1427C20.6405 17.1401 20.4426 17.0839 20.2692 16.9799L14.5567 13.5525C14.3871 13.4512 14.2467 13.3076 14.1491 13.1359C14.0515 12.9641 14.0002 12.77 14 12.5724C13.9998 12.3749 14.0509 12.1807 14.1481 12.0087C14.2454 11.8368 14.3856 11.693 14.555 11.5914L20.2692 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String autoBackward2x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.26917 8.16287C8.44259 8.05881 8.64052 8.00264 8.84274 8.00009C9.04497 7.99754 9.24425 8.0487 9.42024 8.14834C9.59623 8.24799 9.74262 8.39255 9.84448 8.56727C9.94634 8.74199 10 8.94061 10 9.14285V15.9999C10 16.2021 9.94634 16.4008 9.84448 16.5755C9.74262 16.7502 9.59623 16.8948 9.42024 16.9944C9.24425 17.094 9.04497 17.1452 8.84274 17.1427C8.64052 17.1401 8.44259 17.0839 8.26917 16.9799L2.55668 13.5525C2.3871 13.4512 2.24668 13.3076 2.14911 13.1359C2.05155 12.9641 2.00017 12.77 2 12.5724C1.99983 12.3749 2.05086 12.1807 2.14813 12.0087C2.24539 11.8368 2.38556 11.693 2.55497 11.5914L8.26917 8.16287Z" fill="#B5B5B5" stroke="#B5B5B5" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.2692 8.16287C14.4426 8.05881 14.6405 8.00264 14.8427 8.00009C15.045 7.99754 15.2442 8.0487 15.4202 8.14834C15.5962 8.24799 15.7426 8.39255 15.8445 8.56727C15.9463 8.74199 16 8.94061 16 9.14285V15.9999C16 16.2021 15.9463 16.4008 15.8445 16.5755C15.7426 16.7502 15.5962 16.8948 15.4202 16.9944C15.2442 17.094 15.045 17.1452 14.8427 17.1427C14.6405 17.1401 14.4426 17.0839 14.2692 16.9799L8.55668 13.5525C8.3871 13.4512 8.24668 13.3076 8.14911 13.1359C8.05155 12.9641 8.00017 12.77 8 12.5724C7.99983 12.3749 8.05086 12.1807 8.14813 12.0087C8.24539 11.8368 8.38556 11.693 8.55497 11.5914L14.2692 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M20.2692 8.16287C20.4426 8.05881 20.6405 8.00264 20.8427 8.00009C21.045 7.99754 21.2442 8.0487 21.4202 8.14834C21.5962 8.24799 21.7426 8.39255 21.8445 8.56727C21.9463 8.74199 22 8.94061 22 9.14285V15.9999C22 16.2021 21.9463 16.4008 21.8445 16.5755C21.7426 16.7502 21.5962 16.8948 21.4202 16.9944C21.2442 17.094 21.045 17.1452 20.8427 17.1427C20.6405 17.1401 20.4426 17.0839 20.2692 16.9799L14.5567 13.5525C14.3871 13.4512 14.2467 13.3076 14.1491 13.1359C14.0515 12.9641 14.0002 12.77 14 12.5724C13.9998 12.3749 14.0509 12.1807 14.1481 12.0087C14.2454 11.8368 14.3856 11.693 14.555 11.5914L20.2692 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+
+  static const String autoBackward3x = '''
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.26917 8.16287C8.44259 8.05881 8.64052 8.00264 8.84274 8.00009C9.04497 7.99754 9.24425 8.0487 9.42024 8.14834C9.59623 8.24799 9.74262 8.39255 9.84448 8.56727C9.94634 8.74199 10 8.94061 10 9.14285V15.9999C10 16.2021 9.94634 16.4008 9.84448 16.5755C9.74262 16.7502 9.59623 16.8948 9.42024 16.9944C9.24425 17.094 9.04497 17.1452 8.84274 17.1427C8.64052 17.1401 8.44259 17.0839 8.26917 16.9799L2.55668 13.5525C2.3871 13.4512 2.24668 13.3076 2.14911 13.1359C2.05155 12.9641 2.00017 12.77 2 12.5724C1.99983 12.3749 2.05086 12.1807 2.14813 12.0087C2.24539 11.8368 2.38556 11.693 2.55497 11.5914L8.26917 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.2692 8.16287C14.4426 8.05881 14.6405 8.00264 14.8427 8.00009C15.045 7.99754 15.2442 8.0487 15.4202 8.14834C15.5962 8.24799 15.7426 8.39255 15.8445 8.56727C15.9463 8.74199 16 8.94061 16 9.14285V15.9999C16 16.2021 15.9463 16.4008 15.8445 16.5755C15.7426 16.7502 15.5962 16.8948 15.4202 16.9944C15.2442 17.094 15.045 17.1452 14.8427 17.1427C14.6405 17.1401 14.4426 17.0839 14.2692 16.9799L8.55668 13.5525C8.3871 13.4512 8.24668 13.3076 8.14911 13.1359C8.05155 12.9641 8.00017 12.77 8 12.5724C7.99983 12.3749 8.05086 12.1807 8.14813 12.0087C8.24539 11.8368 8.38556 11.693 8.55497 11.5914L14.2692 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M20.2692 8.16287C20.4426 8.05881 20.6405 8.00264 20.8427 8.00009C21.045 7.99754 21.2442 8.0487 21.4202 8.14834C21.5962 8.24799 21.7426 8.39255 21.8445 8.56727C21.9463 8.74199 22 8.94061 22 9.14285V15.9999C22 16.2021 21.9463 16.4008 21.8445 16.5755C21.7426 16.7502 21.5962 16.8948 21.4202 16.9944C21.2442 17.094 21.045 17.1452 20.8427 17.1427C20.6405 17.1401 20.4426 17.0839 20.2692 16.9799L14.5567 13.5525C14.3871 13.4512 14.2467 13.3076 14.1491 13.1359C14.0515 12.9641 14.0002 12.77 14 12.5724C13.9998 12.3749 14.0509 12.1807 14.1481 12.0087C14.2454 11.8368 14.3856 11.693 14.555 11.5914L20.2692 8.16287Z" fill="white" stroke="white" stroke-width="1.14284" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
 }
 
 /// Maps icon names to Lucide icon data with stroke width suffixes
@@ -109,9 +198,27 @@ class LucideIconMap {
         return _getLucideIconWithSuffix('skipForward', suffix);
       case DIconName.skipBack:
         return _getLucideIconWithSuffix('skipBack', suffix);
+      case DIconName.skip10Forward:
+        return _getLucideIconWithSuffix('skipForward', suffix);
+      case DIconName.skip10Backward:
+        return _getLucideIconWithSuffix('skipBack', suffix);
+      case DIconName.autoForward1x:
+      case DIconName.autoForward2x:
+      case DIconName.autoForward3x:
+        return _getLucideIconWithSuffix('skipForward', suffix);
+      case DIconName.autoBackward1x:
+      case DIconName.autoBackward2x:
+      case DIconName.autoBackward3x:
+        return _getLucideIconWithSuffix('skipBack', suffix);
       case DIconName.volume:
         return _getLucideIconWithSuffix('volume2', suffix);
       case DIconName.volumeMute:
+        return _getLucideIconWithSuffix('volumeX', suffix);
+      case DIconName.volumeUp:
+        return _getLucideIconWithSuffix('volume2', suffix);
+      case DIconName.volumeDown:
+        return _getLucideIconWithSuffix('volume1', suffix);
+      case DIconName.volumeOff:
         return _getLucideIconWithSuffix('volumeX', suffix);
       case DIconName.settings:
         return _getLucideIconWithSuffix('settings', suffix);
@@ -140,6 +247,8 @@ class LucideIconMap {
         return _getLucideIconWithSuffix('arrowUp', suffix);
       case DIconName.arrowDown:
         return _getLucideIconWithSuffix('arrowDown', suffix);
+      case DIconName.arrowBack:
+        return _getLucideIconWithSuffix('arrowLeft', suffix);
       case DIconName.heart:
         return _getLucideIconWithSuffix('heart', suffix);
       case DIconName.ellipsis:
@@ -154,6 +263,18 @@ class LucideIconMap {
         return _getLucideIconWithSuffix('tv', suffix);
       case DIconName.music:
         return _getLucideIconWithSuffix('music', suffix);
+      case DIconName.audiotrack:
+        return _getLucideIconWithSuffix('audioWaveform', suffix);
+      case DIconName.subtitles:
+        return _getLucideIconWithSuffix('subtitles', suffix);
+      case DIconName.fullscreen:
+        return _getLucideIconWithSuffix('maximize', suffix);
+      case DIconName.fullscreenExit:
+        return _getLucideIconWithSuffix('minimize', suffix);
+      case DIconName.forward:
+        return _getLucideIconWithSuffix('skipForward', suffix);
+      case DIconName.replay:
+        return _getLucideIconWithSuffix('skipBack', suffix);
       case DIconName.bookOpen:
         return _getLucideIconWithSuffix('bookOpen', suffix);
       case DIconName.library:
@@ -758,13 +879,19 @@ class DIcon extends StatelessWidget {
   /// When true, uses custom SVG icons (size and strokeWidth are ignored for these)
   final bool filled;
 
+  /// Whether to preserve hardcoded colors in SVG and only replace currentColor
+  /// When true, only replaces currentColor with the icon color, preserving other colors
+  /// When false, replaces all colors with the icon color
+  final bool trueColor;
+
   const DIcon({
     super.key,
     required this.icon,
     this.size = 24.0,
-    this.strokeWidth = 2.0,
+    this.strokeWidth = 2.5,
     this.color,
     this.filled = false,
+    this.trueColor = false,
   });
 
   @override
@@ -788,12 +915,22 @@ class DIcon extends StatelessWidget {
       return _buildLucideIcon(iconColor);
     }
 
-    return SvgPicture.string(
-      svgString,
-      colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-      width: size,
-      height: size,
-    );
+    if (trueColor) {
+      // Preserve hardcoded colors, only replace currentColor
+      final colorHex =
+          '#${iconColor.value.toRadixString(16).substring(2).toUpperCase()}';
+      final processedSvg = svgString.replaceAll('currentColor', colorHex);
+
+      return SvgPicture.string(processedSvg, width: size, height: size);
+    } else {
+      // Replace all colors with iconColor
+      return SvgPicture.string(
+        svgString,
+        width: size,
+        height: size,
+        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+      );
+    }
   }
 
   Widget _buildLucideIcon(Color iconColor) {
@@ -809,6 +946,24 @@ class DIcon extends StatelessWidget {
         return CustomIcons.play;
       case DIconName.home:
         return CustomIcons.home;
+      case DIconName.pause:
+        return CustomIcons.pause;
+      case DIconName.skip10Backward:
+        return CustomIcons.skip10Backward;
+      case DIconName.skip10Forward:
+        return CustomIcons.skip10Forward;
+      case DIconName.autoForward1x:
+        return CustomIcons.autoForward1x;
+      case DIconName.autoForward2x:
+        return CustomIcons.autoForward2x;
+      case DIconName.autoForward3x:
+        return CustomIcons.autoForward3x;
+      case DIconName.autoBackward1x:
+        return CustomIcons.autoBackward1x;
+      case DIconName.autoBackward2x:
+        return CustomIcons.autoBackward2x;
+      case DIconName.autoBackward3x:
+        return CustomIcons.autoBackward3x;
       // Add more custom SVG icons here as they are created
       default:
         return null;
