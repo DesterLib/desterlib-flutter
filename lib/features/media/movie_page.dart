@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:desterlib_client/core/utils/platform_utils.dart';
+import 'package:desterlib_client/core/utils/extract_colors.dart';
 
 const _posterUrl =
     'https://image.tmdb.org/t/p/w780/8U6ww9eHilD88wmU3CDF4ANmRmH.jpg';
@@ -17,7 +17,7 @@ class _MoviePageState extends State<MoviePage> {
   @override
   void initState() {
     super.initState();
-    _colorsFuture = PaletteExtractor.sixColors(_posterUrl);
+    _colorsFuture = extractColors(_posterUrl);
   }
 
   @override
