@@ -148,6 +148,6 @@ class _SearchWidgetState extends State<SearchBar>
 class _SearchSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
   _SearchSelectionGestureDetectorBuilder({
-    required TextSelectionGestureDetectorBuilderDelegate delegate,
-  }) : super(delegate: delegate);
+    required super.delegate,
+  });
 }

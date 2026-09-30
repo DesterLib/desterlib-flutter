@@ -1,18 +1,21 @@
+import 'package:desterlib_client/core/app/app_background_state.dart';
 import 'package:desterlib_client/core/app/sidebar.dart';
 import 'package:desterlib_client/core/app/toolbar.dart';
+import 'package:desterlib_client/core/router/sequential_fade_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class AppShell extends StatelessWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.child, required this.background});
 
   final Widget child;
+  final AppBackgroundState background;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Toolbar(),
+        Toolbar(background: background),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -30,7 +33,7 @@ class AppShell extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 12),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: child,
+                        child: SnapshotFadeSwitcher(child: child),
                       ),
                     ),
                   ),

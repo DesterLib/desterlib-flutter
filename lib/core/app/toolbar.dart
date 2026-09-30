@@ -4,11 +4,14 @@ import 'package:desterlib_client/core/icons/refresh_icon.dart';
 import 'package:desterlib_client/core/icons/video_mode_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
 import 'package:desterlib_client/features/search/search_bar.dart';
+import 'package:desterlib_client/core/app/app_background_state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 class Toolbar extends StatelessWidget {
-  const Toolbar({super.key});
+  const Toolbar({super.key, required this.background});
+
+  final AppBackgroundState background;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,10 @@ class Toolbar extends StatelessWidget {
                             ? const SizedBox.shrink(key: ValueKey('empty'))
                             : ActionButton(
                                 key: const ValueKey('back'),
-                                onPressed: () => context.go('/'),
+                                onPressed: () {
+                                  background.reset();
+                                  context.go('/');
+                                },
                                 icon: (context, color, size, iconKey) {
                                   return BackArrowIcon(
                                     color: color,
