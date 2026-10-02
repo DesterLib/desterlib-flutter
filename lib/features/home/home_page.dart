@@ -110,15 +110,13 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: RepaintBoundary(
-        child: Column(
-          spacing: 36,
-          children: [
-            const ScrollList(items: dummyItems),
-            const ScrollList(items: dummyItems),
-            const ScrollList(items: dummyItems),
-          ],
-        ),
+      child: Column(
+        spacing: 36,
+        children: [
+          ScrollList(title: "Movies", items: dummyItems),
+          ScrollList(title: "TV Shows", items: dummyItems),
+          ScrollList(title: "Anime", items: dummyItems),
+        ],
       ),
     );
   }
