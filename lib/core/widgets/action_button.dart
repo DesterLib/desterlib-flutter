@@ -1,3 +1,4 @@
+import 'package:desterlib_client/core/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -16,7 +17,7 @@ class ActionButton extends StatefulWidget {
     super.key,
     required this.icon,
     required this.onPressed,
-    this.color = const Color.fromRGBO(255, 255, 255, 0.6),
+    this.color,
     this.size = 32,
     this.iconSize = 24,
     this.hoverScale = 1.1,
@@ -26,7 +27,7 @@ class ActionButton extends StatefulWidget {
   final IconBuilder icon;
   final VoidCallback? onPressed;
 
-  final Color color;
+  final Color? color;
   final double size;
   final double iconSize;
   final double hoverScale;
@@ -54,6 +55,9 @@ class _ActionButtonState extends State<ActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppThemeScope.of(context);
+    final color = widget.color ?? theme.surfaceMedium;
+
     return RepaintBoundary(
       child: SizedBox(
         width: widget.size,
@@ -89,12 +93,7 @@ class _ActionButtonState extends State<ActionButton> {
               duration: const Duration(milliseconds: 120),
               curve: Curves.easeOutCubic,
               child: Center(
-                child: widget.icon(
-                  context,
-                  widget.color,
-                  widget.iconSize,
-                  _iconKey,
-                ),
+                child: widget.icon(context, color, widget.iconSize, _iconKey),
               ),
             ),
           ),
