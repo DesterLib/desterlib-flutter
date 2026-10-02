@@ -1,7 +1,6 @@
 import 'package:desterlib_client/core/app/app_background_state.dart';
 import 'package:desterlib_client/core/app/sidebar.dart';
 import 'package:desterlib_client/core/app/toolbar.dart';
-import 'package:desterlib_client/core/router/sequential_fade_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -33,7 +32,7 @@ class AppShell extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 12),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: SnapshotFadeSwitcher(child: child),
+                        child: child,
                       ),
                     ),
                   ),

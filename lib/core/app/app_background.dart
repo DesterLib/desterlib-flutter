@@ -28,7 +28,7 @@ class _AppBackgroundState extends State<AppBackground>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
     );
 
     _animation = CurvedAnimation(
