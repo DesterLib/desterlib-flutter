@@ -10,6 +10,14 @@ class AppTheme {
   final Color primary;
   final Color primaryHover;
   final Color onPrimary;
+  final Color secondary;
+  final Color secondaryHover;
+  final Color onSecondary;
+  final Color ghost;
+  final Color ghostHover;
+  final Color onGhost;
+  final Color onGhostHover;
+  final Color icon;
   final Brightness mode;
 
   static const black = Color(0xFF000000);
@@ -26,6 +34,14 @@ class AppTheme {
     required this.primary,
     required this.primaryHover,
     required this.onPrimary,
+    required this.secondary,
+    required this.secondaryHover,
+    required this.onSecondary,
+    required this.ghost,
+    required this.ghostHover,
+    required this.onGhost,
+    required this.onGhostHover,
+    required this.icon,
     required this.mode,
   });
 
@@ -55,6 +71,14 @@ class AppTheme {
       primary: other.primary,
       primaryHover: other.primaryHover,
       onPrimary: other.onPrimary,
+      secondary: other.secondary,
+      secondaryHover: other.secondaryHover,
+      onSecondary: other.onSecondary,
+      ghost: other.ghost,
+      ghostHover: other.ghostHover,
+      onGhost: Color.lerp(onGhost, other.onGhost, t)!,
+      onGhostHover: other.onGhostHover,
+      icon: Color.lerp(icon, other.icon, t)!,
       mode: other.mode,
     );
   }
@@ -62,24 +86,40 @@ class AppTheme {
   static const _light = AppTheme(
     onBackground: Color(0xFF0F1116),
     surfaceLight: Color.fromRGBO(255, 255, 255, 0.1),
-    surfaceMedium: Color.fromRGBO(255, 255, 255, 0.6),
-    surfaceDark: Color.fromRGBO(255, 255, 255, 0.8),
+    surfaceMedium: Color.fromRGBO(255, 255, 255, 0.4),
+    surfaceDark: Color.fromRGBO(255, 255, 255, 0.7),
     onSurface: Color.fromRGBO(0, 0, 0, 0.8),
     primary: Color.fromRGBO(255, 255, 255, 1),
     primaryHover: Color.fromRGBO(255, 255, 255, 0.8),
     onPrimary: Color.fromRGBO(0, 0, 0, 1),
+    secondary: Color.fromRGBO(0, 0, 0, 0.4),
+    secondaryHover: Color.fromRGBO(0, 0, 0, 0.5),
+    onSecondary: Color.fromRGBO(255, 255, 255, 1),
+    ghost: Color.fromRGBO(255, 255, 255, 0),
+    ghostHover: Color.fromRGBO(255, 255, 255, 0.4),
+    onGhost: Color.fromRGBO(255, 255, 255, 1),
+    onGhostHover: Color.fromRGBO(0, 0, 0, 1),
+    icon: Color.fromRGBO(255, 255, 255, 0.6),
     mode: Brightness.light,
   );
 
   static const _dark = AppTheme(
     onBackground: Color(0xFF0F1116),
     surfaceLight: Color.fromRGBO(0, 0, 0, 0.1),
-    surfaceMedium: Color.fromRGBO(0, 0, 0, 0.6),
-    surfaceDark: Color.fromRGBO(0, 0, 0, 0.8),
+    surfaceMedium: Color.fromRGBO(0, 0, 0, 0.4),
+    surfaceDark: Color.fromRGBO(0, 0, 0, 0.7),
     onSurface: Color.fromRGBO(255, 255, 255, 0.8),
     primary: Color.fromRGBO(255, 255, 255, 1),
     primaryHover: Color.fromRGBO(255, 255, 255, 0.8),
     onPrimary: Color.fromRGBO(0, 0, 0, 1),
+    secondary: Color.fromRGBO(0, 0, 0, 0.4),
+    secondaryHover: Color.fromRGBO(0, 0, 0, 0.5),
+    onSecondary: Color.fromRGBO(255, 255, 255, 1),
+    ghost: Color.fromRGBO(0, 0, 0, 0),
+    ghostHover: Color.fromRGBO(0, 0, 0, 0.4),
+    onGhost: Color.fromRGBO(0, 0, 0, 1),
+    onGhostHover: Color.fromRGBO(255, 255, 255, 1),
+    icon: Color.fromRGBO(0, 0, 0, 0.6),
     mode: Brightness.dark,
   );
 

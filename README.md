@@ -1,3 +1,3 @@
 # desterlib_client
 
-A new Flutter project.
+## A DesterLib Server media streaming client.

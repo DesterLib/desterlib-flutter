@@ -55,7 +55,7 @@ class _ActionButtonState extends State<ActionButton> {
   @override
   Widget build(BuildContext context) {
     final theme = AppThemeScope.of(context);
-    final color = widget.color ?? theme.surfaceMedium;
+    final color = widget.color ?? theme.icon;
 
     return RepaintBoundary(
       child: SizedBox(
