@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:desterlib_client/core/app/app.dart';
 import 'package:desterlib_client/core/icons/filter_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +56,8 @@ class _SearchWidgetState extends State<SearchBar>
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppThemeScope.of(context);
+
     final isFocused = _focusNode.hasFocus;
 
     return Row(
@@ -70,13 +73,10 @@ class _SearchWidgetState extends State<SearchBar>
                 width: 280,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0x14FFFFFF),
-                  border: Border.all(
-                    color: isFocused
-                        ? const Color(0x66FFFFFF)
-                        : const Color(0x00FFFFFF),
-                    width: 2,
-                  ),
+                  color: theme.surfaceLight,
+                  border: isFocused
+                      ? Border.all(color: theme.surfaceMedium, width: 2)
+                      : null,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(
@@ -147,7 +147,5 @@ class _SearchWidgetState extends State<SearchBar>
 /// triple-tap-line, etc.) using the [TextSelectionGestureDetectorBuilderDelegate].
 class _SearchSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
-  _SearchSelectionGestureDetectorBuilder({
-    required super.delegate,
-  });
+  _SearchSelectionGestureDetectorBuilder({required super.delegate});
 }
