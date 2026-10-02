@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:desterlib_client/core/app/app.dart';
 import 'package:desterlib_client/core/theme/theme.dart';
 import 'package:flutter/widgets.dart';
-import 'triggerable_icon.dart';
+import 'package:desterlib_client/core/interfaces/triggerable_icon.dart';
 
 enum ButtonVariant { primary, secondary, ghost }
 

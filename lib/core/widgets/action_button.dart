@@ -1,8 +1,7 @@
 import 'package:desterlib_client/core/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
-import 'triggerable_icon.dart';
+import 'package:desterlib_client/core/interfaces/triggerable_icon.dart';
 
 typedef IconBuilder =
     Widget Function(

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:desterlib_client/core/widgets/triggerable_icon.dart';
+import 'package:desterlib_client/core/interfaces/triggerable_icon.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
