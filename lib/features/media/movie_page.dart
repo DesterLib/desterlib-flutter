@@ -4,6 +4,7 @@ import 'package:desterlib_client/core/widgets/button.dart';
 import 'package:desterlib_client/features/widgets/fade_image.dart';
 import 'package:flutter/widgets.dart';
 import 'package:desterlib_client/core/utils/extract_colors.dart';
+import 'package:go_router/go_router.dart';
 
 const _posterUrl =
     'https://image.tmdb.org/t/p/w780/8U6ww9eHilD88wmU3CDF4ANmRmH.jpg';
@@ -54,6 +55,7 @@ class _MoviePageState extends State<MoviePage> {
                     ],
                   )
                 : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       HeroContent(),
                       Expanded(child: HeroImage()),
@@ -74,7 +76,7 @@ class HeroContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: compact ? double.infinity : 300,
+      width: compact ? double.infinity : 360,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
@@ -82,7 +84,7 @@ class HeroContent extends StatelessWidget {
           spacing: 32,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
+              constraints: const BoxConstraints(maxWidth: 360),
               child: Image.network(
                 "https://image.tmdb.org/t/p/original/7j3nPn9CMYctl1KVcwBxVAu6vb1.png",
                 fit: BoxFit.contain,
@@ -122,7 +124,7 @@ class HeroContent extends StatelessWidget {
                       Button(
                         label: "Watch Now",
                         onPressed: () {
-                          print("Hello");
+                          context.push("/player/123");
                         },
                         icon: (context, color, size, iconKey) {
                           return PlayIcon(key: key, color: color, size: 16);
