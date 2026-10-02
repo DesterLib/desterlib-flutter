@@ -1,6 +1,6 @@
 import 'package:desterlib_client/core/icons/settings_icon.dart';
+import 'package:desterlib_client/core/theme/theme_toggle_action_button.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
-import 'package:desterlib_client/core/widgets/color_picker.dart';
 import 'package:flutter/widgets.dart';
 
 class Profile extends StatelessWidget {
@@ -35,7 +35,7 @@ class Profile extends StatelessWidget {
         Row(
           spacing: 12,
           children: [
-            ColorPicker(),
+            ThemeToggleActionButton(),
             ActionButton(
               onPressed: () {
                 print('Refresh pressed');
