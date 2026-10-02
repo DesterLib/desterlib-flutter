@@ -10,7 +10,7 @@ class AppThemeController extends ChangeNotifier implements TickerProvider {
   final Duration duration;
   late final Ticker _ticker;
 
-  AppThemeController({this.duration = const Duration(milliseconds: 300)}) {
+  AppThemeController({this.duration = const Duration(milliseconds: 120)}) {
     _ticker = createTicker(_tick);
   }
 

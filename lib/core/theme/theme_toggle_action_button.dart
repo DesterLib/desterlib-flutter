@@ -16,7 +16,7 @@ class ThemeToggleActionButton extends StatelessWidget {
       onPressed: themeController.toggle,
       icon: (context, color, size, iconKey) {
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 120),
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           transitionBuilder: (child, animation) {

@@ -6,9 +6,6 @@ class PlayerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xFF000000),
-      child: Column(children: [Toolbar()]),
-    );
+    return Column(children: [Toolbar()]);
   }
 }

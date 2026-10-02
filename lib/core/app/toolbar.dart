@@ -82,7 +82,7 @@ class Toolbar extends StatelessWidget {
                     spacing: 12,
                     children: [
                       AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 100),
+                        duration: const Duration(milliseconds: 120),
                         child: isHome
                             ? const SizedBox.shrink(key: ValueKey('empty'))
                             : ActionButton(
