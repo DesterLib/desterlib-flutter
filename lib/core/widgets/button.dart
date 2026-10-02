@@ -42,7 +42,7 @@ extension ButtonVariantStyle on ButtonVariant {
   Color hoverForegroundColor(AppTheme theme) {
     return switch (this) {
       ButtonVariant.primary => theme.onPrimary,
-      ButtonVariant.secondary => theme.onSurface,
+      ButtonVariant.secondary => theme.onSecondary,
       ButtonVariant.ghost => theme.onGhostHover,
     };
   }
