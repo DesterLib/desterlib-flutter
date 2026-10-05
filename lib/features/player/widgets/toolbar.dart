@@ -9,25 +9,63 @@ class Toolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTheme.white.withValues(alpha: 0.2),
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 8,
         children: [
-          ActionButton(
-            onPressed: () {
-              context.pop();
-            },
-            icon: (context, color, size, iconKey) {
-              return BackArrowIcon(
-                color: AppTheme.white,
-                size: size,
-                key: iconKey,
-              );
-            },
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: AppTheme.white.withValues(alpha: 0.2),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Row(
+                children: [
+                  ActionButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                    icon: (context, color, size, iconKey) {
+                      return BackArrowIcon(
+                        color: AppTheme.white,
+                        size: size,
+                        key: iconKey,
+                      );
+                    },
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -1.5),
+                    child: Text(
+                      "Back",
+                      style: TextStyle(color: AppTheme.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          Text("Dune: Part Two", style: TextStyle(color: AppTheme.white)),
+          Container(
+            height: 32,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: AppTheme.white.withValues(alpha: 0.2),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Center(
+                child: Transform.translate(
+                  offset: const Offset(0, -1.5),
+                  child: Text(
+                    "Dune: Part Two",
+                    style: TextStyle(color: AppTheme.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
