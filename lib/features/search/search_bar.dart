@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:desterlib_client/core/app/app.dart';
 import 'package:desterlib_client/core/icons/filter_icon.dart';
+import 'package:desterlib_client/core/icons/search_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -74,54 +75,67 @@ class _SearchWidgetState extends State<SearchBar>
                 height: 32,
                 decoration: BoxDecoration(
                   color: theme.surfaceLight,
-                  border: isFocused
-                      ? Border.all(color: theme.surfaceMedium, width: 2)
-                      : null,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 9),
-                  child: Center(
-                    child: _selectionGestureDetectorBuilder
-                        .buildGestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          child: EditableText(
-                            key: editableTextKey,
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            rendererIgnoresPointer: true,
-
-                            style: const TextStyle(
-                              color: Color(0xE6FFFFFF),
-                              fontSize: 14,
-                              height: 1.0,
-                            ),
-
-                            cursorColor: const Color(0xFFFFFFFF),
-                            backgroundCursorColor: const Color(0xFFFFFFFF),
-                            selectionColor: const Color(0x33FFFFFF),
-
-                            maxLines: 1,
-                            cursorWidth: 1,
-                            cursorHeight: 15,
-
-                            textAlign: TextAlign.left,
-
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.search,
-
-                            strutStyle: const StrutStyle(
-                              fontSize: 14,
-                              height: 1.0,
-                              forceStrutHeight: true,
-                            ),
-
-                            onChanged: (_) {
-                              setState(() {});
-                            },
-                          ),
+                foregroundDecoration: isFocused
+                    ? BoxDecoration(
+                        border: Border.all(
+                          color: theme.surfaceMedium,
+                          width: 2,
                         ),
-                  ),
+                        borderRadius: BorderRadius.circular(8),
+                      )
+                    : null,
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    SizedBox(
+                      width: 36,
+                      height: 32,
+                      child: Center(child: SearchIcon(color: theme.icon)),
+                    ),
+                    Expanded(
+                      child: _selectionGestureDetectorBuilder
+                          .buildGestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            child: EditableText(
+                              key: editableTextKey,
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              rendererIgnoresPointer: true,
+
+                              style: const TextStyle(
+                                color: Color(0xE6FFFFFF),
+                                fontSize: 14,
+                                height: 1.0,
+                              ),
+
+                              cursorColor: const Color(0xFFFFFFFF),
+                              backgroundCursorColor: const Color(0xFFFFFFFF),
+                              selectionColor: const Color(0x33FFFFFF),
+
+                              maxLines: 1,
+                              cursorWidth: 1,
+                              cursorHeight: 15,
+
+                              textAlign: TextAlign.left,
+
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.search,
+
+                              strutStyle: const StrutStyle(
+                                fontSize: 14,
+                                height: 1.0,
+                                forceStrutHeight: true,
+                              ),
+
+                              onChanged: (_) {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                    ),
+                  ],
                 ),
               ),
             ),
