@@ -5,8 +5,6 @@ class Slider extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.height = 24,
-    this.trackHeight = 8,
     this.activeColor = const Color(0xFFFFFFFF),
     this.inactiveColor = const Color(0x55FFFFFF),
     this.thumbRadius = 0,
@@ -14,8 +12,6 @@ class Slider extends StatelessWidget {
 
   final double value;
   final ValueChanged<double> onChanged;
-  final double height;
-  final double trackHeight;
   final Color activeColor;
   final Color inactiveColor;
   final double thumbRadius;
@@ -34,7 +30,7 @@ class Slider extends StatelessWidget {
     final clampedValue = value.isFinite ? value.clamp(0.0, 1.0) : 0.0;
 
     return SizedBox(
-      height: height,
+      height: 18,
       child: Builder(
         builder: (innerContext) {
           return GestureDetector(
@@ -45,10 +41,12 @@ class Slider extends StatelessWidget {
             onHorizontalDragUpdate: (d) =>
                 _handlePosition(innerContext, d.globalPosition),
             child: Center(
-              child: SizedBox(
-                height: trackHeight,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                height: 8,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(trackHeight / 2),
+                  borderRadius: BorderRadius.circular(8 / 2),
                   child: Stack(
                     children: [
                       // Track

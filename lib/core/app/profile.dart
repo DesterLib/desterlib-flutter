@@ -1,6 +1,6 @@
-import 'package:desterlib_client/core/icons/settings_icon.dart';
 import 'package:desterlib_client/core/theme/theme_toggle_action_button.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:flutter/widgets.dart';
 
 class Profile extends StatelessWidget {
@@ -41,7 +41,13 @@ class Profile extends StatelessWidget {
                 print('Refresh pressed');
               },
               icon: (context, color, size, iconKey) {
-                return SettingsIcon(color: color, size: size, key: iconKey);
+                return AppIcon(
+                  icon: AppIcons.settings,
+                  color: color,
+                  size: size,
+                  key: iconKey,
+                  rotateAnimate: true,
+                );
               },
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:desterlib_client/core/theme/theme.dart';
 import 'package:desterlib_client/features/player/widgets/toolbar.dart';
 import 'package:desterlib_client/features/player/widgets/video_controls.dart';
+import 'package:desterlib_client/features/player/widgets/video_player.dart';
 import 'package:flutter/widgets.dart';
 
 class PlayerPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _PlayerPageState extends State<PlayerPage> {
       color: AppTheme.black,
       child: Stack(
         children: [
+          VideoPlayer(),
           Toolbar(),
           VideoControls(
             isPlaying: false,

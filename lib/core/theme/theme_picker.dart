@@ -1,6 +1,6 @@
-import 'package:desterlib_client/core/icons/theme_icon.dart';
 import 'package:desterlib_client/core/theme/theme_toggle_action_button.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:desterlib_client/core/widgets/popover.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,12 @@ class ThemePicker extends StatelessWidget {
           return ActionButton(
             onPressed: toggle,
             icon: (context, color, size, iconKey) {
-              return ThemeIcon(color: color, size: size, key: iconKey);
+              return AppIcon(
+                icon: AppIcons.brush,
+                color: color,
+                size: size,
+                key: iconKey,
+              );
             },
           );
         },

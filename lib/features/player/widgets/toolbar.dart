@@ -1,6 +1,8 @@
-import 'package:desterlib_client/core/icons/back_arrow_icon.dart';
+import 'dart:ui';
+
 import 'package:desterlib_client/core/theme/theme.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,11 +17,7 @@ class Toolbar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 8,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: AppTheme.white.withValues(alpha: 0.2),
-            ),
+          _GlassContainer(
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Row(
@@ -28,18 +26,20 @@ class Toolbar extends StatelessWidget {
                     onPressed: () {
                       context.pop();
                     },
+                    iconSize: 16,
                     icon: (context, color, size, iconKey) {
-                      return BackArrowIcon(
+                      return AppIcon(
+                        key: iconKey,
+                        icon: AppIcons.arrowLeft,
                         color: AppTheme.white,
                         size: size,
-                        key: iconKey,
                       );
                     },
                   ),
                   Transform.translate(
                     offset: const Offset(0, -1.5),
                     child: Text(
-                      "Back",
+                      'Back',
                       style: TextStyle(color: AppTheme.white),
                     ),
                   ),
@@ -47,26 +47,45 @@ class Toolbar extends StatelessWidget {
               ),
             ),
           ),
-          Container(
+
+          _GlassContainer(
             height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: AppTheme.white.withValues(alpha: 0.2),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Center(
-                child: Transform.translate(
-                  offset: const Offset(0, -1.5),
-                  child: Text(
-                    "Dune: Part Two",
-                    style: TextStyle(color: AppTheme.white),
-                  ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Center(
+              child: Transform.translate(
+                offset: const Offset(0, -1.5),
+                child: Text(
+                  'Dune: Part Two',
+                  style: TextStyle(color: AppTheme.white),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GlassContainer extends StatelessWidget {
+  const _GlassContainer({required this.child, this.height, this.padding});
+
+  final Widget child;
+  final double? height;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          height: height,
+          padding: padding,
+          decoration: BoxDecoration(color: AppTheme.playerSurface),
+          child: child,
+        ),
       ),
     );
   }

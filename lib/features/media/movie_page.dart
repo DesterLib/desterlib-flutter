@@ -1,5 +1,5 @@
 import 'package:desterlib_client/core/app/app_background_state.dart';
-import 'package:desterlib_client/core/icons/play_icon.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:desterlib_client/core/widgets/button.dart';
 import 'package:desterlib_client/features/widgets/fade_image.dart';
 import 'package:flutter/widgets.dart';
@@ -127,7 +127,12 @@ class HeroContent extends StatelessWidget {
                           context.push("/player/123");
                         },
                         icon: (context, color, size, iconKey) {
-                          return PlayIcon(key: key, color: color, size: 16);
+                          return AppIcon(
+                            key: key,
+                            icon: AppIcons.play,
+                            color: color,
+                            size: 16,
+                          );
                         },
                       ),
                       Button(
@@ -137,7 +142,12 @@ class HeroContent extends StatelessWidget {
                           print("Hello");
                         },
                         icon: (context, color, size, iconKey) {
-                          return PlayIcon(key: key, color: color, size: 16);
+                          return AppIcon(
+                            key: key,
+                            icon: AppIcons.play,
+                            color: color,
+                            size: 16,
+                          );
                         },
                       ),
                     ],

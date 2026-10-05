@@ -1,7 +1,6 @@
 import 'package:desterlib_client/core/app/app.dart';
-import 'package:desterlib_client/core/icons/dark_mode_icon.dart';
-import 'package:desterlib_client/core/icons/light_mode_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:flutter/widgets.dart';
 
 class ThemeToggleActionButton extends StatelessWidget {
@@ -14,6 +13,7 @@ class ThemeToggleActionButton extends StatelessWidget {
 
     return ActionButton(
       onPressed: themeController.toggle,
+      buttonAnimation: false,
       icon: (context, color, size, iconKey) {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 120),
@@ -23,12 +23,14 @@ class ThemeToggleActionButton extends StatelessWidget {
             return ScaleTransition(scale: animation, child: child);
           },
           child: theme.isDark
-              ? DarkModeIcon(
+              ? AppIcon(
+                  icon: AppIcons.moon,
                   color: color,
                   size: size,
                   key: const ValueKey('dark'),
                 )
-              : LightModeIcon(
+              : AppIcon(
+                  icon: AppIcons.sun,
                   color: color,
                   size: size,
                   key: const ValueKey('light'),

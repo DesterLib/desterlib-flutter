@@ -22,6 +22,7 @@ class AppTheme {
 
   static const black = Color(0xFF000000);
   static const white = Color(0xFFFFFFFF);
+  static const playerSurface = Color(0x99303030);
 
   static const transitionDurationGeneric = Duration(milliseconds: 300);
 

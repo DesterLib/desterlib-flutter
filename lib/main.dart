@@ -1,10 +1,12 @@
 import 'package:desterlib_client/core/app/app.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:nativeapi/nativeapi.dart' as native;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   await WindowManipulator.initialize();
 
   await WindowManipulator.makeTitlebarTransparent();

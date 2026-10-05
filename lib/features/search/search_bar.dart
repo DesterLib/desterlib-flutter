@@ -1,9 +1,8 @@
 import 'dart:ui';
 
 import 'package:desterlib_client/core/app/app.dart';
-import 'package:desterlib_client/core/icons/filter_icon.dart';
-import 'package:desterlib_client/core/icons/search_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_window_utils/widgets/macos_toolbar_passthrough.dart';
@@ -79,10 +78,7 @@ class _SearchWidgetState extends State<SearchBar>
                 ),
                 foregroundDecoration: isFocused
                     ? BoxDecoration(
-                        border: Border.all(
-                          color: theme.surfaceMedium,
-                          width: 2,
-                        ),
+                        border: Border.all(color: theme.surfaceLight, width: 2),
                         borderRadius: BorderRadius.circular(8),
                       )
                     : null,
@@ -92,7 +88,12 @@ class _SearchWidgetState extends State<SearchBar>
                     SizedBox(
                       width: 36,
                       height: 32,
-                      child: Center(child: SearchIcon(color: theme.icon)),
+                      child: Center(
+                        child: AppIcon(
+                          icon: AppIcons.search,
+                          color: theme.icon,
+                        ),
+                      ),
                     ),
                     Expanded(
                       child: _selectionGestureDetectorBuilder
@@ -147,7 +148,12 @@ class _SearchWidgetState extends State<SearchBar>
             print('Refresh pressed');
           },
           icon: (context, color, size, iconKey) {
-            return FilterIcon(color: color, size: size, key: iconKey);
+            return AppIcon(
+              key: iconKey,
+              icon: AppIcons.filter,
+              color: color,
+              size: size,
+            );
           },
         ),
       ],

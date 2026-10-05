@@ -1,9 +1,6 @@
 import 'package:desterlib_client/core/app/app.dart';
-import 'package:desterlib_client/core/icons/back_arrow_icon.dart';
-import 'package:desterlib_client/core/icons/link_icon.dart';
-import 'package:desterlib_client/core/icons/refresh_icon.dart';
-import 'package:desterlib_client/core/icons/video_mode_icon.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:desterlib_client/features/search/search_bar.dart';
 import 'package:desterlib_client/core/app/app_background_state.dart';
 import 'package:flutter/widgets.dart';
@@ -38,15 +35,8 @@ class Toolbar extends StatelessWidget {
                     print('Refresh pressed');
                   },
                   icon: (context, color, size, iconKey) {
-                    return LinkIcon(color: color, size: size, key: iconKey);
-                  },
-                ),
-                ActionButton(
-                  onPressed: () {
-                    print('Refresh pressed');
-                  },
-                  icon: (context, color, size, iconKey) {
-                    return VideoModeIcon(
+                    return AppIcon(
+                      icon: AppIcons.link,
                       color: color,
                       size: size,
                       key: iconKey,
@@ -58,7 +48,26 @@ class Toolbar extends StatelessWidget {
                     print('Refresh pressed');
                   },
                   icon: (context, color, size, iconKey) {
-                    return RefreshIcon(color: color, size: size, key: iconKey);
+                    return AppIcon(
+                      icon: AppIcons.link,
+                      color: color,
+                      size: size,
+                      key: iconKey,
+                    );
+                  },
+                ),
+                ActionButton(
+                  onPressed: () {
+                    print('Refresh pressed');
+                  },
+                  icon: (context, color, size, iconKey) {
+                    return AppIcon(
+                      icon: AppIcons.refresh,
+                      color: color,
+                      size: size,
+                      key: iconKey,
+                      rotateAnimate: true,
+                    );
                   },
                 ),
               ],
@@ -95,7 +104,8 @@ class Toolbar extends StatelessWidget {
                                   context.go('/');
                                 },
                                 icon: (context, color, size, iconKey) {
-                                  return BackArrowIcon(
+                                  return AppIcon(
+                                    icon: AppIcons.arrowLeft,
                                     color: color,
                                     size: size,
                                     key: iconKey,

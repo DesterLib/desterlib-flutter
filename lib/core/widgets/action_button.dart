@@ -21,6 +21,7 @@ class ActionButton extends StatefulWidget {
     this.iconSize = 24,
     this.hoverScale = 1.1,
     this.pressScale = 0.9,
+    this.buttonAnimation = true,
   });
 
   final IconBuilder icon;
@@ -31,6 +32,7 @@ class ActionButton extends StatefulWidget {
   final double iconSize;
   final double hoverScale;
   final double pressScale;
+  final bool buttonAnimation;
 
   @override
   State<ActionButton> createState() => _ActionButtonState();
@@ -87,14 +89,28 @@ class _ActionButtonState extends State<ActionButton> {
             onTapCancel: widget.onPressed == null
                 ? null
                 : () => setState(() => _pressed = false),
-            child: AnimatedScale(
-              scale: _scale,
-              duration: const Duration(milliseconds: 120),
-              curve: Curves.easeOutCubic,
-              child: Center(
-                child: widget.icon(context, color, widget.iconSize, _iconKey),
-              ),
-            ),
+            child: widget.buttonAnimation
+                ? AnimatedScale(
+                    scale: _scale,
+                    duration: const Duration(milliseconds: 120),
+                    curve: Curves.easeOutCubic,
+                    child: Center(
+                      child: widget.icon(
+                        context,
+                        color,
+                        widget.iconSize,
+                        _iconKey,
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: widget.icon(
+                      context,
+                      color,
+                      widget.iconSize,
+                      _iconKey,
+                    ),
+                  ),
           ),
         ),
       ),

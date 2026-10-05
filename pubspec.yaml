@@ -18,6 +18,10 @@ dependencies:
   page_animation_transition: ^1.1.1
   nativeapi_flutter: ^0.4.0
   nativeapi: ^0.4.0
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -27,6 +31,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/icons/
-    - assets/icons/video-mode-icon/
-    - assets/icons/filter-icon/
+    - assets/icons/solar-icons/

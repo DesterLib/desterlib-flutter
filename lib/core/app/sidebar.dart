@@ -1,5 +1,5 @@
 import 'package:desterlib_client/core/app/profile.dart';
-import 'package:desterlib_client/core/icons/folder_icon.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:desterlib_client/core/widgets/button.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,12 @@ class Sidebar extends StatelessWidget {
           label: "Movies",
           onPressed: () {},
           icon: (context, color, size, iconKey) {
-            return FolderIcon(color: color, size: size, key: iconKey);
+            return AppIcon(
+              icon: AppIcons.folder,
+              color: color,
+              size: size,
+              key: iconKey,
+            );
           },
         ),
         Button(
@@ -26,7 +31,12 @@ class Sidebar extends StatelessWidget {
           label: "TV Shows",
           onPressed: () {},
           icon: (context, color, size, iconKey) {
-            return FolderIcon(color: color, size: size, key: iconKey);
+            return AppIcon(
+              icon: AppIcons.folder,
+              color: color,
+              size: size,
+              key: iconKey,
+            );
           },
         ),
         Button(
@@ -34,7 +44,12 @@ class Sidebar extends StatelessWidget {
           label: "Anime",
           onPressed: () {},
           icon: (context, color, size, iconKey) {
-            return FolderIcon(color: color, size: size, key: iconKey);
+            return AppIcon(
+              icon: AppIcons.folder,
+              color: color,
+              size: size,
+              key: iconKey,
+            );
           },
         ),
         const Spacer(),

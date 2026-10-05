@@ -1,8 +1,8 @@
-import 'package:desterlib_client/core/icons/play_icon.dart';
-import 'package:desterlib_client/core/icons/skip_next_icon.dart';
-import 'package:desterlib_client/core/icons/skip_previous_icon.dart';
+import 'dart:ui';
+
 import 'package:desterlib_client/core/theme/theme.dart';
 import 'package:desterlib_client/core/widgets/action_button.dart';
+import 'package:desterlib_client/core/widgets/app_icon.dart';
 import 'package:desterlib_client/features/player/widgets/slider.dart';
 import 'package:flutter/widgets.dart';
 
@@ -28,6 +28,8 @@ class VideoControls extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
     );
 
+    double iconSize = 20;
+
     return Positioned(
       left: 0,
       right: 0,
@@ -35,71 +37,134 @@ class VideoControls extends StatelessWidget {
       child: Center(
         child: ClipPath(
           clipper: ShapeBorderClipper(shape: shape),
-          child: Container(
-            width: 600,
-            padding: EdgeInsets.all(12),
-            decoration: ShapeDecoration(
-              color: AppTheme.white.withValues(alpha: 0.2),
-              shape: shape,
-            ),
-            child: Column(
-              spacing: 8,
-              children: [
-                Slider(
-                  value: position.inMilliseconds / duration.inMilliseconds,
-                  onChanged: (value) {
-                    final position = Duration(
-                      milliseconds: (duration.inMilliseconds * value).round(),
-                    );
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              width: 600,
+              padding: EdgeInsets.all(12),
+              decoration: ShapeDecoration(
+                color: AppTheme.playerSurface,
+                shape: shape,
+              ),
+              child: Column(
+                spacing: 4,
+                children: [
+                  Slider(
+                    value: position.inMilliseconds / duration.inMilliseconds,
+                    onChanged: (value) {
+                      final position = Duration(
+                        milliseconds: (duration.inMilliseconds * value).round(),
+                      );
 
-                    onSeek(position);
-                  },
-                ),
-                Row(
-                  children: [
-                    Row(
-                      spacing: 4,
-                      children: [
-                        ActionButton(
-                          icon: (context, color, size, iconKey) =>
-                              SkipPreviousIcon(
-                                color: color,
-                                size: size,
-                                key: iconKey,
-                              ),
-                          onPressed: () => print("Hello"),
-                        ),
-                        ActionButton(
-                          icon: (context, color, size, iconKey) =>
-                              PlayIcon(color: color, size: size, key: iconKey),
-                          onPressed: () => print("Hello"),
-                        ),
-                        ActionButton(
-                          icon: (context, color, size, iconKey) => SkipNextIcon(
-                            color: color,
-                            size: size,
-                            key: iconKey,
+                      onSeek(position);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        spacing: 4,
+                        children: [
+                          ActionButton(
+                            iconSize: iconSize,
+                            icon: (context, color, size, iconKey) => AppIcon(
+                              key: iconKey,
+                              icon: AppIcons.backward,
+                              color: color,
+                              size: size,
+                            ),
+                            onPressed: () => print("Hello"),
                           ),
-                          onPressed: () => print("Hello"),
-                        ),
-                      ],
-                    ),
-                    Expanded(
-                      child: Slider(
-                        value:
-                            position.inMilliseconds / duration.inMilliseconds,
-                        onChanged: (value) {
-                          final position = Duration(
-                            milliseconds: (duration.inMilliseconds * value)
-                                .round(),
-                          );
-                          onSeek(position);
-                        },
+                          ActionButton(
+                            iconSize: iconSize,
+                            icon: (context, color, size, iconKey) => AppIcon(
+                              key: iconKey,
+                              icon: AppIcons.play,
+                              color: color,
+                              size: size,
+                            ),
+                            onPressed: () => print("Hello"),
+                          ),
+                          ActionButton(
+                            iconSize: iconSize,
+                            icon: (context, color, size, iconKey) => AppIcon(
+                              key: iconKey,
+                              icon: AppIcons.forward,
+                              color: color,
+                              size: size,
+                            ),
+                            onPressed: () => print("Hello"),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      Row(
+                        spacing: 12,
+                        children: [
+                          Row(
+                            spacing: 4,
+                            children: [
+                              ActionButton(
+                                iconSize: iconSize,
+                                icon: (context, color, size, iconKey) =>
+                                    AppIcon(
+                                      key: iconKey,
+                                      icon: AppIcons.volumeFull,
+                                      color: color,
+                                      size: size,
+                                    ),
+                                onPressed: () => print("Hello"),
+                              ),
+                              SizedBox(
+                                width: 100,
+                                child: Slider(
+                                  value:
+                                      position.inMilliseconds /
+                                      duration.inMilliseconds,
+                                  onChanged: (value) {
+                                    final position = Duration(
+                                      milliseconds:
+                                          (duration.inMilliseconds * value)
+                                              .round(),
+                                    );
+                                    onSeek(position);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            spacing: 4,
+                            children: [
+                              ActionButton(
+                                iconSize: iconSize,
+                                icon: (context, color, size, iconKey) =>
+                                    AppIcon(
+                                      key: iconKey,
+                                      icon: AppIcons.volumeFull,
+                                      color: color,
+                                      size: size,
+                                    ),
+                                onPressed: () => print("Hello"),
+                              ),
+                              ActionButton(
+                                iconSize: iconSize,
+                                icon: (context, color, size, iconKey) =>
+                                    AppIcon(
+                                      key: iconKey,
+                                      icon: AppIcons.volumeFull,
+                                      color: color,
+                                      size: size,
+                                    ),
+                                onPressed: () => print("Hello"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
