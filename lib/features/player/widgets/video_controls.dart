@@ -84,15 +84,18 @@ class VideoControls extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Slider(
-                      value: position.inMilliseconds / duration.inMilliseconds,
-                      onChanged: (value) {
-                        final position = Duration(
-                          milliseconds: (duration.inMilliseconds * value)
-                              .round(),
-                        );
-                        onSeek(position);
-                      },
+                    Expanded(
+                      child: Slider(
+                        value:
+                            position.inMilliseconds / duration.inMilliseconds,
+                        onChanged: (value) {
+                          final position = Duration(
+                            milliseconds: (duration.inMilliseconds * value)
+                                .round(),
+                          );
+                          onSeek(position);
+                        },
+                      ),
                     ),
                   ],
                 ),
