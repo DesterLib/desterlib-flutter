@@ -5,7 +5,6 @@ class Slider extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.width = double.infinity,
     this.height = 24,
     this.trackHeight = 8,
     this.activeColor = const Color(0xFFFFFFFF),
@@ -15,7 +14,6 @@ class Slider extends StatelessWidget {
 
   final double value;
   final ValueChanged<double> onChanged;
-  final double width;
   final double height;
   final double trackHeight;
   final Color activeColor;
@@ -36,7 +34,6 @@ class Slider extends StatelessWidget {
     final clampedValue = value.isFinite ? value.clamp(0.0, 1.0) : 0.0;
 
     return SizedBox(
-      width: width,
       height: height,
       child: Builder(
         builder: (innerContext) {
