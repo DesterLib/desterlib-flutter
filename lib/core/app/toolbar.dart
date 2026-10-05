@@ -1,3 +1,4 @@
+import 'package:desterlib_client/core/app/app.dart';
 import 'package:desterlib_client/core/icons/back_arrow_icon.dart';
 import 'package:desterlib_client/core/icons/link_icon.dart';
 import 'package:desterlib_client/core/icons/refresh_icon.dart';
@@ -17,6 +18,8 @@ class Toolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = GoRouter.of(context).state.uri.path;
     final isHome = location == '/';
+
+    final theme = AppThemeScope.of(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
@@ -66,7 +69,7 @@ class Toolbar extends StatelessWidget {
             width: 2,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Color(0x33FFFFFF),
+                color: theme.surfaceMedium,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

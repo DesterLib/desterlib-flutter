@@ -1,3 +1,4 @@
+import 'package:desterlib_client/core/app/app.dart';
 import 'package:desterlib_client/features/widgets/media_card.dart';
 import 'package:desterlib_client/features/widgets/media_item.dart';
 import 'package:go_router/go_router.dart';
@@ -17,11 +18,13 @@ class ScrollList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppThemeScope.of(context);
+
     return Column(
       spacing: 12,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 20)),
+        Text(title, style: theme.textTheme.title),
         SizedBox(
           height: cardWidth * 3 / 2,
           child: ClipRRect(

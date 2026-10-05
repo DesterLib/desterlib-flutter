@@ -52,7 +52,7 @@ class AppTheme {
     title: TextStyle(
       color: onBackground,
       fontSize: 20,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
     ),
     button: TextStyle(
       color: onSurface,
@@ -84,7 +84,7 @@ class AppTheme {
   }
 
   static const _light = AppTheme(
-    onBackground: Color(0xFF0F1116),
+    onBackground: Color.fromRGBO(255, 255, 255, 0.8),
     surfaceLight: Color.fromRGBO(255, 255, 255, 0.1),
     surfaceMedium: Color.fromRGBO(255, 255, 255, 0.4),
     surfaceDark: Color.fromRGBO(255, 255, 255, 0.7),
@@ -104,7 +104,7 @@ class AppTheme {
   );
 
   static const _dark = AppTheme(
-    onBackground: Color(0xFF0F1116),
+    onBackground: Color.fromRGBO(0, 0, 0, 0.8),
     surfaceLight: Color.fromRGBO(0, 0, 0, 0.1),
     surfaceMedium: Color.fromRGBO(0, 0, 0, 0.4),
     surfaceDark: Color.fromRGBO(0, 0, 0, 0.7),
