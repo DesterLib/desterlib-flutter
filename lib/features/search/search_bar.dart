@@ -78,7 +78,10 @@ class _SearchWidgetState extends State<SearchBar>
                 ),
                 foregroundDecoration: isFocused
                     ? BoxDecoration(
-                        border: Border.all(color: theme.surfaceLight, width: 2),
+                        border: Border.all(
+                          color: theme.surfaceMedium,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       )
                     : null,
