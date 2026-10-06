@@ -60,6 +60,11 @@ class AppTheme {
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
+    controls: TextStyle(
+      color: white.withValues(alpha: 0.6),
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+    ),
   );
 
   AppTheme lerp(AppTheme other, double t) {
@@ -134,8 +139,10 @@ class AppTextTheme {
     required this.body,
     required this.title,
     required this.button,
+    required this.controls,
   });
   final TextStyle body;
   final TextStyle title;
   final TextStyle button;
+  final TextStyle controls;
 }

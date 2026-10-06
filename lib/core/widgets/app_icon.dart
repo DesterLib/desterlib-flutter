@@ -22,9 +22,14 @@ abstract final class AppIcons {
   static const moon = 'assets/icons/solar-icons/moon.svg';
 
   static const play = 'assets/icons/solar-icons/play.svg';
+  static const pause = 'assets/icons/solar-icons/pause.svg';
   static const forward = 'assets/icons/solar-icons/forward.svg';
   static const backward = 'assets/icons/solar-icons/backward.svg';
-  static const volumeFull = 'assets/icons/solar-icons/volume_full.svg';
+  static const volumeFull = 'assets/icons/solar-icons/volume-full.svg';
+  static const audioTrack = 'assets/icons/solar-icons/audio-track.svg';
+  static const subtitlesOff = 'assets/icons/solar-icons/subtitles-off.svg';
+  static const subtitlesOn = 'assets/icons/solar-icons/subtitles-on.svg';
+  static const fullscreen = 'assets/icons/solar-icons/fullscreen.svg';
 }
 
 class AppIcon extends StatefulWidget {

@@ -1,7 +1,4 @@
-import 'package:desterlib_client/core/theme/theme.dart';
-import 'package:desterlib_client/features/player/widgets/toolbar.dart';
-import 'package:desterlib_client/features/player/widgets/video_controls.dart';
-import 'package:desterlib_client/features/player/widgets/video_player.dart';
+import 'package:desterlib_client/features/player/video_player/video_player.dart';
 import 'package:flutter/widgets.dart';
 
 class PlayerPage extends StatefulWidget {
@@ -12,30 +9,8 @@ class PlayerPage extends StatefulWidget {
 }
 
 class _PlayerPageState extends State<PlayerPage> {
-  Duration position = Duration.zero;
-  final duration = Duration(seconds: 2);
-
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppTheme.black,
-      child: Stack(
-        children: [
-          VideoPlayer(),
-          Toolbar(),
-          VideoControls(
-            isPlaying: false,
-            position: position,
-            duration: duration,
-            onPlayPause: () => print("toggle"),
-            onSeek: (value) {
-              setState(() {
-                position = value;
-              });
-            },
-          ),
-        ],
-      ),
-    );
+    return VideoPlayer();
   }
 }

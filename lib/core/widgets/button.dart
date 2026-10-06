@@ -75,12 +75,20 @@ class Button extends StatefulWidget {
 }
 
 class _ButtonState extends State<Button> {
+  final _iconKey = GlobalKey();
+
   static const _duration = Duration(milliseconds: 120);
   static const _curve = Curves.easeOutCubic;
 
   bool _hovered = false;
   bool _pressed = false;
-  final _iconKey = GlobalKey();
+
+  Duration get _transitionDuration {
+    return widget.variant == ButtonVariant.ghost && _hovered
+        ? Duration.zero
+        : _duration;
+  }
+
   void _handleTap() {
     widget.onPressed?.call();
   }
@@ -120,7 +128,7 @@ class _ButtonState extends State<Button> {
     final showShadow =
         widget.variant != ButtonVariant.ghost || _hovered || _pressed;
     return AnimatedContainer(
-      duration: _duration,
+      duration: _transitionDuration,
       height: 40,
       decoration: ShapeDecoration(
         shadows: [
@@ -145,7 +153,7 @@ class _ButtonState extends State<Button> {
     required Color foregroundColor,
   }) {
     return AnimatedContainer(
-      duration: _duration,
+      duration: _transitionDuration,
       curve: _curve,
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -160,17 +168,30 @@ class _ButtonState extends State<Button> {
         spacing: 8,
         children: [
           if (widget.icon != null)
-            widget.icon!(context, foregroundColor, widget.iconSize, _iconKey),
+            TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: foregroundColor),
+              duration: _transitionDuration,
+              curve: _curve,
+              builder: (context, color, child) {
+                return widget.icon!(context, color!, widget.iconSize, _iconKey);
+              },
+            ),
           Transform.translate(
             offset: const Offset(0, -1.5),
-            child: AnimatedDefaultTextStyle(
-              duration: _duration,
+            child: TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: foregroundColor),
+              duration: _transitionDuration,
               curve: _curve,
-              style: TextStyle(
-                color: foregroundColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              builder: (context, color, child) {
+                return DefaultTextStyle(
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  child: child!,
+                );
+              },
               child: Text(widget.label),
             ),
           ),
